@@ -1,4 +1,4 @@
-spatpomp <- function (data, units, times, ..., unit_dmeasure,
+spatpomp <- function (data, units, unit_index, times, covar, tcovar, ..., unit_dmeasure,
   unit_statenames, global_statenames, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatpomp"),": ")
@@ -12,12 +12,13 @@ spatpomp <- function (data, units, times, ..., unit_dmeasure,
   if (missing(times))
     stop(ep,sQuote("times")," is a required argument",call.=FALSE)
 
-  if (missing(unit_dmeasure)) unit_dmeasure <- function(y,x,times,params,d,log=FALSE,...)
+  if (missing(unit_dmeasure)) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
 
   if (missing(unit_statenames)) unit_statenames <- character(0)
 
   if (missing(global_statenames)) global_statenames <- character(0)
+
 
 
   if (is.data.frame(data)) {
@@ -36,6 +37,8 @@ spatpomp <- function (data, units, times, ..., unit_dmeasure,
     } else if (is.character(units)) {
       upos <- match(units,names(data))
     }
+    upos_name <- names(data)[upos]
+
 
     if ((is.numeric(times) && (times<1 || times>ncol(data) ||times!=as.integer(times))) ||
         (is.character(times) && (!(times%in%names(data)))) ||
@@ -50,23 +53,56 @@ spatpomp <- function (data, units, times, ..., unit_dmeasure,
     } else if (is.character(times)) {
       tpos <- match(times,names(data))
     }
-    units <- data[[upos]]
+    tpos_name <- names(data)[tpos]
+
+    # make data into unit by var by time
     temp_data <- abind::abind(split(data, data[tpos], drop = TRUE), along = 3)
     rownames(temp_data) <- temp_data[,upos,1]
-    dat <- temp_data[,-c(upos,tpos),]
-    storage.mode(dat) <- "numeric" # TO DO: do i need to make the time axis 1:length(times) instead of actual times?
+    dat <- temp_data[,-c(upos,tpos),,drop = FALSE] # unit by var by time
+    storage.mode(dat) <- "double" # TO DO: do i need to make the time axis 1:length(times) instead of actual times?
 
-    po <- pomp(subset(data, data[[upos]]==data[[upos]][1], select = -c(upos)),times=times,
-      dmeasure=NULL,...,verbose=verbose)
-    spo <- new("spatpomp",po,unit_dmeasure=unit_dmeasure,units=units,
+    # make covariates into unit by var by time (assuming user provides a df with columns time, unit, covariate1, covariate2,...)
+    if(!missing(covar)){
+      upos_cov <- match(upos_name, names(covar))
+      tpos_cov <- match(tpos_name, names(covar))
+      temp_cov <- abind::abind(split(covar, covar[tpos_cov], drop = TRUE), along = 3)
+      rownames(temp_cov) <- temp_cov[,upos_cov,1]
+      cov <- temp_cov[,-c(upos_cov,tpos_cov),,drop = FALSE] # unit by var by time
+      storage.mode(cov) <- "double"
+    } else{
+      cov <- array(dim = c(0,0,0))
+    }
+
+    # get all combinations of unit statenames and units. Concatenate global statenames
+    statenames <- c(do.call(paste0,expand.grid(unit_statenames, 1:length(units))), global_statenames)
+
+    # units slot contains unique units. unit_index is an "ordering" of units
+    units <- unique(data[[upos]])
+    if(missing(unit_index)){
+      unit_index <- units
+      names(unit_index) <- 1:length(units)
+    }
+
+    po <- pomp(subset(data, data[[upos]]==data[[upos]][1], select = -c(upos)),
+               times=times,
+               dmeasure=unit_dmeasure,
+               statenames=statenames,
+               obsnames=colnames(dat),
+               covar = subset(covar, covar[[upos_cov]] == covar[[upos_cov]][1], select = -c(upos_cov)),
+               tcovar = tcovar,
+               ...,
+               verbose=verbose
+               )
+
+    spo <- new("spatpomp",po,unit_dmeasure=unit_dmeasure,units=units,unit_index=unit_index,
         unit_statenames=unit_statenames,global_statenames=global_statenames)
     spo@data <- dat
+    spo@covar <- cov
     spo
-
   } else {
-    stop(ep,sQuote("data"),
-      " must be a data frame or an object of class ",sQuote("spatpomp"),
-      call.=FALSE)
+      stop(ep,sQuote("data"), " must be a data frame", call.=FALSE)
   }
+
+
 }
 
