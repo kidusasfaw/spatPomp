@@ -6,3 +6,6 @@ setGeneric("unit", function(x,...)standardGeneric("unit"))
 
 ## Extract the unit index from spatpomp object
 setGeneric("unit_ix", function(x,...)standardGeneric("unit_ix"))
+
+## Evaluate unit_dmeasure over all units
+# setGeneric("vec_dmeasure", function(x,...)standardGeneric("vec_dmeasure"))

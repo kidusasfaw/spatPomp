@@ -7,11 +7,10 @@ setClass(
     unit_index = 'character',
     unit_statenames = 'character',
     global_statenames = 'character',
-    unit_dmeasure = 'function',
-    covar = 'array'
+    obstypes = 'character',
+    unit_dmeasure = 'pomp.fun'
   ),
   prototype=prototype(
-    unit_dmeasure = function(y,x,times,params,d,log=FALSE,...)
-      stop(sQuote("unit_dmeasure")," not specified")
+    unit_dmeasure = pomp:::pomp.fun(slotname="unit_dmeasure")
   )
 )
