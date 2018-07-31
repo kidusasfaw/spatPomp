@@ -1,3 +1,5 @@
+#' @include spatpomp_class.R
+
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., unit_dmeasure,
   unit_statenames, global_statenames, rprocess, rmeasure, dprocess, dmeasure, initializer,
   cdir,cfile, shlib.args, userdata, PACKAGE, globals, statenames, paramnames, obstypes, zeronames, covarnames,

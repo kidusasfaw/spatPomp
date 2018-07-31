@@ -1,3 +1,5 @@
+#' @include spatpomp_class.R
+#'
 ## this file contains some basic methods definitions
 
 ## 'coerce' method: allows for coercion of a "pomp" object to a data-frame

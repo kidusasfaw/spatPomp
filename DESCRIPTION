@@ -11,3 +11,13 @@ Encoding: UTF-8
 LazyData: true
 Depends: pomp (>= 1.18.4.1)
 LinkingTo: pomp (>= 1.18.4.1)
+Collate: 
+    'spatpomp_class.R'
+    'generics.R'
+    'dmeasure3_spatpomp.R'
+    'iif.R'
+    'pfilter3.R'
+    'spatpomp.R'
+    'spatpomp_methods.R'
+    'spbuilder.R'
+    'vec_dmeasure.R'
