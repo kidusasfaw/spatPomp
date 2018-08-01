@@ -193,9 +193,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
-        Cname="__pomp_unit_dmeasure",
+        Cname="__spatpomp_unit_dmeasure",
         proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __pomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        header="\nvoid __spatpomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -235,56 +235,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
       shlib.args=shlib.args,
       verbose=verbose
     )
-    ## handle unit_dmeasure C Snippet
-    # snips <- list()
-    # if (is(unit_dmeasure,"Csnippet"))
-    #   snips <- c(snips,unit_dmeasure=unit_dmeasure@text)
-    # if (length(snips)>0) {
-    #   libname <- tryCatch(
-    #     do.call(
-    #       spatpompCBuilder,
-    #       c(
-    #         list(
-    #           dir=cdir,
-    #           name=cfile,
-    #           obsnames=obsnames,
-    #           obstypes=obstypes,
-    #           statenames=statenames,
-    #           unit_statenames = unit_statenames,
-    #           global_statenames = global_statenames,
-    #           paramnames=paramnames,
-    #           covarnames=covarnames,
-    #           globals=globals,
-    #           shlib.args=shlib.args,
-    #           verbose=verbose
-    #         ),
-    #         snips
-    #       )
-    #     ),
-    #     error = function (e) {
-    #       stop("error in building shared-object library from C snippets: ",
-    #            conditionMessage(e),call.=FALSE)
-    #     }
-    #   )
-    #   .solibs <- c(.solibs,list(libname))
-    #   libname <- libname$name
-    # } else {
-    #   libname <- ''
-    # }
-    #
-    # ## handle unit_dmeasure
-    # unit_dmeasure <- pomp:::pomp.fun(
-    #   f=unit_dmeasure,
-    #   PACKAGE=PACKAGE,
-    #   proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-    #   slotname="unit_dmeasure",
-    #   libname=libname,
-    #   statenames=statenames,
-    #   paramnames=paramnames,
-    #   obsnames=obsnames,
-    #   covarnames=covarnames
-    # )
-    print(hitches)
+    po@solibs <- c(po@solibs,list(hitches$lib))  ## REPLACE WITH A PROPER INTERFACE TO POMP
     new("spatpomp",po,unit_dmeasure=hitches$funs$unit_dmeasure,units=units,unit_index=unit_index,
         unit_statenames=unit_statenames,global_statenames=global_statenames, obstypes = obstypes)
 

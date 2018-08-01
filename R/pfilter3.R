@@ -255,7 +255,7 @@ pfilter.internal3 <- function (object, params, Np,
     ## also do resampling if filtering has not failed
     xx <- tryCatch(
       .Call(
-        pfilter_computations,
+        pomp:::pfilter_computations,
         x=X,
         params=params,
         Np=Np[nt+1],

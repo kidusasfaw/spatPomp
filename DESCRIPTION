@@ -9,8 +9,8 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: pomp (>= 1.18.4.1)
-LinkingTo: pomp (>= 1.18.4.1)
+Depends: pomp (>= 1.18.5.2)
+LinkingTo: pomp (>= 1.18.5.2)
 Collate: 
     'spatpomp_class.R'
     'generics.R'
