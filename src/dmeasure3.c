@@ -6,7 +6,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-#include "pomp_defines.h"
+#include "spatpomp3_defines.h"
 #include "pomp.h"
 
 SEXP do_dmeasure3 (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi)
@@ -61,16 +61,19 @@ SEXP do_dmeasure3 (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP lo
 
   give_log = *(INTEGER(AS_INTEGER(log)));
 
+  // extract the user-defined function
+  PROTECT(pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
+  PROTECT(fn = (*sp_pomp_fun_handler)(pompfun,gnsi,&mode)); nprotect++;
+
+
   // set up the covariate table
-  covariate_table = make_covariate_table(object,&ncovars);
+  covariate_table = (*sp_make_covariate_table)(object,&ncovars);
 
   // vector for interpolated covariates
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
   SET_NAMES(cvec,Cnames);
 
-  // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
-  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode)); nprotect++;
+
 
   // extract 'userdata' as pairlist
   PROTECT(fcall = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;

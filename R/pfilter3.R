@@ -238,6 +238,7 @@ pfilter.internal3 <- function (object, params, Np,
              conditionMessage(e),call.=FALSE)
       }
     )
+    weights <- rep(weights, Np[1])
     if (!all(is.finite(weights))) {
       first <- which(!is.finite(weights))[1L]
       datvals <- object@data[,nt]
