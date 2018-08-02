@@ -1,8 +1,9 @@
 #' @include spatpomp_class.R
 
-spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., unit_dmeasure,
-  unit_statenames, global_statenames, rprocess, rmeasure, dprocess, dmeasure, initializer,
-  cdir,cfile, shlib.args, userdata, PACKAGE, globals, statenames, paramnames, obstypes, zeronames, covarnames,
+spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
+  unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
+  dprocess, dmeasure, initializer, cdir,cfile, shlib.args, userdata, PACKAGE,
+  globals, statenames, paramnames, obstypes, zeronames, covarnames,
   verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatpomp"),": ")
@@ -123,22 +124,22 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
 
     # create the pomp object
     po <- pomp(data = pomp_data,
-                rprocess = rprocess,
-                rmeasure = rmeasure,
-                dprocess = dprocess,
-                dmeasure = dmeasure,
-                initializer = initializer,
-                times=times,
-                statenames=pomp_statenames,
-                zeronames=zeronames,
-                covar = pomp_covar,
-                tcovar = tcovar,
-                paramnames = paramnames,
-                globals = globals,
-                t0 = t0,
-                ...,
-                verbose=verbose
-                  )
+      rprocess = rprocess,
+      rmeasure = rmeasure,
+      dprocess = dprocess,
+      dmeasure = dmeasure,
+      initializer = initializer,
+      times=times,
+      statenames=pomp_statenames,
+      zeronames=zeronames,
+      covar = pomp_covar,
+      tcovar = tcovar,
+      paramnames = paramnames,
+      globals = globals,
+      t0 = t0,
+      ...,
+      verbose=verbose
+    )
     ## preliminary error checking
     if (missing(cdir)) cdir <- NULL
     if (missing(cfile)) cfile <- NULL
@@ -147,9 +148,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
     added.userdata <- list(...)
     if (length(added.userdata)>0) {
       message("In ",sQuote("spatpomp"),
-              ": the following unrecognized argument(s) ",
-              "will be stored for use by user-defined functions: ",
-              paste(sQuote(names(added.userdata)),collapse=","))
+        ": the following unrecognized argument(s) ",
+        "will be stored for use by user-defined functions: ",
+        paste(sQuote(names(added.userdata)),collapse=","))
       userdata[names(added.userdata)] <- added.userdata
     }
 
@@ -186,8 +187,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
     if (!all(covarnames%in%colnames(pomp_covar))) {
       missing <- covarnames[!(covarnames%in%colnames(covar))]
       stop("covariate(s) ",
-           paste(sapply(missing,sQuote),collapse=","),
-           " are not among the columns of ",sQuote("covar"),call.=FALSE)
+        paste(sapply(missing,sQuote),collapse=","),
+        " are not among the columns of ",sQuote("covar"),call.=FALSE)
     }
     ## handle unit_dmeasure C Snippet
     ud_template <- list(
@@ -221,7 +222,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
         )
       )
     )
-    hitches <- hitch(
+
+    hitches <- pomp::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
       obsnames=obstypes,
@@ -235,13 +237,18 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ..., un
       shlib.args=shlib.args,
       verbose=verbose
     )
-    po@solibs <- c(po@solibs,list(hitches$lib))  ## REPLACE WITH A PROPER INTERFACE TO POMP
-    new("spatpomp",po,unit_dmeasure=hitches$funs$unit_dmeasure,units=units,unit_index=unit_index,
-        unit_statenames=unit_statenames,global_statenames=global_statenames, obstypes = obstypes)
+
+    po@solibs <- if (is.null(hitches$lib)) po@solibs else c(list(hitches$lib),po@solibs)
+
+    new("spatpomp",po,
+      unit_dmeasure=hitches$funs$unit_dmeasure,
+      units=units,
+      unit_index=unit_index,
+      unit_statenames=unit_statenames,
+      global_statenames=global_statenames,
+      obstypes = obstypes)
 
   } else {
     stop(ep,sQuote("data"), " must be a data frame", call.=FALSE)
   }
 }
-
-
