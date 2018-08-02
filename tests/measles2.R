@@ -259,19 +259,19 @@ measles_rmeas <- Csnippet("
   }
 ")
 measles <- spatpomp(measles_long,
-                    units = "unit",
-                    times = "year",
-                    t0 = min(measles_long$year)-1/26,
-                    unit_statenames = c('S','E','I','R','C','W'),
-                    global_statenames = c('P'),
-                    covar = measles_covar,
-                    tcovar = "year",
-                    rprocess=euler.sim(rproc, delta.t=2/365),
-                    zeronames = c(paste0("C",1:D),paste0("W",1:D)),
-                    paramnames=param_names,globals=v_by_g_C,
-                    initializer=measles_initializer,
-                    dmeasure=measles_dmeas,
-                    rmeasure=measles_rmeas)
+  units = "unit",
+  times = "year",
+  t0 = min(measles_long$year)-1/26,
+  unit_statenames = c('S','E','I','R','C','W'),
+  global_statenames = c('P'),
+  covar = measles_covar,
+  tcovar = "year",
+  rprocess=euler.sim(rproc, delta.t=2/365),
+  zeronames = c(paste0("C",1:D),paste0("W",1:D)),
+  paramnames=param_names,globals=v_by_g_C,
+  initializer=measles_initializer,
+  dmeasure=measles_dmeas,
+  rmeasure=measles_rmeas)
 
 ## ----sim_test------------------------------------------------------------
 set.seed(8375621)
@@ -315,20 +315,20 @@ unit_dmeas <- Csnippet("
                        }
                        ")
 measles <- spatpomp(measles_long,
-                    units = "unit",
-                    times = "year",
-                    t0 = min(measles_long$year)-1/26,
-                    unit_statenames = c('S','E','I','R','C','W'),
-                    global_statenames = c('P'),
-                    covar = measles_covar,
-                    tcovar = "year",
-                    rprocess=euler.sim(rproc, delta.t=2/365),
-                    zeronames = c(paste0("C",1:D),paste0("W",1:D)),
-                    paramnames=param_names,globals=v_by_g_C,
-                    initializer=measles_initializer,
-                    dmeasure=measles_dmeas,
-                    unit_dmeasure=unit_dmeas,
-                    rmeasure=measles_rmeas)
+  units = "unit",
+  times = "year",
+  t0 = min(measles_long$year)-1/26,
+  unit_statenames = c('S','E','I','R','C','W'),
+  global_statenames = c('P'),
+  covar = measles_covar,
+  tcovar = "year",
+  rprocess=euler.sim(rproc, delta.t=2/365),
+  zeronames = c(paste0("C",1:D),paste0("W",1:D)),
+  paramnames=param_names,globals=v_by_g_C,
+  initializer=measles_initializer,
+  dmeasure=measles_dmeas,
+  unit_dmeasure=unit_dmeas,
+  rmeasure=measles_rmeas)
 
 ## ----naive_pfilter3, eval = T--------------------------------------------
 pfilter3(measles, params = test_params, Np=1000, tol = (1e-17)^3) -> pf1

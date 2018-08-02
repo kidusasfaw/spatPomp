@@ -238,7 +238,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       verbose=verbose
     )
 
-    po@solibs <- if (is.null(hitches$lib)) po@solibs else c(list(hitches$lib),po@solibs)
+    pomp:::solibs(po) <- hitches$lib
 
     new("spatpomp",po,
       unit_dmeasure=hitches$funs$unit_dmeasure,

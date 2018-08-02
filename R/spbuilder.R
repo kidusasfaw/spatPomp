@@ -1,8 +1,8 @@
 spatpompCBuilder <- function (name = NULL, dir = NULL,
-                              statenames, unit_statenames, global_statenames,
-                              paramnames, covarnames, obsnames,
-                              unit_dmeasure, globals, shlib.args = NULL,
-                              verbose = getOption("verbose",FALSE))
+  statenames, unit_statenames, global_statenames,
+  paramnames, covarnames, obsnames,
+  unit_dmeasure, globals, shlib.args = NULL,
+  verbose = getOption("verbose",FALSE))
 {
 
   if (!is.null(name)) name <- cleanForC(name)
@@ -59,7 +59,7 @@ spatpompCBuilder <- function (name = NULL, dir = NULL,
   cat(file=out,render(define$var.alt,variable="unit",ptr='__unit',index=0L))
 
   ## list of functions to register
-  registry <- c("load_stack_incr","load_stack_decr")
+  registry <- c("__pomp_load_stack_incr","__pomp_load_stack_decr")
 
   ## unit_dmeasure function
   # simplevar="const double *{%simplevar%} = &{%var%};\n",
@@ -115,7 +115,7 @@ spatpompCBuilder <- function (name = NULL, dir = NULL,
 
   tryCatch(
     pompCompile(fname=name,direc=pompSrcDir(dir,verbose=verbose),
-                src=csrc,shlib.args=shlib.args,verbose=verbose),
+      src=csrc,shlib.args=shlib.args,verbose=verbose),
     error = function (e) {
       stop("in ",sQuote("pompCBuilder"),": compilation error: ",conditionMessage(e),call.=FALSE)
     }
@@ -162,8 +162,8 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
 
   cflags <- Sys.getenv("PKG_CPPFLAGS")
   cflags <- paste0("PKG_CPPFLAGS=\"",
-                   if (nchar(cflags)>0) paste0(cflags," ") else "",
-                   "-I",system.file("include",package="pomp"),"\"")
+    if (nchar(cflags)>0) paste0(cflags," ") else "",
+    "-I",system.file("include",package="pomp"),"\"")
 
   shlib.args <- as.character(shlib.args)
 
@@ -197,15 +197,15 @@ callable.decl <- function (code) {
 
 randomName <- function (size = 4, stem = "") {
   paste0(stem,
-         " Time: ",format(Sys.time(),"%Y-%m-%d %H:%M:%OS3 %z"),
-         " Salt: ",
-         paste(
-           format(
-             as.hexmode(ceiling(runif(n=size,max=2^24))),
-             upper.case=TRUE
-           ),
-           collapse=""
-         )
+    " Time: ",format(Sys.time(),"%Y-%m-%d %H:%M:%OS3 %z"),
+    " Salt: ",
+    paste(
+      format(
+        as.hexmode(ceiling(runif(n=size,max=2^24))),
+        upper.case=TRUE
+      ),
+      collapse=""
+    )
   )
 }
 
