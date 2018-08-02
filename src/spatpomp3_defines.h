@@ -9,6 +9,10 @@
 #include <Rinternals.h>
 #include "pomp_defines.h"
 
+typedef void spatpomp_unit_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
+                                         const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                         int ncovars, const double *covars, double t, double u);
+
 typedef SEXP(*psp_load_stack_incr)();
 typedef SEXP(*psp_load_stack_decr)();
 typedef SEXP(*psp_pomp_fun_handler)();
@@ -26,7 +30,7 @@ psp_table_lookup sp_table_lookup;
 psp_make_covariate_table sp_make_covariate_table;
 
 //dmeasure3.c
-extern SEXP do_dmeasure3(SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi);
+extern SEXP do_unit_dmeasure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi);
 
 
 #endif

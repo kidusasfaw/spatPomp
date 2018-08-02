@@ -3,15 +3,18 @@
 vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .getnativesymbolinfo = TRUE, ...) {
   pompLoad(object)
   nunits <- length(object@units)
+  nparticles <- ncol(x)
+  ntimes <- length(times)
   storage.mode(y) <- "double"
   storage.mode(x) <- "double"
   storage.mode(params) <- "double"
-  retvec <- vector(length = nunits)
+  weights <- array(dim=c(nunits,nparticles,ntimes))
+
   for(i in 1:nunits){
-    retvec[i] <- .Call(do_unit_dmeasure,object,y,x,times,i,params,log,statenames,.getnativesymbolinfo)
+    weights[i,,] <- .Call(do_unit_dmeasure,object,y,x,times,i,params,log,statenames,.getnativesymbolinfo)
   }
   pompUnload(object)
-  retvec
+  return(weights)
 }
 
 setMethod(

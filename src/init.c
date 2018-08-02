@@ -2,7 +2,7 @@
 #include "spatpomp3_defines.h"
 
 static const R_CallMethodDef callMethods[] = {
-  {"do_dmeasure3", (DL_FUNC) &do_dmeasure3, 7},
+  {"do_unit_dmeasure", (DL_FUNC) &do_unit_dmeasure, 8},
   {NULL, NULL, 0}
 };
 
