@@ -115,12 +115,12 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       printf("The color: %s\n", "green");
 
       // construct state, parameter, covariate, observable indices
-      oidx = INTEGER(PROTECT(name_index(Onames,dmeas_pompfun,"obsnames","observables"))); nprotect++;
+      oidx = INTEGER(PROTECT(name_index(Onames,pompfun,"obsnames","observables"))); nprotect++;
       printf("The color: %s\n", "orange");
-      sidx = INTEGER(PROTECT(name_index(Snames,dmeas_pompfun,"statenames","state variables"))); nprotect++;
+      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
-      printf("The color: %s\n", "is fucking done ");
+      printf("The color: %s\n", "blue");
       // address of native routine
       *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
@@ -140,7 +140,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     PROTECT(F = makearray(2,dim)); nprotect++;
     fixdimnames(F,dimnm,2);
   }
-  printf("The color: %s\n", "blue");
+  printf("The color: %s\n", "purple");
 
   // now do computations
   switch (mode) {
