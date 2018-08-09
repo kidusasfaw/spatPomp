@@ -32,5 +32,12 @@ psp_make_covariate_table sp_make_covariate_table;
 //dmeasure3.c
 extern SEXP do_unit_dmeasure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi);
 
+//userdata.c
+extern void set_pomp_userdata(SEXP userdata);
+extern void unset_pomp_userdata(void);
+
+// resample.c
+extern void nosort_resamp(int nw, double *w, int np, int *p, int offset);
+extern SEXP systematic_resampling(SEXP weights);
 
 #endif

@@ -119,8 +119,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # get the observation names of the pomp dataframe.
     obsnames <- names(pomp_data)[-c(tpos)]
-    if(missing(globals)) globals <- Csnippet(paste0("int nunits = ",length(units),";\n"))
-    else globals <- Csnippet(paste0(paste0("\nint nunits = ",length(units),";\n"),globals@text))
+    if(missing(globals)) globals <- Csnippet(paste0("const int nunits = ",length(units),";\n"))
+    else globals <- Csnippet(paste0(paste0("\nconst int nunits = ",length(units),";\n"),globals@text))
 
     # create the pomp object
     po <- pomp(data = pomp_data,
@@ -183,7 +183,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # arrange covariates
     if (missing(covarnames) || length(covarnames)==0)
-      covarnames <- as.character(colnames(pomp_covar))
+      covarnames <- as.character(colnames(pomp_covar[-tpos_cov]))
     if (!all(covarnames%in%colnames(pomp_covar))) {
       missing <- covarnames[!(covarnames%in%colnames(covar))]
       stop("covariate(s) ",
@@ -191,6 +191,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
         " are not among the columns of ",sQuote("covar"),call.=FALSE)
     }
     ## handle unit_dmeasure C Snippet
+    print(unit_statenames)
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
@@ -207,11 +208,11 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
             names=quote(covarnames),
             cref="__covars[__covindex[{%v%}]]"
           ),
-          states=list(
+          unit_states=list(
             names=quote(statenames),
             cref="__x[__stateindex[{%v%}*nunits+unit-1]]"
           ),
-          obs=list(
+          obstyp=list(
             names=quote(obsnames),
             cref="__y[__obsindex[{%v%}*nunits+unit-1]]"
           ),
@@ -226,8 +227,10 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     hitches <- pomp::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
-      obsnames=obstypes,
-      statenames=unit_statenames,
+      #obsnames=obstypes,
+      #statenames=unit_statenames,
+      obsnames = obsnames,
+      statenames = pomp_statenames,
       paramnames=paramnames,
       covarnames=covarnames,
       PACKAGE=PACKAGE,
@@ -237,6 +240,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       shlib.args=shlib.args,
       verbose=verbose
     )
+
+    print(hitches)
 
     pomp:::solibs(po) <- hitches$lib
 

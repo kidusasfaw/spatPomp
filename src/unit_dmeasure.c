@@ -16,7 +16,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   int give_log;
   int ntimes, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
-  SEXP pompfun;
+  SEXP pompfun, dmeas_pompfun;
   SEXP cvec, tvec = R_NilValue, uvec = R_NilValue;
   SEXP xvec = R_NilValue, yvec = R_NilValue, pvec = R_NilValue;
   SEXP fn, ans, fcall, rho = R_NilValue;
@@ -69,6 +69,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   SET_NAMES(cvec,Cnames);
 
   // extract the user-defined function
+  PROTECT(dmeas_pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
   PROTECT(pompfun = GET_SLOT(object,install("unit_dmeasure"))); nprotect++;
   PROTECT(fn = (*sp_pomp_fun_handler)(pompfun,gnsi,&mode)); nprotect++;
 
@@ -111,13 +112,15 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       break;
 
     case native:			// native code
+      printf("The color: %s\n", "green");
 
       // construct state, parameter, covariate, observable indices
-      oidx = INTEGER(PROTECT(name_index(Onames,pompfun,"obsnames","observables"))); nprotect++;
-      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
+      oidx = INTEGER(PROTECT(name_index(Onames,dmeas_pompfun,"obsnames","observables"))); nprotect++;
+      printf("The color: %s\n", "orange");
+      sidx = INTEGER(PROTECT(name_index(Snames,dmeas_pompfun,"statenames","state variables"))); nprotect++;
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
-
+      printf("The color: %s\n", "is fucking done ");
       // address of native routine
       *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
@@ -125,7 +128,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
 
     default:
 
-      errorcall(R_NilValue,"in 'dmeasure': unrecognized 'mode'"); // # nocov
+      errorcall(R_NilValue,"in 'unit_dmeasure': unrecognized 'mode'"); // # nocov
 
     break;
   }
@@ -137,6 +140,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     PROTECT(F = makearray(2,dim)); nprotect++;
     fixdimnames(F,dimnm,2);
   }
+  printf("The color: %s\n", "blue");
 
   // now do computations
   switch (mode) {
@@ -181,7 +185,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     break;
 
     case native:			// native code
-      //set_pomp_userdata(fcall);
+      set_pomp_userdata(fcall);
       {
         double *yp = REAL(y);
         double *xs = REAL(x);
@@ -189,7 +193,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         double *cp = REAL(cvec);
         double *ft = REAL(F);
         double *time = REAL(times);
-        double *unit = REAL(units);
+        double *unit = INTEGER(units);
         double *xp, *pp;
         int j, k;
 
@@ -204,7 +208,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         	}
         }
       }
-      //unset_pomp_userdata();
+      unset_pomp_userdata();
     break;
 
     default:

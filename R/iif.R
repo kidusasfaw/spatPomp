@@ -90,8 +90,6 @@ iif.internal <- function (object, params, Np,
                               save.params = FALSE,
                               .getnativesymbolinfo = TRUE) {
   ep <- paste0("in ",sQuote("iif"),": ")
-  if(missing(object@unit_dmeasure))
-    stop(ep,sQuote("unit_dmeasure")," must be specified for the spatpomp object",call.=FALSE)
   if(missing(nbhd))
     stop(ep,sQuote("nbhd")," must be specified for the spatpomp object",call.=FALSE)
   ep <- paste0("in ",sQuote("iif"),": ")
@@ -115,6 +113,7 @@ iif.internal <- function (object, params, Np,
   one.par <- FALSE
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
+  nunits <- length(object@units)
 
   if (missing(Np)) {
     if (is.matrix(params)) {
@@ -234,8 +233,8 @@ iif.internal <- function (object, params, Np,
   }
 
   # create array to store weights across time
-  cond.densities <- array(data = numeric(0), dim=c(units,Np[1L],ntimes))
-  dimnames(cond.densities) <- list(unit = 1:units, rep = 1:Np[1L], time = 1:ntimes)
+  cond.densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
+  dimnames(cond.densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
   #preweighted <- vector("list", length = ntimes)
   #resampling_weights <- vector("list", length = ntimes)
   #postweighted <- vector("list", length = ntimes)
@@ -268,7 +267,6 @@ iif.internal <- function (object, params, Np,
         )
       }
     }
-
     ## determine the weights
     weights <- tryCatch(
       vec_dmeasure(
@@ -285,6 +283,7 @@ iif.internal <- function (object, params, Np,
              conditionMessage(e),call.=FALSE)
       }
     )
+    return(weights)
 
     if (!all(is.finite(weights))) {
       first <- which(!is.finite(weights))[1L]
@@ -446,8 +445,8 @@ iif.internal <- function (object, params, Np,
 setMethod(
   "iif",
   signature=signature(object="pomp"),
-  function (object, params, Np, vec_dmeasure, nbhd, units, islands,
-           tol = (1e-17)^units,
+  function (object, params, Np, nbhd, islands,
+           tol = (1e-17)^length(object@units),
            max.fail = Inf,
            pred.mean = FALSE,
            pred.var = FALSE,
@@ -459,77 +458,76 @@ setMethod(
            ...) {
    if (missing(params)) params <- coef(object)
    ## single thread for testing
-   # single_island_output <- iif.internal(
-   #  object=object,
-   #  params=params,
-   #  Np=Np,
-   #  vec_dmeasure = vec_dmeasure,
-   #  nbhd = nbhd,
-   #  units = units,
-   #  tol=tol,
-   #  max.fail=max.fail,
-   #  pred.mean=pred.mean,
-   #  pred.var=pred.var,
-   #  filter.mean=filter.mean,
-   #  filter.traj=filter.traj,
-   #  save.states=save.states,
-   #  save.params=save.params,
-   #  verbose=verbose,
-   #  ...)
-   # return(single_island_output)
+   single_island_output <- iif.internal(
+    object=object,
+    params=params,
+    Np=Np,
+    nbhd = nbhd,
+    tol=tol,
+    max.fail=max.fail,
+    pred.mean=pred.mean,
+    pred.var=pred.var,
+    filter.mean=filter.mean,
+    filter.traj=filter.traj,
+    save.states=save.states,
+    save.params=save.params,
+    verbose=verbose,
+    ...)
+   return(single_island_output)
    ## end single thread for testing
    ## begin multi-thread code
-   require(doParallel)
-   cores <- 3
-   registerDoParallel(cores)
-   mcopts <- list(set.seed=TRUE)
-   # set.seed(396658101,kind="L'Ecuyer")
-   mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  iif.internal(
-     object=object,
-     params=params,
-     Np=Np,
-     vec_dmeasure = vec_dmeasure,
-     nbhd = nbhd,
-     units = units,
-     tol=tol,
-     max.fail=max.fail,
-     pred.mean=pred.mean,
-     pred.var=pred.var,
-     filter.mean=filter.mean,
-     filter.traj=filter.traj,
-     save.states=save.states,
-     save.params=save.params,
-     verbose=verbose,
-     ...
-   )
-   ntimes = length(time(object))
-   # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
-   island_weight_sums = array(data = numeric(0), dim = c(units,ntimes))
-   for (i in seq_len(units)){
-    for (j in seq_len(ntimes)){
-      weight_sum = 0
-      for (k in seq_len(islands)){
-        # weight_sum = weight_sum + mult_island_output[[k]][[2]][i,j]
-        weight_sum = weight_sum + mult_island_output[[k]]@loc.comb.pred.weights[i,j]
-      }
-      island_weight_sums[i,j] = weight_sum
-    }
-   }
-   loc.comb.filter.weights = array(data = numeric(0), dim=c(units, ntimes, islands, Np))
-   marg.filter.probs = array(data = numeric(0), dim=c(units, ntimes, islands, Np))
-   # compute w_{d,n,i,j}^LCF
-   for(i in seq_len(units)){
-    for(j in seq_len(ntimes)){
-      # space_time_sum = 0
-      for(k in seq_len(islands)){
-        for(l in seq_len(Np)){
-           loc.comb.filter.weights[i,j,k,l] = mult_island_output[[k]]@cond.densities[i,l,j] * (mult_island_output[[k]]@loc.comb.pred.weights[i,j]) / island_weight_sums[i,j]
-           # space_time_sum = space_time_sum + loc.comb.filter.weights[i,j,k,l]
-        }
-      }
-      # marg.filter.probs[i,j,,] = loc.comb.filter.weights[i,j,,]/space_time_sum
-    }
-   }
+   # require(doParallel)
+   # cores <- 3
+   # registerDoParallel(cores)
+   # mcopts <- list(set.seed=TRUE)
+   # # set.seed(396658101,kind="L'Ecuyer")
+   # mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  iif.internal(
+   #   object=object,
+   #   params=params,
+   #   Np=Np,
+   #   vec_dmeasure = vec_dmeasure,
+   #   nbhd = nbhd,
+   #   units = units,
+   #   tol=tol,
+   #   max.fail=max.fail,
+   #   pred.mean=pred.mean,
+   #   pred.var=pred.var,
+   #   filter.mean=filter.mean,
+   #   filter.traj=filter.traj,
+   #   save.states=save.states,
+   #   save.params=save.params,
+   #   verbose=verbose,
+   #   ...
+   # )
+   # ntimes = length(time(object))
+   # # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
+   # island_weight_sums = array(data = numeric(0), dim = c(units,ntimes))
+   # for (i in seq_len(units)){
+   #  for (j in seq_len(ntimes)){
+   #    weight_sum = 0
+   #    for (k in seq_len(islands)){
+   #      # weight_sum = weight_sum + mult_island_output[[k]][[2]][i,j]
+   #      weight_sum = weight_sum + mult_island_output[[k]]@loc.comb.pred.weights[i,j]
+   #    }
+   #    island_weight_sums[i,j] = weight_sum
+   #  }
+   # }
+   # loc.comb.filter.weights = array(data = numeric(0), dim=c(units, ntimes, islands, Np))
+   # marg.filter.probs = array(data = numeric(0), dim=c(units, ntimes, islands, Np))
+   # # compute w_{d,n,i,j}^LCF
+   # for(i in seq_len(units)){
+   #  for(j in seq_len(ntimes)){
+   #    # space_time_sum = 0
+   #    for(k in seq_len(islands)){
+   #      for(l in seq_len(Np)){
+   #         loc.comb.filter.weights[i,j,k,l] = mult_island_output[[k]]@cond.densities[i,l,j] * (mult_island_output[[k]]@loc.comb.pred.weights[i,j]) / island_weight_sums[i,j]
+   #         # space_time_sum = space_time_sum + loc.comb.filter.weights[i,j,k,l]
+   #      }
+   #    }
+   #    # marg.filter.probs[i,j,,] = loc.comb.filter.weights[i,j,,]/space_time_sum
+   #  }
+   # }
+   # end multi-threaded code
 
    # compute conditional log-likelihood estimate
    cond.loglik = array(data = numeric(0), dim=c(units, ntimes))
