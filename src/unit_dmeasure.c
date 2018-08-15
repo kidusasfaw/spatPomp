@@ -62,7 +62,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   give_log = *(INTEGER(AS_INTEGER(log)));
 
   // set up the covariate table
-  covariate_table = (*sp_make_covariate_table)(object,&ncovars);
+  covariate_table = (*mct)(object,&ncovars);
 
   // vector for interpolated covariates
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
@@ -71,7 +71,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   // extract the user-defined function
   PROTECT(dmeas_pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
   PROTECT(pompfun = GET_SLOT(object,install("unit_dmeasure"))); nprotect++;
-  PROTECT(fn = (*sp_pomp_fun_handler)(pompfun,gnsi,&mode)); nprotect++;
+  PROTECT(fn = (*pfh)(pompfun,gnsi,&mode)); nprotect++;
 
   // extract 'userdata' as pairlist
   PROTECT(fcall = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
@@ -163,7 +163,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
       	R_CheckUserInterrupt();	// check for user interrupt
       	*tp = *time;				 // copy the time
-      	(*sp_table_lookup)(&covariate_table,*time,cp); // interpolate the covariates
+      	(*tl)(&covariate_table,*time,cp); // interpolate the covariates
       	memcpy(yp,ys,nobs*sizeof(double));
       	for (j = 0; j < nreps; j++, ft++) { // loop over replicates
       	  // copy the states and parameters into place
@@ -185,7 +185,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     break;
 
     case native:			// native code
-      set_pomp_userdata(fcall);
+      spu(fcall);
       {
         double *yp = REAL(y);
         double *xs = REAL(x);
@@ -193,14 +193,14 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         double *cp = REAL(cvec);
         double *ft = REAL(F);
         double *time = REAL(times);
-        double *unit = INTEGER(units);
+        int *unit = INTEGER(units);
         double *xp, *pp;
         int j, k;
 
         for (k = 0; k < ntimes; k++, time++, yp += nobs) { // loop over times
         	R_CheckUserInterrupt();	// check for user interrupt
         	// interpolate the covar functions for the covariates
-        	(*sp_table_lookup)(&covariate_table,*time,cp);
+        	(*tl)(&covariate_table,*time,cp);
         	for (j = 0; j < nreps; j++, ft++) { // loop over replicates
         	  xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
         	  pp = &ps[npars*(j%nrepsp)];
@@ -208,7 +208,8 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         	}
         }
       }
-      unset_pomp_userdata();
+      upu();
+      //unset_pomp_userdata();
     break;
 
     default:

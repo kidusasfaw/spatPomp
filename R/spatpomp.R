@@ -209,8 +209,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
             cref="__covars[__covindex[{%v%}]]"
           ),
           unit_states=list(
-            names=quote(statenames),
-            cref="__x[__stateindex[{%v%}*nunits+unit-1]]"
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit-1]"
           ),
           obstyp=list(
             names=quote(obsnames),
@@ -227,10 +227,10 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     hitches <- pomp::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
-      #obsnames=obstypes,
-      #statenames=unit_statenames,
-      obsnames = obsnames,
-      statenames = pomp_statenames,
+      obsnames=obstypes,
+      # statenames=unit_statenames,
+      #obsnames = obsnames,
+      statenames = paste0(unit_statenames, "1"),
       paramnames=paramnames,
       covarnames=covarnames,
       PACKAGE=PACKAGE,

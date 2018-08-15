@@ -209,7 +209,7 @@ SEXP iif_computations (SEXP x, SEXP params, SEXP Np,
 
   // create storage for new parameters
   if (do_par_resamp) {
-    xdim[0] = npars; xdim[1] = np;
+    xdim[0] = npars; xdim[1] = copies;
     PROTECT(newparams = makearray(2,xdim)); nprotect++;
     setrownames(newparams,Pnames,2);
     fixdimnames(newparams,dimnm,2);

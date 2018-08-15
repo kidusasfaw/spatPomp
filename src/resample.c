@@ -28,7 +28,7 @@ void nosort_resamp (int nw, double *w, int np, int *p, int offset)
 
 }
 
-SEXP systematic_resampling2 (SEXP weights)
+SEXP systematic_resampling (SEXP weights)
 {
   int n;
   SEXP perm;
