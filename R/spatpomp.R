@@ -195,9 +195,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
-        Cname="__spatpomp_unit_dmeasure",
+        Cname="__spatpomp3_unit_dmeasure",
         proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __spatpomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        header="\nvoid __spatpomp3_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -213,8 +213,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
             cref="__x[__stateindex[{%v%}]+unit-1]"
           ),
           obstyp=list(
-            names=quote(obsnames),
-            cref="__y[__obsindex[{%v%}*nunits+unit-1]]"
+            names=obstypes,
+            cref="__y[__obsindex[{%v%}]+unit-1]"
           ),
           lik=list(
             names="lik",
@@ -227,9 +227,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     hitches <- pomp::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
-      obsnames=obstypes,
-      # statenames=unit_statenames,
-      #obsnames = obsnames,
+      obsnames = paste0(obstypes,"1"),
       statenames = paste0(unit_statenames,"1"),
       paramnames=paramnames,
       covarnames=covarnames,

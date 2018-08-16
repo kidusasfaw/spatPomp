@@ -59,19 +59,26 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
 
+
+  printf("The color: %s\n", "1");
+
   give_log = *(INTEGER(AS_INTEGER(log)));
 
   // set up the covariate table
   covariate_table = (*mct)(object,&ncovars);
+
+  printf("The color: %s\n", "2");
 
   // vector for interpolated covariates
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
   SET_NAMES(cvec,Cnames);
 
   // extract the user-defined function
-  PROTECT(dmeas_pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
+  //PROTECT(dmeas_pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
   PROTECT(pompfun = GET_SLOT(object,install("unit_dmeasure"))); nprotect++;
   PROTECT(fn = (*pfh)(pompfun,gnsi,&mode)); nprotect++;
+
+  printf("The color: %s\n", "3");
 
   // extract 'userdata' as pairlist
   PROTECT(fcall = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
@@ -116,11 +123,9 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
 
       // construct state, parameter, covariate, observable indices
       oidx = INTEGER(PROTECT(name_index(Onames,pompfun,"obsnames","observables"))); nprotect++;
-      printf("The color: %s\n", "orange");
       sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
-      printf("The color: %s\n", "blue");
       // address of native routine
       *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
@@ -134,13 +139,13 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   }
 
   // create array to store results
+
   {
     int dim[2] = {nreps, ntimes};
     const char *dimnm[2] = {"rep","time"};
     PROTECT(F = makearray(2,dim)); nprotect++;
     fixdimnames(F,dimnm,2);
   }
-  printf("The color: %s\n", "purple");
 
   // now do computations
   switch (mode) {
@@ -185,7 +190,8 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     break;
 
     case native:			// native code
-      spu(fcall);
+      (*spu)(fcall);
+
       {
         double *yp = REAL(y);
         double *xs = REAL(x);
@@ -197,18 +203,44 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         double *xp, *pp;
         int j, k;
 
-        for (k = 0; k < ntimes; k++, time++, yp += nobs) { // loop over times
+        for (k = 0; k < ntimes; k++, time++) { // loop over times
         	R_CheckUserInterrupt();	// check for user interrupt
         	// interpolate the covar functions for the covariates
         	(*tl)(&covariate_table,*time,cp);
+
         	for (j = 0; j < nreps; j++, ft++) { // loop over replicates
+        	  printf("The color: %s\n", "red");
+        	  printf("j = %d, k = %d\n", j, k);
         	  xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
         	  pp = &ps[npars*(j%nrepsp)];
+        	  //if(j == 992){
+        	    //UNPROTECT(nprotect);
+        	    //printf("S2: %f\n",xp[sidx[0]+2-1]);
+        	    //printf("E2: %f\n",xp[sidx[1]+2-1]);
+        	    //printf("I2: %f\n",xp[sidx[2]+2-1]);
+        	    //printf("R2: %f\n",xp[sidx[3]+2-1]);
+        	    //printf("C2: %f\n",xp[sidx[4]+2-1]);
+        	    //printf("W2: %f\n",xp[sidx[5]+2-1]);
+        	    //printf("For unit 1: %f\n",yp[oidx[0]+(*unit)-1]);
+        	    //printf("For unit 2: %f\n",yp[oidx[0]+2-1]);
+        	    //printf("For unit 3: %f\n",yp[oidx[0]+3-1]);
+        	    //return(Onames);
+        	  //}
         	  (*ff)(ft,yp,xp,pp,give_log,oidx,sidx,pidx,cidx,ncovars,cp,*time,*unit);
+        	  //if(j > 998 && k==0){
+        	    //UNPROTECT(nprotect);
+        	    //return(Snames);
+        	  //}
         	}
+        	//(*upu)();
+        	//UNPROTECT(nprotect);
+        	//return(F);
         }
+        (*upu)();
+        UNPROTECT(nprotect);
+        return F;
       }
-      upu();
+      (*upu)();
       //unset_pomp_userdata();
     break;
 

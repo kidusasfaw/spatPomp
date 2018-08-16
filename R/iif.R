@@ -356,6 +356,8 @@ iif.internal <- function (object, params, Np,
     if (verbose && (nt%%5==0))
       cat("iif timestep",nt,"of",ntimes,"finished\n")
 
+    return(xx)
+
     #preweighted[[nt]] <- X
     #resampling_weights[[nt]] <- apply(weights[,,1], 2, function(x) prod(x)) # since iif_computations changes resamp_weights
     #postweighted[[nt]] <- x

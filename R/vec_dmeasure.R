@@ -16,7 +16,9 @@ vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .ge
     #   relevant_y <- y[paste0(object@obstypes,i),,drop=FALSE]
     #   row.names(relevant_y) <- object@obstypes
     # }
-    weights[i,,] <- .Call(do_unit_dmeasure,object,y,x,times,i,params,log,.getnativesymbolinfo)
+    print('vec_dmeasure is not returning for all units')
+    return(.Call(do_unit_dmeasure,object,y,x,times,i,params,log,.getnativesymbolinfo))
+    #weights[i,,] <- .Call(do_unit_dmeasure,object,y,x,times,i,params,log,.getnativesymbolinfo)
   }
   pompUnload(object)
   return(weights)
