@@ -11,7 +11,7 @@
 
 typedef void spatpomp_unit_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
                                          const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
-                                         int ncovars, const double *covars, double t, double u);
+                                         int ncovars, const double *covars, double t, int u);
 
 load_stack_incr_t *lsi;
 load_stack_decr_t *lsd;
@@ -21,6 +21,7 @@ table_lookup_t *tl;
 make_covariate_table_t *mct;
 set_pomp_userdata_t *spu;
 unset_pomp_userdata_t *upu;
+
 //typedef SEXP(*psp_load_stack_incr)();
 //typedef SEXP(*psp_load_stack_decr)();
 //typedef SEXP(*psp_pomp_fun_handler)();
