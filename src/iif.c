@@ -24,7 +24,7 @@ SEXP iif_computations (SEXP x, SEXP params, SEXP Np,
   const char *dimnm[2] = {"variable","rep"};
   double *xpm = 0, *xpv = 0, *xfm = 0, *xw = 0, *xx = 0, *xp = 0;
   int *xanc = 0;
-  SEXP dimX, dimP, newdim, Xnames, Pnames, pindex;
+  SEXP dimX, dimP, Xnames, Pnames, pindex;
   int *dim, *pidx, lv, np;
   int nvars, npars = 0, nrw = 0, nreps, offset, nlost;
   int do_rw, do_pm, do_pv, do_fm, do_ta, do_par_resamp, all_fail = 0;
@@ -230,58 +230,6 @@ SEXP iif_computations (SEXP x, SEXP params, SEXP Np,
     }
     if (do_ta) xanc[k] = sample[k]+1;
   }
-
-  // if (!all_fail) { // resample the particles unless we have filtering failure
-  //   int xdim[2];
-  //   int copies = *(INTEGER(AS_INTEGER(Np)));       // number of particles to copy after systematic resampling one particle
-  //   int sample[copies];
-  //   double *ss = 0, *st = 0, *ps = 0, *pt = 0;
-
-  //   // create storage for new states
-  //   xdim[0] = nvars; xdim[1] = copies;
-  //   PROTECT(newstates = makearray(2,xdim)); nprotect++;
-  //   setrownames(newstates,Xnames,2);
-  //   fixdimnames(newstates,dimnm,2);
-  //   ss = REAL(x);
-  //   st = REAL(newstates);
-
-  //   // create storage for new parameters
-  //   if (do_par_resamp) {
-  //     xdim[0] = npars; xdim[1] = np;
-  //     PROTECT(newparams = makearray(2,xdim)); nprotect++;
-  //     setrownames(newparams,Pnames,2);
-  //     fixdimnames(newparams,dimnm,2);
-  //     ps = REAL(params);
-  //     pt = REAL(newparams);
-  //   }
-
-  //   // resample
-  //   nosort_resamp2(nreps,REAL(resamp_weights),np,sample,0);
-  //   for(l = 1; l < copies; l++){ // replicate the resampled particle number `copies` number of times
-  //     sample[l] = sample[l-1];
-  //   }
-
-  //   for (k = 0; k < copies; k++) { // copy the particles
-  //     for (j = 0, xx = ss+nvars*sample[k]; j < nvars; j++, st++, xx++) *st = *xx;
-  //     if (do_par_resamp) {
-  //     	for (j = 0, xp = ps+npars*sample[k]; j < npars; j++, pt++, xp++) *pt = *xp;
-  //     }
-  //     if (do_ta) xanc[k] = sample[k]+1;
-  //   }
-
-  // } else { // don't resample: just drop 3rd dimension in x prior to return
-  //   printf("%s\n", "not resampling here");
-
-  //   PROTECT(newdim = NEW_INTEGER(2)); nprotect++;
-  //   dim = INTEGER(newdim);
-  //   dim[0] = nvars; dim[1] = nreps;
-  //   SET_DIM(x,newdim);
-  //   setrownames(x,Xnames,2);
-  //   fixdimnames(x,dimnm,2);
-
-  //   if (do_ta)
-  //     for (k = 0; k < np; k++) xanc[k] = k+1;
-  // }
 
   PutRNGstate();
 

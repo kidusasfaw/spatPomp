@@ -16,9 +16,7 @@ Suggests: scales, stringr, dplyr, tidyr, geosphere, ggplot2, magrittr,
 Collate: 
     spatpomp_class.R
     generics.R
-    dmeasure3_spatpomp.R
     iif.R
-    pfilter3.R
     spatpomp.R
     spatpomp_methods.R
     spbuilder.R

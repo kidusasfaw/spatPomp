@@ -16,7 +16,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   int give_log;
   int ntimes, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
-  SEXP pompfun, dmeas_pompfun;
+  SEXP pompfun;
   SEXP cvec, tvec = R_NilValue, uvec = R_NilValue;
   SEXP xvec = R_NilValue, yvec = R_NilValue, pvec = R_NilValue;
   SEXP fn, ans, fcall, rho = R_NilValue;
@@ -156,7 +156,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       double *pp = REAL(pvec);
       double *ft = REAL(F);
       double *time = REAL(times);
-      double *unit = REAL(units);
+      // double *unit = REAL(units);
       int j, k;
 
       for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
