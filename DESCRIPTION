@@ -19,6 +19,6 @@ Collate:
     iif.R
     spatpomp.R
     spatpomp_methods.R
-    spbuilder.R
     vec_dmeasure.R
+    hippie.R
 RoxygenNote: 6.1.0

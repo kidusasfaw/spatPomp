@@ -3,6 +3,7 @@
 
 static const R_CallMethodDef callMethods[] = {
   {"do_unit_dmeasure", (DL_FUNC) &do_unit_dmeasure, 8},
+  {"iif_computations", (DL_FUNC) &iif_computations, 11},
   {NULL, NULL, 0}
 };
 

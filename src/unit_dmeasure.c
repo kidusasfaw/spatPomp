@@ -113,7 +113,6 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       break;
 
     case native:			// native code
-      printf("The color: %s\n", "green");
 
       // construct state, parameter, covariate, observable indices
       oidx = INTEGER(PROTECT(name_index(Onames,pompfun,"obsnames","observables"))); nprotect++;

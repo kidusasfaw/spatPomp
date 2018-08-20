@@ -4,7 +4,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, initializer, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, zeronames, covarnames,
-  verbose = getOption("verbose",FALSE)) {
+  fromEstimationScale, toEstimationScale, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatpomp"),": ")
 
@@ -136,6 +136,11 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       tcovar = tcovar,
       paramnames = paramnames,
       globals = globals,
+      cdir = cdir,
+      cfile = cfile,
+      shlib.args = shlib.args,
+      toEstimationScale = toEstimationScale,
+      fromEstimationScale = fromEstimationScale,
       t0 = t0,
       ...,
       verbose=verbose
@@ -238,8 +243,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       shlib.args=shlib.args,
       verbose=verbose
     )
-
-    print(hitches)
 
     pomp:::solibs(po) <- hitches$lib
 

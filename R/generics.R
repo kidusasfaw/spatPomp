@@ -10,8 +10,8 @@ setGeneric("unit_ix", function(x,...)standardGeneric("unit_ix"))
 ## Evaluate unit_dmeasure over all units
 setGeneric("vec_dmeasure", function(object,...)standardGeneric("vec_dmeasure"))
 
-## basic SMC (particle filter) FOR TEST PURPOSES ONLY
-setGeneric("pfilter3",function(object,...)standardGeneric("pfilter3"))
+## Adapted simulation for HIPPIE
+setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter"))
 
-## FOR TEST PURPOSES ONLY
-setGeneric("dmeasure3",function(object,...)standardGeneric("dmeasure3"))
+## HIPPIE
+setGeneric("hippie", function(object,...)standardGeneric("hippie"))
