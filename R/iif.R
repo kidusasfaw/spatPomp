@@ -473,7 +473,8 @@ setMethod(
    ## end single thread for testing
    ## begin multi-thread code
    require(doParallel)
-   cores <- 3
+   require(parallel)
+   cores <- parallel:::detectCores() - 1
    registerDoParallel(cores)
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")

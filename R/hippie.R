@@ -435,7 +435,8 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
 
   # iterate the filtering
   require(doParallel)
-  cores <- 3
+  require(parallel)
+  cores <- parallel:::detectCores()-1
   registerDoParallel(cores)
   mcopts <- list(set.seed=TRUE)
 
