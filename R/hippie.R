@@ -23,7 +23,7 @@ setClass(
   "hippie.as.pfilterd.pomp",
   contains="spatpomp",
   slots=c(
-    loc.comb.pred.weights="array",
+    loc.comb.pred.weights="numeric",
     cond.densities="array",
     paramMatrix="array",
     indices="vector",
@@ -35,7 +35,7 @@ setClass(
     loglik="numeric"
   ),
   prototype=prototype(
-    loc.comb.pred.weights = array(data = numeric(0), dim=c(0,0)),
+    loc.comb.pred.weights = numeric(0),
     cond.densities=array(data=numeric(0),dim=c(0,0,0)),
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
     indices=integer(0),
@@ -80,6 +80,7 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
   # create array to store weights across time
   cond.densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
   dimnames(cond.densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
+
   for (nt in seq_len(ntimes)) {
 
     ## perturb parameters
@@ -207,12 +208,13 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       call.=FALSE
     )
   }
-  loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,ntimes))
+  loc.comb.pred.weights = 0
   for (nt in seq_len(ntimes)){
     for (unit in seq_len(nunits)){
       sum_log_over_times=0
       #prod_over_times = 1
       full_nbhd = nbhd(object, nt, unit)
+      if((nt != ntimes) && (unit != nunits)) next
       for (prev_t in 1:nt){
         if(prev_t == nt){
           if(unit == 1) next
@@ -248,7 +250,7 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
         }
       }
       #loc.comb.pred.weights[unit,nt] = prod_over_times
-      loc.comb.pred.weights[unit,nt] = sum_log_over_times
+      loc.comb.pred.weights = sum_log_over_times
     }
   }
 
@@ -436,13 +438,13 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   # iterate the filtering
   require(doParallel)
   require(parallel)
-  cores <- parallel:::detectCores()-1
-  registerDoParallel(cores)
-  mcopts <- list(preschedule = FALSE, set.seed=TRUE)
+  # cores <- parallel:::detectCores()-1
+  registerDoParallel(cores=NULL)
+  mcopts <- list(set.seed=TRUE,preschedule=FALSE)
+  mult.island.output <- list()
 
   for (n in seq_len(Nhippie)) {
-    mult.island.output <- list()
-    param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
+    # param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
     # begin multi-threaded
     mult.island.output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  {
       hippie_pfilter.internal(
@@ -482,13 +484,13 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     gnsi <- FALSE
     fails <- 0
     weights <- vector(length=islands)
-
+    param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
     for(i in 1:islands){
       param.swarm[,i] <- mult.island.output[[i]]@paramMatrix[,1]
       paramMatrixList[[i]] <- mult.island.output[[i]]@paramMatrix
       fails <- fails + mult.island.output[[i]]@nfail
       .indices[[i]] <- mult.island.output[[i]]@indices
-      weights[i] <- mult.island.output[[i]]@loc.comb.pred.weights[length(unit(object)),length(time(object))-1]
+      weights[i] <- mult.island.output[[i]]@loc.comb.pred.weights
     }
 
     coef(object, transform = transform) <- apply(param.swarm,1,mean)
@@ -502,8 +504,17 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     assignments <- suppressWarnings(top_indices + assignments) # uses recycling to ensure equitable distribution
     assignments <- sample(assignments)
 
+
     for(i in 1:islands) {
-      paramMatrixList[[i]] <- paramMatrixList[[assignments[i]]]
+      # in cases where all weights are equal and extremely low, this will not happen
+      if(length(assignments) > 0) paramMatrixList[[i]] <- paramMatrixList[[assignments[i]]]
+    }
+
+    if (n != Nhippie){
+      rm(param.swarm)
+      rm(assignments)
+      rm(top_indices)
+      rm(weights)
     }
 
     if (verbose) cat("hippie iteration",n,"of",Nhippie,"completed\n")

@@ -99,7 +99,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     # }
 
     # make covariates into a dataframe that pomp would expect
-    if(!missing(covar)){
+    if(!missing(covar) && !missing(tcovar)){
       upos_cov <- match(upos_name, names(covar))
       tpos_cov <- match(tpos_name, names(covar))
       covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
@@ -109,6 +109,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+    } else {
+      pomp_covar <- NULL
+      tcovar <- NULL
     }
 
     # get all combinations of unit statenames and units. Concatenate global statenames
@@ -188,7 +191,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # arrange covariates
     if (missing(covarnames) || length(covarnames)==0)
-      covarnames <- as.character(colnames(pomp_covar[-tpos_cov]))
+      if(!is.null(pomp_covar)) covarnames <- as.character(colnames(pomp_covar[-tpos_cov]))
+      else covarnames <- NULL
     if (!all(covarnames%in%colnames(pomp_covar))) {
       missing <- covarnames[!(covarnames%in%colnames(covar))]
       stop("covariate(s) ",
@@ -196,7 +200,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
         " are not among the columns of ",sQuote("covar"),call.=FALSE)
     }
     ## handle unit_dmeasure C Snippet
-    print(unit_statenames)
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
