@@ -23,24 +23,28 @@ setClass(
   "hippie.as.pfilterd.pomp",
   contains="spatpomp",
   slots=c(
-    loc.comb.pred.weights="numeric",
-    cond.densities="array",
-    paramMatrix="array",
+    #loc.comb.pred.weights="numeric",
+    #cond.densities="array",
+    log.island.weight="numeric",
+    #paramMatrix="array",
+    island.param="numeric",
     indices="vector",
     eff.sample.size="numeric",
-    cond.loglik="numeric",
+    #cond.loglik="numeric",
     Np="integer",
     tol="numeric",
     nfail="integer",
     loglik="numeric"
   ),
   prototype=prototype(
-    loc.comb.pred.weights = numeric(0),
-    cond.densities=array(data=numeric(0),dim=c(0,0,0)),
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    #loc.comb.pred.weights = numeric(0),
+    #cond.densities=array(data=numeric(0),dim=c(0,0,0)),
+    log.island.weight=numeric(0),
+    #paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    island.param=numeric(0),
     indices=integer(0),
     eff.sample.size=numeric(0),
-    cond.loglik=numeric(0),
+    #cond.loglik=numeric(0),
     saved.states=list(),
     saved.params=list(),
     Np=as.integer(NA),
@@ -76,11 +80,12 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
   eff.sample.size <- numeric(ntimes)
   nfail <- 0
 
+  params <- array(data = params, dim = c(length(params),Np[1L]), dimnames = list(variable=names(params),rep=NULL))
 
   # create array to store weights across time
   cond.densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
   dimnames(cond.densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
-
+  log.island.weight <- 0
   for (nt in seq_len(ntimes)) {
 
     ## perturb parameters
@@ -138,20 +143,22 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       msg <- pomp:::nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
       stop(ep,msg,call.=FALSE)
     }
-    gnsi <- FALSE
-    cond.densities[,,nt] <- weights[,,1,drop=FALSE]
     resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
+    log.island.weight <- log.island.weight + log((1/Np[1L])*sum(resamp_weights))
+    gnsi <- FALSE
+    #cond.densities[,,nt] <- weights[,,1,drop=FALSE]
+    #resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
 
-    ## compute weighted mean at last timestep
-    if (nt == ntimes) {
-      if (any(resamp_weights>0)) {
-        coef(object,transform=transform) <- apply(params,1L,weighted.mean,w=resamp_weights)
-      } else {
-        warning(ep,"filtering failure at last filter iteration, using unweighted mean for ",
-                sQuote("coef"),call.=FALSE)
-        coef(object,transform=transform) <- apply(params,1L,mean)
-      }
-    }
+    ## compute weighted mean at last timestep. KIDUS COMMENTED THIS OUT BC I THINK WE NEED TO DO THIS AFTER RESAMPLING
+    # if (nt == ntimes) {
+    #   if (any(resamp_weights>0)) {
+    #     coef(object,transform=transform) <- apply(params,1L,weighted.mean,w=resamp_weights)
+    #   } else {
+    #     warning(ep,"filtering failure at last filter iteration, using unweighted mean for ",
+    #             sQuote("coef"),call.=FALSE)
+    #     coef(object,transform=transform) <- apply(params,1L,mean)
+    #   }
+    # }
     ## compute effective sample size, log-likelihood
     ## also do resampling if filtering has not failed
 
@@ -185,6 +192,16 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
     x <- xx$states
     params <- xx$params
 
+    if (nt == ntimes) {
+      if (any(resamp_weights>0)) {
+        coef(object,transform=transform) <- apply(params,1L,weighted.mean,w=resamp_weights)
+      } else {
+        warning(ep,"filtering failure at last filter iteration, using unweighted mean for ",
+                sQuote("coef"),call.=FALSE)
+        coef(object,transform=transform) <- apply(params,1L,mean)
+      }
+    }
+
     if (all.fail) { ## all particles are lost
       nfail <- nfail+1
       if (verbose)
@@ -208,60 +225,62 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       call.=FALSE
     )
   }
-  loc.comb.pred.weights = 0
-  for (nt in seq_len(ntimes)){
-    for (unit in seq_len(nunits)){
-      sum_log_over_times=0
-      #prod_over_times = 1
-      full_nbhd = nbhd(object, nt, unit)
-      if((nt != ntimes) && (unit != nunits)) next
-      for (prev_t in 1:nt){
-        if(prev_t == nt){
-          if(unit == 1) next
-          time_sum = 0
-          for(pp in seq_len(Np[1])){
-            part_prod = 1
-            for (prev_u in 1:unit-1){
-              if (prev_u == 0) next
-              if (full_nbhd[prev_u, prev_t]){
-                part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
-              }
-            }
-            time_sum = time_sum + part_prod
-          }
-          time_avg = time_sum/Np[1]
-          #prod_over_times = prod_over_times * time_avg
-          sum_log_over_times = sum_log_over_times + log(time_avg)
-        }
-        else{
-          time_sum = 0
-          for(pp in seq_len(Np[1])){
-            part_prod = 1
-            for (prev_u in 1:nunits){
-              if (full_nbhd[prev_u, prev_t]){
-                part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
-              }
-            }
-            time_sum = time_sum + part_prod
-          }
-          time_avg = time_sum/Np[1]
-          #prod_over_times = prod_over_times * time_avg
-          sum_log_over_times = sum_log_over_times + log(time_avg)
-        }
-      }
-      #loc.comb.pred.weights[unit,nt] = prod_over_times
-      loc.comb.pred.weights = sum_log_over_times
-    }
-  }
+  # loc.comb.pred.weights = 0
+  # for (nt in seq_len(ntimes)){
+  #   for (unit in seq_len(nunits)){
+  #     sum_log_over_times=0
+  #     #prod_over_times = 1
+  #     full_nbhd = nbhd(object, nt, unit)
+  #     if((nt != ntimes) && (unit != nunits)) next
+  #     for (prev_t in 1:nt){
+  #       if(prev_t == nt){
+  #         if(unit == 1) next
+  #         time_sum = 0
+  #         for(pp in seq_len(Np[1])){
+  #           part_prod = 1
+  #           for (prev_u in 1:unit-1){
+  #             if (prev_u == 0) next
+  #             if (full_nbhd[prev_u, prev_t]){
+  #               part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
+  #             }
+  #           }
+  #           time_sum = time_sum + part_prod
+  #         }
+  #         time_avg = time_sum/Np[1]
+  #         #prod_over_times = prod_over_times * time_avg
+  #         sum_log_over_times = sum_log_over_times + log(time_avg)
+  #       }
+  #       else{
+  #         time_sum = 0
+  #         for(pp in seq_len(Np[1])){
+  #           part_prod = 1
+  #           for (prev_u in 1:nunits){
+  #             if (full_nbhd[prev_u, prev_t]){
+  #               part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
+  #             }
+  #           }
+  #           time_sum = time_sum + part_prod
+  #         }
+  #         time_avg = time_sum/Np[1]
+  #         #prod_over_times = prod_over_times * time_avg
+  #         sum_log_over_times = sum_log_over_times + log(time_avg)
+  #       }
+  #     }
+  #     #loc.comb.pred.weights[unit,nt] = prod_over_times
+  #     loc.comb.pred.weights = sum_log_over_times
+  #   }
+  # }
 
   new(
     "hippie.as.pfilterd.pomp",
     object,
-    loc.comb.pred.weights=loc.comb.pred.weights,
-    cond.densities=cond.densities,
-    paramMatrix=params,
+    #loc.comb.pred.weights=loc.comb.pred.weights,
+    #cond.densities=cond.densities,
+    log.island.weight=log.island.weight,
+    #paramMatrix=params,
+    island.param=params[,1],
     eff.sample.size=eff.sample.size,
-    cond.loglik=loglik,
+    #cond.loglik=loglik,
     Np=as.integer(Np),
     tol=tol,
     nfail=as.integer(nfail),
@@ -407,21 +426,26 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
   )
-  # initialize the paramMatrix for each island
-  paramMatrixList = list()
+  # initialize the parameter for each island
+  # paramMatrixList = list()
+  island.param.list = list()
   for(i in seq_len(islands)){
     .indices[[i]] <- integer(0)
     if (is.null(.paramMatrix)) {
       if (.ndone > 0) {               # call is from 'continue'
-        paramMatrixList[[i]] <- object@paramMatrix
-        start <- apply(paramMatrixList[[i]],1L,mean)
+        # paramMatrixList[[i]] <- object@paramMatrix
+        island.param.list[[i]] <- coef(object)
+        #start <- apply(paramMatrixList[[i]],1L,mean)
+        start <- coef(object)
       } else {                      # initial call
-        paramMatrixList[[i]] <- array(data=start,dim=c(length(start),Np[1L]),
-                             dimnames=list(variable=names(start),rep=NULL))
+        # paramMatrixList[[i]] <- array(data=start,dim=c(length(start),Np[1L]), dimnames=list(variable=names(start),rep=NULL))
+        island.param.list[[i]] <- start
       }
     } else {
-      paramMatrixList[[i]] <- .paramMatrix
-      start <- apply(paramMatrixList[[i]],1L,mean)
+      # paramMatrixList[[i]] <- .paramMatrix
+      island.param.list[[i]] <- .paramMatrix[,i]
+      # start <- apply(paramMatrixList[[i]],1L,mean)
+      start <- apply(.paramMatrix,1L,mean)
     }
 
     conv.rec <- array(dim=c(Nhippie+1,length(start)+2),
@@ -430,8 +454,8 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     conv.rec[1L,] <- c(NA,NA,start)
 
     if (transform)
-      paramMatrixList[[i]] <- partrans(object,paramMatrixList[[i]],dir="toEstimationScale",
-                              .getnativesymbolinfo=gnsi)
+      # paramMatrixList[[i]] <- partrans(object,paramMatrixList[[i]],dir="toEstimationScale", .getnativesymbolinfo=gnsi)
+      island.param.list[[i]] <- partrans(object,island.param.list[[i]],dir="toEstimationScale",.getnativesymbolinfo=gnsi)
   }
   object <- as(object,"spatpomp")
 
@@ -449,7 +473,8 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     mult.island.output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  {
       hippie_pfilter.internal(
         object=object,
-        params=paramMatrixList[[i]],
+        # params = paramMatrixList[[i]]
+        params=island.param.list[[i]],
         Np=Np,
         nbhd=nbhd,
         hippieiter=.ndone+n,
@@ -467,7 +492,8 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     # for(i in 1:islands){
     #   mult.island.output[[i]] <- hippie_pfilter.internal(
     #     object=object,
-    #     params=paramMatrixList[[i]],
+    #     #params=paramMatrixList[[i]],
+    #     params=island.param.list[[i]]
     #     Np=Np,
     #     nbhd=nbhd,
     #     hippieiter=.ndone+n,
@@ -486,11 +512,11 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     weights <- vector(length=islands)
     param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
     for(i in 1:islands){
-      param.swarm[,i] <- mult.island.output[[i]]@paramMatrix[,1]
-      paramMatrixList[[i]] <- mult.island.output[[i]]@paramMatrix
+      param.swarm[,i] <- mult.island.output[[i]]@island.param
+      island.param.list[[i]] <- mult.island.output[[i]]@island.param
       fails <- fails + mult.island.output[[i]]@nfail
       .indices[[i]] <- mult.island.output[[i]]@indices
-      weights[i] <- mult.island.output[[i]]@loc.comb.pred.weights
+      weights[i] <- mult.island.output[[i]]@log.island.weight
     }
 
     coef(object, transform = transform) <- apply(param.swarm,1,mean)
@@ -507,7 +533,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
 
     for(i in 1:islands) {
       # in cases where all weights are equal and extremely low, this will not happen
-      if(length(assignments) > 0) paramMatrixList[[i]] <- paramMatrixList[[assignments[i]]]
+      if(length(assignments) > 0) island.param.list[[i]] <- island.param.list[[assignments[i]]]
     }
 
     if (n != Nhippie){
