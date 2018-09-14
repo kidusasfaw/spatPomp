@@ -464,7 +464,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   require(parallel)
   # cores <- parallel:::detectCores()-1
   registerDoParallel(cores=NULL)
-  mcopts <- list(set.seed=TRUE,preschedule=FALSE)
+  mcopts <- list(set.seed=TRUE)
   mult.island.output <- list()
 
   for (n in seq_len(Nhippie)) {
