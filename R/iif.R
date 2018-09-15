@@ -5,38 +5,38 @@ setClass(
   slots=c(
     loc.comb.pred.weights="array",
     cond.densities="array",
-    pred.mean="array",
-    pred.var="array",
-    filter.mean="array",
-    filter.traj="array",
-    paramMatrix="array",
-    indices="vector",
-    eff.sample.size="numeric",
-    cond.loglik="numeric",
-    saved.states="list",
-    saved.params="list",
+    #pred.mean="array",
+    #pred.var="array",
+    #filter.mean="array",
+    #filter.traj="array",
+    #paramMatrix="array",
+    #indices="vector",
+    #eff.sample.size="numeric",
+    #cond.loglik="numeric",
+    #saved.states="list",
+    #saved.params="list",
     Np="integer",
-    tol="numeric",
-    nfail="integer",
-    loglik="numeric"
+    tol="numeric"
+    #nfail="integer",
+    #loglik="numeric"
   ),
   prototype=prototype(
     loc.comb.pred.weights=array(data=numeric(0),dim=c(0,0)),
     cond.densities=array(data=numeric(0),dim=c(0,0,0)),
-    pred.mean=array(data=numeric(0),dim=c(0,0)),
-    pred.var=array(data=numeric(0),dim=c(0,0)),
-    filter.mean=array(data=numeric(0),dim=c(0,0)),
-    filter.traj=array(data=numeric(0),dim=c(0,0,0)),
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    indices=integer(0),
-    eff.sample.size=numeric(0),
-    cond.loglik=numeric(0),
-    saved.states=list(),
-    saved.params=list(),
+    # pred.mean=array(data=numeric(0),dim=c(0,0)),
+    # pred.var=array(data=numeric(0),dim=c(0,0)),
+    # filter.mean=array(data=numeric(0),dim=c(0,0)),
+    # filter.traj=array(data=numeric(0),dim=c(0,0,0)),
+    # paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    # indices=integer(0),
+    # eff.sample.size=numeric(0),
+    # cond.loglik=numeric(0),
+    # saved.states=list(),
+    # saved.params=list(),
     Np=as.integer(NA),
-    tol=as.double(NA),
-    nfail=as.integer(NA),
-    loglik=as.double(NA)
+    tol=as.double(NA)
+    #nfail=as.integer(NA),
+    #loglik=as.double(NA)
   )
 )
 setClass(
@@ -44,36 +44,36 @@ setClass(
   contains="spatpomp",
   slots=c(
     loc.comb.filter.weights="array",
-    pred.mean="list",
-    pred.var="list",
-    filter.mean="list",
-    filter.traj="list",
-    paramMatrix="array",
-    indices="vector",
-    eff.sample.size="list",
+    #pred.mean="list",
+    #pred.var="list",
+    #filter.mean="list",
+    #filter.traj="list",
+    #paramMatrix="array",
+    #indices="vector",
+    #eff.sample.size="list",
     cond.loglik="array",
-    saved.states="list",
-    saved.params="list",
+    #saved.states="list",
+    #saved.params="list",
     Np="integer",
     tol="numeric",
-    nfail="list",
+    #nfail="list",
     loglik="numeric"
   ),
   prototype=prototype(
     loc.comb.filter.weights=array(data=numeric(0),dim=c(0,0,0,0)),
-    pred.mean=list(),
-    pred.var=list(),
-    filter.mean=list(),
-    filter.traj=list(),
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    indices=integer(0),
-    eff.sample.size=list(),
+    #pred.mean=list(),
+    #pred.var=list(),
+    #filter.mean=list(),
+    #filter.traj=list(),
+    #paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    #indices=integer(0),
+    #eff.sample.size=list(),
     cond.loglik=array(data=numeric(0),dim=c(0,0)),
-    saved.states=list(),
-    saved.params=list(),
+    #saved.states=list(),
+    #saved.params=list(),
     Np=as.integer(NA),
     tol=as.double(NA),
-    nfail=list(),
+    #nfail=list(),
     loglik=as.double(NA)
   )
 )
@@ -281,18 +281,22 @@ iif.internal <- function (object, params, Np,
       }
     )
 
-    if (!all(is.finite(weights))) {
-      first <- which(!is.finite(weights))[1L]
-      datvals <- object@data[,nt]
-      weight <- weights[first]
-      states <- X[,first,1L]
-      params <- if (one.par) params[,1L] else params[,first]
-      msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
-      stop(ep,msg,call.=FALSE)
-    }
-    gnsi.dmeas <- FALSE
+    # if (!all(is.finite(weights))) {
+    #   first <- which(!is.finite(weights))[1L]
+    #   datvals <- object@data[,nt]
+    #   weight <- weights[first]
+    #   states <- X[,first,1L]
+    #   params <- if (one.par) params[,1L] else params[,first]
+    #   msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
+    #   stop(ep,msg,call.=FALSE)
+    # }
+
+    weights[is.na(weights)] <- tol
     cond.densities[,,nt] <- weights[,,1]
-    resamp_weights <- apply(weights[,,1], 2, function(x) prod(x))
+    resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
+    # if any particle's resampling weight is zero divide out it's weight vector by the smallest component
+    if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
+    gnsi <- FALSE
     ## compute prediction mean, prediction variance, filtering mean,
     ## effective sample size, log-likelihood
     ## also do resampling if filtering has not failed
@@ -308,50 +312,48 @@ iif.internal <- function (object, params, Np,
         filtmean=filter.mean,
         trackancestry=filter.traj,
         onepar=one.par,
-        weights=resamp_weights,
-        tol=tol
+        weights=resamp_weights
       ),
       error = function (e) {
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    all.fail <- xx$fail
-    loglik[nt] <- xx$loglik
-    eff.sample.size[nt] <- xx$ess
+    #all.fail <- xx$fail
+    #loglik[nt] <- xx$loglik
+    #eff.sample.size[nt] <- xx$ess
 
     x <- xx$states
     params <- xx$params
 
-    if (pred.mean)
-      pred.m[,nt] <- xx$pm
-    if (pred.var)
-      pred.v[,nt] <- xx$pv
-    if (filter.mean)
-      filt.m[,nt] <- xx$fm
-    if (filter.traj)
-      pedigree[[nt]] <- xx$ancestry
+    # if (pred.mean)
+    #   pred.m[,nt] <- xx$pm
+    # if (pred.var)
+    #   pred.v[,nt] <- xx$pv
+    # if (filter.mean)
+    #   filt.m[,nt] <- xx$fm
+    # if (filter.traj)
+    #   pedigree[[nt]] <- xx$ancestry
 
-    if (all.fail) { ## all particles are lost
-      nfail <- nfail+1
-      if (verbose)
-        message("filtering failure at time t = ",times[nt+1])
-      if (nfail>max.fail)
-        stop(ep,"too many filtering failures",call.=FALSE)
-    }
+    # if (all.fail) { ## all particles are lost
+    #   nfail <- nfail+1
+    #   if (verbose)
+    #     message("filtering failure at time t = ",times[nt+1])
+    #   if (nfail>max.fail)
+    #     stop(ep,"too many filtering failures",call.=FALSE)
+    # }
 
-    if (save.states | filter.traj) {
-      xparticles[[nt]] <- x
-      dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),c("variable","rep"))
-    }
-
-    if (save.params) {
-      pparticles[[nt]] <- params
-      dimnames(pparticles[[nt]]) <- setNames(dimnames(pparticles[[nt]]),c("variable","rep"))
-    }
+    # if (save.states | filter.traj) {
+    #   xparticles[[nt]] <- x
+    #   dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),c("variable","rep"))
+    # }
+    #
+    # if (save.params) {
+    #   pparticles[[nt]] <- params
+    #   dimnames(pparticles[[nt]]) <- setNames(dimnames(pparticles[[nt]]),c("variable","rep"))
+    # }
 
     if (verbose && (nt%%5==0))
       cat("iif timestep",nt,"of",ntimes,"finished\n")
-
     #preweighted[[nt]] <- X
     #resampling_weights[[nt]] <- apply(weights[,,1], 2, function(x) prod(x)) # since iif_computations changes resamp_weights
     #postweighted[[nt]] <- x
@@ -359,18 +361,18 @@ iif.internal <- function (object, params, Np,
   } ## end of main loop
 
 
-  if (!save.states) xparticles <- list()
+  #if (!save.states) xparticles <- list()
 
-  if (nfail>0)
-    warning(
-      ep,nfail,
-      ngettext(
-        nfail,
-        msg1=" filtering failure occurred.",
-        msg2=" filtering failures occurred."
-      ),
-      call.=FALSE
-    )
+  # if (nfail>0)
+  #   warning(
+  #     ep,nfail,
+  #     ngettext(
+  #       nfail,
+  #       msg1=" filtering failure occurred.",
+  #       msg2=" filtering failures occurred."
+  #     ),
+  #     call.=FALSE
+  #   )
 
   # compute locally combined pred. weights for each time and unit
   loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,ntimes))
@@ -420,19 +422,19 @@ iif.internal <- function (object, params, Np,
     object,
     loc.comb.pred.weights = loc.comb.pred.weights,
     cond.densities = cond.densities,
-    pred.mean=pred.m,
-    pred.var=pred.v,
-    filter.mean=filt.m,
-    filter.traj=filt.t,
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    eff.sample.size=eff.sample.size,
-    cond.loglik=loglik,
-    saved.states=xparticles,
-    saved.params=pparticles,
+    #pred.mean=pred.m,
+    #pred.var=pred.v,
+    #filter.mean=filt.m,
+    #filter.traj=filt.t,
+    #paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    #eff.sample.size=eff.sample.size,
+    #cond.loglik=loglik,
+    #saved.states=xparticles,
+    #saved.params=pparticles,
     Np=as.integer(Np),
-    tol=tol,
-    nfail=as.integer(nfail),
-    loglik=sum(loglik)
+    tol=tol
+    #nfail=as.integer(nfail),
+    #loglik=sum(loglik)
   )
 
 
@@ -442,7 +444,7 @@ setMethod(
   "iif",
   signature=signature(object="spatpomp"),
   function (object, params, Np, nbhd, islands,
-           tol = (1e-17)^(length(unit(object)) + 10),
+           tol = (1e-18)^17,
            max.fail = Inf,
            pred.mean = FALSE,
            pred.var = FALSE,
@@ -580,18 +582,18 @@ setMethod(
       "iifd.pomp",
       object,
       loc.comb.filter.weights = loc.comb.filter.weights,
-      pred.mean=lapply(mult_island_output, "slot", "pred.mean"),
-      pred.var=lapply(mult_island_output, "slot", "pred.var"),
-      filter.mean=lapply(mult_island_output, "slot", "filter.mean"),
-      filter.traj=lapply(mult_island_output, "slot", "filter.traj"),
-      paramMatrix=array(data=numeric(0),dim=c(0,0)),
-      eff.sample.size=lapply(mult_island_output, "slot", "eff.sample.size"),
+      #pred.mean=lapply(mult_island_output, "slot", "pred.mean"),
+      #pred.var=lapply(mult_island_output, "slot", "pred.var"),
+      #filter.mean=lapply(mult_island_output, "slot", "filter.mean"),
+      #filter.traj=lapply(mult_island_output, "slot", "filter.traj"),
+      #paramMatrix=array(data=numeric(0),dim=c(0,0)),
+      #eff.sample.size=lapply(mult_island_output, "slot", "eff.sample.size"),
       cond.loglik=cond.loglik,
-      saved.states=lapply(mult_island_output, "slot", "saved.states"),
-      saved.params=lapply(mult_island_output, "slot", "saved.params"),
+      #saved.states=lapply(mult_island_output, "slot", "saved.states"),
+      #saved.params=lapply(mult_island_output, "slot", "saved.params"),
       Np=as.integer(Np),
       tol=tol,
-      nfail=lapply(mult_island_output, "slot", "nfail"),
+      #nfail=lapply(mult_island_output, "slot", "nfail"),
       loglik=sum(cond.loglik)
      )
   }
