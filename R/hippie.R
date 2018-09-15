@@ -29,12 +29,12 @@ setClass(
     #paramMatrix="array",
     island.param="numeric",
     indices="vector",
-    eff.sample.size="numeric",
+    #eff.sample.size="numeric",
     #cond.loglik="numeric",
     Np="integer",
-    tol="numeric",
-    nfail="integer",
-    loglik="numeric"
+    tol="numeric"
+    #nfail="integer",
+    #loglik="numeric"
   ),
   prototype=prototype(
     #loc.comb.pred.weights = numeric(0),
@@ -43,20 +43,20 @@ setClass(
     #paramMatrix=array(data=numeric(0),dim=c(0,0)),
     island.param=numeric(0),
     indices=integer(0),
-    eff.sample.size=numeric(0),
+    #eff.sample.size=numeric(0),
     #cond.loglik=numeric(0),
     saved.states=list(),
     saved.params=list(),
     Np=as.integer(NA),
-    tol=as.double(NA),
-    nfail=as.integer(NA),
-    loglik=as.double(NA)
+    tol=as.double(NA)
+    #nfail=as.integer(NA),
+    #loglik=as.double(NA)
   )
 )
 
 hippie_pfilter.internal <- function (object, params, Np, nbhd,
                           hippieiter, cooling.fn, rw.sd,
-                          tol = 1e-17, max.fail = Inf,
+                          tol = (1e-18)^17, max.fail = Inf,
                           transform, .indices = integer(0), verbose,
                           .getnativesymbolinfo = TRUE) {
   ep <- paste0("in ",sQuote("hippie_pfilter.internal"),": ")
@@ -134,16 +134,19 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       }
     )
 
-    if (!all(is.finite(weights))) {
-      first <- which(!is.finite(weights))[1L]
-      datvals <- object@data[,nt]
-      weight <- weights[first]
-      states <- X[,first,1L]
-      params <- if (transform) tparams[,first] else params[,first]
-      msg <- pomp:::nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
-      stop(ep,msg,call.=FALSE)
-    }
+    # if (!all(is.finite(weights))) {
+    #   first <- which(!is.finite(weights))[1L]
+    #   datvals <- object@data[,nt]
+    #   weight <- weights[first]
+    #   states <- X[,first,1L]
+    #   params <- if (transform) tparams[,first] else params[,first]
+    #   msg <- pomp:::nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
+    #   stop(ep,msg,call.=FALSE)
+    # }
+    weights[is.na(weights)] <- tol
     resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
+    # if any particle's resampling weight is zero divide out it's weight vector by the smallest component
+    if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
     log.island.weight <- log.island.weight + log((1/Np[1L])*sum(resamp_weights))
     gnsi <- FALSE
     #cond.densities[,,nt] <- weights[,,1,drop=FALSE]
@@ -161,10 +164,17 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
     # }
     ## compute effective sample size, log-likelihood
     ## also do resampling if filtering has not failed
+    # zero.weight.indices <- which(resamp_weights == 0)
+    # if(length(zero.weight.indices) > 0 && length(zero.weight.indices) < Np[1L]){
+    #   for(i in zero.weight.indices){
+    #     max.ind <- which.max(weights[,i])
+    #     resamp_weights[i] <- weights[,i]/weights[,i][max.ind]
+    #   }
+    # }
 
     xx <- tryCatch(
       .Call(
-        iif_computations,
+        hippie_computations,
         x=X,
         params=params,
         Np=Np[nt+1],
@@ -174,17 +184,17 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
         filtmean=FALSE,
         trackancestry=do_ta,
         onepar=FALSE,
-        weights=resamp_weights,
-        tol=tol
+        weights=resamp_weights
+        #tol=tol
       ),
       error = function (e) {
         stop(ep,"hippie pfilter computations error: ",conditionMessage(e),call.=FALSE)
       }
     )
 
-    all.fail <- xx$fail
-    loglik[nt] <- xx$loglik
-    eff.sample.size[nt] <- xx$ess
+    # all.fail <- xx$fail
+    # loglik[nt] <- xx$loglik
+    # eff.sample.size[nt] <- xx$ess
     if (do_ta) {
       .indices <- .indices[xx$ancestry]
     }
@@ -202,29 +212,29 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       }
     }
 
-    if (all.fail) { ## all particles are lost
-      nfail <- nfail+1
-      if (verbose)
-        message("filtering failure at time t = ",times[nt+1])
-      if (nfail>max.fail)
-        stop(ep,"too many filtering failures",call.=FALSE)
-    }
+    # if (all.fail) { ## all particles are lost
+    #   nfail <- nfail+1
+    #   if (verbose)
+    #     message("filtering failure at time t = ",times[nt+1])
+    #   if (nfail>max.fail)
+    #     stop(ep,"too many filtering failures",call.=FALSE)
+    # }
 
     if (verbose && (nt%%5==0))
       cat("hippie pfilter timestep",nt,"of",ntimes,"finished\n")
   }
 
-  if (nfail>0) {
-    warning(
-      ep,nfail,
-      ngettext(
-        nfail,
-        msg1=" filtering failure occurred.",
-        msg2=" filtering failures occurred."
-      ),
-      call.=FALSE
-    )
-  }
+  # if (nfail>0) {
+  #   warning(
+  #     ep,nfail,
+  #     ngettext(
+  #       nfail,
+  #       msg1=" filtering failure occurred.",
+  #       msg2=" filtering failures occurred."
+  #     ),
+  #     call.=FALSE
+  #   )
+  # }
   # loc.comb.pred.weights = 0
   # for (nt in seq_len(ntimes)){
   #   for (unit in seq_len(nunits)){
@@ -279,12 +289,12 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
     log.island.weight=log.island.weight,
     #paramMatrix=params,
     island.param=params[,1],
-    eff.sample.size=eff.sample.size,
+    #eff.sample.size=eff.sample.size,
     #cond.loglik=loglik,
     Np=as.integer(Np),
     tol=tol,
-    nfail=as.integer(nfail),
-    loglik=sum(loglik),
+    #nfail=as.integer(nfail),
+    #loglik=sum(loglik),
     indices=.indices
   )
 }
@@ -293,7 +303,7 @@ setMethod( ## need to convert this to spatpomp
   "hippie_pfilter",
   signature=signature(object="pomp"),
   function (object, params, Np, rw.sd, cooling.type, cooling.fraction.50, transform=FALSE, .indices=integer(0), .ndone=0, .paramMatrix, start,
-            tol = 1e-17,
+            tol = (1e-18)^17,
             max.fail = Inf,
             verbose = getOption("verbose"),
             ...) {
@@ -399,7 +409,7 @@ setMethod( ## need to convert this to spatpomp
 
 hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw.sd, transform = FALSE,
                            cooling.type, cooling.fraction.50,
-                           tol = 1e-17, max.fail = Inf,
+                           tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
                            .indices = vector(mode="list", length = islands),
                            .paramMatrix = NULL,
@@ -514,7 +524,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     for(i in 1:islands){
       param.swarm[,i] <- mult.island.output[[i]]@island.param
       island.param.list[[i]] <- mult.island.output[[i]]@island.param
-      fails <- fails + mult.island.output[[i]]@nfail
+      # fails <- fails + mult.island.output[[i]]@nfail
       .indices[[i]] <- mult.island.output[[i]]@indices
       weights[i] <- mult.island.output[[i]]@log.island.weight
     }
@@ -522,7 +532,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     coef(object, transform = transform) <- apply(param.swarm,1,mean)
 
     conv.rec[n+1,-c(1,2)] <- coef(object)
-    conv.rec[n,c(1,2)] <- c(0,fails)
+    conv.rec[n,c(1,2)] <- c(0,0)
 
     # top p quantile weights
     top_indices <- which(weights > quantile(weights, p = 1-prop))
@@ -576,7 +586,7 @@ setMethod(
                          nbhd, rw.sd, transform = FALSE,
                          cooling.type = c("hyperbolic", "geometric"),
                          cooling.fraction.50,
-                         tol = (1e-17)^(length(unit(object)) + 10), max.fail = Inf,
+                         tol = (1e-18)^17, max.fail = Inf,
                          verbose = getOption("verbose"),...) {
 
     ep <- paste0("in ",sQuote("hippie"),": ")

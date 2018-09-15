@@ -44,6 +44,9 @@ extern SEXP do_unit_dmeasure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP units
 //iif.c
 extern SEXP iif_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights, SEXP tol);
 
+//hippie.c
+extern SEXP hippie_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights);
+
 //userdata.c
 //extern void set_pomp_userdata(SEXP userdata);
 //extern void unset_pomp_userdata(void);
