@@ -291,7 +291,7 @@ iif.internal <- function (object, params, Np,
     #   stop(ep,msg,call.=FALSE)
     # }
 
-    weights[is.na(weights)] <- tol
+    weights[weights == 0] <- tol
     cond.densities[,,nt] <- weights[,,1]
     resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
     # if any particle's resampling weight is zero divide out it's weight vector by the smallest component
@@ -373,7 +373,6 @@ iif.internal <- function (object, params, Np,
   #     ),
   #     call.=FALSE
   #   )
-
   # compute locally combined pred. weights for each time and unit
   loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,ntimes))
   for (nt in seq_len(ntimes)){
@@ -444,7 +443,7 @@ setMethod(
   "iif",
   signature=signature(object="spatpomp"),
   function (object, params, Np, nbhd, islands,
-           tol = (1e-18)^17,
+           tol = (1e-18)^9,
            max.fail = Inf,
            pred.mean = FALSE,
            pred.var = FALSE,
@@ -495,7 +494,7 @@ setMethod(
      save.params=save.params,
      verbose=verbose,
      ...
-   )
+     )
    ntimes = length(time(object))
    nunits = length(unit(object))
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
@@ -526,7 +525,7 @@ setMethod(
     }
    }
    # end multi-threaded code
-
+   #
    # compute conditional log-likelihood estimate
    cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
    for(i in seq_len(nunits)){
