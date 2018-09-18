@@ -475,8 +475,8 @@ setMethod(
    ## begin multi-thread code
    require(doParallel)
    require(parallel)
-   cores <- parallel:::detectCores() - 1
-   registerDoParallel(cores)
+   # cores <- parallel:::detectCores() - 1
+   registerDoParallel(cores = NULL)
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
    mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  iif.internal(
