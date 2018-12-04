@@ -149,28 +149,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
     if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
     log.island.weight <- log.island.weight + log((1/Np[1L])*sum(resamp_weights))
     gnsi <- FALSE
-    #cond.densities[,,nt] <- weights[,,1,drop=FALSE]
-    #resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
-
-    ## compute weighted mean at last timestep. KIDUS COMMENTED THIS OUT BC I THINK WE NEED TO DO THIS AFTER RESAMPLING
-    # if (nt == ntimes) {
-    #   if (any(resamp_weights>0)) {
-    #     coef(object,transform=transform) <- apply(params,1L,weighted.mean,w=resamp_weights)
-    #   } else {
-    #     warning(ep,"filtering failure at last filter iteration, using unweighted mean for ",
-    #             sQuote("coef"),call.=FALSE)
-    #     coef(object,transform=transform) <- apply(params,1L,mean)
-    #   }
-    # }
-    ## compute effective sample size, log-likelihood
-    ## also do resampling if filtering has not failed
-    # zero.weight.indices <- which(resamp_weights == 0)
-    # if(length(zero.weight.indices) > 0 && length(zero.weight.indices) < Np[1L]){
-    #   for(i in zero.weight.indices){
-    #     max.ind <- which.max(weights[,i])
-    #     resamp_weights[i] <- weights[,i]/weights[,i][max.ind]
-    #   }
-    # }
 
     xx <- tryCatch(
       .Call(
@@ -192,9 +170,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       }
     )
 
-    # all.fail <- xx$fail
-    # loglik[nt] <- xx$loglik
-    # eff.sample.size[nt] <- xx$ess
     if (do_ta) {
       .indices <- .indices[xx$ancestry]
     }
@@ -224,77 +199,14 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       cat("hippie pfilter timestep",nt,"of",ntimes,"finished\n")
   }
 
-  # if (nfail>0) {
-  #   warning(
-  #     ep,nfail,
-  #     ngettext(
-  #       nfail,
-  #       msg1=" filtering failure occurred.",
-  #       msg2=" filtering failures occurred."
-  #     ),
-  #     call.=FALSE
-  #   )
-  # }
-  # loc.comb.pred.weights = 0
-  # for (nt in seq_len(ntimes)){
-  #   for (unit in seq_len(nunits)){
-  #     sum_log_over_times=0
-  #     #prod_over_times = 1
-  #     full_nbhd = nbhd(object, nt, unit)
-  #     if((nt != ntimes) && (unit != nunits)) next
-  #     for (prev_t in 1:nt){
-  #       if(prev_t == nt){
-  #         if(unit == 1) next
-  #         time_sum = 0
-  #         for(pp in seq_len(Np[1])){
-  #           part_prod = 1
-  #           for (prev_u in 1:unit-1){
-  #             if (prev_u == 0) next
-  #             if (full_nbhd[prev_u, prev_t]){
-  #               part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
-  #             }
-  #           }
-  #           time_sum = time_sum + part_prod
-  #         }
-  #         time_avg = time_sum/Np[1]
-  #         #prod_over_times = prod_over_times * time_avg
-  #         sum_log_over_times = sum_log_over_times + log(time_avg)
-  #       }
-  #       else{
-  #         time_sum = 0
-  #         for(pp in seq_len(Np[1])){
-  #           part_prod = 1
-  #           for (prev_u in 1:nunits){
-  #             if (full_nbhd[prev_u, prev_t]){
-  #               part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
-  #             }
-  #           }
-  #           time_sum = time_sum + part_prod
-  #         }
-  #         time_avg = time_sum/Np[1]
-  #         #prod_over_times = prod_over_times * time_avg
-  #         sum_log_over_times = sum_log_over_times + log(time_avg)
-  #       }
-  #     }
-  #     #loc.comb.pred.weights[unit,nt] = prod_over_times
-  #     loc.comb.pred.weights = sum_log_over_times
-  #   }
-  # }
 
   new(
     "hippie.as.pfilterd.pomp",
     object,
-    #loc.comb.pred.weights=loc.comb.pred.weights,
-    #cond.densities=cond.densities,
     log.island.weight=log.island.weight,
-    #paramMatrix=params,
     island.param=params[,1],
-    #eff.sample.size=eff.sample.size,
-    #cond.loglik=loglik,
     Np=as.integer(Np),
     tol=tol,
-    #nfail=as.integer(nfail),
-    #loglik=sum(loglik),
     indices=.indices
   )
 }
