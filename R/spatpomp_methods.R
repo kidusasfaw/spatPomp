@@ -1,7 +1,19 @@
 #' @include spatpomp_class.R
 #'
 ## this file contains some basic methods definitions
-
+setAs(
+  from="pomp",
+  to="spatpomp",
+  def = function (from) {
+    new("spatpomp",from,
+        unit_dmeasure=from@dmeasure,
+        units="unit",
+        unit_index="unit",
+        unit_statenames=character(0),
+        global_statenames=character(0),
+        obstypes = rownames(from@data))
+  }
+)
 ## extract the vector of units
 setMethod(
   "unit",
