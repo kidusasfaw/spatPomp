@@ -1,16 +1,16 @@
-Package: spatpomp3
+Package: spatpomp
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Methods for Spatiotemporal POMPs
 Version: 0.1.1
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Author: Kidus Asfaw, Aaron King, Ed Ionides
+Maintainer: kasfaw@umich.edu
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: pomp (>= 1.18.6.2)
-LinkingTo: pomp
+Depends: pomp2 (>= 2.0)
+LinkingTo: pomp2
 Suggests: scales, stringr, dplyr, tidyr, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate: 

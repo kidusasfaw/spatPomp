@@ -3,8 +3,8 @@
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, initializer, cdir,cfile, shlib.args, userdata, PACKAGE,
-  globals, statenames, paramnames, obstypes, zeronames, covarnames,
-  fromEstimationScale, toEstimationScale, verbose = getOption("verbose",FALSE)) {
+  globals, statenames, paramnames, obstypes, accumvars, covarnames,
+  partrans, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatpomp"),": ")
 
@@ -109,9 +109,17 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      # construct call of covariate_table function
+      call_to_covar = list()
+      call_to_covar[[1]] <- as.symbol("covariate_table")
+      for(col in names(pomp_covar)){
+        call_to_covar$col <- pomp_covar[,col]
+      }
+      call_to_covar$'times'=tpos_name
     } else {
-      pomp_covar <- NULL
-      tcovar <- NULL
+      # pomp_covar <- NULL
+      # tcovar <- NULL
+      call_to_covar <- NULL
     }
 
     # get all combinations of unit statenames and units. Concatenate global statenames
@@ -127,26 +135,28 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # create the pomp object
     po <- pomp(data = pomp_data,
-      rprocess = rprocess,
-      rmeasure = rmeasure,
-      dprocess = dprocess,
-      dmeasure = dmeasure,
-      initializer = initializer,
-      times=times,
-      statenames=pomp_statenames,
-      zeronames=zeronames,
-      covar = pomp_covar,
-      tcovar = tcovar,
-      paramnames = paramnames,
-      globals = globals,
-      cdir = cdir,
-      cfile = cfile,
-      shlib.args = shlib.args,
-      toEstimationScale = toEstimationScale,
-      fromEstimationScale = fromEstimationScale,
-      t0 = t0,
-      ...,
-      verbose=verbose
+                times=times,
+                t0 = t0,
+                rprocess = rprocess,
+                rmeasure = rmeasure,
+                dprocess = dprocess,
+                dmeasure = dmeasure,
+                initializer = initializer,
+                statenames=pomp_statenames,
+                accumvars=accumvars,
+                covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
+                # tcovar = tcovar,
+                paramnames = paramnames,
+                globals = globals,
+                cdir = cdir,
+                cfile = cfile,
+                shlib.args = shlib.args,
+                #toEstimationScale = toEstimationScale,
+                #fromEstimationScale = fromEstimationScale,
+                partrans = partrans,
+
+                ...,
+                verbose=verbose
     )
     ## preliminary error checking
     if (missing(cdir)) cdir <- NULL
@@ -173,10 +183,10 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     ## defaults for names of states, parameters, and accumulator variables
     statenames <- pomp_statenames
     if (missing(paramnames)) paramnames <- character(0)
-    if (missing(zeronames)) zeronames <- character(0)
+    if (missing(accumvars)) accumvars <- character(0)
     statenames <- as.character(statenames)
     paramnames <- as.character(paramnames)
-    zeronames <- as.character(zeronames)
+    accumvars <- as.character(accumvars)
 
     ## check for duplicate names
     if (anyDuplicated(statenames)) {
@@ -185,8 +195,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     if (anyDuplicated(paramnames)) {
       stop("all ",sQuote("paramnames")," must be unique", call.=FALSE)
     }
-    if (anyDuplicated(zeronames)) {
-      stop("all ",sQuote("zeronames")," must be unique", call.=FALSE)
+    if (anyDuplicated(accumvars)) {
+      stop("all ",sQuote("accumvars")," must be unique", call.=FALSE)
     }
 
     # arrange covariates
@@ -203,9 +213,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
-        Cname="__spatpomp3_unit_dmeasure",
+        Cname="__spatpomp_unit_dmeasure",
         proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __spatpomp3_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        header="\nvoid __spatpomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -232,7 +242,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       )
     )
 
-    hitches <- pomp::hitch(
+    hitches <- pomp2::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
       obsnames = paste0(obstypes,"1"),
