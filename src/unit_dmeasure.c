@@ -6,7 +6,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-#include "spatpomp3_defines.h"
+#include "spatpomp_defines.h"
 #include "pomp.h"
 
 SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi)

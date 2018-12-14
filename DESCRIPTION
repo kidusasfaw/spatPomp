@@ -2,8 +2,9 @@ Package: spatpomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
 Version: 0.1.1
-Author: Kidus Asfaw, Aaron King, Ed Ionides
-Maintainer: kasfaw@umich.edu
+Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
+             person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
+             person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?

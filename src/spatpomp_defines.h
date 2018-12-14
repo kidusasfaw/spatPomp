@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
-#ifndef _SPATPOMP3_DEFINES_H_
-#define _SPATPOMP3_DEFINES_H_
+#ifndef _SPATPOMP_DEFINES_H_
+#define _SPATPOMP_DEFINES_H_
 
 #include <R.h>
 #include <Rmath.h>

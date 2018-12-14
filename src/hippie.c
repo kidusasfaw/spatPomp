@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-#include "spatpomp3_defines.h"
+#include "spatpomp_defines.h"
 #include <Rdefines.h>
 
 // examines resampling weights for filtering failure
