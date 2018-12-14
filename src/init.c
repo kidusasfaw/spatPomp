@@ -8,7 +8,7 @@ static const R_CallMethodDef callMethods[] = {
   {NULL, NULL, 0}
 };
 
-void R_init_spatpomp3 (DllInfo *info) {
+void R_init_spatpomp (DllInfo *info) {
   // Register routines
 
   lsi = (load_stack_incr_t *) R_GetCCallable("pomp2", "load_stack_incr");
