@@ -88,14 +88,14 @@ iif.internal <- function (object, params, Np,
                               verbose = FALSE,
                               save.states = FALSE,
                               save.params = FALSE,
-                              .getnativesymbolinfo = TRUE) {
+                              .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("iif"),": ")
   if(missing(nbhd))
     stop(ep,sQuote("nbhd")," must be specified for the spatpomp object",call.=FALSE)
   ep <- paste0("in ",sQuote("iif"),": ")
   object <- as(object,"spatpomp")
   pompLoad(object,verbose=verbose)
-  gnsi.rproc <- gnsi.dmeas <- as.logical(.getnativesymbolinfo)
+  gnsi <- as.logical(.gnsi)
   pred.mean <- as.logical(pred.mean)
   pred.var <- as.logical(pred.var)
   filter.mean <- as.logical(filter.mean)
@@ -157,7 +157,8 @@ iif.internal <- function (object, params, Np,
     stop(ep,sQuote("params")," must have rownames",call.=FALSE)
 
   ## returns an nvars by nsim matrix
-  init.x <- init.state(object,params=params,nsim=Np[1L])
+  #init.x <- init.state(object,params=params,nsim=Np[1L])
+  init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
   statenames <- rownames(init.x)
   nvars <- nrow(init.x)
   x <- init.x
@@ -245,14 +246,13 @@ iif.internal <- function (object, params, Np,
         times=times[c(nt,nt+1)],
         params=params,
         offset=1,
-        .getnativesymbolinfo=gnsi.rproc
+        .gnsi=gnsi.rproc
       ),
       error = function (e) {
         stop(ep,"process simulation error: ",
              conditionMessage(e),call.=FALSE)
       }
     )
-    gnsi.rproc <- FALSE
 
     if (pred.var) { ## check for nonfinite state variables and parameters
       problem.indices <- unique(which(!is.finite(X),arr.ind=TRUE)[,1L])
@@ -273,23 +273,13 @@ iif.internal <- function (object, params, Np,
         times=times[nt+1],
         params=params,
         log=FALSE,
-        .getnativesymbolinfo=gnsi.dmeas
+        .gnsi=gnsi
       ),
       error = function (e) {
         stop(ep,"error in calculation of weights: ",
              conditionMessage(e),call.=FALSE)
       }
     )
-
-    # if (!all(is.finite(weights))) {
-    #   first <- which(!is.finite(weights))[1L]
-    #   datvals <- object@data[,nt]
-    #   weight <- weights[first]
-    #   states <- X[,first,1L]
-    #   params <- if (one.par) params[,1L] else params[,first]
-    #   msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
-    #   stop(ep,msg,call.=FALSE)
-    # }
 
     weights[weights == 0] <- tol
     cond.densities[,,nt] <- weights[,,1]
@@ -597,17 +587,4 @@ setMethod(
      )
   }
 )
-
-
-nonfinite_dmeasure_error <- function (time, lik, datvals, states, params) {
-  showvals <- c(time=time,lik=lik,datvals,states,params)
-  m1 <- formatC(names(showvals),preserve.width="common")
-  m2 <- formatC(showvals,digits=6,width=12,format="g",
-                preserve.width="common")
-  paste0(
-    sQuote("dmeasure")," returns non-finite value.\n",
-    "likelihood, data, states, and parameters are:\n",
-    paste0(m1,": ",m2,collapse="\n")
-  )
-}
 

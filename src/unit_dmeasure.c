@@ -146,7 +146,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   PROTECT(Onames = GET_ROWNAMES(GET_DIMNAMES(y))); nprotect++;
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = get_covariate_names(GET_SLOT(object,install("covar")))); nprotect++;
+  PROTECT(Cnames = (*gcn)(GET_SLOT(object,install("covar")))); nprotect++;
 
   // set up the covariate table
   covariate_table = (*mct)(GET_SLOT(object,install("covar")),&ncovars);
@@ -166,42 +166,42 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   switch (mode) {
 
   case Rfun: {
-    double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
-    double *ft = REAL(F);
-    int j, k;
+    //double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
+    //double *ft = REAL(F);
+    //int j, k;
 
     // build argument list
-    PROTECT(args = dmeas_args(args,Onames,Snames,Pnames,Cnames,log)); nprotect++;
+    //PROTECT(args = dmeas_args(args,Onames,Snames,Pnames,Cnames,log)); nprotect++;
 
-    for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
+    //for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
 
-      R_CheckUserInterrupt();	// check for user interrupt
+      //R_CheckUserInterrupt();	// check for user interrupt
 
-      table_lookup(&covariate_table,*time,cov); // interpolate the covariates
+      //table_lookup(&covariate_table,*time,cov); // interpolate the covariates
 
-      for (j = 0; j < nreps; j++, ft++) { // loop over replicates
+      //for (j = 0; j < nreps; j++, ft++) { // loop over replicates
 
         // evaluate the call
-        PROTECT(
-          ans = eval_call(
-            fn,args,
-            time,
-            ys,nobs,
-            xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-            ps+npars*(j%nrepsp),npars,
-            cov,ncovars
-          )
-        );
+        //PROTECT(
+          //ans = eval_call(
+            //fn,args,
+            //time,
+            //ys,nobs,
+            //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
+            //ps+npars*(j%nrepsp),npars,
+            //cov,ncovars
+          //)
+        //);
 
-        if (k == 0 && j == 0 && LENGTH(ans) != 1)
-          errorcall(R_NilValue,"user 'dmeasure' returns a vector of length %d when it should return a scalar.",LENGTH(ans));
+        //if (k == 0 && j == 0 && LENGTH(ans) != 1)
+          //errorcall(R_NilValue,"user 'dmeasure' returns a vector of length %d when it should return a scalar.",LENGTH(ans));
 
-        *ft = *(REAL(AS_NUMERIC(ans)));
+        //*ft = *(REAL(AS_NUMERIC(ans)));
 
-        UNPROTECT(1);
+        //UNPROTECT(1);
 
-      }
-    }
+      //}
+    //}
   }
 
     break;

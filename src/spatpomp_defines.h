@@ -16,7 +16,8 @@ typedef void spatpomp_unit_measure_model_density (double *lik, const double *y, 
 load_stack_incr_t *lsi;
 load_stack_decr_t *lsd;
 pomp_fun_handler_t *pfh;
-lookup_in_table_t *lit;
+get_covariate_names_t *gcn;
+//lookup_in_table_t *lit;
 table_lookup_t *tl;
 make_covariate_table_t *mct;
 set_pomp_userdata_t *spu;

@@ -22,6 +22,8 @@ void R_init_spatpomp (DllInfo *info) {
   pfh = (pomp_fun_handler_t *) R_GetCCallable("pomp2", "pomp_fun_handler");
   //sp_pomp_fun_handler = (psp_pomp_fun_handler)R_GetCCallable("pomp", "pomp_fun_handler");
 
+  gcn = (get_covariate_names_t *) R_GetCCallable("pomp2", "get_covariate_names");
+
   //DO I NEED THIS LINE BELOW??
   //lit = (lookup_in_table_t *) R_GetCCallable("pomp2", "lookup_in_table");
   //sp_lookup_in_table = (psp_lookup_in_table)R_GetCCallable("pomp", "lookup_in_table");

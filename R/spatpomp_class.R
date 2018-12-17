@@ -8,9 +8,9 @@ setClass(
     unit_statenames = 'character',
     global_statenames = 'character',
     obstypes = 'character',
-    unit_dmeasure = 'pomp.fun'
+    unit_dmeasure = 'pomp_fun'
   ),
   prototype=prototype(
-    unit_dmeasure = pomp:::pomp.fun(slotname="unit_dmeasure")
+    unit_dmeasure = pomp2:::pomp_fun(slotname="unit_dmeasure")
   )
 )

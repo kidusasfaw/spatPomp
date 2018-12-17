@@ -110,16 +110,16 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
       # construct call of covariate_table function
-      call_to_covar = list()
-      call_to_covar[[1]] <- as.symbol("covariate_table")
-      for(col in names(pomp_covar)){
-        call_to_covar$col <- pomp_covar[,col]
-      }
-      call_to_covar$'times'=tpos_name
+      # call_to_covar = list()
+      # call_to_covar[[1]] <- as.symbol("covariate_table")
+      # for(col in names(pomp_covar)){
+      #   call_to_covar$col <- pomp_covar[,col]
+      # }
+      # call_to_covar$'times'=tpos_name
     } else {
-      # pomp_covar <- NULL
-      # tcovar <- NULL
-      call_to_covar <- NULL
+      pomp_covar <- NULL
+      tcovar <- NULL
+      # call_to_covar <- NULL
     }
 
     # get all combinations of unit statenames and units. Concatenate global statenames
@@ -144,8 +144,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                 initializer = initializer,
                 statenames=pomp_statenames,
                 accumvars=accumvars,
-                covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
-                # tcovar = tcovar,
+                #covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
+                covar = covariate_table(pomp_covar),
+                tcovar = tcovar,
                 paramnames = paramnames,
                 globals = globals,
                 cdir = cdir,

@@ -1,6 +1,6 @@
 ## HIPPIE algorithm functions
 
-rw.sd <- pomp:::safecall
+rw.sd <- pomp2:::safecall
 
 
 ## define the hippied.pomp class
@@ -90,15 +90,16 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
 
     ## perturb parameters
     pmag <- cooling.fn(nt,hippieiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp2')
 
     if (transform)
-      tparams <- pomp::partrans(object,params,dir="fromEstimationScale",
-                          .getnativesymbolinfo=gnsi)
+      tparams <- pomp2::partrans(object,params,dir="fromEst",
+                          .gnsi=gnsi)
 
     if (nt == 1L) {
       ## get initial states
-      x <- init.state(object,nsim=Np[1L],params=if (transform) tparams else params)
+      # x <- init.state(object,nsim=Np[1L],params=if (transform) tparams else params)
+      x <- rinit(object,params=tparams)
     }
 
     ## advance the state variables according to the process model
@@ -134,15 +135,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       }
     )
 
-    # if (!all(is.finite(weights))) {
-    #   first <- which(!is.finite(weights))[1L]
-    #   datvals <- object@data[,nt]
-    #   weight <- weights[first]
-    #   states <- X[,first,1L]
-    #   params <- if (transform) tparams[,first] else params[,first]
-    #   msg <- pomp:::nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,states,params)
-    #   stop(ep,msg,call.=FALSE)
-    # }
     weights[is.na(weights)] <- tol
     resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
     # if any particle's resampling weight is zero divide out it's weight vector by the smallest component
@@ -187,14 +179,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
       }
     }
 
-    # if (all.fail) { ## all particles are lost
-    #   nfail <- nfail+1
-    #   if (verbose)
-    #     message("filtering failure at time t = ",times[nt+1])
-    #   if (nfail>max.fail)
-    #     stop(ep,"too many filtering failures",call.=FALSE)
-    # }
-
     if (verbose && (nt%%5==0))
       cat("hippie pfilter timestep",nt,"of",ntimes,"finished\n")
   }
@@ -211,111 +195,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
   )
 }
 
-setMethod( ## need to convert this to spatpomp
-  "hippie_pfilter",
-  signature=signature(object="pomp"),
-  function (object, params, Np, rw.sd, cooling.type, cooling.fraction.50, transform=FALSE, .indices=integer(0), .ndone=0, .paramMatrix, start,
-            tol = (1e-18)^17,
-            max.fail = Inf,
-            verbose = getOption("verbose"),
-            ...) {
-  if (missing(params)) params <- coef(object)
-
-  pompLoad(object,verbose=verbose)
-
-  transform <- as.logical(transform)
-  verbose <- as.logical(verbose)
-  if (length(params)==0)
-      stop(ep,sQuote("params")," must be specified",call.=FALSE)
-
-    if (missing(tol))
-      stop(ep,sQuote("tol")," must be specified",call.=FALSE)
-
-    one.par <- FALSE
-    times <- time(object,t0=TRUE)
-    ntimes <- length(times)-1
-
-    if (missing(Np)) {
-      if (is.matrix(params)) {
-        Np <- ncol(params)
-      } else {
-        stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-      }
-    }
-    if (is.function(Np)) {
-      Np <- tryCatch(
-        vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
-        error = function (e) {
-          stop(ep,"if ",sQuote("Np")," is a function, ",
-               "it must return a single positive integer",call.=FALSE)
-        }
-      )
-    }
-    if (length(Np)==1)
-      Np <- rep(Np,times=ntimes+1)
-    else if (length(Np)!=(ntimes+1))
-      stop(ep,sQuote("Np")," must have length 1 or length ",ntimes+1,call.=FALSE)
-    if (any(Np<=0))
-      stop(ep,"number of particles, ",sQuote("Np"),", must always be positive",call.=FALSE)
-    if (!is.numeric(Np))
-      stop(ep,sQuote("Np")," must be a number, a vector of numbers, or a function",call.=FALSE)
-    Np <- as.integer(Np)
-    if (is.matrix(params)) {
-      if (!all(Np==ncol(params)))
-        stop(ep,"when ",sQuote("params")," is provided as a matrix, do not specify ",
-             sQuote("Np"),"!",call.=FALSE)
-    }
-
-    if (NCOL(params)==1) {        # there is only one parameter vector
-      one.par <- TRUE
-      coef(object) <- params     # set params slot to the parameters
-      paramMatrix <- as.matrix(params)
-    }
-
-    paramnames <- rownames(paramMatrix)
-    if (is.null(paramnames))
-      stop(ep,sQuote("paramMatrix")," must have rownames",call.=FALSE)
-
-    cooling.fn <- mif2.cooling(
-      type=cooling.type,
-      fraction=cooling.fraction.50,
-      ntimes=length(time(object))
-    )
-    if(missing(start)) start <- coef(object)
-    if (is.null(.paramMatrix)) {
-      if (.ndone > 0) {               # call is from 'continue'
-        paramMatrix <- object@paramMatrix
-        start <- apply(paramMatrix,1L,mean)
-      } else {                         # initial call
-        paramMatrix <- array(data=start,dim=c(length(start),Np[1L]),
-                             dimnames=list(variable=names(start),rep=NULL))
-      }
-    } else {
-      paramMatrix <- .paramMatrix
-      start <- apply(paramMatrix,1L,mean)
-    }
-
-    if (missing(rw.sd))
-      stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
-    rw.sd <- pomp:::pkern.sd(rw.sd,time=time(object),paramnames=names(start))
-
-    object <- as(object,"pomp")
-
-    hippie_pfilter.internal(
-      object=object,
-      params=paramMatrix,
-      Np=Np,
-      hippieiter=.ndone+1,
-      cooling.fn=cooling.fn,
-      rw.sd=rw.sd,
-      tol=tol,
-      max.fail=max.fail,
-      transform=transform,
-      .indices=.indices,
-      verbose=verbose
-    )
-  }
-)
 
 
 
@@ -343,7 +222,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   if (islands <= 0)
     stop(ep,sQuote("islands")," must be a positive integer",call.=FALSE)
 
-  cooling.fn <- pomp:::mif2.cooling(
+  cooling.fn <- pomp2:::mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -377,7 +256,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
 
     if (transform)
       # paramMatrixList[[i]] <- partrans(object,paramMatrixList[[i]],dir="toEstimationScale", .getnativesymbolinfo=gnsi)
-      island.param.list[[i]] <- partrans(object,island.param.list[[i]],dir="toEstimationScale",.getnativesymbolinfo=gnsi)
+      island.param.list[[i]] <- partrans(object,island.param.list[[i]],dir="toEst",.gnsi=gnsi)
   }
   object <- as(object,"spatpomp")
 
@@ -469,11 +348,9 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   }
 
   # parameter swarm to be outputted
-  #final.param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
-  #for(i in 1:islands) final.param.swarm[,i] <- paramMatrixList[[i]][,1]
   if (transform)
-    param.swarm <- partrans(object,param.swarm,dir="fromEstimationScale",
-                                .getnativesymbolinfo=gnsi)
+    param.swarm <- partrans(object,param.swarm,dir="fromEst",
+                                .gnsi=gnsi)
   #coef(object, transform=transform) <- apply(final.param.swarm,1L,mean) # weighted mean hard because weights unstable.
 
   pompUnload(object,verbose=verbose)
@@ -562,7 +439,7 @@ setMethod(
 
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
-    rw.sd <- pomp:::pkern.sd(rw.sd,time=time(object),paramnames=names(start))
+    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
     cooling.type <- match.arg(cooling.type)
 
@@ -588,22 +465,6 @@ setMethod(
       verbose=verbose,
       ...
     )
-  }
-)
-
-
-setMethod(
-  "hippie",
-  signature=signature(object="pfilterd.pomp"),
-  definition = function (object, Nhippie = 1, Np, tol, ...) {
-
-    if (missing(Np)) Np <- object@Np
-    if (missing(tol)) tol <- object@tol
-
-
-
-    f <- selectMethod("hippie","pomp")
-    f(object=object, Nhippie=Nhippie, Np=Np, tol=tol, ...)
   }
 )
 
