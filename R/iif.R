@@ -246,7 +246,7 @@ iif.internal <- function (object, params, Np,
         times=times[c(nt,nt+1)],
         params=params,
         offset=1,
-        .gnsi=gnsi.rproc
+        .gnsi=gnsi
       ),
       error = function (e) {
         stop(ep,"process simulation error: ",
@@ -565,7 +565,6 @@ setMethod(
   #   # } else {
   #   #   filt.t <- filt.t[,,-1L,drop=FALSE]
   #   # }
-
 
    new(
       "iifd.pomp",

@@ -381,7 +381,7 @@ setMethod(
     ep <- paste0("in ",sQuote("hippie"),": ")
 
     Nhippie <- as.integer(Nhippie)
-
+    print("before coef object")
     if (missing(start)) start <- coef(object)
     if (length(start)==0)
       stop(ep,sQuote("start")," must be specified if ",
@@ -389,9 +389,9 @@ setMethod(
     if (is.null(names(start)))
       stop(ep,sQuote("start")," must be a named vector",
            call.=FALSE)
-
-    ntimes <- length(time(object))
-
+    print("before time object")
+    ntimes <- length(object@times)
+    print("after time object")
     if (missing(Np))
       stop(ep,sQuote("Np")," must be specified",call.=FALSE)
     else if (is.function(Np)) {
@@ -436,11 +436,11 @@ setMethod(
         return(nbhd_matrix)
       }
     }
-
+    print("before perturbation kernel")
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
     rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
-
+    print("after perturbation kernel")
     cooling.type <- match.arg(cooling.type)
 
     cooling.fraction.50 <- as.numeric(cooling.fraction.50)

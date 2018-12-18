@@ -2,7 +2,7 @@
 
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
-  dprocess, dmeasure, initializer, cdir,cfile, shlib.args, userdata, PACKAGE,
+  dprocess, dmeasure, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
 
@@ -110,16 +110,16 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
       # construct call of covariate_table function
-      # call_to_covar = list()
-      # call_to_covar[[1]] <- as.symbol("covariate_table")
-      # for(col in names(pomp_covar)){
-      #   call_to_covar$col <- pomp_covar[,col]
-      # }
-      # call_to_covar$'times'=tpos_name
+      call_to_covar = list()
+      call_to_covar[[1]] <- as.symbol("covariate_table")
+      for(col in names(pomp_covar)){
+        call_to_covar$col <- pomp_covar[,col]
+      }
+      call_to_covar$'times'=tpos_name
     } else {
       pomp_covar <- NULL
       tcovar <- NULL
-      # call_to_covar <- NULL
+      call_to_covar <- NULL
     }
 
     # get all combinations of unit statenames and units. Concatenate global statenames
@@ -141,12 +141,13 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                 rmeasure = rmeasure,
                 dprocess = dprocess,
                 dmeasure = dmeasure,
-                initializer = initializer,
+                rinit = rinit,
                 statenames=pomp_statenames,
                 accumvars=accumvars,
-                #covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
-                covar = covariate_table(pomp_covar),
-                tcovar = tcovar,
+                # covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
+                covar = eval(call_to_covar),
+                # covar = covariate_table(pomp_covar),
+                # tcovar = tcovar,
                 paramnames = paramnames,
                 globals = globals,
                 cdir = cdir,
@@ -199,7 +200,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     if (anyDuplicated(accumvars)) {
       stop("all ",sQuote("accumvars")," must be unique", call.=FALSE)
     }
-
     # arrange covariates
     if (missing(covarnames) || length(covarnames)==0)
       if(!is.null(pomp_covar)) covarnames <- as.character(colnames(pomp_covar[-tpos_cov]))
@@ -242,7 +242,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
         )
       )
     )
-
     hitches <- pomp2::hitch(
       unit_dmeasure=unit_dmeasure,
       templates=ud_template,
@@ -258,8 +257,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       verbose=verbose
     )
 
-    pomp:::solibs(po) <- hitches$lib
-
+    pomp2:::solibs(po) <- hitches$lib
     new("spatpomp",po,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       units=units,
