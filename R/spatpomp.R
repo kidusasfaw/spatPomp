@@ -69,12 +69,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       names(unit_index) <- 1:length(units)
     }
 
-    # make data into unit by var by time
-    # temp_data <- abind::abind(split(data, data[tpos], drop = TRUE), along = 3)
-    # rownames(temp_data) <- temp_data[,upos,1]
-    # dat <- temp_data[,-c(upos,tpos),,drop = FALSE] # unit by var by time
-    # storage.mode(dat) <- "double" # TO DO: do i need to make the time axis 1:length(times) instead of actual times?
-
     # make data into a dataframe that pomp would expect
     tmp <- names(unit_index)
     names(tmp) <- unit_index
