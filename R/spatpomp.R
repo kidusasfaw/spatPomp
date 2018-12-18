@@ -24,8 +24,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
   if (missing(global_statenames)) global_statenames <- character(0)
 
-
-
   if (is.data.frame(data)) {
     ## 'data' is a data frame. find the units position
     if ((is.numeric(units) && (units<1 || units>ncol(data) ||
@@ -84,19 +82,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% arrange(pomp_data[,tpos_name], obsname, ui)
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
-
-
-    # make covariates into unit by var by time (assuming user provides a df with columns time, unit, covariate1, covariate2,...)
-    # if(!missing(covar)){
-    #   upos_cov <- match(upos_name, names(covar))
-    #   tpos_cov <- match(tpos_name, names(covar))
-    #   temp_cov <- abind::abind(split(covar, covar[tpos_cov], drop = TRUE), along = 3)
-    #   rownames(temp_cov) <- temp_cov[,upos_cov,1]
-    #   cov <- temp_cov[,-c(upos_cov,tpos_cov),,drop = FALSE] # unit by var by time
-    #   storage.mode(cov) <- "double"
-    # } else{
-    #   cov <- array(dim = c(0,0,0))
-    # }
 
     # make covariates into a dataframe that pomp would expect
     if(!missing(covar) && !missing(tcovar)){
