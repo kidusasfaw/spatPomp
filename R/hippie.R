@@ -427,7 +427,7 @@ setMethod(
     if(missing(nbhd)){
       nbhd <- function(object, time, unit) {
         nunits = length(unit(object))
-        ntimes = length(time(object))
+        ntimes = length(object@times) #length(time(object))
         nbhd_matrix = array(0, dim = c(nunits, ntimes))
         # B_{d,n} = entire past
         if(time > 1) {
@@ -439,7 +439,8 @@ setMethod(
     print("before perturbation kernel")
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
-    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+    # rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=object@times,paramnames=names(start))
     print("after perturbation kernel")
     cooling.type <- match.arg(cooling.type)
 
