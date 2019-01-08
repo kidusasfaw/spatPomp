@@ -390,7 +390,7 @@ setMethod(
       stop(ep,sQuote("start")," must be a named vector",
            call.=FALSE)
     print("before time object")
-    ntimes <- length(object@times)
+    ntimes <- length(time(object))
     print("after time object")
     if (missing(Np))
       stop(ep,sQuote("Np")," must be specified",call.=FALSE)
@@ -427,7 +427,7 @@ setMethod(
     if(missing(nbhd)){
       nbhd <- function(object, time, unit) {
         nunits = length(unit(object))
-        ntimes = length(object@times) #length(time(object))
+        ntimes = length(time(object)) #length(time(object))
         nbhd_matrix = array(0, dim = c(nunits, ntimes))
         # B_{d,n} = entire past
         if(time > 1) {
@@ -440,7 +440,7 @@ setMethod(
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
     # rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
-    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=object@times,paramnames=names(start))
+    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
     print("after perturbation kernel")
     cooling.type <- match.arg(cooling.type)
 
