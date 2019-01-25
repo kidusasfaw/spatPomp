@@ -69,6 +69,12 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       names(unit_index) <- 1:length(units)
     }
 
+    # make data into unit by var by time
+    # temp_data <- abind::abind(split(data, data[tpos], drop = TRUE), along = 3)
+    # rownames(temp_data) <- temp_data[,upos,1]
+    # dat <- temp_data[,-c(upos,tpos),,drop = FALSE] # unit by var by time
+    # storage.mode(dat) <- "double" # TO DO: do i need to make the time axis 1:length(times) instead of actual times?
+
     # make data into a dataframe that pomp would expect
     tmp <- names(unit_index)
     names(tmp) <- unit_index
@@ -100,6 +106,11 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       tcovar <- NULL
       call_to_covar <- NULL
     }
+    if(is.null(tcovar)){
+      cov.t <- NULL
+    } else {
+      cov.t <- covariate_table(pomp_covar, times = tcovar)
+    }
 
     # get all combinations of unit statenames and units. Concatenate global statenames
     if(!missing(unit_statenames)){
@@ -111,33 +122,26 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     obsnames <- names(pomp_data)[-c(tpos)]
     if(missing(globals)) globals <- Csnippet(paste0("const int nunits = ",length(units),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int nunits = ",length(units),";\n"),globals@text))
-
     # create the pomp object
     po <- pomp(data = pomp_data,
-                times=times,
-                t0 = t0,
-                rprocess = rprocess,
-                rmeasure = rmeasure,
-                dprocess = dprocess,
-                dmeasure = dmeasure,
-                rinit = rinit,
-                statenames=pomp_statenames,
-                accumvars=accumvars,
-                # covar = ifelse(is.null(call_to_covar), NULL, eval(call_to_covar)),
-                covar = eval(call_to_covar),
-                # covar = covariate_table(pomp_covar),
-                # tcovar = tcovar,
-                paramnames = paramnames,
-                globals = globals,
-                cdir = cdir,
-                cfile = cfile,
-                shlib.args = shlib.args,
-                #toEstimationScale = toEstimationScale,
-                #fromEstimationScale = fromEstimationScale,
-                partrans = partrans,
-
-                ...,
-                verbose=verbose
+             times=times,
+             t0 = t0,
+             rprocess = rprocess,
+             rmeasure = rmeasure,
+             dprocess = dprocess,
+             dmeasure = dmeasure,
+             rinit = rinit,
+             statenames=pomp_statenames,
+             accumvars=accumvars,
+             covar = cov.t,
+             paramnames = paramnames,
+             globals = globals,
+             cdir = cdir,
+             cfile = cfile,
+             shlib.args = shlib.args,
+             partrans = partrans,
+             ...,
+             verbose=verbose
     )
     ## preliminary error checking
     if (missing(cdir)) cdir <- NULL
