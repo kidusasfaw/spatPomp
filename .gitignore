@@ -33,3 +33,8 @@ Thumbs.db
 .Rproj.user/
 
 .Rproj.user
+
+# Temporary files #
+###################
+*~
+

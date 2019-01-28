@@ -22,4 +22,6 @@ Collate:
     spatpomp_methods.R
     vec_dmeasure.R
     hippie.R
+    measles.R
+    ou.R
 RoxygenNote: 6.1.0
