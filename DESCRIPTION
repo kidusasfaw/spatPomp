@@ -1,7 +1,7 @@
 Package: spatpomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
              person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
              person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
