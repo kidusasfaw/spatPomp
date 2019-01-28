@@ -2,9 +2,9 @@
 # https://datadryad.org/resource/doi:10.5061/dryad.r4q34
 # US data come from Project Tycho.
 # England and Wales data are the city of London plus the largest 39 cities that were more than 50km from London.
-# reports is reported measles cases per biweek
+# cases is reported measles cases per biweek
 # births is estimated recruitment of susceptibles per biweek
-"year";"city";"reports";"pop";"births"
+"year";"city";"cases";"pop";"births"
 1944;"LONDON";180;2453642.319;1702.729265
 1944.038462;"LONDON";271;2443251.37;1675.561132
 1944.076923;"LONDON";423;2434526.681;1651.419491

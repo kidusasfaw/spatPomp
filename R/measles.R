@@ -1,24 +1,23 @@
-#library(spatpomp)
 
 measles <- function(D=6){
 
-# D <- 6
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
 # pre-vaccine biweekly measles reports for the largest 40 UK cities, sorted by size
 data(measlesUK)
-library(dplyr)
-measlesUK %>% mutate_if(is.factor, as.character) -> measlesUK
+measlesUK$city<-as.character(measlesUK$city)
 
 # Note: check for outliers, c.f. He et al (2010)
 
-if(0){  ## code for data cleaning
+
+######## code for data cleaning: only re-run if dataset changes ######
+if(0){  
 # datafile for measles spatpomp
 # derived from measlesUKUS.csv from 
 # https://datadryad.org/resource/doi:10.5061/dryad.r4q34
 # US data come from Project Tycho.
 # England and Wales data are the city of London plus the largest 39 cities that were more than 50km from London.
-# reports is reported measles cases per biweek
+# cases is reported measles cases per biweek
 # births is estimated recruitment of susceptibles per biweek
   library(magrittr)
   library(dplyr)
@@ -29,7 +28,7 @@ x %>%
   mutate(meanPop = mean(pop)) %>%
   ungroup() %>%
   arrange(desc(meanPop),decimalYear) -> x1
-x1 %>% transmute(year=decimalYear,city=loc,reports=cases,pop=pop,births=rec) -> x2
+x1 %>% transmute(year=decimalYear,city=loc,cases=cases,pop=pop,births=rec) -> x2
   # the R package csv format 
   # from https://cran.r-project.org/doc/manuals/R-exts.html#Data-in-packages
   write.table(file="measlesUK.csv",sep = ";",row.names=F,x2)
@@ -38,18 +37,18 @@ y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
 y1 <- transmute(y,city=loc,lon,lat,meanPop) 
 write.table(file="city_data_UK.csv",sep=";",row.names=F,y1)
 }
-
-obs_names <- "reports"
+####################################################################
 
 cities <- unique(measlesUK$city)[1:D]
-measlesReports <- measlesUK[measlesUK$city %in% cities,c("year","city","reports")]
-#reports <- measlesUK[measlesUK$year>1949.99,]
+measlesCases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]
+measlesCases <- measlesCases[measlesCases$year>1949.99,]
 
 measlesCovar <- measlesUK[measlesUK$city %in% cities,c("year","city","pop","births")]
 u <- split(measlesCovar$births,measlesCovar$city)
 v <- sapply(u,function(x){c(rep(NA,birth_lag),x[1:(length(x)-birth_lag)])})
 measlesCovar$lag_birthrate <- as.vector(v[,cities])*26
 measlesCovar$births<- NULL
+measlesCovarNames <- paste0(rep(c("pop","lag_birthrate"),each=D),1:D)
 
 data(city_data_UK)
 # Distance between two points on a sphere radius R
@@ -94,17 +93,19 @@ v_by_g_C <- Csnippet(paste0("const double v_by_g[",D,"][",D,"] = ",v_by_g_C_arra
 v_by_g_C
 
 states <- c("S","E","I","R","C","W")
-#state_names <- paste0(rep(states,each=D),1:D)
+state_names <- paste0(rep(states,each=D),1:D)
 
 ## initial value parameters
-#ivp_names <- paste0(state_names[1:(4*D)],"_0")
+ivp_names <- paste0(state_names[1:(4*D)],"_0")
 
 ## regular parameters
 he10_rp_names <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi")
 rp_names <- c(he10_rp_names,"D","g")
 
 ## all parameters
-#param_names <- c(rp_names,ivp_names)
+param_names <- c(rp_names,ivp_names)
+
+## Model adapted from He et al. (2010) with gravity transport
 
 rproc <- Csnippet("
   double beta, br, seas, foi, dw, births;
@@ -201,39 +202,6 @@ measles_rinit <- Csnippet("
   }
 ")
 
-
-# parameters from He et al (2010) for the largest 10 cities
-read.csv(text="
-town,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
-BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
-LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
-MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
-LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0.0778
-SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0.0428
-BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0.0392
-NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0.038
-HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0.0636
-BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0.0451
-",stringsAsFactors=FALSE) -> he10_mles
-
-if(D>10) stop("Code only designed for D<=10") 
-test_params <- c(
-  unlist(he10_mles[1,he10_rp_names]),
-  D=D,
-  g=100,
-  he10_mles[1:D,"S_0"],
-  he10_mles[1:D,"E_0"],
-  he10_mles[1:D,"I_0"],
-  he10_mles[1:D,"R_0"]
-)
-names(test_params) <- param_names
-
-
-## Measurement model adapted from He et al. (2010). 
-## We are going to need a unit dmeasure, which returns the measurement density for a single unit, for the ASIIF algorithm. 
-## For other algorithms, including basic pomp methods, we should have the regular dmeasure and rmeasure as well.
-
 measles_dmeas <- Csnippet("
   const double *C = &C1;
   const double *cases = &cases1;
@@ -309,17 +277,19 @@ measles_rinit <- Csnippet("
   }
 ")
 
-measles <- spatpomp(measlesReports,
+spatpomp(measlesCases,
                     units = "city",
                     times = "year",
-                    t0 = min(measlesReports$year)-1/26,
+                    t0 = min(measlesCases$year)-1/26,
                     unit_statenames = c('S','E','I','R','C','W'),
                     global_statenames = c('P'),
-                    covar = measles_covar,
+                    covar = measlesCovar,
                     tcovar = "year",
-                    rprocess=euler.sim(rproc, delta.t=2/365),
-                    zeronames = c(paste0("C",1:D),paste0("W",1:D)),
-                    paramnames=param_names,globals=v_by_g_C,
+                    rprocess=euler(rproc, delta.t=2/365),
+                    accumvars = c(paste0("C",1:D),paste0("W",1:D)),
+                    paramnames=param_names,
+                    covarnames=measlesCovarNames,
+                    globals=v_by_g_C,
                     rinit=measles_rinit,
                     dmeasure=measles_dmeas,
                     rmeasure=measles_rmeas)
