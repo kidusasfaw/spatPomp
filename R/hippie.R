@@ -1,4 +1,4 @@
-## HIPPIE algorithm functions
+#' @include spatpomp_class.R
 
 rw.sd <- pomp2:::safecall
 
@@ -23,34 +23,20 @@ setClass(
   "hippie.as.pfilterd.pomp",
   contains="spatpomp",
   slots=c(
-    #loc.comb.pred.weights="numeric",
-    #cond.densities="array",
     log.island.weight="numeric",
-    #paramMatrix="array",
     island.param="numeric",
     indices="vector",
-    #eff.sample.size="numeric",
-    #cond.loglik="numeric",
     Np="integer",
     tol="numeric"
-    #nfail="integer",
-    #loglik="numeric"
   ),
   prototype=prototype(
-    #loc.comb.pred.weights = numeric(0),
-    #cond.densities=array(data=numeric(0),dim=c(0,0,0)),
     log.island.weight=numeric(0),
-    #paramMatrix=array(data=numeric(0),dim=c(0,0)),
     island.param=numeric(0),
     indices=integer(0),
-    #eff.sample.size=numeric(0),
-    #cond.loglik=numeric(0),
     saved.states=list(),
     saved.params=list(),
     Np=as.integer(NA),
     tol=as.double(NA)
-    #nfail=as.integer(NA),
-    #loglik=as.double(NA)
   )
 )
 
@@ -98,7 +84,6 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
 
     if (nt == 1L) {
       ## get initial states
-      # x <- init.state(object,nsim=Np[1L],params=if (transform) tparams else params)
       x <- rinit(object,params=tparams)
     }
 
@@ -228,24 +213,18 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     ntimes=length(time(object))
   )
   # initialize the parameter for each island
-  # paramMatrixList = list()
   island.param.list = list()
   for(i in seq_len(islands)){
     .indices[[i]] <- integer(0)
     if (is.null(.paramMatrix)) {
       if (.ndone > 0) {               # call is from 'continue'
-        # paramMatrixList[[i]] <- object@paramMatrix
         island.param.list[[i]] <- coef(object)
-        #start <- apply(paramMatrixList[[i]],1L,mean)
         start <- coef(object)
       } else {                      # initial call
-        # paramMatrixList[[i]] <- array(data=start,dim=c(length(start),Np[1L]), dimnames=list(variable=names(start),rep=NULL))
         island.param.list[[i]] <- start
       }
     } else {
-      # paramMatrixList[[i]] <- .paramMatrix
       island.param.list[[i]] <- .paramMatrix[,i]
-      # start <- apply(paramMatrixList[[i]],1L,mean)
       start <- apply(.paramMatrix,1L,mean)
     }
 
@@ -351,7 +330,6 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   if (transform)
     param.swarm <- partrans(object,param.swarm,dir="fromEst",
                                 .gnsi=gnsi)
-  #coef(object, transform=transform) <- apply(final.param.swarm,1L,mean) # weighted mean hard because weights unstable.
 
   pompUnload(object,verbose=verbose)
 
@@ -381,7 +359,6 @@ setMethod(
     ep <- paste0("in ",sQuote("hippie"),": ")
 
     Nhippie <- as.integer(Nhippie)
-    print("before coef object")
     if (missing(start)) start <- coef(object)
     if (length(start)==0)
       stop(ep,sQuote("start")," must be specified if ",
@@ -389,9 +366,7 @@ setMethod(
     if (is.null(names(start)))
       stop(ep,sQuote("start")," must be a named vector",
            call.=FALSE)
-    print("before time object")
     ntimes <- length(time(object))
-    print("after time object")
     if (missing(Np))
       stop(ep,sQuote("Np")," must be specified",call.=FALSE)
     else if (is.function(Np)) {
@@ -436,12 +411,9 @@ setMethod(
         return(nbhd_matrix)
       }
     }
-    print("before perturbation kernel")
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
-    # rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
     rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
-    print("after perturbation kernel")
     cooling.type <- match.arg(cooling.type)
 
     cooling.fraction.50 <- as.numeric(cooling.fraction.50)
@@ -466,52 +438,5 @@ setMethod(
       verbose=verbose,
       ...
     )
-  }
-)
-
-setMethod(
-  "hippie",
-  signature=signature(object="hippied.spatpomp"),
-  definition = function (object, Nhippie=1, start, Np,
-                         rw.sd, transform, cooling.type, cooling.fraction.50,
-                         tol, ...) {
-
-    if (missing(Nhippie)) Nhippie <- object@Nhippie
-    if (missing(start)) start <- coef(object)
-    if (missing(rw.sd)) rw.sd <- object@rw.sd
-    if (missing(transform)) transform <- object@transform
-    if (missing(cooling.type)) cooling.type <- object@cooling.type
-    if (missing(cooling.fraction.50)) cooling.fraction.50 <- object@cooling.fraction.50
-
-    if (missing(Np)) Np <- object@Np
-    if (missing(tol)) tol <- object@tol
-
-    f <- selectMethod("hippie","pomp")
-
-    f(object,Nhippie=Nhippie,start=start,Np=Np,rw.sd=rw.sd,transform=transform,
-      cooling.type=cooling.type,cooling.fraction.50=cooling.fraction.50,
-      tol=tol,...)
-  }
-)
-
-setMethod(
-  'continue',
-  signature=signature(object='hippied.spatpomp'),
-  definition = function (object, Nhippie = 1, ...) {
-
-    ndone <- object@Nhippie
-
-    f <- selectMethod("hippie","hippied.pomp")
-    obj <- f(object=object,Nhippie=Nhippie,.ndone=ndone,...)
-
-    object@conv.rec[ndone+1,c('loglik','nfail')] <- obj@conv.rec[1L,c('loglik','nfail')]
-    obj@conv.rec <- rbind(
-      object@conv.rec,
-      obj@conv.rec[-1L,colnames(object@conv.rec)]
-    )
-    names(dimnames(obj@conv.rec)) <- c("iteration","variable")
-    obj@Nhippie <- as.integer(ndone+Nhippie)
-
-    obj
   }
 )

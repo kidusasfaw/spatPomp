@@ -1,4 +1,7 @@
+#' spatpomp: A package that provides methods for inference for Spatiotemporal POMPs
+#'
 #' @include spatpomp_class.R
+NULL
 
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,

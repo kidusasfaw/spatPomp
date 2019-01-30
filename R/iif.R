@@ -1,4 +1,5 @@
-## independent island filtering codes
+#' @include spatpomp_class.R
+#'
 setClass(
   "island.pomp",
   contains="spatpomp",

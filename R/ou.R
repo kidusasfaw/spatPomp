@@ -1,3 +1,13 @@
+#' Linear-Gaussian process generator
+#'
+#' Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with \code{N} time steps.
+#'
+#' @param D Numeric signifying dimension of the process.
+#' @param N Numeric signifying the number of time steps to evolve the process.
+#' @return A spatpomp object with the specified dimension and time steps.
+#' @examples
+#' ou(5, 100)
+
 ou <- function(D=5,N=100){
 
 D <- 3
@@ -66,7 +76,7 @@ ou_dmeas <- Csnippet("
   lik=0;
   for (d=0; d<D; d++) lik += dnorm(Y[d],X[d],tau,1);
   if(!give_log) lik = exp(lik) + tol;
-")    
+")
 
 ou_rmeas <- Csnippet("
   const double *X = &X1;
