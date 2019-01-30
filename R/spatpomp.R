@@ -17,6 +17,21 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   if (missing(times))
     stop(ep,sQuote("times")," is a required argument",call.=FALSE)
 
+  if (missing(rinit)) rinit <- NULL
+
+  if (missing(rprocess) || is.null(rprocess)) {
+    rprocess <- rproc_plugin()
+  }
+
+  if (missing(dprocess)) dprocess <- NULL
+  if (missing(rmeasure)) rmeasure <- NULL
+  if (missing(dmeasure)) dmeasure <- NULL
+
+
+  if (missing(partrans) || is.null(partrans)) {
+    partrans <- parameter_trans()
+  }
+
   if (missing(unit_dmeasure)) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
 
@@ -69,12 +84,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       names(unit_index) <- 1:length(units)
     }
 
-    # make data into unit by var by time
-    # temp_data <- abind::abind(split(data, data[tpos], drop = TRUE), along = 3)
-    # rownames(temp_data) <- temp_data[,upos,1]
-    # dat <- temp_data[,-c(upos,tpos),,drop = FALSE] # unit by var by time
-    # storage.mode(dat) <- "double" # TO DO: do i need to make the time axis 1:length(times) instead of actual times?
-
     # make data into a dataframe that pomp would expect
     tmp <- names(unit_index)
     names(tmp) <- unit_index
@@ -82,6 +91,13 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% arrange(pomp_data[,tpos_name], obsname, ui)
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
+    dat_col_order <- vector(length = length(units)*length(obstypes))
+    for(ot in obstypes){
+      for(i in 1:length(units)){
+        dat_col_order[i] = paste0(ot, i)
+      }
+    }
+    pomp_data <- pomp_data[, c(tpos_name, dat_col_order)]
 
     # make covariates into a dataframe that pomp would expect
     if(!missing(covar) && !missing(tcovar)){
@@ -94,6 +110,13 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      cov_col_order <- vector(length = length(units)*length(covariate_names))
+      for(cn in covariate_names){
+        for(i in 1:length(units)){
+          cov_col_order[i] = paste0(cn, i)
+        }
+      }
+      pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order)]
       # construct call of covariate_table function
       call_to_covar = list()
       call_to_covar[[1]] <- as.symbol("covariate_table")
@@ -123,6 +146,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     if(missing(globals)) globals <- Csnippet(paste0("const int nunits = ",length(units),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int nunits = ",length(units),";\n"),globals@text))
     # create the pomp object
+
     po <- pomp(data = pomp_data,
              times=times,
              t0 = t0,
