@@ -1,4 +1,11 @@
-
+#' Measles in UK spatpomp generator
+#'
+#' Generate a spatpomp object for measles in the top-\code{D} most populous cities in England.
+#'
+#' @param D A length-one numeric signifying the number of cities to be represented in the spatpomp object.
+#' @return A spatpomp object.
+#' @examples
+#' measles(7)
 measles <- function(D=6){
 
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
@@ -11,9 +18,9 @@ measlesUK$city<-as.character(measlesUK$city)
 
 
 ######## code for data cleaning: only re-run if dataset changes ######
-if(0){  
+if(0){
 # datafile for measles spatpomp
-# derived from measlesUKUS.csv from 
+# derived from measlesUKUS.csv from
 # https://datadryad.org/resource/doi:10.5061/dryad.r4q34
 # US data come from Project Tycho.
 # England and Wales data are the city of London plus the largest 39 cities that were more than 50km from London.
@@ -23,18 +30,18 @@ if(0){
   library(dplyr)
   read.csv("../../measles/measlesUKUS.csv",stringsAsFactors=FALSE) %>% subset(country=="UK") -> x
   library(dplyr)
-x %>% 
-  group_by(loc) %>% 
+x %>%
+  group_by(loc) %>%
   mutate(meanPop = mean(pop)) %>%
   ungroup() %>%
   arrange(desc(meanPop),decimalYear) -> x1
 x1 %>% transmute(year=decimalYear,city=loc,cases=cases,pop=pop,births=rec) -> x2
-  # the R package csv format 
+  # the R package csv format
   # from https://cran.r-project.org/doc/manuals/R-exts.html#Data-in-packages
   write.table(file="measlesUK.csv",sep = ";",row.names=F,x2)
 # y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
 y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
-y1 <- transmute(y,city=loc,lon,lat,meanPop) 
+y1 <- transmute(y,city=loc,lon,lat,meanPop)
 write.table(file="city_data_UK.csv",sep=";",row.names=F,y1)
 }
 ####################################################################
@@ -53,7 +60,7 @@ measlesCovarNames <- paste0(rep(c("pop","lag_birthrate"),each=D),1:D)
 data(city_data_UK)
 # Distance between two points on a sphere radius R
 # Adapted from geosphere package
-distHaversine <- function (p1, p2, r = 6378137) 
+distHaversine <- function (p1, p2, r = 6378137)
 {
     toRad <- pi/180
     p1 <- p1 * toRad
@@ -61,7 +68,7 @@ distHaversine <- function (p1, p2, r = 6378137)
     p = cbind(p1[, 1], p1[, 2], p2[, 1], p2[, 2], as.vector(r))
     dLat <- p[, 4] - p[, 2]
     dLon <- p[, 3] - p[, 1]
-    a <- sin(dLat/2) * sin(dLat/2) + cos(p[, 2]) * cos(p[, 4]) * 
+    a <- sin(dLat/2) * sin(dLat/2) + cos(p[, 2]) * cos(p[, 4]) *
         sin(dLon/2) * sin(dLon/2)
     a <- pmin(a, 1)
     dist <- 2 * atan2(sqrt(a), sqrt(1 - a)) * p[, 5]
@@ -133,19 +140,19 @@ rproc <- Csnippet("
   for (d = 0 ; d < D ; d++) {
 
     // cohort effect
-    if (fabs(t-floor(t)-251.0/365.0) < 0.5*dt) 
+    if (fabs(t-floor(t)-251.0/365.0) < 0.5*dt)
       br = cohort*lag_birthrate[d]/dt + (1-cohort)*lag_birthrate[d];
-    else 
+    else
       br = (1.0-cohort)*lag_birthrate[d];
 
-    // expected force of infection    
+    // expected force of infection
     foi = pow( (I[d]+iota)/pop[d],alpha);
     // Do we still need iota in a spatPomp version?
     // See also discrepancy between Joonha and Daihai versions
     // Daihai didn't raise pop to the alpha power
 
     for (e=0; e < D ; e++) {
-      if(e != d) 
+      if(e != d)
         foi += g * v_by_g[d][e] * (pow(I[e]/pop[e],alpha) - pow(I[d]/pop[d],alpha)) / pop[d];
     }
     // white noise (extrademographic stochasticity)
@@ -162,7 +169,7 @@ rproc <- Csnippet("
 
     // Poisson births
     births = rpois(br*dt);
-  
+
     // transitions between classes
     reulermultinom(2,S[d],&rate[0],dt,&trans[0]);
     reulermultinom(2,E[d],&rate[2],dt,&trans[2]);

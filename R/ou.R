@@ -1,6 +1,7 @@
-#' Linear-Gaussian process generator
+#' Linear-Gaussian spatpomp generator
 #'
-#' Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with \code{N} time steps.
+#' Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with
+#' \code{N} time steps.
 #'
 #' @param D A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ou.R
 \name{ou}
 \alias{ou}
-\title{Linear-Gaussian process generator}
+\title{Linear-Gaussian spatpomp generator}
 \usage{
 ou(D = 5, N = 100)
 }
@@ -15,7 +15,8 @@ ou(D = 5, N = 100)
 A spatpomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with \code{N} time steps.
+Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with
+\code{N} time steps.
 }
 \examples{
 ou(5, 100)
