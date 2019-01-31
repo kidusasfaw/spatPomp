@@ -7,9 +7,9 @@
 ou(D = 5, N = 100)
 }
 \arguments{
-\item{D}{Numeric signifying dimension of the process.}
+\item{D}{A length-one numeric signifying dimension of the process.}
 
-\item{N}{Numeric signifying the number of time steps to evolve the process.}
+\item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
 }
 \value{
 A spatpomp object with the specified dimension and time steps.

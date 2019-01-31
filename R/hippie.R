@@ -3,7 +3,7 @@
 rw.sd <- pomp2:::safecall
 
 
-## define the hippied.pomp class
+## define the hippied.spatpomp class
 setClass(
   'hippied.spatpomp',
   contains='spatpomp',
