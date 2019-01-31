@@ -185,7 +185,7 @@ hippie_pfilter.internal <- function (object, params, Np,
 
 hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, transform = FALSE,
                            cooling.type, cooling.fraction.50,
-                           tol = (1e-18)^17, max.fail = Inf,
+                           tol = (1e-18)^17, max.fail = Inf, island_bound = 10000,
                            verbose = FALSE, .ndone = 0L,
                            .indices = vector(mode="list", length = islands),
                            .paramMatrix = NULL,
@@ -234,10 +234,17 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
     conv.rec[1L,] <- c(NA,NA,start)
 
     if (transform)
-      # paramMatrixList[[i]] <- partrans(object,paramMatrixList[[i]],dir="toEstimationScale", .getnativesymbolinfo=gnsi)
       island.param.list[[i]] <- partrans(object,island.param.list[[i]],dir="toEst",.gnsi=gnsi)
   }
   object <- as(object,"spatpomp")
+  # if necessary split up the islands into manageable chunks
+  quot <- islands%/%island_bound
+  rem <- islands%%island_bound
+  print(rem)
+  if(rem != 0) bounded_island_nums <- cumsum(c(rep(island_bound,quot),rem))
+  else bounded_island_nums <- cumsum(rep(island_bound,quot))
+
+  print(bounded_island_nums)
 
   # iterate the filtering
   # cores <- parallel:::detectCores()-1
@@ -247,52 +254,65 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
 
   for (n in seq_len(Nhippie)) {
     # begin multi-threaded
-    mult.island.output <- foreach::foreach(i=1:islands, .options.multicore=mcopts) %dopar%  {
-      hippie_pfilter.internal(
-        object=object,
-        params=island.param.list[[i]],
-        Np=Np,
-        hippieiter=.ndone+n,
-        cooling.fn=cooling.fn,
-        rw.sd=rw.sd,
-        tol=tol,
-        max.fail=max.fail,
-        transform=transform,
-        .indices=.indices[[i]],
-        verbose=verbose
-      )
-    }
-    # end multi-threaded
-    # begin single-threaded
-    # for(i in 1:islands){
-    #   mult.island.output[[i]] <- hippie_pfilter.internal(
-    #     object=object,
-    #     #params=paramMatrixList[[i]],
-    #     params=island.param.list[[i]]
-    #     Np=Np,
-    #     nbhd=nbhd,
-    #     hippieiter=.ndone+n,
-    #     cooling.fn=cooling.fn,
-    #     rw.sd=rw.sd,
-    #     tol=tol,
-    #     max.fail=max.fail,
-    #     transform=transform,
-    #     .indices=.indices[[i]],
-    #     verbose=verbose
-    #   )
-    # }
-    # end single threaded
-    gnsi <- FALSE
-    fails <- 0
+    bdd_iter <- 1
     weights <- vector(length=islands)
     param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
-    for(i in 1:islands){
-      param.swarm[,i] <- mult.island.output[[i]]@island.param
-      island.param.list[[i]] <- mult.island.output[[i]]@island.param
-      .indices[[i]] <- mult.island.output[[i]]@indices
-      weights[i] <- mult.island.output[[i]]@log.island.weight
+    for(bdd_island_num in bounded_island_nums){
+      mult.island.output <- foreach::foreach(i=((bdd_iter-1)*island_bound + 1):bdd_island_num, .options.multicore=mcopts) %dopar%  {
+        hippie_pfilter.internal(
+          object=object,
+          params=island.param.list[[(bdd_iter-1)*island_bound + 1]],
+          Np=Np,
+          hippieiter=.ndone+n,
+          cooling.fn=cooling.fn,
+          rw.sd=rw.sd,
+          tol=tol,
+          max.fail=max.fail,
+          transform=transform,
+          .indices=.indices[[(bdd_iter-1)*island_bound + 1]],
+          verbose=verbose
+        )
+      }
+      # end multi-threaded
+      # begin single-threaded
+      # for(i in 1:islands){
+      #   mult.island.output[[i]] <- hippie_pfilter.internal(
+      #     object=object,
+      #     #params=paramMatrixList[[i]],
+      #     params=island.param.list[[i]]
+      #     Np=Np,
+      #     nbhd=nbhd,
+      #     hippieiter=.ndone+n,
+      #     cooling.fn=cooling.fn,
+      #     rw.sd=rw.sd,
+      #     tol=tol,
+      #     max.fail=max.fail,
+      #     transform=transform,
+      #     .indices=.indices[[i]],
+      #     verbose=verbose
+      #   )
+      # }
+      # end single threaded
+      gnsi <- FALSE
+      for(i in ((bdd_iter-1)*island_bound + 1):bdd_island_num){
+        print(paste0("iter",i))
+        if(i%%island_bound == 0){
+          param.swarm[,i] <- mult.island.output[[island_bound]]@island.param
+          island.param.list[[i]] <- mult.island.output[[island_bound]]@island.param
+          .indices[[i]] <- mult.island.output[[island_bound]]@indices
+          weights[i] <- mult.island.output[[island_bound]]@log.island.weight
+        }
+        else{
+          param.swarm[,i] <- mult.island.output[[i%%island_bound]]@island.param
+          island.param.list[[i]] <- mult.island.output[[i%%island_bound]]@island.param
+          .indices[[i]] <- mult.island.output[[i%%island_bound]]@indices
+          weights[i] <- mult.island.output[[i%%island_bound]]@log.island.weight
+        }
+      }
+      bdd_iter <- bdd_iter + 1
+      print(bdd_iter)
     }
-
+    # WHERE TO STOP THE FIXED SIZE HIPPIE LOOP
     coef(object, transform = transform) <- apply(param.swarm,1,mean)
 
     conv.rec[n+1,-c(1,2)] <- coef(object)
@@ -347,7 +367,7 @@ setMethod(
                          rw.sd, transform = FALSE,
                          cooling.type = c("hyperbolic", "geometric"),
                          cooling.fraction.50,
-                         tol = (1e-18)^17, max.fail = Inf,
+                         tol = (1e-18)^17, max.fail = Inf, island_bound = 10000,
                          verbose = getOption("verbose"),...) {
 
     ep <- paste0("in ",sQuote("hippie"),": ")
@@ -416,6 +436,7 @@ setMethod(
       cooling.fraction.50=cooling.fraction.50,
       tol=tol,
       max.fail=max.fail,
+      island_bound = island_bound,
       verbose=verbose,
       ...
     )
