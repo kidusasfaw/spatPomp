@@ -90,8 +90,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     # make data into a dataframe that pomp would expect
     tmp <- names(unit_index)
     names(tmp) <- unit_index
-    pomp_data <- data %>% mutate(ui = tmp[match(data[,upos_name], names(tmp))])
-    pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% arrange(pomp_data[,tpos_name], obsname, ui)
+    pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,upos_name], names(tmp))])
+    pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,tpos_name], obsname, ui)
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
     dat_col_order <- vector(length = length(units)*length(obstypes))

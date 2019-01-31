@@ -40,7 +40,7 @@ setClass(
   )
 )
 
-hippie_pfilter.internal <- function (object, params, Np, nbhd,
+hippie_pfilter.internal <- function (object, params, Np,
                           hippieiter, cooling.fn, rw.sd,
                           tol = (1e-18)^17, max.fail = Inf,
                           transform, .indices = integer(0), verbose,
@@ -183,7 +183,7 @@ hippie_pfilter.internal <- function (object, params, Np, nbhd,
 
 
 
-hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw.sd, transform = FALSE,
+hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, transform = FALSE,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
@@ -240,23 +240,18 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
   object <- as(object,"spatpomp")
 
   # iterate the filtering
-  require(doParallel)
-  require(parallel)
   # cores <- parallel:::detectCores()-1
-  registerDoParallel(cores=NULL)
+  doParallel::registerDoParallel(cores=NULL)
   mcopts <- list(set.seed=TRUE)
   mult.island.output <- list()
 
   for (n in seq_len(Nhippie)) {
-    # param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
     # begin multi-threaded
-    mult.island.output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  {
+    mult.island.output <- foreach::foreach(i=1:islands, .options.multicore=mcopts) %dopar%  {
       hippie_pfilter.internal(
         object=object,
-        # params = paramMatrixList[[i]]
         params=island.param.list[[i]],
         Np=Np,
-        nbhd=nbhd,
         hippieiter=.ndone+n,
         cooling.fn=cooling.fn,
         rw.sd=rw.sd,
@@ -294,7 +289,6 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, nbhd, rw
     for(i in 1:islands){
       param.swarm[,i] <- mult.island.output[[i]]@island.param
       island.param.list[[i]] <- mult.island.output[[i]]@island.param
-      # fails <- fails + mult.island.output[[i]]@nfail
       .indices[[i]] <- mult.island.output[[i]]@indices
       weights[i] <- mult.island.output[[i]]@log.island.weight
     }
@@ -350,7 +344,7 @@ setMethod(
   "hippie",
   signature=signature(object="spatpomp"),
   definition = function (object, Nhippie = 1, islands, prop, start, Np,
-                         nbhd, rw.sd, transform = FALSE,
+                         rw.sd, transform = FALSE,
                          cooling.type = c("hyperbolic", "geometric"),
                          cooling.fraction.50,
                          tol = (1e-18)^17, max.fail = Inf,
@@ -399,18 +393,6 @@ setMethod(
     if(missing(prop))
       stop(ep,"top proportion of islands (by weight) to be resampled, ",
            sQuote("prop"),", must be specified!",call.=FALSE)
-    if(missing(nbhd)){
-      nbhd <- function(object, time, unit) {
-        nunits = length(unit(object))
-        ntimes = length(time(object)) #length(time(object))
-        nbhd_matrix = array(0, dim = c(nunits, ntimes))
-        # B_{d,n} = entire past
-        if(time > 1) {
-          nbhd_matrix[1:unit, 1:(time-1)] = 1
-        }
-        return(nbhd_matrix)
-      }
-    }
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
     rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
@@ -428,7 +410,6 @@ setMethod(
       Nhippie=Nhippie,
       start=start,
       Np=Np,
-      nbhd=nbhd,
       rw.sd=rw.sd,
       transform=transform,
       cooling.type=cooling.type,

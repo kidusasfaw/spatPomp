@@ -1,3 +1,4 @@
 exportPattern("^[[:alpha:]]+")
 useDynLib(spatpomp, .registration=TRUE)
 import(pomp2)
+importFrom(foreach,"%dopar%")
