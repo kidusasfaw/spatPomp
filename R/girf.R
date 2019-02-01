@@ -1,78 +1,9 @@
-##' Guided intermiediate resampling filter (GIRF)
-##'
-##' An implementation of the GIRF of Park and Ionides (2018) 
-##'
-##' @name girf
-##' @rdname girf
-##' @aliases girf girf,ANY-method girf,missing-method
-##' girfd_pomp-class girfd_pomp
-##' @author Aaron A. King
-##' @family elementary POMP methods
-##' @family particle filter methods
-##'
-##' @include pomp_class.R pomp.R rprocess_spec.R dmeasure_spec.R
-##' @importFrom stats setNames
-##'
-##' @inheritParams pomp
-##'
-##' @param Np the number of particles to use.
-##' This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-##' Alternatively, if one wishes the number of particles to vary across timesteps, one may specify \code{Np} either as a vector of positive integers of length \preformatted{length(time(object,t0=TRUE))} or as a function taking a positive integer argument.
-##' In the latter case, \code{Np(k)} must be a single positive integer, representing the number of particles to be used at the \code{k}-th timestep:
-##' \code{Np(0)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-##' \code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
-##' and so on,
-##' while when \code{T=length(time(object,t0=TRUE))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.
-##'
-##' @param tol positive numeric scalar;
-##' particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-##' See the section on \emph{Filtering Failures} for more information.
-##'
-##' @param max.fail integer; the maximum number of filtering failures allowed (see below).
-##' If the number of filtering failures exceeds this number, execution will terminate with an error.
-##' By default, \code{max.fail} is set to infinity, so no error can be triggered.
-##'
-##' @param pred.mean logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.
-##'
-##' @param pred.var logical; if \code{TRUE}, the prediction variances are calculated for the state variables and parameters.
-##'
-##' @param filter.mean logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.
-##'
-##' @param filter.traj logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
-##'
-##' @param save.states logical.
-##' If \code{save.states=TRUE}, the state-vector for each particle at each time is saved.
-##'
-##' @return
-##' An object of class \sQuote{girfd_pomp}, which extends class \sQuote{pomp}.
-##' @section Methods:
-##' \describe{
-##' \item{logLik}{ the estimated log likelihood  }
-##' \item{cond.logLik}{ the estimated conditional log likelihood }
-##' \item{eff.sample.size}{
-##' the (time-dependent) estimated effective sample size }
-##' \item{pred.mean, pred.var}{ the mean and variance of the approximate prediction distribution }
-##' \item{filter.mean}{ the mean of the filtering distribution }
-##' \item{filter.traj}{ retrieve one sample from the smoothing distribution}
-##' \item{as.data.frame}{ coerce to a data frame }
-##' \item{plot}{diagnostic plots}
-##' }
-##'
-##' @section Filtering failures:
-##' If the degree of disagreement between model and data becomes sufficiently large, a \dQuote{filtering failure} results.
-##' A filtering failure occurs when, at some time point, none of the \code{Np} particles is compatible with the data.
-##' In particular, if the conditional likelihood of a particle at any time is below the tolerance value \code{tol}, then that particle is considered to be uninformative and its likelihood is taken to be zero.
-##' A filtering failure occurs when this is the case for all particles.
-##' A warning is generated when this occurs unless the cumulative number of failures exceeds \code{max.fail}, in which case an error is generated.
-##'
-##' @references
-##' J. Park & E. L. Ionides (2018). 
-##' A guided intermediate resampling particle filter for inference on high dimensional systems. 
-##' Arxiv 1708.08543v2
-##'
-##' @example examples/girf.R
-##'
-NULL
+##
+## @references
+## J. Park & E. L. Ionides (2018). 
+## A guided intermediate resampling particle filter for inference on high dimensional systems. 
+## Arxiv 1708.08543v2
+##
 
 setClass(
   "girfd_pomp",
