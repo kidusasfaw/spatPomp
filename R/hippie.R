@@ -254,6 +254,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
 
   for (n in seq_len(Nhippie)) {
     # begin multi-threaded
+    print(n)
     bdd_iter <- 1
     weights <- vector(length=islands)
     param.swarm = array(dim=c(length(start),islands), dimnames=list(var = names(start), island = 1:islands))
@@ -295,7 +296,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
       # end single threaded
       gnsi <- FALSE
       for(i in ((bdd_iter-1)*island_bound + 1):bdd_island_num){
-        print(paste0("iter",i))
+        # print(paste0("iter",i))
         if(i%%island_bound == 0){
           param.swarm[,i] <- mult.island.output[[island_bound]]@island.param
           island.param.list[[i]] <- mult.island.output[[island_bound]]@island.param
@@ -310,7 +311,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
         }
       }
       bdd_iter <- bdd_iter + 1
-      print(bdd_iter)
+      # print(bdd_iter)
     }
     # WHERE TO STOP THE FIXED SIZE HIPPIE LOOP
     coef(object, transform = transform) <- apply(param.swarm,1,mean)
