@@ -240,11 +240,11 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
   # if necessary split up the islands into manageable chunks
   quot <- islands%/%island_bound
   rem <- islands%%island_bound
-  print(rem)
+  #print(rem)
   if(rem != 0) bounded_island_nums <- cumsum(c(rep(island_bound,quot),rem))
   else bounded_island_nums <- cumsum(rep(island_bound,quot))
 
-  print(bounded_island_nums)
+  #print(bounded_island_nums)
 
   # iterate the filtering
   # cores <- parallel:::detectCores()-1
