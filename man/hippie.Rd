@@ -62,5 +62,8 @@ When \code{cooling.type="hyperbolic"}, we have \deqn{c_{m,n}=\frac{s+1}{s+n+(m-1
 Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a fraction \eqn{\alpha}{alpha} smaller than they are at first.
 }
 
+\seealso{
+Other particle filter methods: \code{\link{iif}}
+}
 \concept{\pkg{spatpomp} parameter estimation methods}
 \concept{particle filter methods}

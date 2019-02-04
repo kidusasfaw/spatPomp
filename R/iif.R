@@ -1,5 +1,39 @@
-#' @include spatpomp_class.R
-#'
+##' Adapted Simulation Iterated Island Filter (ASIIF)
+##'
+##' An algorithm for estimating the filter distribution of a spatiotemporal partially-observed Markov process (SpatPOMP for short).
+##' Running \code{iif} causes the algorithm to run independent island jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
+##' distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each island close to each other through resampling down
+##' to one particle per island at each observation time point.
+##' The adapted simulations are then weighted in a way that tries to avert COD by making a weak coupling assumption to get an approximate filter distribution.
+##' As a by-product, we also get a biased estimate of the likelihood of the data.
+##'
+##' @name iif
+##' @rdname iif
+##' @include spatpomp_class.R
+##' @family particle filter methods
+##' @family \pkg{spatpomp} filtering methods
+##'
+##'
+##' @inheritParams spatpomp
+##' @inheritParams pfilterß
+##' @param object A \code{spatpomp} object.
+##' @param params A parameter set for the spatiotemporal POMP.
+##' @param Np The number of particles used within each island for the adapted simulations.
+##' @param nbhd A function which when given a point in space-time \code{(d,n)} will output a 0-1 matrix of points in space-time considered to be
+##' in the neighborhood of \code{(d,n)}.
+##' @param islands The number of islands for the adapted simulations.
+##' @return
+##' Upon successful completion, \code{iif} returns an object of class
+##' \sQuote{iifd.pomp}.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' }
+##'
+NULL
+
 setClass(
   "island.pomp",
   contains="spatpomp",
@@ -309,61 +343,14 @@ iif.internal <- function (object, params, Np,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    #all.fail <- xx$fail
-    #loglik[nt] <- xx$loglik
-    #eff.sample.size[nt] <- xx$ess
 
     x <- xx$states
     params <- xx$params
 
-    # if (pred.mean)
-    #   pred.m[,nt] <- xx$pm
-    # if (pred.var)
-    #   pred.v[,nt] <- xx$pv
-    # if (filter.mean)
-    #   filt.m[,nt] <- xx$fm
-    # if (filter.traj)
-    #   pedigree[[nt]] <- xx$ancestry
-
-    # if (all.fail) { ## all particles are lost
-    #   nfail <- nfail+1
-    #   if (verbose)
-    #     message("filtering failure at time t = ",times[nt+1])
-    #   if (nfail>max.fail)
-    #     stop(ep,"too many filtering failures",call.=FALSE)
-    # }
-
-    # if (save.states | filter.traj) {
-    #   xparticles[[nt]] <- x
-    #   dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),c("variable","rep"))
-    # }
-    #
-    # if (save.params) {
-    #   pparticles[[nt]] <- params
-    #   dimnames(pparticles[[nt]]) <- setNames(dimnames(pparticles[[nt]]),c("variable","rep"))
-    # }
-
     if (verbose && (nt%%5==0))
       cat("iif timestep",nt,"of",ntimes,"finished\n")
-    #preweighted[[nt]] <- X
-    #resampling_weights[[nt]] <- apply(weights[,,1], 2, function(x) prod(x)) # since iif_computations changes resamp_weights
-    #postweighted[[nt]] <- x
-    #if (nt == 7) break
   } ## end of main loop
 
-
-  #if (!save.states) xparticles <- list()
-
-  # if (nfail>0)
-  #   warning(
-  #     ep,nfail,
-  #     ngettext(
-  #       nfail,
-  #       msg1=" filtering failure occurred.",
-  #       msg2=" filtering failures occurred."
-  #     ),
-  #     call.=FALSE
-  #   )
   # compute locally combined pred. weights for each time and unit
   loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,ntimes))
   for (nt in seq_len(ntimes)){
@@ -405,7 +392,6 @@ iif.internal <- function (object, params, Np,
       loc.comb.pred.weights[unit,nt] = prod_over_times
     }
   }
-  #return(list(preweighted,resampling_weights,postweighted,loc.comb.pred.weights,weights))
   pompUnload(object,verbose=verbose)
   new(
     "island.pomp",
@@ -505,14 +491,11 @@ setMethod(
    # compute w_{d,n,i,j}^LCF
    for(i in seq_len(nunits)){
     for(j in seq_len(ntimes)){
-      # space_time_sum = 0
       for(k in seq_len(islands)){
         for(l in seq_len(Np)){
            loc.comb.filter.weights[i,j,k,l] = mult_island_output[[k]]@cond.densities[i,l,j] * (mult_island_output[[k]]@loc.comb.pred.weights[i,j]) / island_weight_sums[i,j]
-           # space_time_sum = space_time_sum + loc.comb.filter.weights[i,j,k,l]
         }
       }
-      # marg.filter.probs[i,j,,] = loc.comb.filter.weights[i,j,,]/space_time_sum
     }
    }
    # end multi-threaded code
@@ -530,42 +513,6 @@ setMethod(
       cond.loglik[i,j] = log((1/Np)*space_time_sum)
     }
    }
-
-  #  # marginal filter
-  # # if (filter.traj) { ## select a single trajectory (i.e. find the island and particle for each space-time step)
-  #   # for(i in seq_len(units)){
-  #    # for(j in seq_len(ntimes)){
-  #       #b <- sample.int(n = length(as.vector(marg.filter.probs[i,j,,])), size=1L,prob=as.vector(marg.filter.probs[i,j,,]), replace = TRUE)
-  #       #isl <- ifelse(b%%islands == 0, islands, b%%islands)  # retrieving matrix location based on b
-  #       #rep <- b%/%islands + 1
-  #       #filt.t[,1,j] = mult_island_output[[isl]]@saved.states[[j]][,rep]
-  #     #}
-  #    #}
-  #  #}
-
-
-
-
-
-
-  #   # if (max(weights)>0) {
-  #     # b <- sample.int(n=length(weights),size=1L,
-  #                     #prob=weights,replace=TRUE)
-  #   # } else {
-  #   #   b <- sample.int(n=length(weights),size=1L,
-  #                     #replace=TRUE)
-  #   # }
-  #   # filt.t[,1L,ntimes+1] <- xparticles[[ntimes]][,b]
-  #   # for (nt in seq.int(from=ntimes-1,to=1L,by=-1L)) {
-  #   #   b <- pedigree[[nt+1]][b]
-  #   #   filt.t[,1L,nt+1] <- xparticles[[nt]][,b]
-  #   # }
-  #   # if (times[2L] > times[1L]) {
-  #   #   b <- pedigree[[1L]][b]
-  #   #   filt.t[,1L,1L] <- init.x[,b]
-  #   # } else {
-  #   #   filt.t <- filt.t[,,-1L,drop=FALSE]
-  #   # }
 
    new(
       "iifd.pomp",
