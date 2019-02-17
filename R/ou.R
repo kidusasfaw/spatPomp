@@ -11,9 +11,6 @@
 
 ou <- function(D=5,N=100){
 
-D <- 3
-N <- 10
-
 dist <- function(d,e,n=D) min(abs(d-e),abs(d-e+D),abs(d-e-D))
 dmat <- matrix(0,D,D)
 for(d in 1:D) {
