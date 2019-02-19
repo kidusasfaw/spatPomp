@@ -31,8 +31,6 @@ xcheck tests: export R_PROFILE_USER=$(CURDIR)/.Rprofile
 session htmldocs vignettes data tests manual: export R_LIBS=$(CURDIR)/library
 xxcheck: export R_LIBS=$(CURDIR)/check
 
-includes: inst/include/pomp.h inst/include/pomp_defines.h
-
 inst/include/%.h: src/%.h
 	$(CP) $^ $@
 
@@ -60,13 +58,16 @@ roxy: $(SOURCE)
 
 dist: NEWS $(PKGVERS).tar.gz
 
-$(PKGVERS).tar.gz: $(SOURCE) includes
+$(PKGVERS).tar.gz: $(SOURCE)
 	$(RCMD) build --force --no-manual --resave-data --compact-vignettes=both --md5 .
 
 binary: dist
 	mkdir -p plib
 	$(RCMD) INSTALL --build --library=plib --preclean --clean $(PKGVERS).tar.gz
 	rm -rf plib
+
+pkg: $(SOURCE)
+	R CMD INSTALL ../$(PKG)
 
 publish: dist manual news
 	$(RSCRIPT) -e 'drat::insertPackage("$(PKGVERS).tar.gz",repodir="../www",action="prune")'
