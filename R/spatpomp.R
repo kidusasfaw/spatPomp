@@ -105,7 +105,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       }
     }
     pomp_data <- pomp_data[, c(tpos_name, dat_col_order)]
-
     # make covariates into a dataframe that pomp would expect
     if(!missing(covar) && !missing(tcovar)){
       upos_cov <- match(upos_name, names(covar))
@@ -113,16 +112,17 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
       tmp <- names(unit_index)
       names(tmp) <- unit_index
-      pomp_covar <- covar %>% mutate(ui = match(covar[,upos_name], names(tmp)))
+      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
       pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
-      cov_col_order <- vector(length = length(units)*length(covariate_names))
+      cov_col_order <- c()
       for(cn in covariate_names){
         for(i in 1:length(units)){
-          cov_col_order[i] = paste0(cn, i)
+          cov_col_order = c(cov_col_order, paste0(cn, i))
         }
       }
+      print(cov_col_order)
       pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order)]
       # construct call of covariate_table function
       call_to_covar = list()
