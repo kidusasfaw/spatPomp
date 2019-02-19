@@ -122,7 +122,6 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
           cov_col_order = c(cov_col_order, paste0(cn, i))
         }
       }
-      print(cov_col_order)
       pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order)]
       # construct call of covariate_table function
       call_to_covar = list()
