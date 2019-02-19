@@ -243,9 +243,10 @@ girf.internal <- function (object,
     filt.t <- array(data=numeric(0),dim=c(0,0,0))
   }
 
-  for (nt in 1:ntimes) { ## main loop
+  for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times
-    tt <- seq(from=times[nt],to=times[nt+1],length.out=Ninter)
+    if(nt == 0) tt <- seq(from=object@t0,to=times[nt+1],length.out=Ninter)
+    else tt <- seq(from=times[nt],to=times[nt+1],length.out=Ninter)
     lookahead_steps = min(lookahead, ntimes-nt)
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
@@ -253,9 +254,10 @@ girf.internal <- function (object,
     forecast_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
     for (p in 1:Np[1]){
       # find this particle's initialization and repeat in Nguide times
-      xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = dimnames(x))
+      if(nt == 0) xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
+      else xp = matrix(x[,p,1], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       # get all the guides for this particles
-      Xg[,,,p] <- rprocess(object, xstart=xp, times=times[nt:(nt+lookahead)],
+      Xg[,,,p] <- rprocess(object, xstart=xp, times=times[(nt+1):(nt+lookahead)],
                params=params,offset=1L,.gnsi=gnsi)
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
@@ -272,6 +274,8 @@ girf.internal <- function (object,
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
       # add an extra time for the lookahead step for the lookahead
+      print(X)
+      return(X)
       X.skel <- array(0, dim=c(length(statenames), Np[1], 2), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
       X.skel[,,1] <- X[,,1]
       skel <- skeleton(object, x=X.skel, times = c(tt[s+1], times[nt + lookahead_steps]), params=params)

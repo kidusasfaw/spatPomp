@@ -113,7 +113,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
       tmp <- names(unit_index)
       names(tmp) <- unit_index
-      pomp_covar <- covar %>% mutate(ui = match(covar[,upos_name], names(tmp)))
+      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
       pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
       pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
       pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
