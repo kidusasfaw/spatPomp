@@ -244,8 +244,8 @@ girf.internal <- function (object,
   }
 
   for (nt in 1:ntimes) { ## main loop
-    # intermediate times
-    tt <- seq(from=times[nt],to=times[nt+1],length.out=Ninter)
+    # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
+    tt <- seq(from=times[nt],to=times[nt+1],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
@@ -265,16 +265,20 @@ girf.internal <- function (object,
         }
       }
     }
+    # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
       print(dim(x))
       print(x)
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
-      # add an extra time for the lookahead step for the lookahead
-      X.skel <- array(0, dim=c(length(statenames), Np[1], 2), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
+      # X is now a nvars by nreps by 1 array
+      # add an extra time for the current prediction particle and hence the +1
+      X.skel <- array(0, dim=c(length(statenames), Np[1], lookahead_steps + 1), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
       X.skel[,,1] <- X[,,1]
-      skel <- skeleton(object, x=X.skel, times = c(tt[s+1], times[nt + lookahead_steps]), params=params)
+      print(X.skel)
+      skel <- skeleton(object, x=X.skel, times = c(tt[s+1], times[(nt+1):(nt + lookahead_steps)]), params=params)
+      print(skel)
       return(skel)
       # X.skel <- X[,,]
 

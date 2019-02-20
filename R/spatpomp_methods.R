@@ -39,6 +39,23 @@ setMethod(
 )
 
 setMethod(
+  "simulate",
+  signature=signature(object="spatpomp"),
+  definition=function(object, nsim = 1, seed = NULL,
+                       format = c("spatpomps", "arrays", "data.frame"),
+                       include.data = FALSE,...) {
+    s1 <- simulate(pomp(object), ...)
+    if(format=="data.frame"){
+      # convert to long format and output
+    }
+    if(format=="spatpomps"){
+      # add back spatpomp components
+    }
+    s1
+  }
+)
+
+setMethod(
   "show",
   signature=signature(object="spatpomp"),
   definition=function (object) {
@@ -49,7 +66,7 @@ setMethod(
     cat("summary of data:\n")
     print(summary(as.data.frame(t(obs(object)))))
     cat("zero time, t0 = ",object@t0,"\n",sep="")
-    if (length(object@tcovar)>0) {
+    if (!is.null(dim(object@covar))) {
       cat(nrow(object@covar),"records of",
           ncol(object@covar),"covariates,",
           "recorded from t =",min(object@tcovar),
@@ -69,18 +86,11 @@ setMethod(
     show(object@rprior)
     cat("prior density, dprior = ")
     show(object@dprior)
-    cat("skeleton ",
-        if (object@skeleton.type!="undef")
-          paste0("(",object@skeleton.type,") ")
-        else "",
-        "= ",sep="")
     show(object@skeleton)
-    cat("initializer = ")
-    show(object@initializer)
-    cat("parameter transformation (to estimation scale) = ")
-    show(object@to.trans)
-    cat("parameter transformation (from estimation scale) = ")
-    show(object@from.trans)
+    cat("rinit = ")
+    show(object@rinit)
+    cat("parameter transformation  = ")
+    show(object@partrans)
     if (length(coef(object))>0) {
       cat("parameter(s):\n")
       print(coef(object))
