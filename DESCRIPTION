@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: pomp2 (>= 2.0)
 LinkingTo: pomp2
-Suggests: scales, stringr, geosphere, ggplot2, magrittr,
+Suggests: scales, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate:
     'generics.R'
@@ -31,4 +31,5 @@ Imports: doParallel (>= 1.0.11),
     parallel,
     foreach,
     dplyr,
-    tidyr
+    tidyr,
+    stringr

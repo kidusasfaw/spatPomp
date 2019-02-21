@@ -47,6 +47,21 @@ setMethod(
     s1 <- simulate(pomp(object), ...)
     if(format=="data.frame"){
       # convert to long format and output
+      pompdf <- as.data.frame(s1)
+      to.gather <- colnames(pompdf)[2:length(colnames(pompdf))]
+      to.select <- c(colnames(pompdf)[1], "unit", "stateobs", "val")
+      to.arrange <- c(colnames(pompdf)[1], "unit", "stateobs")
+      gathered <- pompdf %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
+        dplyr::mutate(ui = stringr::str_extract(stateobs,"[0-9]+"))%>%
+        dplyr::mutate(unit = object@unit_index[ui])%>%
+        dplyr::select_(.dots = to.select) %>%
+        dplyr::arrange_(.dots = to.arrange)
+      stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_split(x,"[0-9]+")[[1]][1])
+      gathered$stateobstype <- stateobstype
+      gathered <- gathered %>%
+        dplyr::select(-stateobs) %>%
+        tidyr::spread(key = stateobstype, value = val)
+      return(gathered)
     }
     if(format=="spatpomps"){
       # add back spatpomp components
