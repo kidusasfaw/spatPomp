@@ -65,8 +65,14 @@ setMethod(
     }
     if(format=="spatpomps"){
       # add back spatpomp components
+      sp <- new("spatpomp",s1,
+                unit_dmeasure = ,
+                units=units,
+                unit_index=unit_index,
+                unit_statenames=unit_statenames,
+                global_statenames=global_statenames,
+                obstypes = obstypes)
     }
-    s1
   }
 )
 

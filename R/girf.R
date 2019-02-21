@@ -273,11 +273,11 @@ girf.internal <- function (object,
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
       # X is now a nvars by nreps by 1 array
-      # add an extra time for the current prediction particle and hence the +1
-      X.skel <- array(0, dim=c(length(statenames), Np[1], lookahead_steps + 1), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
-      X.skel[,,1] <- X[,,1]
+      X.skel <- array(0, dim=c(length(statenames), Np[1], lookahead_steps), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
+      X.start <- X[,,1]
       print(X.skel)
-      skel <- skeleton(object, x=X.skel, times = c(tt[s+1], times[(nt+1):(nt + lookahead_steps)]), params=params)
+      print(X.start)
+      skel <- pomp2::flow(object, xstart=X.start, tstart = tt[s+1], params=params, times = times[(nt+1):(nt + lookahead_steps)])
       print(skel)
       return(skel)
       # X.skel <- X[,,]
