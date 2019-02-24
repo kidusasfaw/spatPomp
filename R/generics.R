@@ -15,3 +15,4 @@ setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter
 
 ## HIPPIE
 setGeneric("hippie", function(object,...)standardGeneric("hippie"))
+

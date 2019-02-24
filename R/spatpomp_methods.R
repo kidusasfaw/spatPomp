@@ -39,6 +39,44 @@ setMethod(
 )
 
 setMethod(
+  "simulate",
+  signature=signature(object="spatpomp"),
+  definition=function(object, nsim = 1, seed = NULL,
+                       format = c("spatpomps", "arrays", "data.frame"),
+                       include.data = FALSE,...) {
+    s1 <- simulate(pomp(object), ...)
+    if(format=="data.frame"){
+      # convert to long format and output
+      pompdf <- as.data.frame(s1)
+      to.gather <- colnames(pompdf)[2:length(colnames(pompdf))]
+      to.select <- c(colnames(pompdf)[1], "unit", "stateobs", "val")
+      to.arrange <- c(colnames(pompdf)[1], "unit", "stateobs")
+      gathered <- pompdf %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
+        dplyr::mutate(ui = stringr::str_extract(stateobs,"[0-9]+"))%>%
+        dplyr::mutate(unit = object@unit_index[ui])%>%
+        dplyr::select_(.dots = to.select) %>%
+        dplyr::arrange_(.dots = to.arrange)
+      stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_split(x,"[0-9]+")[[1]][1])
+      gathered$stateobstype <- stateobstype
+      gathered <- gathered %>%
+        dplyr::select(-stateobs) %>%
+        tidyr::spread(key = stateobstype, value = val)
+      return(gathered)
+    }
+    if(format=="spatpomps"){
+      # add back spatpomp components
+      sp <- new("spatpomp",s1,
+                unit_dmeasure = ,
+                units=units,
+                unit_index=unit_index,
+                unit_statenames=unit_statenames,
+                global_statenames=global_statenames,
+                obstypes = obstypes)
+    }
+  }
+)
+
+setMethod(
   "show",
   signature=signature(object="spatpomp"),
   definition=function (object) {
@@ -49,7 +87,7 @@ setMethod(
     cat("summary of data:\n")
     print(summary(as.data.frame(t(obs(object)))))
     cat("zero time, t0 = ",object@t0,"\n",sep="")
-    if (length(object@tcovar)>0) {
+    if (!is.null(dim(object@covar))) {
       cat(nrow(object@covar),"records of",
           ncol(object@covar),"covariates,",
           "recorded from t =",min(object@tcovar),
@@ -69,18 +107,11 @@ setMethod(
     show(object@rprior)
     cat("prior density, dprior = ")
     show(object@dprior)
-    cat("skeleton ",
-        if (object@skeleton.type!="undef")
-          paste0("(",object@skeleton.type,") ")
-        else "",
-        "= ",sep="")
     show(object@skeleton)
-    cat("initializer = ")
-    show(object@initializer)
-    cat("parameter transformation (to estimation scale) = ")
-    show(object@to.trans)
-    cat("parameter transformation (from estimation scale) = ")
-    show(object@from.trans)
+    cat("rinit = ")
+    show(object@rinit)
+    cat("parameter transformation  = ")
+    show(object@partrans)
     if (length(coef(object))>0) {
       cat("parameter(s):\n")
       print(coef(object))
