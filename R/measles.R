@@ -1,12 +1,12 @@
 #' Measles in UK spatpomp generator
 #'
-#' Generate a spatpomp object for measles in the top-\code{D} most populous cities in England.
+#' Generate a spatpomp object for measles in the top-\code{U} most populous cities in England.
 #'
-#' @param D A length-one numeric signifying the number of cities to be represented in the spatpomp object.
+#' @param U A length-one numeric signifying the number of cities to be represented in the spatpomp object.
 #' @return A spatpomp object.
 #' @examples
 #' measles(7)
-measles <- function(D=6){
+measles <- function(U=6){
 
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
@@ -39,14 +39,13 @@ x1 %>% transmute(year=decimalYear,city=loc,cases=cases,pop=pop,births=rec) -> x2
   # the R package csv format
   # from https://cran.r-project.org/doc/manuals/R-exts.html#Data-in-packages
   write.table(file="measlesUK.csv",sep = ";",row.names=F,x2)
-# y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
 y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
 y1 <- transmute(y,city=loc,lon,lat,meanPop)
 write.table(file="city_data_UK.csv",sep=";",row.names=F,y1)
 }
 ####################################################################
 
-cities <- unique(measlesUK$city)[1:D]
+cities <- unique(measlesUK$city)[1:U]
 measlesCases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]
 measlesCases <- measlesCases[measlesCases$year>1949.99,]
 
@@ -55,7 +54,7 @@ u <- split(measlesCovar$births,measlesCovar$city)
 v <- sapply(u,function(x){c(rep(NA,birth_lag),x[1:(length(x)-birth_lag)])})
 measlesCovar$lag_birthrate <- as.vector(v[,cities])*26
 measlesCovar$births<- NULL
-measlesCovarNames <- paste0(rep(c("pop","lag_birthrate"),each=D),1:D)
+measlesCovarNames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
 
 data(city_data_UK)
 # Distance between two points on a sphere radius R
@@ -75,42 +74,43 @@ distHaversine <- function (p1, p2, r = 6378137)
     return(as.vector(dist))
 }
 
-long_lat <- city_data_UK[1:D,c("lon","lat")]
-dmat <- matrix(0,D,D)
-for(d1 in 1:D) {
-  for(d2 in 1:D) {
-    dmat[d1,d2] <- round(distHaversine(long_lat[d1,],long_lat[d2,]) / 1609.344,1)
+long_lat <- city_data_UK[1:U,c("lon","lat")]
+dmat <- matrix(0,U,U)
+for(u1 in 1:U) {
+  for(u2 in 1:U) {
+    dmat[u1,u2] <- round(distHaversine(long_lat[u1,],long_lat[u2,]) / 1609.344,1)
   }
 }
 
-p <- city_data_UK$meanPop[1:D]
-v_by_g <- matrix(0,D,D)
-dist_mean <- sum(dmat)/(D*(D-1))
+p <- city_data_UK$meanPop[1:U]
+v_by_g <- matrix(0,U,U)
+dist_mean <- sum(dmat)/(U*(U-1))
 p_mean <- mean(p)
-for(d1 in 2:D){
-  for(d2 in 1:(d1-1)){
-    v_by_g[d1,d2] <- (dist_mean*p[d1]*p[d2]) / (dmat[d1,d2] * p_mean^2)
-    v_by_g[d2,d1] <- v_by_g[d1,d2]
+for(u1 in 2:U){
+  for(u2 in 1:(u1-1)){
+    v_by_g[u1,u2] <- (dist_mean*p[u1]*p[u2]) / (dmat[u1,u2] * p_mean^2)
+    v_by_g[u2,u1] <- v_by_g[u1,u2]
   }
 }
 to_C_array <- function(v)paste0("{",paste0(v,collapse=","),"}")
 v_by_g_C_rows <- apply(v_by_g,1,to_C_array)
 v_by_g_C_array <- to_C_array(v_by_g_C_rows)
-v_by_g_C <- Csnippet(paste0("const double v_by_g[",D,"][",D,"] = ",v_by_g_C_array,"; "))
-v_by_g_C
+v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
-states <- c("S","E","I","R","C","W")
-state_names <- paste0(rep(states,each=D),1:D)
+measlesGlobals <- Csnippet(
+  paste0("const int U = ",U,"; \n ", v_by_g_C)
+)
 
-## initial value parameters
-ivp_names <- paste0(state_names[1:(4*D)],"_0")
+measlesUnitStateNames <- c('S','E','I','R','C','W')
+measlesStateNames <- paste0(rep(measlesUnitStateNames,each=U),1:U)
+measlesIvpNames <- paste0(measlesStateNames[1:(4*U)],"_0")
 
 ## regular parameters
 he10_rp_names <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi")
-rp_names <- c(he10_rp_names,"D","g")
+rp_names <- c(he10_rp_names,"g")
 
 ## all parameters
-param_names <- c(rp_names,ivp_names)
+measlesParamNames <- c(rp_names,measlesIvpNames)
 
 ## Model adapted from He et al. (2010) with gravity transport
 
@@ -125,7 +125,7 @@ rproc <- Csnippet("
   double *W = &W1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
-  int d,e;
+  int u,v;
 
   // term-time seasonality
   t = (t-floor(t))*365.25;
@@ -137,23 +137,23 @@ rproc <- Csnippet("
   // transmission rate
   beta = R0*(gamma+mu)*seas;
 
-  for (d = 0 ; d < D ; d++) {
+  for (u = 0 ; u < U ; u++) {
 
     // cohort effect
     if (fabs(t-floor(t)-251.0/365.0) < 0.5*dt)
-      br = cohort*lag_birthrate[d]/dt + (1-cohort)*lag_birthrate[d];
+      br = cohort*lag_birthrate[u]/dt + (1-cohort)*lag_birthrate[u];
     else
-      br = (1.0-cohort)*lag_birthrate[d];
+      br = (1.0-cohort)*lag_birthrate[u];
 
     // expected force of infection
-    foi = pow( (I[d]+iota)/pop[d],alpha);
+    foi = pow( (I[u]+iota)/pop[u],alpha);
     // Do we still need iota in a spatPomp version?
     // See also discrepancy between Joonha and Daihai versions
     // Daihai didn't raise pop to the alpha power
 
-    for (e=0; e < D ; e++) {
-      if(e != d)
-        foi += g * v_by_g[d][e] * (pow(I[e]/pop[e],alpha) - pow(I[d]/pop[d],alpha)) / pop[d];
+    for (v=0; v < U ; v++) {
+      if(v != u)
+        foi += g * v_by_g[u][v] * (pow(I[v]/pop[v],alpha) - pow(I[u]/pop[u],alpha)) / pop[u];
     }
     // white noise (extrademographic stochasticity)
     dw = rgammawn(sigmaSE,dt);
@@ -171,16 +171,16 @@ rproc <- Csnippet("
     births = rpois(br*dt);
 
     // transitions between classes
-    reulermultinom(2,S[d],&rate[0],dt,&trans[0]);
-    reulermultinom(2,E[d],&rate[2],dt,&trans[2]);
-    reulermultinom(2,I[d],&rate[4],dt,&trans[4]);
+    reulermultinom(2,S[u],&rate[0],dt,&trans[0]);
+    reulermultinom(2,E[u],&rate[2],dt,&trans[2]);
+    reulermultinom(2,I[u],&rate[4],dt,&trans[4]);
 
-    S[d] += births   - trans[0] - trans[1];
-    E[d] += trans[0] - trans[2] - trans[3];
-    I[d] += trans[2] - trans[4] - trans[5];
-    R[d] = pop[d] - S[d] - E[d] - I[d];
-    W[d] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
-    C[d] += trans[4];           // true incidence
+    S[u] += births   - trans[0] - trans[1];
+    E[u] += trans[0] - trans[2] - trans[3];
+    I[u] += trans[2] - trans[4] - trans[5];
+    R[u] = pop[u] - S[u] - E[u] - I[u];
+    W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
+    C[u] += trans[4];           // true incidence
   }
 ")
 
@@ -197,15 +197,15 @@ measles_rinit <- Csnippet("
   const double *R_0 = &R1_0;
   const double *pop = &pop1;
   double m;
-  int d;
-  for (d = 0; d < D; d++) {
-    m = pop[d]/(S_0[d]+E_0[d]+I_0[d]+R_0[d]);
-    S[d] = nearbyint(m*S_0[d]);
-    E[d] = nearbyint(m*E_0[d]);
-    I[d] = nearbyint(m*I_0[d]);
-    R[d] = nearbyint(m*R_0[d]);
-    W[d] = 0;
-    C[d] = 0;
+  int u;
+  for (u = 0; u < U; u++) {
+    m = pop[u]/(S_0[u]+E_0[u]+I_0[u]+R_0[u]);
+    S[u] = nearbyint(m*S_0[u]);
+    E[u] = nearbyint(m*E_0[u]);
+    I[u] = nearbyint(m*I_0[u]);
+    R[u] = nearbyint(m*R_0[u]);
+    W[u] = 0;
+    C[u] = 0;
   }
 ")
 
@@ -213,17 +213,17 @@ measles_dmeas <- Csnippet("
   const double *C = &C1;
   const double *cases = &cases1;
   double m,v;
-  double tol = pow(1.0e-18,D);
-  int d;
+  double tol = pow(1.0e-18,U);
+  int u;
 
   lik = 0;
-  for (d = 0; d < D; d++) {
-    m = rho*C[d];
+  for (u = 0; u < U; u++) {
+    m = rho*C[u];
     v = m*(1.0-rho+psi*psi*m);
-    if (cases[d] > 0.0) {
-      lik += log(pnorm(cases[d]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[d]-0.5,m,sqrt(v)+tol,1,0)+tol);
+    if (cases[u] > 0.0) {
+      lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
     } else {
-      lik += log(pnorm(cases[d]+0.5,m,sqrt(v)+tol,1,0)+tol);
+      lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
     }
   }
   if(!give_log) lik = exp(lik);
@@ -233,17 +233,17 @@ measles_rmeas <- Csnippet("
   const double *C = &C1;
   double *cases = &cases1;
   double m,v;
-  double tol = pow(1.0e-18,D);
-  int d;
+  double tol = pow(1.0e-18,U);
+  int u;
 
-  for (d = 0; d < D; d++) {
-    m = rho*C[d];
+  for (u = 0; u < U; u++) {
+    m = rho*C[u];
     v = m*(1.0-rho+psi*psi*m);
-    cases[d] = rnorm(m,sqrt(v)+tol);
-    if (cases[d] > 0.0) {
-      cases[d] = nearbyint(cases[d]);
+    cases[u] = rnorm(m,sqrt(v)+tol);
+    if (cases[u] > 0.0) {
+      cases[u] = nearbyint(cases[u]);
     } else {
-      cases[d] = 0.0;
+      cases[u] = 0.0;
     }
   }
 ")
@@ -272,15 +272,15 @@ measles_rinit <- Csnippet("
   const double *R_0 = &R1_0;
   const double *pop = &pop1;
   double m;
-  int d;
-  for (d = 0; d < D; d++) {
-    m = pop[d]/(S_0[d]+E_0[d]+I_0[d]+R_0[d]);
-    S[d] = nearbyint(m*S_0[d]);
-    E[d] = nearbyint(m*E_0[d]);
-    I[d] = nearbyint(m*I_0[d]);
-    R[d] = nearbyint(m*R_0[d]);
-    W[d] = 0;
-    C[d] = 0;
+  int u;
+  for (u = 0; u < U; u++) {
+    m = pop[u]/(S_0[u]+E_0[u]+I_0[u]+R_0[u]);
+    S[u] = nearbyint(m*S_0[u]);
+    E[u] = nearbyint(m*E_0[u]);
+    I[u] = nearbyint(m*I_0[u]);
+    R[u] = nearbyint(m*R_0[u]);
+    W[u] = 0;
+    C[u] = 0;
   }
 ")
 
@@ -288,15 +288,15 @@ spatpomp(measlesCases,
                     units = "city",
                     times = "year",
                     t0 = min(measlesCases$year)-1/26,
-                    unit_statenames = c('S','E','I','R','C','W'),
+                    unit_statenames = measlesUnitStateNames,
                     global_statenames = c('P'),
                     covar = measlesCovar,
                     tcovar = "year",
                     rprocess=euler(rproc, delta.t=2/365),
-                    accumvars = c(paste0("C",1:D),paste0("W",1:D)),
-                    paramnames=param_names,
+                    accumvars = c(paste0("C",1:U),paste0("W",1:U)),
+                    paramnames=measlesParamNames,
                     covarnames=measlesCovarNames,
-                    globals=v_by_g_C,
+                    globals=measlesGlobals,
                     rinit=measles_rinit,
                     dmeasure=measles_dmeas,
                     rmeasure=measles_rmeas)
