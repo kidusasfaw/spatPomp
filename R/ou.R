@@ -1,90 +1,88 @@
 #' Linear-Gaussian spatpomp generator
 #'
-#' Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with
-#' \code{N} time steps.
+#' Generate a spatpomp object representing a \code{U}-dimensional discrete-time 
+#' Ornstein-Uhlenbeck process with \code{N} time steps.
 #'
-#' @param D A length-one numeric signifying dimension of the process.
+#' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
 #' @return A spatpomp object with the specified dimension and time steps.
 #' @examples
 #' ou(5, 100)
 
-ou <- function(D=5,N=100){
+ou <- function(U=5,N=100){
 
-dist <- function(d,e,n=D) min(abs(d-e),abs(d-e+D),abs(d-e-D))
-dmat <- matrix(0,D,D)
-for(d in 1:D) {
-  for(e in 1:D) {
-    dmat[d,e] <- dist(d,e)
+U <- 5; N <- 100
+
+dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
+dmat <- matrix(0,U,U)
+for(u in 1:U) {
+  for(v in 1:U) {
+    dmat[u,v] <- dist(u,v)
   }
 }
 to_C_array <- function(v)paste0("{",paste0(v,collapse=","),"}")
 dist_C_rows <- apply(dmat,1,to_C_array)
 dist_C_array <- to_C_array(dist_C_rows)
-dist_C <- paste0("const double dist[",D,"][",D,"] = ",dist_C_array,"; ")
-ou_globals <- Csnippet(paste0("#define D ", D, " \n ", dist_C))
+dist_C <- paste0("const double dist[",U,"][",U,"] = ",dist_C_array,"; ")
+ou_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
 
 
-obs_names <- paste0("Y",1:D)
-ou_data <- data.frame(time=rep(1:N,D),unit=rep(obs_names,each=N),Y=rep(NA,D*N),stringsAsFactors=F)
+obs_names <- paste0("Y",1:U)
+ou_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
 
-state_names <- paste0("X",1:D)
+ou_unit_statenames <- c("X")
+ou_statenames <- paste0(ou_unit_statenames,1:U)
 
-## initial value parameters
- ivp_names <- paste0(state_names,"_0")
+ou_IVPnames <- paste0(ou_statenames,"_0")
+ou_RPnames <- c("alpha","rho","sigma","tau")
+ou_paramnames <- c(ou_RPnames,ou_IVPnames)
 
-## regular parameters
- rp_names <- c("alpha","rho","sigma","tau")
-
-## all parameters
-param_names <- c(rp_names,ivp_names)
-
-ou_rproc <- Csnippet("
+ou_rprocess <- Csnippet("
   double *X = &X1;
-  double nextX[D];
-  int d,e;
+  double nextX[U];
+  int u,v;
 
-  for (d = 0 ; d < D ; d++) {
-    nextX[d] = 0;
-    for (e=0; e < D ; e++) {
-      nextX[d] += X[e]*pow(rho,dist[d][e]);
+  for (u = 0 ; u < U ; u++) {
+    nextX[u] = 0;
+    for (v=0; v < U ; v++) {
+      nextX[u] += X[v]*pow(rho,dist[u][v]);
     }
-    nextX[d] = alpha * nextX[d] + rnorm(0,sigma);
+    nextX[u] = alpha * nextX[u] + rnorm(0,sigma);
   }
-  for (d = 0 ; d < D ; d++) {
-    X[d] = nextX[d];
+  for (u = 0 ; u < U ; u++) {
+    X[u] = nextX[u];
   }
 ")
 
 ou_rinit <- Csnippet("
   double *X = &X1;
   const double *X_0 =&X1_0;
-  int d;
-  for (d = 0; d < D; d++) {
-    X[d]=X_0[d];
+  int u;
+  for (u = 0; u < U; u++) {
+    X[u]=X_0[u];
   }
 ")
 
 
-ou_dmeas <- Csnippet("
+ou_dmeasure <- Csnippet("
   const double *X = &X1;
   const double *Y = &Y1;
-  double tol = pow(1.0e-18,D);
-  int d;
+  double tol = pow(1.0e-18,U);
+  int u;
   lik=0;
-  for (d=0; d<D; d++) lik += dnorm(Y[d],X[d],tau,1);
+  for (u=0; u<U; u++) lik += dnorm(Y[u],X[u],tau,1);
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-ou_rmeas <- Csnippet("
+ou_rmeasure <- Csnippet("
   const double *X = &X1;
   double *Y = &Y1;
-  double tol = pow(1.0e-18,D);
-  int d;
-  for (d=0; d<D; d++) Y[d] = rnorm(X[d],tau+tol);
+  double tol = pow(1.0e-18,U);
+  int u;
+  for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
-ou_udmeas <- Csnippet("
+ou_unit_dmeasure <- Csnippet("
   double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
@@ -94,21 +92,21 @@ ou <- spatpomp(ou_data,
                times="time",
                t0=0,
                units="unit",
-               unit_statenames = c('X'),
-               rprocess=discrete_time(ou_rproc),
-               paramnames=param_names,
+               unit_statenames = ou_unit_statenames,
+               rprocess=discrete_time(ou_rprocess),
+               paramnames=ou_paramnames,
                globals=ou_globals,
-               rmeasure=ou_rmeas,
-               dmeasure=ou_dmeas,
-               unit_dmeasure=ou_udmeas,
+               rmeasure=ou_rmeasure,
+               dmeasure=ou_dmeasure,
+               unit_dmeasure=ou_unit_dmeasure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),
                rinit=ou_rinit
   )
 
 ## We need a parameter vector. For now, we initialize the process at zero.
-test_ivps <- rep(0,D)
-names(test_ivps) <- ivp_names
+test_ivps <- rep(0,U)
+names(test_ivps) <- ou_IVPnames
 test_params <- c(alpha=0.4, rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(ou,params=test_params)
+simulate(pomp(ou),params=test_params)
 
 }

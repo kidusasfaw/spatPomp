@@ -4,16 +4,17 @@
 \alias{measles}
 \title{Measles in UK spatpomp generator}
 \usage{
-measles(D = 6)
+measles(U = 6)
 }
 \arguments{
-\item{D}{A length-one numeric signifying the number of cities to be represented in the spatpomp object.}
+\item{U}{A length-one numeric signifying the number of cities to be represented in the spatpomp object.}
 }
 \value{
 A spatpomp object.
 }
 \description{
-Generate a spatpomp object for measles in the top-\code{D} most populous cities in England.
+Generate a spatpomp object for measles in the top-\code{U} most populous cities in England.
+Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 }
 \examples{
 measles(7)

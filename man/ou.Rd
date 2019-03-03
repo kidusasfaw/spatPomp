@@ -4,10 +4,10 @@
 \alias{ou}
 \title{Linear-Gaussian spatpomp generator}
 \usage{
-ou(D = 5, N = 100)
+ou(U = 5, N = 100)
 }
 \arguments{
-\item{D}{A length-one numeric signifying dimension of the process.}
+\item{U}{A length-one numeric signifying dimension of the process.}
 
 \item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
 }
@@ -15,8 +15,8 @@ ou(D = 5, N = 100)
 A spatpomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{D}-dimensional Ornstein-Uhlenbeck process with
-\code{N} time steps.
+Generate a spatpomp object representing a \code{U}-dimensional discrete-time 
+Ornstein-Uhlenbeck process with \code{N} time steps.
 }
 \examples{
 ou(5, 100)

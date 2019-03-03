@@ -15,6 +15,7 @@ LinkingTo: pomp2
 Suggests: scales, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate:
+    'bm.R'
     'generics.R'
     'girf.R'
     'spatpomp_class.R'
