@@ -250,7 +250,7 @@ girf.internal <- function (object,
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    forecast_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+    fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
     for (p in 1:Np[1]){
       # find this particle's initialization and repeat in Nguide times
       xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = dimnames(x))
@@ -261,25 +261,38 @@ girf.internal <- function (object,
         snames = paste0(object@unit_statenames,u)
         for(l in 1:lookahead_steps){
           hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h)
-          forecast_samp_var[u, l, p] = var(hXg)
+          fcst_samp_var[u, l, p] = var(hXg)
         }
       }
     }
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
-      print(dim(x))
-      print(x)
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
       # X is now a nvars by nreps by 1 array
-      X.skel <- array(0, dim=c(length(statenames), Np[1], lookahead_steps), dimnames = list(nvars = statenames, nreps = NULL, ntimes=NULL))
       X.start <- X[,,1]
-      print(X.skel)
-      print(X.start)
-      skel <- pomp2::flow(object, xstart=X.start, tstart = tt[s+1], params=params, times = times[(nt+1):(nt + lookahead_steps)])
-      print(skel)
-      return(skel)
+      skel <- pomp2::flow(object, xstart=X.start, tstart = tt[s+1], params=params, times = c(tt[s+1], times[(nt+1):(nt + lookahead_steps)]))
+      # create measurement variance at skeleton matrix
+      meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      for(u in 1:length(object@units)){
+        snames = paste0(object@unit_statenames,u)
+        for (l in 1:lookahead_steps){
+          hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h)
+          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta_to_v)
+        }
+      }
+      fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      for(u in 1:length(object@units)){
+        for(l in 1:lookahead_steps){
+          fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
+                                      FUN = function(x) x*(times[nt+l] - tt[s+1])/(times[nt+l] - times[nt]))
+        }
+      }
+      mom_match_param <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      inflated_var <- meas_var_skel + fcst_var_upd
+      theta <- v_to_theta(inflated_var)
+
       # X.skel <- X[,,]
 
       # for(l in 1:lookahead_steps){
