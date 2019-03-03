@@ -107,6 +107,6 @@ ou <- spatpomp(ou_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- ou_IVPnames
 test_params <- c(alpha=0.4, rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(ou,params=test_params)
+simulate(pomp(ou),params=test_params)
 
 }

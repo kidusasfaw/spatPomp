@@ -105,7 +105,7 @@ lorenz <- spatpomp(lorenz_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- lorenz_IVPnames
 test_params <- c(F=8, rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(lorenz,params=test_params)
+simulate(pomp(lorenz),params=test_params)
 
 }
 

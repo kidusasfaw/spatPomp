@@ -111,7 +111,7 @@ bm_spatpomp <- spatpomp(bm_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
 test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(bm_spatpomp,params=test_params)
+simulate(pomp(bm_spatpomp),params=test_params)
 
 }
 
