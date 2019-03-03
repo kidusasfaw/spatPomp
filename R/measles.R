@@ -1,6 +1,7 @@
 #' Measles in UK spatpomp generator
 #'
 #' Generate a spatpomp object for measles in the top-\code{U} most populous cities in England.
+#' Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatpomp object.
 #' @return A spatpomp object.
@@ -46,15 +47,14 @@ write.table(file="city_data_UK.csv",sep=";",row.names=F,y1)
 ####################################################################
 
 cities <- unique(measlesUK$city)[1:U]
-measlesCases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]
-measlesCases <- measlesCases[measlesCases$year>1949.99,]
-
-measlesCovar <- measlesUK[measlesUK$city %in% cities,c("year","city","pop","births")]
-u <- split(measlesCovar$births,measlesCovar$city)
+measles_cases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]
+measles_cases <- measles_cases[measles_cases$year>1949.99,]
+measles_covar <- measlesUK[measlesUK$city %in% cities,c("year","city","pop","births")]
+u <- split(measles_covar$births,measles_covar$city)
 v <- sapply(u,function(x){c(rep(NA,birth_lag),x[1:(length(x)-birth_lag)])})
-measlesCovar$lag_birthrate <- as.vector(v[,cities])*26
-measlesCovar$births<- NULL
-measlesCovarNames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
+measles_covar$lag_birthrate <- as.vector(v[,cities])*26
+measles_covar$births<- NULL
+measles_covarnames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
 
 data(city_data_UK)
 # Distance between two points on a sphere radius R
@@ -97,24 +97,17 @@ v_by_g_C_rows <- apply(v_by_g,1,to_C_array)
 v_by_g_C_array <- to_C_array(v_by_g_C_rows)
 v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
-measlesGlobals <- Csnippet(
+measles_globals <- Csnippet(
   paste0("const int U = ",U,"; \n ", v_by_g_C)
 )
 
-measlesUnitStateNames <- c('S','E','I','R','C','W')
-measlesStateNames <- paste0(rep(measlesUnitStateNames,each=U),1:U)
-measlesIvpNames <- paste0(measlesStateNames[1:(4*U)],"_0")
+measles_unit_statenames <- c('S','E','I','R','C','W')
+measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
+measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
+measles_RPnames <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi","g")
+measles_paramnames <- c(measles_RPnames,measles_IVPnames)
 
-## regular parameters
-he10_rp_names <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi")
-rp_names <- c(he10_rp_names,"g")
-
-## all parameters
-measlesParamNames <- c(rp_names,measlesIvpNames)
-
-## Model adapted from He et al. (2010) with gravity transport
-
-rproc <- Csnippet("
+measles_rprocess <- Csnippet("
   double beta, br, seas, foi, dw, births;
   double rate[6], trans[6];
   double *S = &S1;
@@ -160,7 +153,7 @@ rproc <- Csnippet("
 
     rate[0] = beta*foi*dw/dt;  // stochastic force of infection
 
-    // These rates could be outside the d loop if all parameters are shared between units
+    // These rates could be outside the u loop if all parameters are shared between units
     rate[1] = mu;			    // natural S death
     rate[2] = sigma;		  // rate of ending of latent stage
     rate[3] = mu;			    // natural E death
@@ -209,7 +202,7 @@ measles_rinit <- Csnippet("
   }
 ")
 
-measles_dmeas <- Csnippet("
+measles_dmeasure <- Csnippet("
   const double *C = &C1;
   const double *cases = &cases1;
   double m,v;
@@ -229,7 +222,7 @@ measles_dmeas <- Csnippet("
   if(!give_log) lik = exp(lik);
 ")
 
-measles_rmeas <- Csnippet("
+measles_rmeasure <- Csnippet("
   const double *C = &C1;
   double *cases = &cases1;
   double m,v;
@@ -248,7 +241,7 @@ measles_rmeas <- Csnippet("
   }
 ")
 
-unit_dmeas <- Csnippet('
+measles_unit_dmeasure <- Csnippet('
                        double m = rho*C;
                        double v = m*(1.0-rho+psi*psi*m);
                        double tol = 1.0e-18;
@@ -284,21 +277,22 @@ measles_rinit <- Csnippet("
   }
 ")
 
-spatpomp(measlesCases,
+spatpomp(measles_cases,
                     units = "city",
                     times = "year",
-                    t0 = min(measlesCases$year)-1/26,
-                    unit_statenames = measlesUnitStateNames,
-                    global_statenames = c('P'),
-                    covar = measlesCovar,
+                    t0 = min(measles_cases$year)-1/26,
+                    unit_statenames = measles_unit_statenames,
+                    covar = measles_covar,
                     tcovar = "year",
-                    rprocess=euler(rproc, delta.t=2/365),
+                    rprocess=euler(measles_rprocess, delta.t=2/365),
                     accumvars = c(paste0("C",1:U),paste0("W",1:U)),
-                    paramnames=measlesParamNames,
-                    covarnames=measlesCovarNames,
-                    globals=measlesGlobals,
+                    paramnames=measles_paramnames,
+                    covarnames=measles_covarnames,
+                    globals=measles_globals,
                     rinit=measles_rinit,
-                    dmeasure=measles_dmeas,
-                    rmeasure=measles_rmeas)
+                    dmeasure=measles_dmeasure,
+                    rmeasure=measles_rmeasure,
+                    unit_dmeasure=measles_unit_dmeasure
+)
 
 }

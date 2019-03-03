@@ -27,15 +27,15 @@ lorenz_data <- data.frame(time=rep((1:N)*dt_obs,U),
 lorenz_state_names <- paste0("X",1:U)
 
 ## initial value parameters
-lorenz_ivp_names <- paste0(lorenz_unit_statenames,1:U,"_0")
+lorenz_IVPnames <- paste0(lorenz_unit_statenames,1:U,"_0")
 
 ## regular parameters
-lorenz_rp_names <- c("F","sigma","tau")
+lorenz_RPnames <- c("F","sigma","tau")
 
 ## all parameters
-lorenz_param_names <- c(lorenz_rp_names,lorenz_ivp_names)
+lorenz_paramnames <- c(lorenz_RPnames,lorenz_IVPnames)
 
-lorenz_rproc <- Csnippet("
+lorenz_rprocess <- Csnippet("
   double *X = &X1;
   double dXdt[U];
   int u,e;
@@ -61,7 +61,7 @@ lorenz_rinit <- Csnippet("
 ")
 
 
-lorenz_dmeas <- Csnippet("
+lorenz_dmeasure <- Csnippet("
   const double *X = &X1;
   const double *Y = &Y1;
   double tol = pow(1.0e-18,U);
@@ -71,7 +71,7 @@ lorenz_dmeas <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-lorenz_rmeas <- Csnippet("
+lorenz_rmeasure <- Csnippet("
   const double *X = &X1;
   double *Y = &Y1;
   double tol = pow(1.0e-18,U);
@@ -79,7 +79,7 @@ lorenz_rmeas <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
-lorenz_udmeas <- Csnippet("
+lorenz_unit_dmeasure <- Csnippet("
   double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
@@ -90,20 +90,20 @@ lorenz <- spatpomp(lorenz_data,
                t0=0,
                units="unit",
                unit_statenames = lorenz_unit_statenames,
-               rprocess=euler(lorenz_rproc,delta.t=dt),
-               statenames=lorenz_state_names, 
-               paramnames=lorenz_param_names,
+               rprocess=euler(lorenz_rprocess,delta.t=dt),
+               statenames=lorenz_statenames, 
+               paramnames=lorenz_paramnames,
                globals=lorenz_globals,
-               rmeasure=lorenz_rmeas,
-               dmeasure=lorenz_dmeas,
-               unit_dmeasure=lorenz_udmeas,
+               rmeasure=lorenz_rmeasure,
+               dmeasure=lorenz_dmeasure,
+               unit_dmeasure=lorenz_unit_dmeasure,
                partrans = parameter_trans(log = c("F", "sigma", "tau")),
                rinit=lorenz_rinit
   )
 
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
-names(test_ivps) <- lorenz_ivp_names
+names(test_ivps) <- lorenz_IVPnames
 test_params <- c(F=8, rho=0.4, sigma=1, tau=1, test_ivps)
 simulate(lorenz,params=test_params)
 
