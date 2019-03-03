@@ -2,7 +2,9 @@
 #'
 #' Generate a spatpomp object representing a \code{U}-dimensional  
 #' Brownian motion with spatial correlation decaying geometrically with
-#' distance around a circle. 
+#' distance around a circle. The model is defined in continuous time
+#' though in this case an Euler approximation is exact at the evaluation
+#' times. 
 #'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
@@ -10,9 +12,9 @@
 #' @examples
 #' bm(U=4, N=20)
 
-bm <- function(U=5,N=100){
+bm <- function(U=5,N=100,delta.t=0.1){
 
-U <- 5; N <- 100
+U <- 5; N <- 100; delta.t <- 0.3
 
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -88,11 +90,12 @@ bm_unit_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik);
 ")
 
-bm <- spatpomp(bm_data,
+bm_spatpomp <- spatpomp(bm_data,
                times="time",
                t0=0,
                units="unit",
                unit_statenames = bm_unit_statenames,
+#               rprocess=euler(bm_rprocess,delta.t=delta.t),
                rprocess=discrete_time(bm_rprocess),
                paramnames=bm_paramnames,
                globals=bm_globals,
@@ -103,10 +106,12 @@ bm <- spatpomp(bm_data,
                rinit=bm_rinit
   )
 
+
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
 test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(bm,params=test_params)
+simulate(bm_spatpomp,params=test_params)
 
 }
+

@@ -4,7 +4,7 @@
 \alias{bm}
 \title{Brownian motion spatpomp generator}
 \usage{
-bm(U = 5, N = 100)
+bm(U = 5, N = 100, delta.t = 0.1)
 }
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}
@@ -17,7 +17,9 @@ A spatpomp object with the specified dimension and time steps.
 \description{
 Generate a spatpomp object representing a \code{U}-dimensional  
 Brownian motion with spatial correlation decaying geometrically with
-distance around a circle.
+distance around a circle. The model is defined in continuous time
+though in this case an Euler approximation is exact at the evaluation
+times.
 }
 \examples{
 bm(U=4, N=20)
