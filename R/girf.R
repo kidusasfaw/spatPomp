@@ -100,7 +100,7 @@ setMethod(
         h,
         theta_to_v,
         v_to_theta,
-        tol = 1e-17, max.fail = Inf,
+        tol = tol, max.fail = Inf,
         pred.mean = FALSE,
         pred.var = FALSE,
         filter.mean = FALSE,
@@ -151,6 +151,7 @@ girf.internal <- function (object,
         .gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
+  ep <- paste0("in ",sQuote("girf"),": ")
 
   if (pomp2:::undefined(object@rprocess) || pomp2:::undefined(object@dmeasure))
     pomp2:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
@@ -164,7 +165,10 @@ girf.internal <- function (object,
   save.states <- as.logical(save.states)
 
   params <- coef(object)
+  params_matrix <- matrix(params,nrow=length(params), ncol = Np[1])
+  rownames(params_matrix) <- names(params)
   times <- time(object,t0=TRUE)
+  t0 <- times[1]
   ntimes <- length(times)-1
 
   if (missing(Np) || is.null(Np)) {
@@ -210,8 +214,8 @@ girf.internal <- function (object,
     pedigree <- vector(mode="list",length=ntimes+1)
   }
 
-  loglik <- rep(NA,ntimes)
-  eff.sample.size <- numeric(ntimes)
+  loglik <- array(0, dim = c(ntimes, Ninter))
+  eff.sample.size <- array(0, dim = c(ntimes, Ninter))
   nfail <- 0
 
   ## set up storage for prediction means, variances, etc.
@@ -242,10 +246,11 @@ girf.internal <- function (object,
   } else {
     filt.t <- array(data=numeric(0),dim=c(0,0,0))
   }
-
-  for (nt in 1:ntimes) { ## main loop
+  # initialize filter guide function
+  filter_guide_fun <- array(1, dim = Np[1])
+  for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
-    tt <- seq(from=times[nt],to=times[nt+1],length.out=Ninter+1)
+    tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
@@ -255,7 +260,7 @@ girf.internal <- function (object,
       # find this particle's initialization and repeat in Nguide times
       xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = dimnames(x))
       # get all the guides for this particles
-      Xg[,,,p] <- rprocess(object, xstart=xp, times=times[nt:(nt+lookahead)],
+      Xg[,,,p] <- rprocess(object, xstart=xp, times=times[(nt+1):(nt+1+lookahead_steps)],
                params=params,offset=1L,.gnsi=gnsi)
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
@@ -272,7 +277,12 @@ girf.internal <- function (object,
                     params=params,offset=1L,.gnsi=gnsi)
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
-      skel <- pomp2::flow(object, xstart=X.start, tstart = tt[s+1], params=params, times = c(tt[s+1], times[(nt+1):(nt + lookahead_steps)]))
+      if(tt[s+1] < times[nt + 1 + lookahead_steps]){
+        skel <- pomp2::flow(object, xstart=X.start, params=params_matrix, times = c(tt[s+1], times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]), offset = 1)
+      } else {
+        skel <- X
+      }
+
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
@@ -286,123 +296,94 @@ girf.internal <- function (object,
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
           fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
-                                      FUN = function(x) x*(times[nt+l] - tt[s+1])/(times[nt+l] - times[nt]))
+                                      FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-      mom_match_param <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      mom_match_param <- array(0, dim = c(length(params), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      theta <- v_to_theta(inflated_var)
-
-      # X.skel <- X[,,]
-
-      # for(l in 1:lookahead_steps){
-      #   skel <- skeleton(object, x=X, times = c(tt[s], times[nt + lookahead_steps]), params=params)
-      #   return(skel)
-      # }
+      mom_match_param = apply(X=inflated_var, MARGIN=c(2,3), FUN = v_to_theta)
+      # guide functions as product (so base case is 1)
+      guide_fun = vector(mode = "numeric", length = Np[1]) + 1
+      for(l in 1:lookahead_steps){
+        dmeas_weights <- tryCatch(
+          vec_dmeasure(
+            object,
+            y=object@data[,nt+l,drop=FALSE],
+            x=skel[,,l,drop = FALSE],
+            times=times[nt+1+l],
+            params=mom_match_param[,l,],
+            log=FALSE,
+            .gnsi=gnsi
+          ),
+          error = function (e) {
+            stop(ep,"error in calculation of dmeas_weights: ",
+                 conditionMessage(e),call.=FALSE)
+          }
+        )
+        # print(dmeas_weights)
+        dmeas_weights[dmeas_weights == 0] <- tol
+        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
+        if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
+        guide_fun = guide_fun*resamp_weights
+      }
+      # weights
+      s_not_1_weights <- guide_fun/filter_guide_fun
+      if (!(s==1 & nt!=0)){
+        weights <- s_not_1_weights
+      }
+      else {
+        print("nt!=0 and s==1")
+        x_3d <- x
+        dim(x_3d) <- c(dim(x),1)
+        rownames(x_3d)<-rownames(x)
+        weights <- tryCatch(
+          dmeasure(
+            object,
+            y=object@data[,nt,drop=FALSE],
+            x=x_3d,
+            times=times[nt+1],
+            params=params,
+            log=FALSE,
+            .gnsi=gnsi
+          ),
+          error = function (e) {
+            stop(ep,"error in calculation of dmeas_weights: ",
+                 conditionMessage(e),call.=FALSE)
+          }
+        )
+        gnsi <- FALSE
+        weights <- as.numeric(weights)*s_not_1_weights
+      }
+      xx <- tryCatch(
+        .Call('girf_computations',
+              x=X,
+              params=params,
+              Np=Np[nt+1],
+              predmean=pred.mean,
+              predvar=pred.var,
+              filtmean=filter.mean,
+              trackancestry=filter.traj,
+              doparRS=FALSE,
+              weights=weights,
+              gps=guide_fun,
+              fsv=fcst_samp_var,
+              tol=tol
+              ),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
+        }
+      )
+      all.fail <- xx$fail
+      eff.sample.size[nt+1, s] <- xx$ess
+      loglik[nt+1, s] <- xx$loglik
+      x <- xx$states
+      filter_guide_fun <- xx$filterguides
+      params <- xx$params[,1]
+      fcst_samp_var <- xx$newfsv
     }
   }
+  return(sum(loglik))
 }
-#     ## advance the state variables according to the process model
-#     X <- rprocess(object,xstart=x,times=times[c(nt,nt+1)],params=params,
-#       offset=1L,.gnsi=gnsi)
-#
-#     if (pred.var) { ## check for nonfinite state variables and parameters
-#       problem.indices <- unique(which(!is.finite(X),arr.ind=TRUE)[,1L])
-#       nprob <- length(problem.indices)
-#       if (nprob > 0)
-#         pomp2:::pStop_("non-finite state variable",ngettext(nprob,"","s"),": ",
-#           paste(rownames(X)[problem.indices],collapse=', '))
-#     }
-#
-#     ## determine the weights
-#     weights <- dmeasure(object,y=object@data[,nt,drop=FALSE],x=X,
-#       times=times[nt+1],params=params,log=FALSE,.gnsi=gnsi)
-#
-#     if (!all(is.finite(weights))) {
-#       first <- which(!is.finite(weights))[1L]
-#       datvals <- object@data[,nt]
-#       weight <- weights[first]
-#       states <- X[,first,1L]
-#       msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,
-#         datvals,states,params)
-#       pomp2:::pStop_(msg)
-#     }
-#
-#     gnsi <- FALSE
-#
-#     ## compute prediction mean, prediction variance, filtering mean,
-#     ## effective sample size, log-likelihood
-#     ## also do resampling if filtering has not failed
-#     xx <- .Call(P_girf_computations,x=X,params=params,Np=Np[nt+1],
-#       predmean=pred.mean,predvar=pred.var,filtmean=filter.mean,
-#       trackancestry=filter.traj,doparRS=FALSE,weights=weights,tol=tol)
-#
-#     all.fail <- xx$fail
-#     loglik[nt] <- xx$loglik
-#     eff.sample.size[nt] <- xx$ess
-#
-#     x <- xx$states
-#     params <- xx$params[,1L]
-#
-#     if (pred.mean) pred.m[,nt] <- xx$pm
-#     if (pred.var) pred.v[,nt] <- xx$pv
-#     if (filter.mean) filt.m[,nt] <- xx$fm
-#     if (filter.traj) pedigree[[nt]] <- xx$ancestry
-#
-#     if (all.fail) { ## all particles are lost
-#       nfail <- nfail+1
-#       if (verbose) message("filtering failure at time t = ",times[nt+1])
-#       if (nfail>max.fail) pomp2:::pStop_("too many filtering failures")
-#     }
-#
-#     if (save.states || filter.traj) {
-#       xparticles[[nt]] <- x
-#       dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),
-#         c("variable","rep"))
-#     }
-#
-#     if (verbose && (nt%%5 == 0))
-#       cat("girf timestep",nt,"of",ntimes,"finished\n")
-#
-#   } ## end of main loop
-#
-#   if (filter.traj) { ## select a single trajectory
-#     b <- sample.int(n=length(weights),size=1L,replace=TRUE)
-#     filt.t[,1L,ntimes+1] <- xparticles[[ntimes]][,b]
-#     for (nt in seq.int(from=ntimes-1,to=1L,by=-1L)) {
-#       b <- pedigree[[nt+1]][b]
-#       filt.t[,1L,nt+1] <- xparticles[[nt]][,b]
-#     }
-#     if (times[2L] > times[1L]) {
-#       b <- pedigree[[1L]][b]
-#       filt.t[,1L,1L] <- init.x[,b]
-#     } else {
-#       filt.t <- filt.t[,,-1L,drop=FALSE]
-#     }
-#   }
-#
-#   if (!save.states) xparticles <- list()
-#
-#   if (nfail>0)
-#     pWarn("girf",nfail," filtering failure",ngettext(nfail,"","s")," occurred.")
-#
-#   new(
-#     "girfd_pomp",
-#     object,
-#     pred.mean=pred.m,
-#     pred.var=pred.v,
-#     filter.mean=filt.m,
-#     filter.traj=filt.t,
-#     paramMatrix=array(data=numeric(0),dim=c(0,0)),
-#     eff.sample.size=eff.sample.size,
-#     cond.loglik=loglik,
-#     saved.states=xparticles,
-#     Np=as.integer(Np),
-#     tol=tol,
-#     nfail=as.integer(nfail),
-#     loglik=sum(loglik)
-#   )
-# }
 
 nonfinite_dmeasure_error <- function (time, lik, datvals, states, params) {
   showvals <- c(time=time,lik=lik,datvals,states,params)

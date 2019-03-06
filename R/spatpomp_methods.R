@@ -45,6 +45,7 @@ setMethod(
                        format = c("spatpomps", "arrays", "data.frame"),
                        include.data = FALSE,...) {
     s1 <- simulate(pomp(object), ...)
+    format <- match.arg(format)
     if(format=="data.frame"){
       # convert to long format and output
       pompdf <- as.data.frame(s1)
@@ -66,13 +67,14 @@ setMethod(
     if(format=="spatpomps"){
       # add back spatpomp components
       sp <- new("spatpomp",s1,
-                unit_dmeasure = ,
-                units=units,
-                unit_index=unit_index,
-                unit_statenames=unit_statenames,
-                global_statenames=global_statenames,
-                obstypes = obstypes)
+                unit_dmeasure = object@unit_dmeasure,
+                units=object@units,
+                unit_index=object@unit_index,
+                unit_statenames=object@unit_statenames,
+                global_statenames=object@global_statenames,
+                obstypes = object@obstypes)
     }
+    return(sp)
   }
 )
 
