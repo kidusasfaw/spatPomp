@@ -44,15 +44,15 @@ setMethod(
   definition=function(object, nsim = 1, seed = NULL,
                        format = c("spatpomps", "arrays", "data.frame"),
                        include.data = FALSE,...) {
-    s1 <- simulate(pomp(object), ...)
     format <- match.arg(format)
+    if(format == 'spatpomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
+    if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
       # convert to long format and output
-      pompdf <- as.data.frame(s1)
-      to.gather <- colnames(pompdf)[2:length(colnames(pompdf))]
-      to.select <- c(colnames(pompdf)[1], "unit", "stateobs", "val")
-      to.arrange <- c(colnames(pompdf)[1], "unit", "stateobs")
-      gathered <- pompdf %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
+      to.gather <- colnames(sims)[3:length(colnames(sims))] # all columns except time and .id
+      to.select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
+      to.arrange <- c(colnames(sims)[1], "unit", "stateobs")
+      gathered <- sims %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
         dplyr::mutate(ui = stringr::str_extract(stateobs,"[0-9]+"))%>%
         dplyr::mutate(unit = object@unit_index[ui])%>%
         dplyr::select_(.dots = to.select) %>%
@@ -65,16 +65,31 @@ setMethod(
       return(gathered)
     }
     if(format=="spatpomps"){
-      # add back spatpomp components
-      sp <- new("spatpomp",s1,
-                unit_dmeasure = object@unit_dmeasure,
-                units=object@units,
-                unit_index=object@unit_index,
-                unit_statenames=object@unit_statenames,
-                global_statenames=object@global_statenames,
-                obstypes = object@obstypes)
+      # add back spatpomp components into a list of spatpomps
+      if(nsim > 1){
+        sp.list <- vector(mode="list", length = nsim)
+        for(i in 1:length(sims)){
+          sp <- new("spatpomp",sims[[i]],
+                    unit_dmeasure = object@unit_dmeasure,
+                    units=object@units,
+                    unit_index=object@unit_index,
+                    unit_statenames=object@unit_statenames,
+                    global_statenames=object@global_statenames,
+                    obstypes = object@obstypes)
+          sp.list[[i]] <- sp
+        }
+        return(sp.list)
+      } else{
+        sp <- new("spatpomp",sims,
+                  unit_dmeasure = object@unit_dmeasure,
+                  units=object@units,
+                  unit_index=object@unit_index,
+                  unit_statenames=object@unit_statenames,
+                  global_statenames=object@global_statenames,
+                  obstypes = object@obstypes)
+        return(sp)
+      }
     }
-    return(sp)
   }
 )
 
@@ -82,49 +97,7 @@ setMethod(
   "show",
   signature=signature(object="spatpomp"),
   definition=function (object) {
-    cat(length(object@times),"records of",
-        nrow(obs(object)),"observables,",
-        "recorded from t =",
-        min(object@times),"to",max(object@times), "for ", length(object@units), " units\n")
-    cat("summary of data:\n")
-    print(summary(as.data.frame(t(obs(object)))))
-    cat("zero time, t0 = ",object@t0,"\n",sep="")
-    if (!is.null(dim(object@covar))) {
-      cat(nrow(object@covar),"records of",
-          ncol(object@covar),"covariates,",
-          "recorded from t =",min(object@tcovar),
-          "to",max(object@tcovar),"\n")
-      cat("summary of covariates:\n")
-      print(summary(as.data.frame(object@covar)))
-    }
-    cat("process model simulator, rprocess = ")
-    show(object@rprocess)
-    cat("process model density, dprocess = ")
-    show(object@dprocess)
-    cat("measurement model simulator, rmeasure = ")
-    show(object@rmeasure)
-    cat("measurement model density, dmeasure = ")
-    show(object@dmeasure)
-    cat("prior simulator, rprior = ")
-    show(object@rprior)
-    cat("prior density, dprior = ")
-    show(object@dprior)
-    show(object@skeleton)
-    cat("rinit = ")
-    show(object@rinit)
-    cat("parameter transformation  = ")
-    show(object@partrans)
-    if (length(coef(object))>0) {
-      cat("parameter(s):\n")
-      print(coef(object))
-    } else {
-      cat ("parameter(s) unspecified\n");
-    }
-    if (length(object@userdata)>0) {
-      cat("extra user-defined variables: ",
-          paste(sapply(names(object@userdata),sQuote),collapse=", "),
-          "\n")
-    }
+    cat("<object of class ",sQuote(as.character(class(object))),">\n",sep="")
     invisible(NULL)
   }
 )
