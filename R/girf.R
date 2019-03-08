@@ -258,7 +258,8 @@ girf.internal <- function (object,
     fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
     for (p in 1:Np[1]){
       # find this particle's initialization and repeat in Nguide times
-      xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = dimnames(x))
+      if(nt == 0) xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
+      else xp = matrix(x[,p,1], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       # get all the guides for this particles
       Xg[,,,p] <- rprocess(object, xstart=xp, times=times[(nt+1):(nt+1+lookahead_steps)],
                params=params,offset=1L,.gnsi=gnsi)
@@ -275,6 +276,7 @@ girf.internal <- function (object,
       # get prediction simulations
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
+
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
@@ -282,6 +284,7 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
+
 
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
