@@ -392,7 +392,6 @@ girf.internal <- function (object,
         # print("=============================\n")
       }
       else {
-        print("hi")
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
@@ -423,10 +422,15 @@ girf.internal <- function (object,
         gnsi <- FALSE
 
         weights <- as.numeric(weights)*s_not_1_weights
-        # print(paste0("weight for s=",s, "nt = ",nt, "after dmeasure and s_not_1 product", "=", "\n"))
-        # print(weights)
-        # print("=============================\n")
       }
+      # print("=============================\n")
+      # print(paste0("weight for s=",s, "nt = ",nt, "after dmeasure and s_not_1 product", "=", "\n"))
+      # print(weights)
+      # print(paste0("X for s=",s, "nt = ",nt))
+      # print(X)
+      # print(paste0("gps for s=",s, "nt = ",nt))
+      # print(guide_fun)
+      # print("=============================\n")
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
@@ -453,17 +457,6 @@ girf.internal <- function (object,
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
-      # print(paste0("loglik for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
-      # print(xx$loglik)
-      # print(paste0("states for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
-      # print(xx$states)
-      # print(paste0("filter guide functions for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
-      # print(xx$filterguides)
-      # print(paste0("params for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
-      # print(xx$params[,1])
-      # print(paste0("forecast sample variance for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
-      # print(xx$newfsv)
-      # print("=============================\n")
     }
   }
   return(loglik)

@@ -15,7 +15,7 @@ bm(U = 5, N = 100, delta.t = 0.1)
 A spatpomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{U}-dimensional  
+Generate a spatpomp object representing a \code{U}-dimensional
 Brownian motion with spatial correlation decaying geometrically with
 distance around a circle. The model is defined in continuous time
 though in this case an Euler approximation is exact at the evaluation
