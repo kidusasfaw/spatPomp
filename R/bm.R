@@ -1,10 +1,10 @@
 #' Brownian motion spatpomp generator
 #'
-#' Generate a spatpomp object representing a \code{U}-dimensional  
+#' Generate a spatpomp object representing a \code{U}-dimensional
 #' Brownian motion with spatial correlation decaying geometrically with
 #' distance around a circle. The model is defined in continuous time
 #' though in this case an Euler approximation is exact at the evaluation
-#' times. 
+#' times.
 #'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
@@ -14,7 +14,7 @@
 
 bm <- function(U=5,N=100,delta.t=0.1){
 
-U <- 5; N <- 100; delta.t <- 0.3
+U <- U; N <- N; delta.t <- delta.t
 
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -53,6 +53,17 @@ bm_rprocess <- Csnippet("
     for (v=0; v < U ; v++) {
       X[u] += dW[v]*pow(rho,dist[u][v]);
     }
+  }
+")
+
+bm_skel <- Csnippet("
+  double *X = &X1;
+  double *DX = &DX1;
+  int u;
+  //double dW[U];
+  //int u,v;
+  for (u = 0 ; u < U ; u++) {
+    DX[u] = X[u];
   }
 ")
 
@@ -95,8 +106,9 @@ bm_spatpomp <- spatpomp(bm_data,
                t0=0,
                units="unit",
                unit_statenames = bm_unit_statenames,
-#               rprocess=euler(bm_rprocess,delta.t=delta.t),
-               rprocess=discrete_time(bm_rprocess),
+               rprocess=euler(bm_rprocess,delta.t = delta.t),
+#               rprocess=discrete_time(bm_rprocess),
+               skeleton=map(bm_skel, delta.t=1),
                paramnames=bm_paramnames,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
@@ -111,7 +123,7 @@ bm_spatpomp <- spatpomp(bm_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
 test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(pomp(bm_spatpomp),params=test_params)
+simulate(bm_spatpomp,params=test_params)
 
 }
 

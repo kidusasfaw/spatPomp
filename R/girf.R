@@ -246,6 +246,7 @@ girf.internal <- function (object,
   } else {
     filt.t <- array(data=numeric(0),dim=c(0,0,0))
   }
+
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
@@ -258,24 +259,38 @@ girf.internal <- function (object,
     fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
     for (p in 1:Np[1]){
       # find this particle's initialization and repeat in Nguide times
-      if(nt == 0) xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
-      else xp = matrix(x[,p,1], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
+      xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       # get all the guides for this particles
       Xg[,,,p] <- rprocess(object, xstart=xp, times=times[(nt+1):(nt+1+lookahead_steps)],
                params=params,offset=1L,.gnsi=gnsi)
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for(l in 1:lookahead_steps){
-          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h)
+          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, obj=object)
           fcst_samp_var[u, l, p] = var(hXg)
         }
       }
     }
+    # print("=============================\n")
+    # print("Guide simulations")
+    # print(Xg)
+    # print("=============================\n")
+    # print("Forecast sample variance")
+    # print(fcst_samp_var)
+    # print("=============================\n")
+    # print("xstart")
+    # print(x)
+    # print("=============================\n")
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
+      # print("Prediction particles\n")
+      # print(paste0("s = ",s, ", nt = ",nt, "\n"))
+      # print(paste0("X sub", nt, ",", s, ","))
+      # print(X)
+      # print("=============================\n")
 
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
@@ -284,17 +299,25 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-
-
+      # print("Skeleton\n")
+      # print(paste0("s = ",s, ", nt = ",nt, "\n"))
+      # print(paste0("Skel = ", "\n"))
+      # print(skel)
+      # print("=============================\n")
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for (l in 1:lookahead_steps){
-          hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h)
-          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta_to_v)
+          hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h, obj = object)
+          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta_to_v, obj = object)
         }
       }
+      # print("Measurement Variance at Skeleton\n")
+      # print(paste0("s=",s, ", nt = ",nt, "\n"))
+      # print(paste0("Measurement Variance at Skeleton = ", "\n"))
+      # print(meas_var_skel)
+      # print("=============================\n")
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -302,11 +325,26 @@ girf.internal <- function (object,
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-      mom_match_param <- array(0, dim = c(length(params), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
+      # print("Forecast Variance Update\n")
+      # print(paste0("s=",s, ", nt = ",nt, "\n"))
+      # print(paste0("Forecast Variance Update = ", "\n"))
+      # print(fcst_var_upd)
+      # print("=============================\n")
+      mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      mom_match_param = apply(X=inflated_var, MARGIN=c(2,3), FUN = v_to_theta)
+      mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v_to_theta, obj = object)
+      # print("Moment Matched Parameter\n")
+      # print(paste0("s=",s, ", nt = ",nt, "\n"))
+      # print(paste0("Moment Matched Parameter = ", "\n"))
+      # print(mom_match_param)
+      # print("=============================\n")
       # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
+      # print("Guide function evolution\n")
+      # print(paste0("s=",s, ", nt = ",nt, "\n"))
+      # print(paste0("Guide function starts off at = ", "\n"))
+      # print(guide_fun)
+      # print("=============================\n")
       for(l in 1:lookahead_steps){
         dmeas_weights <- tryCatch(
           vec_dmeasure(
@@ -314,7 +352,7 @@ girf.internal <- function (object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
-            params=mom_match_param[,l,],
+            params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
           ),
@@ -323,22 +361,47 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
+        # print(paste0("s=",s, ", nt = ",nt, "l = ", l, "\n"))
+        # print(paste0("Guide update for l = ", l, "="))
         # print(dmeas_weights)
-        dmeas_weights[dmeas_weights == 0] <- tol
+        # print("=============================\n")
         resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
-        if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
+        # print(paste0("s=",s, ", nt = ",nt, "l = ", l, "\n"))
+        # print(paste0("Resampling weights for l = ", l, "="))
+        # print(resamp_weights)
+        # print("=============================\n")
         guide_fun = guide_fun*resamp_weights
       }
-      # weights
+      # print(paste0("s=",s, ", nt = ",nt, "Pre-tolerance imputation guide function", "\n"))
+      # print(paste0("Guide function for", "s=",s, ", nt = ",nt, "="))
+      # print(guide_fun)
+      # print("=============================\n")
+      guide_fun[guide_fun < tol^(lookahead*length(object@units))] <- tol^(lookahead*length(object@units))
+      # print(paste0("s=",s, ", nt = ",nt, "Post-tolerance imputation guide function", "\n"))
+      # print(paste0("Guide function for", "s=",s, ", nt = ",nt, "="))
+      # print(guide_fun)
+      # print("=============================\n")
       s_not_1_weights <- guide_fun/filter_guide_fun
+      # print(paste0("s_not_1 weight for s=",s, ", nt = ",nt, "=", "\n"))
+      # print(s_not_1_weights)
+      # print("=============================\n")
       if (!(s==1 & nt!=0)){
         weights <- s_not_1_weights
+        # print(paste0("weight for s=",s, "nt = ",nt, "=", "\n"))
+        # print(weights)
+        # print("=============================\n")
       }
       else {
-        print("nt!=0 and s==1")
+        print("hi")
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
+        # print(paste0("x for s=",s, "nt = ",nt, "=", "for dmeasure = ", "\n"))
+        # print(x_3d)
+        # print("=============================\n")
+        # print(paste0("y for s=",s, "nt = ",nt, "=", "for dmeasure = ", "\n"))
+        # print(object@data[,nt,drop=FALSE])
+        # print("=============================\n")
         weights <- tryCatch(
           dmeasure(
             object,
@@ -354,8 +417,15 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
+        # print(paste0("dmeasure weights for s=",s, "nt = ",nt, "=", "\n"))
+        # print(weights)
+        # print("=============================\n")
         gnsi <- FALSE
+
         weights <- as.numeric(weights)*s_not_1_weights
+        # print(paste0("weight for s=",s, "nt = ",nt, "after dmeasure and s_not_1 product", "=", "\n"))
+        # print(weights)
+        # print("=============================\n")
       }
       xx <- tryCatch(
         .Call('girf_computations',
@@ -370,7 +440,7 @@ girf.internal <- function (object,
               weights=weights,
               gps=guide_fun,
               fsv=fcst_samp_var,
-              tol=tol
+              tol=tol^(lookahead*length(object@units))
               ),
         error = function (e) {
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
@@ -383,9 +453,20 @@ girf.internal <- function (object,
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
+      # print(paste0("loglik for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
+      # print(xx$loglik)
+      # print(paste0("states for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
+      # print(xx$states)
+      # print(paste0("filter guide functions for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
+      # print(xx$filterguides)
+      # print(paste0("params for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
+      # print(xx$params[,1])
+      # print(paste0("forecast sample variance for s=",s, "nt = ",nt, "after resampling step", "=", "\n"))
+      # print(xx$newfsv)
+      # print("=============================\n")
     }
   }
-  return(sum(loglik))
+  return(loglik)
 }
 
 nonfinite_dmeasure_error <- function (time, lik, datvals, states, params) {
