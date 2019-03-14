@@ -3,37 +3,38 @@
 ## J. Park & E. L. Ionides (2018).
 ## A guided intermediate resampling particle filter for inference on high dimensional systems.
 ## Arxiv 1708.08543v2
+##' @include spatpomp_class.R
 ##
 
 setClass(
   "girfd_spatpomp",
   contains="spatpomp",
   slots=c(
-    Ninter="integer",
-    Nguide="integer",
-    lookahead="integer",
+    Ninter="numeric",
+    Nguide="numeric",
+    lookahead="numeric",
     h = "function",
     theta.to.v = "function",
     v.to.theta = "function",
     paramMatrix="array",
-    eff.sample.size="numeric",
-    cond.loglik="numeric",
-    saved.states="list",
+    eff.sample.size="array",
+    cond.loglik="array",
+    saved.states="array",
     Np="integer",
     tol="numeric",
     loglik="numeric"
   ),
   prototype=prototype(
-    Ninter=as.integer(NA),
-    Nguide=as.integer(NA),
-    lookahead=as.integer(NA),
+    Ninter=as.double(NA),
+    Nguide=as.double(NA),
+    lookahead=as.double(NA),
     h = function(){},
     theta.to.v = function(){},
     v.to.theta = function(){},
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    eff.sample.size=numeric(0),
-    cond.loglik=numeric(0),
-    saved.states=list(),
+    eff.sample.size=array(data=numeric(0),dim=c(0,0)),
+    cond.loglik=array(data=numeric(0),dim=c(0,0)),
+    saved.states=array(data=numeric(0), dim = c(0,0)),
     Np=as.integer(NA),
     tol=as.double(NA),
     loglik=as.double(NA)
@@ -212,7 +213,7 @@ girf.internal <- function (object,
   x <- init.x
 
   ## set up storage for saving samples from filtering distributions
-  if (save.states || filter.traj) {
+  if (save.states) {
     xparticles <- setNames(vector(mode="list",length=ntimes),time(object))
   }
 
@@ -256,6 +257,7 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
+
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
@@ -265,6 +267,7 @@ girf.internal <- function (object,
           meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta.to.v, obj = object)
         }
       }
+
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -272,6 +275,7 @@ girf.internal <- function (object,
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
+
       mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
       mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v.to.theta, obj = object)
@@ -297,6 +301,7 @@ girf.internal <- function (object,
         resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
         guide_fun = guide_fun*resamp_weights
       }
+
       guide_fun[guide_fun < tol^(lookahead*length(object@units))] <- tol^(lookahead*length(object@units))
       s_not_1_weights <- guide_fun/filter_guide_fun
       if (!(s==1 & nt!=0)){
@@ -322,18 +327,18 @@ girf.internal <- function (object,
           }
         )
         gnsi <- FALSE
-
         weights <- as.numeric(weights)*s_not_1_weights
       }
+
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
               params=params,
               Np=Np[nt+1],
-              predmean=pred.mean,
-              predvar=pred.var,
-              filtmean=filter.mean,
-              trackancestry=filter.traj,
+              predmean=FALSE,
+              predvar=FALSE,
+              filtmean=FALSE,
+              trackancestry=FALSE,
               doparRS=FALSE,
               weights=weights,
               gps=guide_fun,
@@ -365,7 +370,7 @@ girf.internal <- function (object,
     paramMatrix=params.matrix,
     eff.sample.size=eff.sample.size,
     cond.loglik=cond.loglik,
-    saved.states=xparticles,
+    saved.states=x,
     Np=Np[1],
     tol=tol,
     loglik=sum(cond.loglik)

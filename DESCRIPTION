@@ -17,8 +17,8 @@ Suggests: scales, geosphere, ggplot2, magrittr,
 Collate:
     'bm.R'
     'generics.R'
-    'girf.R'
     'spatpomp_class.R'
+    'girf.R'
     'hippie.R'
     'iif.R'
     'lorenz.R'
