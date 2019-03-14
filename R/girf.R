@@ -6,39 +6,36 @@
 ##
 
 setClass(
-  "girfd_pomp",
-  contains="pomp",
+  "girfd_spatpomp",
+  contains="spatpomp",
   slots=c(
-    S="integer",
-    K="integer",
-  # remaining slots are from pfilter
-    pred.mean="array",
-    pred.var="array",
-    filter.mean="array",
-    filter.traj="array",
+    Ninter="integer",
+    Nguide="integer",
+    lookahead="integer",
+    h = "function",
+    theta.to.v = "function",
+    v.to.theta = "function",
     paramMatrix="array",
-    indices="vector",
     eff.sample.size="numeric",
     cond.loglik="numeric",
     saved.states="list",
     Np="integer",
     tol="numeric",
-    nfail="integer",
     loglik="numeric"
   ),
   prototype=prototype(
-    pred.mean=array(data=numeric(0),dim=c(0,0)),
-    pred.var=array(data=numeric(0),dim=c(0,0)),
-    filter.mean=array(data=numeric(0),dim=c(0,0)),
-    filter.traj=array(data=numeric(0),dim=c(0,0,0)),
+    Ninter=as.integer(NA),
+    Nguide=as.integer(NA),
+    lookahead=as.integer(NA),
+    h = function(){},
+    theta.to.v = function(){},
+    v.to.theta = function(){},
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    indices=integer(0),
     eff.sample.size=numeric(0),
     cond.loglik=numeric(0),
     saved.states=list(),
     Np=as.integer(NA),
     tol=as.double(NA),
-    nfail=as.integer(NA),
     loglik=as.double(NA)
   )
 )
@@ -79,13 +76,9 @@ setMethod(
     lookahead,
     Nguide,
     h,
-    theta_to_v,
-    v_to_theta,
+    theta.to.v,
+    v.to.theta,
     tol = 1e-17, max.fail = Inf,
-    pred.mean = FALSE,
-    pred.var = FALSE,
-    filter.mean = FALSE,
-    filter.traj = FALSE,
     save.states = FALSE,
     ...,
     verbose = getOption("verbose", FALSE)) {
@@ -98,13 +91,9 @@ setMethod(
         lookahead,
         Nguide,
         h,
-        theta_to_v,
-        v_to_theta,
+        theta.to.v,
+        v.to.theta,
         tol = tol, max.fail = Inf,
-        pred.mean = FALSE,
-        pred.var = FALSE,
-        filter.mean = FALSE,
-        filter.traj = FALSE,
         save.states = FALSE,
         ...,
         verbose=verbose
@@ -114,21 +103,45 @@ setMethod(
   }
 )
 
-##' @name girf-girfd_pomp
-##' @aliases girf,girfd_pomp-method
+##' @name girf-girfd_spatpomp
+##' @aliases girf,girfd_spatpomp-method
 ##' @rdname girf
 ##' @export
 setMethod(
   "girf",
-  signature=signature(data="girfd_pomp"),
-  function (data, Np, tol,
-    ..., verbose = getOption("verbose", FALSE)) {
-
+  signature=signature(data="girfd_spatpomp"),
+  function (data,
+            Np,
+            tol,
+            Ninter,
+            Nguide,
+            lookahead,
+            h,
+            theta.to.v,
+            v.to.theta,
+            ...,
+            verbose = getOption("verbose", FALSE)
+            ) {
     if (missing(Np)) Np <- data@Np
     if (missing(tol)) tol <- data@tol
+    if (missing(Ninter)) Ninter <- data@Ninter
+    if (missing(Nguide)) Nguide <- data@Nguide
+    if (missing(lookahead)) lookahead <- data@lookahead
+    if (missing(h)) h <- data@h
+    if (missing(theta.to.v)) theta.to.v <- data@theta.to.v
+    if (missing(v.to.theta)) v.to.theta <- data@v.to.theta
 
-    girf(as(data,"pomp"),Np=Np,tol=tol,
-      ...,verbose=verbose)
+    girf(as(data,"spatpomp"),
+         Np=Np,
+         tol=tol,
+         Ninter=Ninter,
+         Nguide=Nguide,
+         lookahead=lookahead,
+         h=h,
+         theta.to.v=theta.to.v,
+         v.to.theta=v.to.theta,
+         ...,
+         verbose=verbose)
 
   }
 )
@@ -139,13 +152,9 @@ girf.internal <- function (object,
         lookahead,
         Nguide,
         h,
-        theta_to_v,
-        v_to_theta,
+        theta.to.v,
+        v.to.theta,
         tol = 1e-17, max.fail = Inf,
-        pred.mean = FALSE,
-        pred.var = FALSE,
-        filter.mean = FALSE,
-        filter.traj = FALSE,
         save.states = FALSE,
         cooling, cooling.m,
         .gnsi = TRUE, verbose = FALSE) {
@@ -158,15 +167,11 @@ girf.internal <- function (object,
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
-  pred.mean <- as.logical(pred.mean)
-  pred.var <- as.logical(pred.var)
-  filter.mean <- as.logical(filter.mean)
-  filter.traj <- as.logical(filter.traj)
   save.states <- as.logical(save.states)
 
   params <- coef(object)
-  params_matrix <- matrix(params,nrow=length(params), ncol = Np[1])
-  rownames(params_matrix) <- names(params)
+  params.matrix <- matrix(params,nrow=length(params), ncol = Np[1])
+  rownames(params.matrix) <- names(params)
   times <- time(object,t0=TRUE)
   t0 <- times[1]
   ntimes <- length(times)-1
@@ -210,42 +215,9 @@ girf.internal <- function (object,
   if (save.states || filter.traj) {
     xparticles <- setNames(vector(mode="list",length=ntimes),time(object))
   }
-  if (filter.traj) {
-    pedigree <- vector(mode="list",length=ntimes+1)
-  }
 
-  loglik <- array(0, dim = c(ntimes, Ninter))
+  cond.loglik <- array(0, dim = c(ntimes, Ninter))
   eff.sample.size <- array(0, dim = c(ntimes, Ninter))
-  nfail <- 0
-
-  ## set up storage for prediction means, variances, etc.
-  if (pred.mean) {
-    pred.m <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
-  } else {
-    pred.m <- array(data=numeric(0),dim=c(0,0))
-  }
-
-  if (pred.var) {
-    pred.v <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
-  } else {
-    pred.v <- array(data=numeric(0),dim=c(0,0))
-  }
-
-  if (filter.mean) {
-    filt.m <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
-  } else {
-    filt.m <- array(data=numeric(0),dim=c(0,0))
-  }
-
-  if (filter.traj) {
-    filt.t <- array(data=numeric(1),dim=c(nvars,1,ntimes+1),
-      dimnames=list(variable=statenames,rep=1,time=times))
-  } else {
-    filt.t <- array(data=numeric(0),dim=c(0,0,0))
-  }
 
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
@@ -271,53 +243,28 @@ girf.internal <- function (object,
         }
       }
     }
-    # print("=============================\n")
-    # print("Guide simulations")
-    # print(Xg)
-    # print("=============================\n")
-    # print("Forecast sample variance")
-    # print(fcst_samp_var)
-    # print("=============================\n")
-    # print("xstart")
-    # print(x)
-    # print("=============================\n")
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
       X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
                     params=params,offset=1L,.gnsi=gnsi)
-      # print("Prediction particles\n")
-      # print(paste0("s = ",s, ", nt = ",nt, "\n"))
-      # print(paste0("X sub", nt, ",", s, ","))
-      # print(X)
-      # print("=============================\n")
 
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp2::flow(object, xstart=X.start, params=params_matrix, times = c(tt[s+1], times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]), offset = 1)
+        skel <- pomp2::flow(object, xstart=X.start, params=params.matrix, times = c(tt[s+1], times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]), offset = 1)
       } else {
         skel <- X
       }
-      # print("Skeleton\n")
-      # print(paste0("s = ",s, ", nt = ",nt, "\n"))
-      # print(paste0("Skel = ", "\n"))
-      # print(skel)
-      # print("=============================\n")
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for (l in 1:lookahead_steps){
           hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h, obj = object)
-          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta_to_v, obj = object)
+          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta.to.v, obj = object)
         }
       }
-      # print("Measurement Variance at Skeleton\n")
-      # print(paste0("s=",s, ", nt = ",nt, "\n"))
-      # print(paste0("Measurement Variance at Skeleton = ", "\n"))
-      # print(meas_var_skel)
-      # print("=============================\n")
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -325,26 +272,12 @@ girf.internal <- function (object,
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-      # print("Forecast Variance Update\n")
-      # print(paste0("s=",s, ", nt = ",nt, "\n"))
-      # print(paste0("Forecast Variance Update = ", "\n"))
-      # print(fcst_var_upd)
-      # print("=============================\n")
       mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v_to_theta, obj = object)
-      # print("Moment Matched Parameter\n")
-      # print(paste0("s=",s, ", nt = ",nt, "\n"))
-      # print(paste0("Moment Matched Parameter = ", "\n"))
-      # print(mom_match_param)
-      # print("=============================\n")
+      mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v.to.theta, obj = object)
       # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
-      # print("Guide function evolution\n")
-      # print(paste0("s=",s, ", nt = ",nt, "\n"))
-      # print(paste0("Guide function starts off at = ", "\n"))
-      # print(guide_fun)
-      # print("=============================\n")
+
       for(l in 1:lookahead_steps){
         dmeas_weights <- tryCatch(
           vec_dmeasure(
@@ -361,46 +294,18 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        # print(paste0("s=",s, ", nt = ",nt, "l = ", l, "\n"))
-        # print(paste0("Guide update for l = ", l, "="))
-        # print(dmeas_weights)
-        # print("=============================\n")
         resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
-        # print(paste0("s=",s, ", nt = ",nt, "l = ", l, "\n"))
-        # print(paste0("Resampling weights for l = ", l, "="))
-        # print(resamp_weights)
-        # print("=============================\n")
         guide_fun = guide_fun*resamp_weights
       }
-      # print(paste0("s=",s, ", nt = ",nt, "Pre-tolerance imputation guide function", "\n"))
-      # print(paste0("Guide function for", "s=",s, ", nt = ",nt, "="))
-      # print(guide_fun)
-      # print("=============================\n")
       guide_fun[guide_fun < tol^(lookahead*length(object@units))] <- tol^(lookahead*length(object@units))
-      # print(paste0("s=",s, ", nt = ",nt, "Post-tolerance imputation guide function", "\n"))
-      # print(paste0("Guide function for", "s=",s, ", nt = ",nt, "="))
-      # print(guide_fun)
-      # print("=============================\n")
       s_not_1_weights <- guide_fun/filter_guide_fun
-      # print(paste0("s_not_1 weight for s=",s, ", nt = ",nt, "=", "\n"))
-      # print(s_not_1_weights)
-      # print("=============================\n")
       if (!(s==1 & nt!=0)){
         weights <- s_not_1_weights
-        # print(paste0("weight for s=",s, "nt = ",nt, "=", "\n"))
-        # print(weights)
-        # print("=============================\n")
       }
       else {
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        # print(paste0("x for s=",s, "nt = ",nt, "=", "for dmeasure = ", "\n"))
-        # print(x_3d)
-        # print("=============================\n")
-        # print(paste0("y for s=",s, "nt = ",nt, "=", "for dmeasure = ", "\n"))
-        # print(object@data[,nt,drop=FALSE])
-        # print("=============================\n")
         weights <- tryCatch(
           dmeasure(
             object,
@@ -416,21 +321,10 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        # print(paste0("dmeasure weights for s=",s, "nt = ",nt, "=", "\n"))
-        # print(weights)
-        # print("=============================\n")
         gnsi <- FALSE
 
         weights <- as.numeric(weights)*s_not_1_weights
       }
-      # print("=============================\n")
-      # print(paste0("weight for s=",s, "nt = ",nt, "after dmeasure and s_not_1 product", "=", "\n"))
-      # print(weights)
-      # print(paste0("X for s=",s, "nt = ",nt))
-      # print(X)
-      # print(paste0("gps for s=",s, "nt = ",nt))
-      # print(guide_fun)
-      # print("=============================\n")
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
@@ -452,23 +346,28 @@ girf.internal <- function (object,
       )
       all.fail <- xx$fail
       eff.sample.size[nt+1, s] <- xx$ess
-      loglik[nt+1, s] <- xx$loglik
+      cond.loglik[nt+1, s] <- xx$loglik
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
     }
   }
-  return(loglik)
-}
-
-nonfinite_dmeasure_error <- function (time, lik, datvals, states, params) {
-  showvals <- c(time=time,lik=lik,datvals,states,params)
-  m1 <- formatC(names(showvals),preserve.width="common")
-  m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
-  paste0(
-    sQuote("dmeasure")," returns non-finite value.\n",
-    "likelihood, data, states, and parameters are:\n",
-    paste0(m1,": ",m2,collapse="\n")
+  new(
+    "girfd_spatpomp",
+    object,
+    Ninter=Ninter,
+    Nguide=Nguide,
+    lookahead=lookahead,
+    h = h,
+    theta.to.v = theta.to.v,
+    v.to.theta = v.to.theta,
+    paramMatrix=params.matrix,
+    eff.sample.size=eff.sample.size,
+    cond.loglik=cond.loglik,
+    saved.states=xparticles,
+    Np=Np[1],
+    tol=tol,
+    loglik=sum(cond.loglik)
   )
 }
