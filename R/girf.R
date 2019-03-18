@@ -234,8 +234,8 @@ girf.internal <- function (object,
       # find this particle's initialization and repeat in Nguide times
       xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       # get all the guides for this particles
-      Xg[,,,p] <- rprocess(object, xstart=xp, times=times[(nt+1):(nt+1+lookahead_steps)],
-               params=params,offset=1L,.gnsi=gnsi)
+      Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+               params=params,.gnsi=gnsi)
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for(l in 1:lookahead_steps){
@@ -247,13 +247,13 @@ girf.internal <- function (object,
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
-      X <- rprocess(object,xstart=x,times=c(tt[s], tt[s+1]),
-                    params=params,offset=1L,.gnsi=gnsi)
+      X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
+                    params=params,.gnsi=gnsi)
 
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp2::flow(object, xstart=X.start, params=params.matrix, times = c(tt[s+1], times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]), offset = 1)
+        skel <- pomp2::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)])
       } else {
         skel <- X
       }
