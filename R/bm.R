@@ -96,9 +96,15 @@ bm_rmeasure <- Csnippet("
 ")
 
 bm_unit_dmeasure <- Csnippet("
-  double tol = 1.0e-18;
+  //double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
+")
+
+bm_unit_rmeasure <- Csnippet("
+  double tol = pow(1.0e-18,U);
+  double Y;
+  Y = rnorm(X,tau+tol);
 ")
 
 bm_spatpomp <- spatpomp(bm_data,
@@ -114,6 +120,7 @@ bm_spatpomp <- spatpomp(bm_data,
                rmeasure=bm_rmeasure,
                dmeasure=bm_dmeasure,
                unit_dmeasure=bm_unit_dmeasure,
+               unit_rmeasure=bm_unit_rmeasure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),
                rinit=bm_rinit
   )

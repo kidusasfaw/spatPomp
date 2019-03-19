@@ -22,5 +22,7 @@ unit statenames will result in the each unit's corresponding states.}
 \item{\code{obstypes}}{A vector of observation types for a spatial unit.}
 
 \item{\code{unit_dmeasure}}{A pomp_fun representing the unit measurement density for each spatial unit.}
+
+\item{\code{unit_rmeasure}}{A pomp_fun representing the unit observation simulator.}
 }}
 

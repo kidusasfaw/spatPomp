@@ -27,6 +27,7 @@ Collate:
     'spatpomp.R'
     'spatpomp_methods.R'
     'vec_dmeasure.R'
+    'vec_rmeasure.R'
 RoxygenNote: 6.1.1
 Imports: doParallel (>= 1.0.11),
     parallel,

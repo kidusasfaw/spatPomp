@@ -7,6 +7,7 @@
 #' @slot global_statenames A vector containing the statenames shared by all spatial units.
 #' @slot obstypes A vector of observation types for a spatial unit.
 #' @slot unit_dmeasure A pomp_fun representing the unit measurement density for each spatial unit.
+#' @slot unit_rmeasure A pomp_fun representing the unit observation simulator.
 setClass(
   'spatpomp',
   contains="pomp",
@@ -16,9 +17,11 @@ setClass(
     unit_statenames = 'character',
     global_statenames = 'character',
     obstypes = 'character',
-    unit_dmeasure = 'pomp_fun'
+    unit_dmeasure = 'pomp_fun',
+    unit_rmeasure = 'pomp_fun'
   ),
   prototype=prototype(
-    unit_dmeasure = pomp2:::pomp_fun(slotname="unit_dmeasure")
+    unit_dmeasure = pomp2:::pomp_fun(slotname="unit_dmeasure"),
+    unit_rmeasure = pomp2:::pomp_fun(slotname="unit_rmeasure")
   )
 )

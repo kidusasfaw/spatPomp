@@ -1,5 +1,6 @@
 # spatpomp to-do list
 
-- complete simulate implementation 
-(the part that outputs a dataframe is done but the part that outputs spatpomps needs to be written)
+- unit_dmeasure and unit_rmeasure need to be able to take R functions
+- turn 'd' into 'u' in all files
+- turn 'iif' to 'asif'
 

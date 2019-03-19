@@ -13,6 +13,11 @@ typedef void spatpomp_unit_measure_model_density (double *lik, const double *y, 
                                          const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                          int ncovars, const double *covars, double t, int u);
 
+typedef void spatpomp_unit_measure_model_simulator (double *y, const double *x, const double *p,
+                                                  const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                                  int ncovars, const double *covars, double t, int u);
+
+
 load_stack_incr_t *lsi;
 load_stack_decr_t *lsd;
 pomp_fun_handler_t *pfh;
@@ -41,6 +46,9 @@ unset_pomp_userdata_t *upu;
 
 //unit_dmeasure.c
 extern SEXP do_unit_dmeasure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi);
+
+//unit_rmeasure.c
+extern SEXP do_unit_rmeasure(SEXP object, SEXP x, SEXP times, SEXP units, SEXP params, SEXP gnsi);
 
 //iif.c
 extern SEXP iif_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights);

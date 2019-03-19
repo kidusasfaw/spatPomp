@@ -4,7 +4,7 @@
 NULL
 
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
-  unit_dmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
+  unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
@@ -41,6 +41,8 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
   if (missing(unit_dmeasure)) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
+  if (missing(unit_rmeasure)) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("unit_rmeasure")," not specified")
 
   if (missing(unit_statenames)) unit_statenames <- character(0)
 
@@ -254,10 +256,32 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
             cref="__lik[0]"
           )
         )
+      ),
+      unit_rmeasure=list(
+        slotname="unit_rmeasure",
+        Cname="__spatpomp_unit_rmeasure",
+        proto=quote(unit_rmeasure(x,t,d,params,log,...)),
+        header="\nvoid __spatpomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        footer="\n}\n\n",
+        vars=list(
+          params=list(
+            names=quote(paramnames),
+            cref="__p[__parindex[{%v%}]]"
+          ),
+          covars=list(
+            names=quote(covarnames),
+            cref="__covars[__covindex[{%v%}]]"
+          ),
+          unit_states=list(
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit-1]"
+          )
+        )
       )
     )
     hitches <- pomp2::hitch(
       unit_dmeasure=unit_dmeasure,
+      unit_rmeasure=unit_rmeasure,
       templates=ud_template,
       obsnames = paste0(obstypes,"1"),
       statenames = paste0(unit_statenames,"1"),
@@ -274,6 +298,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     pomp2:::solibs(po) <- hitches$lib
     new("spatpomp",po,
       unit_dmeasure=hitches$funs$unit_dmeasure,
+      unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,
       unit_index=unit_index,
       unit_statenames=unit_statenames,
