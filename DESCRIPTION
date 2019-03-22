@@ -20,6 +20,7 @@ Collate:
     'spatpomp_class.R'
     'girf.R'
     'hippie.R'
+    'igirf.R'
     'iif.R'
     'lorenz.R'
     'measles.R'
