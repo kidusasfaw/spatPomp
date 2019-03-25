@@ -1,21 +1,21 @@
-##' Adapted Simulation Iterated Island Filter (ASIIF)
+##' Adapted Simulation Island Filter (ASIF)
 ##'
 ##' An algorithm for estimating the filter distribution of a spatiotemporal partially-observed Markov process (SpatPOMP for short).
-##' Running \code{iif} causes the algorithm to run independent island jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
+##' Running \code{asif} causes the algorithm to run independent island jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
 ##' distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each island close to each other through resampling down
 ##' to one particle per island at each observation time point.
 ##' The adapted simulations are then weighted in a way that tries to avert COD by making a weak coupling assumption to get an approximate filter distribution.
 ##' As a by-product, we also get a biased estimate of the likelihood of the data.
 ##'
-##' @name iif
-##' @rdname iif
-##' @include spatpomp_class.R
+##' @name asif
+##' @rdname asif
+##' @include spatpomp_class.R generics.R
 ##' @family particle filter methods
 ##' @family \pkg{spatpomp} filtering methods
 ##'
 ##'
 ##' @inheritParams spatpomp
-##' @inheritParams pfilterß
+##' @inheritParams pfilter
 ##' @param object A \code{spatpomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
@@ -23,8 +23,8 @@
 ##' in the neighborhood of \code{(d,n)}.
 ##' @param islands The number of islands for the adapted simulations.
 ##' @return
-##' Upon successful completion, \code{iif} returns an object of class
-##' \sQuote{iifd.pomp}.
+##' Upon successful completion, \code{asif} returns an object of class
+##' \sQuote{asifd.pomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -35,7 +35,7 @@
 NULL
 
 setClass(
-  "island.pomp",
+  "island.spatpomp",
   contains="spatpomp",
   slots=c(
     loc.comb.pred.weights="array",
@@ -75,7 +75,7 @@ setClass(
   )
 )
 setClass(
-  "iifd.pomp",
+  "asifd.spatpomp",
   contains="spatpomp",
   slots=c(
     #loc.comb.filter.weights="array",
@@ -112,7 +112,7 @@ setClass(
     loglik=as.double(NA)
   )
 )
-iif.internal <- function (object, params, Np,
+asif.internal <- function (object, params, Np,
                               nbhd,
                               tol, max.fail,
                               pred.mean = FALSE,
@@ -124,10 +124,10 @@ iif.internal <- function (object, params, Np,
                               save.states = FALSE,
                               save.params = FALSE,
                               .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("iif"),": ")
+  ep <- paste0("in ",sQuote("asif"),": ")
   if(missing(nbhd))
     stop(ep,sQuote("nbhd")," must be specified for the spatpomp object",call.=FALSE)
-  ep <- paste0("in ",sQuote("iif"),": ")
+  ep <- paste0("in ",sQuote("asif"),": ")
   object <- as(object,"spatpomp")
   pompLoad(object,verbose=verbose)
   gnsi <- as.logical(.gnsi)
@@ -327,7 +327,7 @@ iif.internal <- function (object, params, Np,
     ## also do resampling if filtering has not failed
     xx <- tryCatch(
       .Call(
-        "iif_computations",
+        "asif_computations",
         x=X,
         params=params,
         Np=Np[nt+1],
@@ -348,7 +348,7 @@ iif.internal <- function (object, params, Np,
     params <- xx$params
 
     if (verbose && (nt%%5==0))
-      cat("iif timestep",nt,"of",ntimes,"finished\n")
+      cat("asif timestep",nt,"of",ntimes,"finished\n")
   } ## end of main loop
 
   # compute locally combined pred. weights for each time and unit
@@ -394,7 +394,7 @@ iif.internal <- function (object, params, Np,
   }
   pompUnload(object,verbose=verbose)
   new(
-    "island.pomp",
+    "island.spatpomp",
     object,
     loc.comb.pred.weights = loc.comb.pred.weights,
     cond.densities = cond.densities,
@@ -417,7 +417,7 @@ iif.internal <- function (object, params, Np,
 }
 
 setMethod(
-  "iif",
+  "asif",
   signature=signature(object="spatpomp"),
   function (object, params, Np, nbhd, islands,
            tol = (1e-18)^9,
@@ -432,7 +432,7 @@ setMethod(
            ...) {
    if (missing(params)) params <- coef(object)
    ## single thread for testing
-   # single_island_output <- iif.internal(
+   # single_island_output <- asif.internal(
    #  object=object,
    #  params=params,
    #  Np=Np,
@@ -456,7 +456,7 @@ setMethod(
    registerDoParallel(cores = NULL)
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
-   mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  iif.internal(
+   mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  asif.internal(
      object=object,
      params=params,
      Np=Np,
@@ -515,7 +515,7 @@ setMethod(
    }
 
    new(
-      "iifd.pomp",
+      "asifd.spatpomp",
       object,
       #loc.comb.filter.weights = loc.comb.filter.weights,
       #pred.mean=lapply(mult_island_output, "slot", "pred.mean"),

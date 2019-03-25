@@ -15,13 +15,13 @@ LinkingTo: pomp2
 Suggests: scales, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate:
-    'bm.R'
     'generics.R'
     'spatpomp_class.R'
+    'asif.R'
+    'bm.R'
     'girf.R'
     'hippie.R'
     'igirf.R'
-    'iif.R'
     'lorenz.R'
     'measles.R'
     'ou.R'

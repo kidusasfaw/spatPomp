@@ -1,5 +1,5 @@
-## Independent Island Filter (IIF)
-setGeneric("iif",function(object,...)standardGeneric("iif"))
+## Adapted Simulation Island Filter (ASIF)
+setGeneric("asif",function(object,...)standardGeneric("asif"))
 
 ## Extract units from spatpomp object
 setGeneric("unit", function(x,...)standardGeneric("unit"))

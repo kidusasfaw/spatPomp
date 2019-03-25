@@ -10,7 +10,7 @@
 // resampling weights are used in filtering mean computation.
 // if length(resamp_weights) == 1, an unweighted average is computed.
 // returns all of the above in a named list
-SEXP iif_computations (SEXP x, SEXP params, SEXP Np,
+SEXP asif_computations (SEXP x, SEXP params, SEXP Np,
 			   SEXP rw_sd,
 			   SEXP predmean, SEXP predvar,
 			   SEXP filtmean, SEXP trackancestry, SEXP onepar,
@@ -45,7 +45,7 @@ SEXP iif_computations (SEXP x, SEXP params, SEXP Np,
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
 
   //np = *(INTEGER(AS_INTEGER(Np)));       // number of particles to resample
-  np = 1;       // number of particles to resample for iif is just one
+  np = 1;       // number of particles to resample for asif is just one
 
   nrw = LENGTH(rw_sd);	     // number of parameters that are variable
   do_rw = nrw > 0;	     // do random walk in parameters?
