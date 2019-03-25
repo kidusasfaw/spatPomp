@@ -277,8 +277,9 @@ asif.internal <- function (object, params, Np,
     X <- tryCatch(
       rprocess(
         object,
-        xstart=x,
-        times=times[c(nt,nt+1)],
+        x0=x,
+        t0=times[nt],
+        times=times[nt+1],
         params=params,
         offset=1,
         .gnsi=gnsi
