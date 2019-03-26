@@ -1,6 +1,6 @@
 #' Linear-Gaussian spatpomp generator
 #'
-#' Generate a spatpomp object representing a \code{U}-dimensional discrete-time 
+#' Generate a spatpomp object representing a \code{U}-dimensional discrete-time
 #' Ornstein-Uhlenbeck process with \code{N} time steps.
 #'
 #' @param U A length-one numeric signifying dimension of the process.
@@ -10,8 +10,6 @@
 #' ou(5, 100)
 
 ou <- function(U=5,N=100){
-
-U <- 5; N <- 100
 
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -107,6 +105,6 @@ ou <- spatpomp(ou_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- ou_IVPnames
 test_params <- c(alpha=0.4, rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(pomp(ou),params=test_params)
+simulate(ou,params=test_params)
 
 }

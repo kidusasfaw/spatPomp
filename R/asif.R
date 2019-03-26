@@ -281,7 +281,6 @@ asif.internal <- function (object, params, Np,
         t0=times[nt],
         times=times[nt+1],
         params=params,
-        offset=1,
         .gnsi=gnsi
       ),
       error = function (e) {
