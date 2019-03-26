@@ -15,7 +15,7 @@ ou(U = 5, N = 100)
 A spatpomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{U}-dimensional discrete-time 
+Generate a spatpomp object representing a \code{U}-dimensional discrete-time
 Ornstein-Uhlenbeck process with \code{N} time steps.
 }
 \examples{
