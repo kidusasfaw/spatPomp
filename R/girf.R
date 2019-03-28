@@ -343,7 +343,7 @@ girf.internal <- function (object,
               weights=weights,
               gps=guide_fun,
               fsv=fcst_samp_var,
-              tol=tol^(lookahead*length(object@units))
+              tol=tol
               ),
         error = function (e) {
           stop(ep,conditionMessage(e),call.=FALSE) # nocov

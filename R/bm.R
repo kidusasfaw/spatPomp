@@ -129,7 +129,7 @@ bm_spatpomp <- spatpomp(bm_data,
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
-test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
+test_params <- c(rho=0.4, sigma=1, tau=2, test_ivps)
 simulate(bm_spatpomp,params=test_params)
 
 }
