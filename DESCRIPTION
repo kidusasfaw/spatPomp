@@ -25,6 +25,7 @@ Collate:
     'lorenz.R'
     'measles.R'
     'ou.R'
+    'plot.R'
     'spatpomp.R'
     'spatpomp_methods.R'
     'vec_dmeasure.R'
