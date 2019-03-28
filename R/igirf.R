@@ -98,7 +98,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
-  # print("igirf.internal start")
   if (pomp2:::undefined(object@rprocess) || pomp2:::undefined(object@dmeasure))
     pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
@@ -110,7 +109,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   if (is.null(.paramMatrix)) {
     start <- coef(object)
-  } else {  ## if '.paramMatrix' is supplied, 'start' is ignored
+  } else {
     start <- apply(.paramMatrix,1L,mean)
   }
 
@@ -148,7 +147,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   Np <- as.integer(Np)
   Np <- c(Np,Np[1L])
-  # print("igirf.internal done with Np")
 
   if (missing(rw.sd))
     pStop_(sQuote("rw.sd")," must be specified!")
@@ -167,7 +165,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
   )
-  # print("igirf.internal done with cooling stuff")
 
   if (is.null(.paramMatrix)) {
     paramMatrix <- array(data=start,dim=c(length(start),Np[1L]),
@@ -186,7 +183,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   paramMatrix <- partrans(object,paramMatrix,dir="toEst",
                           .gnsi=gnsi)
-  # print("igirf.internal done with setting up paramMatrix")
 
   ## iterate the filtering
   for (n in seq_len(Ngirf)) {
@@ -199,7 +195,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
     paramMatrix <- g@paramMatrix
     traces[n+1,-1] <- coef(g)
-    traces[n,1] <- g@loglik
+    traces[n+1,1] <- g@loglik
     .indices <- .indices
 
     if (verbose) cat("igirf iteration",n,"of",Ngirf,"completed\n")
@@ -247,16 +243,11 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
 
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
-  # print("test1.1")
   for (nt in 0:(ntimes-1)) {
     ## perturb parameters
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
     params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp2')
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
-    # print("test1.2")
-    # obj_new_params <- object
-    # new_coef = apply(tparams, MARGIN = 1, FUN = function(x) x[1])
-    # coef(obj_new_params) <- new_coef
     ## get initial states
     if (nt == 0) {
       x <- rinit(object,params=tparams)
@@ -271,19 +262,13 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
     fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-    # print("test1.23")
-    # print(Np)
-    # print(x)
     for (p in 1:Np[1]){
       # find this particle's initialization and repeat in Nguide times
       xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       tparamsp = matrix(tparams[,p], nrow = nrow(tparams), ncol = Nguide, dimnames = list(params = paramnames, ng = NULL))
-      # print("test1.24")
-      # print(xp)
       # get all the guides for this particles
       Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
                            params=tparamsp,.gnsi=gnsi)
-      # print("test1.245")
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for(l in 1:lookahead_steps){
@@ -292,17 +277,12 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
         }
       }
     }
-    # print("test1.25")
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
-      # obj_new_params <- object
-
-      # coef(obj_new_params) <- tparams
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=tparams,.gnsi=gnsi)
-      # print("test1.3")
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
@@ -310,7 +290,6 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       } else {
         skel <- X
       }
-      # print("test1.5")
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
@@ -319,12 +298,8 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
           hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams[,i]))
           dim(hskel) <- c(1,Np[1],1)
           meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],tparams[,i]))
-          # meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) apply(X=hskel, MARGIN = c(1,2), FUN = theta.to.v, param.vec = tparams))
-          # hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams)
-          # meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta.to.v, param.vec = tparams)
         }
       }
-      # print("test1.7")
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -332,16 +307,12 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-      # print("test1.9")
       mom_match_param <- array(0, dim = c(dim(params)[1], length(object@units), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
       for(p in 1:Np[1]){
         mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]
       }
-      # mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams)
-      # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
-      # print("test2")
 
       for(l in 1:lookahead_steps){
         dmeas_weights <- tryCatch(
@@ -399,7 +370,6 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
       }
-      # print("test3")
 
       xx <- tryCatch(
         .Call('girf_computations',
@@ -420,23 +390,13 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      # print("test4")
       all.fail <- xx$fail
-      # print("test4.2")
-      # print(xx$ess)
       eff.sample.size[nt+1, s] <- xx$ess
-      # print("test4.4")
       cond.loglik[nt+1, s] <- xx$loglik
-      # print("test4.6")
       x <- xx$states
-      # print("test4.8")
       filter_guide_fun <- xx$filterguides
-      # print("test4.9")
       params <- xx$params
-      # print("test4.96")
       fcst_samp_var <- xx$newfsv
-      # print("test5")
-      # print(params)
     }
   }
   print(sum(cond.loglik))
