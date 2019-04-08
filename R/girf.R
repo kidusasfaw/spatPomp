@@ -239,7 +239,7 @@ girf.internal <- function (object,
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for(l in 1:lookahead_steps){
-          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, obj=object)
+          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=coef(object))
           fcst_samp_var[u, l, p] = var(hXg)
         }
       }
@@ -263,8 +263,9 @@ girf.internal <- function (object,
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for (l in 1:lookahead_steps){
-          hskel <- apply(X=skel[snames,,l, drop = FALSE], MARGIN = c(2,3), FUN = h, obj = object)
-          meas_var_skel[u,l,] <- apply(X=hskel, MARGIN = c(1,2), FUN = theta.to.v, obj = object)
+          hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = coef(object)))
+          dim(hskel) <- c(1,Np[1],1)
+          meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],coef(object)))
         }
       }
 
@@ -278,7 +279,9 @@ girf.internal <- function (object,
 
       mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      mom_match_param = apply(X=inflated_var, MARGIN=c(1,2,3), FUN = v.to.theta, obj = object)
+      for(p in 1:Np[1]){
+        mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = coef(object))[,,,1]
+      }
       # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
