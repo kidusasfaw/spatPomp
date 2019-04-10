@@ -334,7 +334,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
         guide_fun = guide_fun*resamp_weights
       }
 
-      guide_fun[guide_fun < tol^(lookahead*length(object@units))] <- tol^(lookahead*length(object@units))
+      guide_fun[guide_fun < tol] <- tol
       s_not_1_weights <- guide_fun/filter_guide_fun
       if (!(s==1 & nt!=0)){
         weights <- s_not_1_weights
@@ -361,11 +361,11 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
         gnsi <- FALSE
         weights <- as.numeric(weights)*s_not_1_weights
       }
-      if (nt == ntimes-1) {
+      if (nt == ntimes-1 & s==Ninter) {
         if (any(weights>0)) {
           coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=weights)
         } else {
-          pWarn("igirf","filtering failure at last filter iteration; using ",
+          pomp2:::pWarn("igirf","filtering failure at last filter iteration; using ",
                 "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
@@ -384,7 +384,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
               weights=weights,
               gps=guide_fun,
               fsv=fcst_samp_var,
-              tol=tol^(lookahead*length(object@units))
+              tol=tol
         ),
         error = function (e) {
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
