@@ -70,6 +70,7 @@ setMethod(
         sp.list <- vector(mode="list", length = nsim)
         for(i in 1:length(sims)){
           sp <- new("spatpomp",sims[[i]],
+                    unit_rmeasure = object@unit_rmeasure,
                     unit_dmeasure = object@unit_dmeasure,
                     units=object@units,
                     unit_index=object@unit_index,

@@ -11,6 +11,7 @@
 #' @return A spatpomp object with the specified dimension and time steps.
 #' @examples
 #' bm(U=4, N=20)
+#' @export
 
 bm <- function(U=5,N=100,delta.t=0.1){
 

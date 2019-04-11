@@ -64,6 +64,8 @@ Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a
 
 \seealso{
 Other particle filter methods: \code{\link{asif}}
+
+Other \pkg{spatpomp} parameter estimation methods: \code{\link{senkf}}
 }
 \concept{\pkg{spatpomp} parameter estimation methods}
 \concept{particle filter methods}

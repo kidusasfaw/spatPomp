@@ -2,7 +2,7 @@
 #'
 #' Generate a spatpomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
 #' \code{N} measurements made at times \eqn{t_n= n dt_{obs}}, simulated using an Euler method
-#' with time increment $dt$. 
+#' with time increment $dt$.
 #'
 #' @param U A length-one numeric signifying the number of spatial units for the process.
 #' @param N A length-one numeric signifying the number of observations.
@@ -13,7 +13,7 @@
 #' lorenz(U=5, N=100, dt=0.01, dt_obs=1)
 
 lorenz <- function(U=5,N=100,dt=0.01,dt_obs=1){
- 
+
 if(U<3.5)stop("Please use U >= 4")
 
 lorenz_globals <- Csnippet(paste0("#define U ", U, "\n"))
@@ -91,7 +91,7 @@ lorenz <- spatpomp(lorenz_data,
                units="unit",
                unit_statenames = lorenz_unit_statenames,
                rprocess=euler(lorenz_rprocess,delta.t=dt),
-               statenames=lorenz_statenames, 
+               statenames=lorenz_statenames,
                paramnames=lorenz_paramnames,
                globals=lorenz_globals,
                rmeasure=lorenz_rmeasure,
@@ -105,7 +105,7 @@ lorenz <- spatpomp(lorenz_data,
 test_ivps <- rep(0,U)
 names(test_ivps) <- lorenz_IVPnames
 test_params <- c(F=8, rho=0.4, sigma=1, tau=1, test_ivps)
-simulate(pomp(lorenz),params=test_params)
+simulate(lorenz,params=test_params)
 
 }
 

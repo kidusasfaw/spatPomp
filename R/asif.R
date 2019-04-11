@@ -415,7 +415,10 @@ asif.internal <- function (object, params, Np,
 
 
 }
-
+##' @name asif-spatpomp
+##' @aliases asif,spatpomp-method
+##' @rdname asif
+##' @export
 setMethod(
   "asif",
   signature=signature(object="spatpomp"),
