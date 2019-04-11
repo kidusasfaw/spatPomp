@@ -305,7 +305,7 @@ girf.internal <- function (object,
         guide_fun = guide_fun*resamp_weights
       }
 
-      guide_fun[guide_fun < tol^(lookahead*length(object@units))] <- tol^(lookahead*length(object@units))
+      guide_fun[guide_fun < tol] <- tol)
       s_not_1_weights <- guide_fun/filter_guide_fun
       if (!(s==1 & nt!=0)){
         weights <- s_not_1_weights
