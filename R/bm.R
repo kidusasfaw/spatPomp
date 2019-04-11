@@ -68,6 +68,18 @@ bm_skel <- Csnippet("
   }
 ")
 
+bm_skel2 <- Csnippet("
+  //double *X = &X1;
+  double *DX = &DX1;
+  int u;
+  //double dW[U];
+  //int u,v;
+  for (u = 0 ; u < U ; u++) {
+    DX[u] = 0;
+  }
+")
+
+
 bm_rinit <- Csnippet("
   double *X = &X1;
   const double *X_0 =&X1_0;
@@ -113,9 +125,10 @@ bm_spatpomp <- spatpomp(bm_data,
                t0=0,
                units="unit",
                unit_statenames = bm_unit_statenames,
-               #rprocess=euler(bm_rprocess,delta.t = delta.t),
-               rprocess=discrete_time(bm_rprocess),
-               skeleton=map(bm_skel, delta.t=delta.t),
+               rprocess=euler(bm_rprocess,delta.t = delta.t),
+               #rprocess=discrete_time(bm_rprocess),
+               #skeleton=map(bm_skel, delta.t=delta.t),
+               skeleton=vectorfield(bm_skel2),
                paramnames=bm_paramnames,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
