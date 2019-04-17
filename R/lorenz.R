@@ -12,7 +12,7 @@
 #' @examples
 #' lorenz(U=5, N=100, dt=0.01, dt_obs=1)
 
-lorenz <- function(U=5,N=100,dt=0.01,dt_obs=1){
+lorenz <- function(U=5,N=100,dt=0.01,dt_obs=0.5){
 
 if(U<3.5)stop("Please use U >= 4")
 
@@ -38,7 +38,7 @@ lorenz_paramnames <- c(lorenz_RPnames,lorenz_IVPnames)
 lorenz_rprocess <- Csnippet("
   double *X = &X1;
   double dXdt[U];
-  int u,e;
+  int u;
 
   for (u = 2 ; u < U-1 ; u++) {
     dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
@@ -48,6 +48,22 @@ lorenz_rprocess <- Csnippet("
   dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
   for (u = 0 ; u < U ; u++) {
     X[u] += dXdt[u]*dt + rnorm(0,sigma*sqrt(dt));
+  }
+")
+
+lorenz_skel <- Csnippet("
+  double *X = &X1;
+  double dXdt[U];
+  double *DX = &DX1;
+  int u;
+  for (u = 2 ; u < U-1 ; u++) {
+    dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
+  }
+  dXdt[0] = (X[1]-X[U-2])*X[U-1] - X[0]+F;
+  dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
+  dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
+  for (u = 0 ; u < U ; u++) {
+    DX[u] = dXdt[u];
   }
 ")
 
@@ -91,6 +107,7 @@ lorenz <- spatpomp(lorenz_data,
                units="unit",
                unit_statenames = lorenz_unit_statenames,
                rprocess=euler(lorenz_rprocess,delta.t=dt),
+               skeleton=vectorfield(lorenz_skel),
                statenames=lorenz_statenames,
                paramnames=lorenz_paramnames,
                globals=lorenz_globals,
@@ -102,9 +119,9 @@ lorenz <- spatpomp(lorenz_data,
   )
 
 ## We need a parameter vector. For now, we initialize the process at zero.
-test_ivps <- rep(0,U)
+test_ivps <- c(rep(0,U-1),0.01)
 names(test_ivps) <- lorenz_IVPnames
-test_params <- c(F=8, rho=0.4, sigma=1, tau=1, test_ivps)
+test_params <- c(F=8, sigma=1, tau=1, test_ivps)
 simulate(lorenz,params=test_params)
 
 }

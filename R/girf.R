@@ -249,7 +249,6 @@ girf.internal <- function (object,
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
-
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){

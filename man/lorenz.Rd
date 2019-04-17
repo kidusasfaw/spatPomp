@@ -4,7 +4,7 @@
 \alias{lorenz}
 \title{Lorenz 96 spatpomp generator}
 \usage{
-lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 1)
+lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 0.5)
 }
 \arguments{
 \item{U}{A length-one numeric signifying the number of spatial units for the process.}

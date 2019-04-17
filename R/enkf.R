@@ -107,7 +107,7 @@ setMethod(
         ...,
         verbose=verbose
       ),
-      error = function (e) pStop("senkf",conditionMessage(e))
+      error = function (e) pomp2:::pStop("senkf",conditionMessage(e))
     )
     new("kalmand_spatpomp", kp,
         unit_rmeasure = data@unit_rmeasure,
