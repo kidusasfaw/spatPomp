@@ -222,28 +222,33 @@ girf.internal <- function (object,
 
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
+  ## begin multi-thread code
+  doParallel::registerDoParallel(cores = NULL)
+  mcopts <- list(set.seed=TRUE)
+  acomb <- function(...) abind::abind(..., along=3)
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
-    # four-dimensional array: nvars by nguide by ntimes by nreps
-    Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
     fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-    for (p in 1:Np[1]){
-      # find this particle's initialization and repeat in Nguide times
-      xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
-      # get all the guides for this particles
-      Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
-               params=params,.gnsi=gnsi)
-      for(u in 1:length(object@units)){
-        snames = paste0(object@unit_statenames,u)
-        for(l in 1:lookahead_steps){
-          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=coef(object))
-          fcst_samp_var[u, l, p] = var(hXg)
-        }
+    fcst_samp_var <- foreach::foreach(i=1:Np[1], .combine = 'acomb', .multicombine = TRUE, .options.multicore=mcopts) %dopar%  {
+      print('hi')
+      Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps))
+      xp = matrix(x[,i], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
+      # get all the guides for this particle
+      Xg <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+                 params=params,.gnsi=gnsi)
+      fsv <- array(0, dim = c(length(unit(object)),lookahead_steps))
+      for(u in 1:length(unit(object))){
+        snames <- paste0(object@unit_statenames,u)
+        hXgp <- apply(Xg[snames,,], MARGIN = c(1,2,3), FUN = h, param.vec = coef(object))
+        return(Xg)
+        fsv[u,] <- apply(hXgp, MARGIN = 3, FUN = var)
       }
+      fsv
     }
+    return(fcst_samp_var)
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations

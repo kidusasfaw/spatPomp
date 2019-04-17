@@ -37,4 +37,5 @@ Imports: doParallel (>= 1.0.11),
     foreach,
     dplyr,
     tidyr,
-    stringr
+    stringr,
+    abind
