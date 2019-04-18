@@ -36,7 +36,6 @@ NULL
 
 setClass(
   "island.spatpomp",
-  contains="spatpomp",
   slots=c(
     loc.comb.pred.weights="array",
     cond.densities="array",
@@ -395,7 +394,6 @@ asif.internal <- function (object, params, Np,
   pompUnload(object,verbose=verbose)
   new(
     "island.spatpomp",
-    object,
     loc.comb.pred.weights = loc.comb.pred.weights,
     cond.densities = cond.densities,
     #pred.mean=pred.m,
@@ -453,13 +451,13 @@ setMethod(
    # return(single_island_output)
    ## end single thread for testing
    ## begin multi-thread code
-   require(doParallel)
-   require(parallel)
+   #require(doParallel)
+   #require(parallel)
    # cores <- parallel:::detectCores() - 1
-   registerDoParallel(cores = NULL)
+   doParallel::registerDoParallel(cores = NULL)
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
-   mult_island_output <- foreach(i=1:islands, .options.multicore=mcopts) %dopar%  asif.internal(
+   mult_island_output <- foreach::foreach(i=1:islands, .options.multicore=mcopts) %dopar%  asif.internal(
      object=object,
      params=params,
      Np=Np,
