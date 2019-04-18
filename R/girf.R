@@ -219,7 +219,8 @@ girf.internal <- function (object,
 
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   eff.sample.size <- array(0, dim = c(ntimes, Ninter))
-
+  # decide integration method
+  ifelse(length(unit(object))<20, method = "lsoda", method = "adams")
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
   ## begin multi-thread code
@@ -253,7 +254,7 @@ girf.internal <- function (object,
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp2::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],method = "adams")
+        skel <- pomp2::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],method = method)
       } else {
         skel <- X
       }
