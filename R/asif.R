@@ -56,7 +56,7 @@ setClass(
   ),
   prototype=prototype(
     loc.comb.pred.weights=array(data=numeric(0),dim=c(0,0)),
-    cond.densities=array(data=numeric(0),dim=c(0,0,0)),
+    cond.densities=array(data=numeric(0),dim=c(0,0)),
     # pred.mean=array(data=numeric(0),dim=c(0,0)),
     # pred.var=array(data=numeric(0),dim=c(0,0)),
     # filter.mean=array(data=numeric(0),dim=c(0,0)),
@@ -391,6 +391,7 @@ asif.internal <- function (object, params, Np,
       loc.comb.pred.weights[unit,nt] = prod_over_times
     }
   }
+  cond.densities = apply(cond.densities, c(1,3), FUN = mean)
   pompUnload(object,verbose=verbose)
   new(
     "island.spatpomp",
@@ -451,8 +452,6 @@ setMethod(
    # return(single_island_output)
    ## end single thread for testing
    ## begin multi-thread code
-   #require(doParallel)
-   #require(parallel)
    # cores <- parallel:::detectCores() - 1
    doParallel::registerDoParallel(cores = NULL)
    mcopts <- list(set.seed=TRUE)
@@ -477,26 +476,18 @@ setMethod(
    nunits = length(unit(object))
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    island_weight_sums = array(data = numeric(0), dim = c(nunits,ntimes))
+   island_weight_weighted_sums = array(data = numeric(0), dim = c(nunits, ntimes))
    for (i in seq_len(nunits)){
     for (j in seq_len(ntimes)){
       weight_sum = 0
+      weight_weighted_sum = 0
       for (k in seq_len(islands)){
         # weight_sum = weight_sum + mult_island_output[[k]][[2]][i,j]
         weight_sum = weight_sum + mult_island_output[[k]]@loc.comb.pred.weights[i,j]
+	weight_weighted_sum = weight_weighted_sum + (mult_island_output[[k]]@loc.comb.pred.weights[i,j])*mult_island_output[[k]]@cond.densities[i,j]
       }
       island_weight_sums[i,j] = weight_sum
-    }
-   }
-   loc.comb.filter.weights = array(data = numeric(0), dim=c(nunits, ntimes, islands, Np))
-   marg.filter.probs = array(data = numeric(0), dim=c(nunits, ntimes, islands, Np))
-   # compute w_{d,n,i,j}^LCF
-   for(i in seq_len(nunits)){
-    for(j in seq_len(ntimes)){
-      for(k in seq_len(islands)){
-        for(l in seq_len(Np)){
-           loc.comb.filter.weights[i,j,k,l] = mult_island_output[[k]]@cond.densities[i,l,j] * (mult_island_output[[k]]@loc.comb.pred.weights[i,j]) / island_weight_sums[i,j]
-        }
-      }
+      island_weight_weighted_sums[i,j] = weight_weighted_sum
     }
    }
    # end multi-threaded code
@@ -505,13 +496,7 @@ setMethod(
    cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
    for(i in seq_len(nunits)){
     for(j in seq_len(ntimes)){
-      space_time_sum = 0
-      for(k in seq_len(islands)){
-        for(l in seq_len(Np)){
-           space_time_sum = space_time_sum + loc.comb.filter.weights[i,j,k,l]
-        }
-      }
-      cond.loglik[i,j] = log((1/Np)*space_time_sum)
+      cond.loglik[i,j] = log(island_weight_weighted_sums[i,j]) - log(island_weight_sums[i,j])
     }
    }
 
