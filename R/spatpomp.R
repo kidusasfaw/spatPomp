@@ -23,7 +23,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   if (missing(rinit)) rinit <- NULL
 
   if (missing(rprocess) || is.null(rprocess)) {
-    rprocess <- rproc_plugin()
+    rprocess <- pomp2:::rproc_plugin()
   }
 
   if (missing(dprocess)) dprocess <- NULL
