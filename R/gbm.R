@@ -61,9 +61,13 @@ gbm_rprocess <- Csnippet("
 gbm_skel <- Csnippet("
   double *DX = &DX1;
   double *X = &X1;
-  int u;
+  double cumsigsq[U];
+  int u,v;
   for (u = 0 ; u < U ; u++) {
-    DX[u] = X[u];
+    for (v = 0 ; v < U ; v++) {
+      cumsigsq[u] += pow(sigma*(pow(rho, dist[u][v])), 2);
+    }
+    DX[u] = X[u]*((cumsigsq[u])/2);
   }
 ")
 
@@ -130,7 +134,7 @@ gbm_spatpomp <- spatpomp(gbm_data,
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(1,U)
 names(test_ivps) <- gbm_IVPnames
-test_params <- c(rho=0.3, sigma=0.1, tau=0.1, test_ivps)
+test_params <- c(rho=0.1, sigma=0.1, tau=0.1, test_ivps)
 simulate(gbm_spatpomp,params=test_params)
 
 }
