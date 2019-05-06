@@ -57,17 +57,6 @@ bm_rprocess <- Csnippet("
   }
 ")
 
-bm_skel <- Csnippet("
-  double *X = &X1;
-  double *DX = &DX1;
-  int u;
-  //double dW[U];
-  //int u,v;
-  for (u = 0 ; u < U ; u++) {
-    DX[u] = X[u];
-  }
-")
-
 bm_skel2 <- Csnippet("
   //double *X = &X1;
   double *DX = &DX1;

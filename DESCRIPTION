@@ -21,6 +21,7 @@ Collate:
     'bm.R'
     'spatpomp.R'
     'enkf.R'
+    'gbm.R'
     'girf.R'
     'hippie.R'
     'igirf.R'

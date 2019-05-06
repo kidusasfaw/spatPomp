@@ -244,11 +244,17 @@ girf.internal <- function (object,
       }
       fsv
     }
+
+    #print(paste0("fcst_samp_var"))
+    #print(fcst_samp_var)
+
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
+      #print(paste0("X"))
+      #print(X)
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
@@ -256,7 +262,8 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-
+      #print(paste0("skel"))
+      #print(skel)
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
@@ -267,7 +274,8 @@ girf.internal <- function (object,
           meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],coef(object)))
         }
       }
-
+      #print(paste0("meas_var_skel"))
+      #print(meas_var_skel)
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -275,12 +283,24 @@ girf.internal <- function (object,
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-
-      mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params), lookahead = NULL, J = NULL))
+      #print(paste0("fcst_var_upd"))
+      #print(fcst_var_upd)
+      mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      for(p in 1:Np[1]){
-        mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = coef(object))[,,,1]
+      #print(paste0("inflated_var"))
+      #print(inflated_var)
+      for(u in 1:length(object@units)){
+        snames = paste0(object@unit_statenames,u)
+        for (l in 1:lookahead_steps){
+          for(p in 1:Np[1]){
+            mom_match_param[, u, l, p] = v.to.theta(inflated_var[u,l,p], coef(object), skel[snames, p, l])
+            # mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = coef(object), state.vec = skel[snames,p,l])[,,,1]
+          }
+        }
       }
+      #print(paste0("mom_match_param"))
+      #print(mom_match_param)
+      # return(1)
       # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
@@ -303,8 +323,11 @@ girf.internal <- function (object,
         resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
         guide_fun = guide_fun*resamp_weights
       }
-
+      #print("dmeas_weights")
+      #print(dmeas_weights)
       guide_fun[guide_fun < tol] <- tol
+      #print(paste0("guide_fun"))
+      #print(guide_fun)
       s_not_1_weights <- guide_fun/filter_guide_fun
       if (!(s==1 & nt!=0)){
         weights <- s_not_1_weights
@@ -331,6 +354,8 @@ girf.internal <- function (object,
         gnsi <- FALSE
         weights <- as.numeric(weights)*s_not_1_weights
       }
+      #print(paste0("weights"))
+      #print(weights)
 
       xx <- tryCatch(
         .Call('girf_computations',
@@ -358,6 +383,7 @@ girf.internal <- function (object,
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
+      #print(filter_guide_fun)
     }
   }
   new(

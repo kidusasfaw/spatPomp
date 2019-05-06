@@ -31,8 +31,8 @@ dist_C <- paste0("const double dist[",U,"][",U,"] = ",dist_C_array,"; ")
 gbm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
 
 
-obs_names <- paste0("Y",1:U)
-gbm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
+obs_names <- paste0("Y",(1:U))
+gbm_data <- data.frame(time=rep((1:N),U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
 
 gbm_unit_statenames <- c("X")
 gbm_statenames <- paste0(gbm_unit_statenames,1:U)
@@ -46,21 +46,21 @@ gbm_rprocess <- Csnippet("
   double Xbm[U];
   double dW[U];
   int u,v;
-
   for (u = 0 ; u < U ; u++) {
-    Xbm[u] = log(X[u])
+    Xbm[u] = log(X[u]);
     dW[u] = rnorm(0,sigma*sqrt(dt));
   }
   for (u = 0 ; u < U ; u++) {
     for (v=0; v < U ; v++) {
       Xbm[u] += dW[v]*pow(rho,dist[u][v]);
     }
-    X[u] = exp(Xbm[u])
+    X[u] = exp(Xbm[u]);
   }
 ")
 
 gbm_skel <- Csnippet("
   double *DX = &DX1;
+  double *X = &X1;
   int u;
   for (u = 0 ; u < U ; u++) {
     DX[u] = X[u];
@@ -84,7 +84,8 @@ gbm_dmeasure <- Csnippet("
   double tol = pow(1.0e-18,U);
   int u;
   lik=0;
-  for (u=0; u<U; u++) lik += dnorm(Y[u],log(X[u]),tau,1);
+  // Jacobian to get Y|logX since we know logY|logX is Normal(0,tau-squred)
+  for (u=0; u<U; u++)lik += (dnorm(log(Y[u]),log(X[u]),tau,1) + log(1/Y[u]));
   if(!give_log) lik = exp(lik) + tol;
 ")
 
@@ -93,18 +94,19 @@ gbm_rmeasure <- Csnippet("
   double *Y = &Y1;
   double tol = pow(1.0e-18,U);
   int u;
-  for (u=0; u<U; u++) Y[u] = rnorm(log(X[u]),tau+tol);
+  // Y|X = X*exp(eta) where eta is Normal(0, tau-squared)
+  for (u=0; u<U; u++) Y[u] = X[u]*exp(rnorm(0,tau+tol));
 ")
 
 gbm_unit_dmeasure <- Csnippet("
-  lik = dnorm(Y,log(X),tau,1);
+  lik = dnorm(log(Y),log(X),tau,1) + log(1/Y);
   if(!give_log) lik = exp(lik);
 ")
 
 gbm_unit_rmeasure <- Csnippet("
   double tol = pow(1.0e-18,U);
   double Y;
-  Y = rnorm(log(X),tau+tol);
+  Y = X*exp(rnorm(0,tau+tol));
 ")
 
 gbm_spatpomp <- spatpomp(gbm_data,
@@ -126,9 +128,9 @@ gbm_spatpomp <- spatpomp(gbm_data,
 
 
 ## We need a parameter vector. For now, we initialize the process at zero.
-test_ivps <- rep(0,U)
+test_ivps <- rep(1,U)
 names(test_ivps) <- gbm_IVPnames
-test_params <- c(rho=0.4, sigma=1, tau=2, test_ivps)
+test_params <- c(rho=0.3, sigma=0.1, tau=0.1, test_ivps)
 simulate(gbm_spatpomp,params=test_params)
 
 }
