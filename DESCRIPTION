@@ -29,6 +29,7 @@ Collate:
     'measles.R'
     'ou.R'
     'plot.R'
+    'spat_sir.R'
     'spatpomp_methods.R'
     'vec_dmeasure.R'
     'vec_rmeasure.R'
