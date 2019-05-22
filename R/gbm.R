@@ -63,6 +63,9 @@ gbm_skel <- Csnippet("
   double *X = &X1;
   double cumsigsq[U];
   int u,v;
+  for (u = 0; u < U; u++){
+     cumsigsq[u] = 0;
+  }
   for (u = 0 ; u < U ; u++) {
     for (v = 0 ; v < U ; v++) {
       cumsigsq[u] += pow(sigma*(pow(rho, dist[u][v])), 2);
