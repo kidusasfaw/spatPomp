@@ -24,6 +24,54 @@
 in the neighborhood of \code{(d,n)}.}
 
 \item{islands}{The number of islands for the adapted simulations.}
+
+\item{tol}{
+    positive numeric scalar; particles with likelihood less than \code{tol} are considered to be incompatible with the data.
+    See the section on \emph{Filtering Failures} below for more information.
+  }
+
+\item{max.fail}{
+    integer; the maximum number of filtering failures allowed (see below).
+    If the number of filtering failures exceeds this number, execution will terminate with an error.
+    By default, \code{max.fail} is set to infinity, so no error can be triggered.
+  }
+
+\item{pred.mean}{
+    logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.
+  }
+
+\item{pred.var}{
+    logical; if \code{TRUE}, the prediction variances are calculated for the state variables and parameters.
+  }
+
+\item{filter.mean}{
+    logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.
+  }
+
+\item{filter.traj}{
+    logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
+  }
+
+\item{save.states}{
+    logical.
+    If \code{save.states=TRUE}, the state-vector for each particle at each time is saved in the \code{saved.states} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
+    If \code{save.params=TRUE}, the parameter-vector for each particle at each time is saved in the \code{saved.params} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
+  }
+
+\item{save.params}{
+    logical.
+    If \code{save.states=TRUE}, the state-vector for each particle at each time is saved in the \code{saved.states} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
+    If \code{save.params=TRUE}, the parameter-vector for each particle at each time is saved in the \code{saved.params} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
+  }
+
+\item{verbose}{
+    logical; if \code{TRUE}, progress information is reported as \code{pfilter} works.
+  }
+
+\item{...}{
+    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
+    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
+  }
 }
 \value{
 Upon successful completion, \code{asif} returns an object of class
@@ -46,7 +94,11 @@ The following methods are available for such an object:
 }
 
 \seealso{
-Other particle filter methods: \code{\link{hippie}}
+Other particle filter methods: \code{\link{girf}},
+  \code{\link{hippie}}, \code{\link{igirf}}
+
+Other \pkg{spatpomp} filtering methods: \code{\link{girf}},
+  \code{\link{igirf}}
 }
 \concept{\pkg{spatpomp} filtering methods}
 \concept{particle filter methods}

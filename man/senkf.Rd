@@ -13,12 +13,21 @@
   verbose = getOption("verbose", FALSE))
 }
 \arguments{
+\item{data}{either a data frame holding the spatiotemporal data,
+or an object of class \sQuote{spatPomp},
+i.e., the output of another \pkg{spatPomp} calculation.}
+
 \item{Np}{the number of particles to use.}
 
 \item{h}{function returning the expected value of the observation given the
 state.}
 
 \item{R}{matrix; variance of the measurement noise.}
+
+\item{...}{
+    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
+    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
+  }
 
 \item{C}{matrix converting state vector into expected value of the
 observation.}

@@ -1,10 +1,35 @@
-##
-## @references
-## J. Park & E. L. Ionides (2018).
-## Iterated GIRF.
-## Arxiv 1708.08543v2
-##' @include spatpomp_class.R girf.R
-##
+##' Iterated guided intermediate resampling filter (iGIRF)
+##'
+##' An implementation of a parameter estimation algorithm combining
+##' GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in Asfaw, Ionides and King (2019). 
+##'
+##' @name igirf
+##' @rdname igirf
+##' @include spatpomp_class.R generics.R spatpomp.R girf.R
+##' @family particle filter methods
+##' @family \pkg{spatpomp} filtering methods
+##'
+##'
+##' @inheritParams spatpomp
+##' @inheritParams pomp::mif2
+##'
+##' @param Ngirf the number of iterations of perturbed GIRF.
+##'
+##' @return
+##' Upon successful completion, \code{igirf} returns an object of class
+##' \sQuote{igirfd.spatpomp}.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' }
+##'
+##' @references
+##' \park2019
+##'
+##' \asfaw2019
+NULL
 
 rw.sd <- pomp2:::safecall
 

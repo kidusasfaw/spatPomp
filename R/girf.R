@@ -1,10 +1,42 @@
-##
-## @references
-## J. Park & E. L. Ionides (2018).
-## A guided intermediate resampling particle filter for inference on high dimensional systems.
-## Arxiv 1708.08543v2
-##' @include spatpomp_class.R
-##
+##' Guided intermediate resampling filter (GIRF)
+##'
+##' An implementation of the algorithm of Park and Ionides (2019),
+##' following the pseudocode in Asfaw, Ionides and King (2019).
+##'
+##' @name girf
+##' @rdname girf
+##' @include spatpomp_class.R generics.R spatpomp.R
+##' @family particle filter methods
+##' @family \pkg{spatpomp} filtering methods
+##'
+##'
+##' @inheritParams spatpomp
+##' @param object A \code{spatpomp} object.
+##' @param params A parameter set for the spatiotemporal POMP.
+##' @param Np The number of particles used.
+##' @param h A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.
+##' @param theta.to.v A function with template \code{function(state.vec, param.vec)} which returns an approximation to the variance of an observation given a latent state and parameter vector.
+##' @param v.to.theta A function with template \code{function(var, state.vec, param.vec)} which returns a parameter vector having observation noise consistent with variance \code{var} at latent state \code{state.vec} with other paramters given by \code{param.vec}.
+##' @param Ninter the number of intermediate resampling timepoints.
+##' @param lookahead The number of future observations included in the guide function.
+##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
+##'
+##' @return
+##' Upon successful completion, \code{girf} returns an object of class
+##' \sQuote{girfd.spatpomp}.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' }
+##'
+##' @references
+##' \park2019
+##'
+##' \asfaw2019
+NULL
+
 
 setClass(
   "girfd_spatpomp",

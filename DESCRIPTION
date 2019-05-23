@@ -28,6 +28,7 @@ Collate:
     'lorenz.R'
     'measles.R'
     'ou.R'
+    'package.R'
     'plot.R'
     'spat_sir.R'
     'spatpomp_methods.R'

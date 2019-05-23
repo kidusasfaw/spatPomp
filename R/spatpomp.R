@@ -1,8 +1,21 @@
-#' spatpomp: A package that provides methods for inference for Spatiotemporal POMPs
-#'
-#' @include spatpomp_class.R
-NULL
-
+##' Constructor of the basic spatPomp object
+##'
+##' This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
+##' Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.
+##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
+##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms. 
+##'
+##' @name spatpomp
+##' @rdname spatpomp
+##'
+##' @include spatpomp_class.R
+##'
+##' @param data either a data frame holding the spatiotemporal data,
+##' or an object of class \sQuote{spatPomp},
+##' i.e., the output of another \pkg{spatPomp} calculation.
+##'
+##' @inheritParams pomp::pomp
+##'
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
