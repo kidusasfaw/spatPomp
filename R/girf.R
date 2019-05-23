@@ -257,6 +257,8 @@ girf.internal <- function (object,
   doParallel::registerDoParallel(cores = NULL)
   mcopts <- list(set.seed=TRUE)
   acomb <- function(...) abind::abind(..., along=3)
+  acombb <- function(...) abind::abind(..., along=4)
+
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
@@ -294,7 +296,7 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-      #print(paste0("skel"))
+      #print(paste0("skel done"))
       #print(skel)
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
@@ -321,15 +323,24 @@ girf.internal <- function (object,
       inflated_var <- meas_var_skel + fcst_var_upd
       #print(paste0("inflated_var"))
       #print(inflated_var)
-      for(u in 1:length(object@units)){
-        snames = paste0(object@unit_statenames,u)
-        for (l in 1:lookahead_steps){
-          for(p in 1:Np[1]){
-            mom_match_param[, u, l, p] = v.to.theta(inflated_var[u,l,p], coef(object), skel[snames, p, l])
-            # mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = coef(object), state.vec = skel[snames,p,l])[,,,1]
+      mom_match_param <- foreach::foreach(i=1:Np[1], .combine = acombb, .multicombine = TRUE, .options.multicore=mcopts) %dopar%  {
+        mmp <- array(0, dim = c(length(params), length(unit(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
+        for(u in 1:length(object@units)){
+          snames = paste0(object@unit_statenames,u)
+          for (l in 1:lookahead_steps){
+            mmp[,u,l] = v.to.theta(inflated_var[u,l,i], coef(object), skel[snames, i, l])
           }
         }
+        mmp
       }
+      # for(u in 1:length(object@units)){
+      #   snames = paste0(object@unit_statenames,u)
+      #   for (l in 1:lookahead_steps){
+      #     for(p in 1:Np[1]){
+      #       mom_match_param[, u, l, p] = v.to.theta(inflated_var[u,l,p], coef(object), skel[snames, p, l])
+      #     }
+      #   }
+      # }
       #print(paste0("mom_match_param"))
       #print(mom_match_param)
       # return(1)
