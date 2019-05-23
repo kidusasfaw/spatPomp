@@ -264,7 +264,7 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-      print(paste0("skel done"))
+      #print(paste0("skel done"))
       #print(skel)
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))

@@ -37,8 +37,10 @@ NULL
 setClass(
   "island.spatpomp",
   slots=c(
-    loc.comb.pred.weights="array",
-    cond.densities="array",
+    wm.times.wp.avg="array",
+    wp.avg="array",
+    #loc.comb.pred.weights="array",
+    #cond.densities="array",
     #pred.mean="array",
     #pred.var="array",
     #filter.mean="array",
@@ -55,8 +57,8 @@ setClass(
     #loglik="numeric"
   ),
   prototype=prototype(
-    loc.comb.pred.weights=array(data=numeric(0),dim=c(0,0)),
-    cond.densities=array(data=numeric(0),dim=c(0,0)),
+    wm.times.wp.avg=array(data=numeric(0),dim=c(0,0)),
+    wp.avg=array(data=numeric(0),dim=c(0,0)),
     # pred.mean=array(data=numeric(0),dim=c(0,0)),
     # pred.var=array(data=numeric(0),dim=c(0,0)),
     # filter.mean=array(data=numeric(0),dim=c(0,0)),
@@ -350,28 +352,30 @@ asif.internal <- function (object, params, Np,
       cat("asif timestep",nt,"of",ntimes,"finished\n")
   } ## end of main loop
 
-  # compute locally combined pred. weights for each time and unit
-  loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,ntimes))
+  # compute locally combined pred. weights for each time, unit and particle
+  loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,Np[1L], ntimes))
+  wm.times.wp.avg = array(data = numeric(0), dim = c(nunits, ntimes))
+  wp.avg = array(data = numeric(0), dim = c(nunits, ntimes))
   for (nt in seq_len(ntimes)){
     for (unit in seq_len(nunits)){
       prod_over_times = 1
       full_nbhd = nbhd(object, nt, unit)
       for (prev_t in 1:nt){
         if(prev_t == nt){
-          if(unit == 1) next
-          time_sum = 0
-          for(pp in seq_len(Np[1])){
-            part_prod = 1
-            for (prev_u in 1:unit-1){
-              if (prev_u == 0) next
-              if (full_nbhd[prev_u, prev_t]){
-                part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
+          if(unit == 1) loc.comb.pred.weights[unit,,nt] = prod_over_times
+          else{
+            for(pp in seq_len(Np[1])){
+              part_prod = 1
+              for (prev_u in 1:unit-1){
+                if (prev_u == 0) next
+                if (full_nbhd[prev_u, prev_t]){
+                  part_prod = part_prod*cond.densities[prev_u, pp, prev_t]
+                }
               }
+              # time_sum = time_sum + part_prod
+              loc.comb.pred.weights[unit, pp, nt] = prod_over_times*part_prod
             }
-            time_sum = time_sum + part_prod
           }
-          time_avg = time_sum/Np[1]
-          prod_over_times = prod_over_times * time_avg
         }
         else{
           time_sum = 0
@@ -388,15 +392,20 @@ asif.internal <- function (object, params, Np,
           prod_over_times = prod_over_times * time_avg
         }
       }
-      loc.comb.pred.weights[unit,nt] = prod_over_times
+      # loc.comb.pred.weights[unit,nt] = prod_over_times
     }
   }
-  cond.densities = apply(cond.densities, c(1,3), FUN = mean)
+  wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
+  wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
+
+  #cond.densities = apply(cond.densities, c(1,3), FUN = mean)
   pompUnload(object,verbose=verbose)
   new(
     "island.spatpomp",
-    loc.comb.pred.weights = loc.comb.pred.weights,
-    cond.densities = cond.densities,
+    wm.times.wp.avg = wm.times.wp.avg,
+    wp.avg = wp.avg,
+    #loc.comb.pred.weights = loc.comb.pred.weights,
+    #cond.densities = cond.densities,
     #pred.mean=pred.m,
     #pred.var=pred.v,
     #filter.mean=filt.m,
@@ -475,30 +484,33 @@ setMethod(
    ntimes = length(time(object))
    nunits = length(unit(object))
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
-   island_weight_sums = array(data = numeric(0), dim = c(nunits,ntimes))
-   island_weight_weighted_sums = array(data = numeric(0), dim = c(nunits, ntimes))
+   island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
+   island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
+   cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
    for (i in seq_len(nunits)){
     for (j in seq_len(ntimes)){
-      weight_sum = 0
-      weight_weighted_sum = 0
+      mp_sum = 0
+      p_sum = 0
       for (k in seq_len(islands)){
         # weight_sum = weight_sum + mult_island_output[[k]][[2]][i,j]
-        weight_sum = weight_sum + mult_island_output[[k]]@loc.comb.pred.weights[i,j]
-	weight_weighted_sum = weight_weighted_sum + (mult_island_output[[k]]@loc.comb.pred.weights[i,j])*mult_island_output[[k]]@cond.densities[i,j]
+        mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[i,j]
+        p_sum = p_sum + mult_island_output[[k]]@wp.avg[i,j]
+	      # weight_weighted_sum = weight_weighted_sum + (mult_island_output[[k]]@loc.comb.pred.weights[i,j])*mult_island_output[[k]]@cond.densities[i,j]
       }
-      island_weight_sums[i,j] = weight_sum
-      island_weight_weighted_sums[i,j] = weight_weighted_sum
+      # island_weight_sums[i,j] = weight_sum
+      # island_weight_weighted_sums[i,j] = weight_weighted_sum
+      cond.loglik[i,j] = log(mp_sum) - log(p_sum)
     }
    }
    # end multi-threaded code
    #
    # compute conditional log-likelihood estimate
-   cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
-   for(i in seq_len(nunits)){
-    for(j in seq_len(ntimes)){
-      cond.loglik[i,j] = log(island_weight_weighted_sums[i,j]) - log(island_weight_sums[i,j])
-    }
-   }
+   # cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
+   # for(i in seq_len(nunits)){
+   #  for(j in seq_len(ntimes)){
+   #    cond.loglik[i,j] = log(island_weight_weighted_sums[i,j]) - log(island_weight_sums[i,j])
+   #  }
+   # }
 
    new(
       "asifd.spatpomp",
