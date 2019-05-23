@@ -2,18 +2,18 @@
 % Please edit documentation in R/measles.R
 \name{measles}
 \alias{measles}
-\title{Measles in UK spatpomp generator}
+\title{Measles in UK spatPomp generator}
 \usage{
 measles(U = 6)
 }
 \arguments{
-\item{U}{A length-one numeric signifying the number of cities to be represented in the spatpomp object.}
+\item{U}{A length-one numeric signifying the number of cities to be represented in the spatPomp object.}
 }
 \value{
-A spatpomp object.
+A spatPomp object.
 }
 \description{
-Generate a spatpomp object for measles in the top-\code{U} most populous cities in England.
+Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
 Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/lorenz.R
 \name{lorenz}
 \alias{lorenz}
-\title{Lorenz 96 spatpomp generator}
+\title{Lorenz 96 spatPomp generator}
 \usage{
 lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 0.5)
 }
@@ -16,10 +16,10 @@ lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 0.5)
 \item{dt_obs}{A length-one numeric giving the time between observations.}
 }
 \value{
-A spatpomp object with the specified dimension and time steps.
+A spatPomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
+Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
 \code{N} measurements made at times \eqn{t_n= n dt_{obs}}, simulated using an Euler method
 with time increment $dt$.
 }

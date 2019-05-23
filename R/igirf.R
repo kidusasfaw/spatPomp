@@ -5,24 +5,24 @@
 ##'
 ##' @name igirf
 ##' @rdname igirf
-##' @include spatpomp_class.R generics.R spatpomp.R girf.R
+##' @include spatPomp_class.R generics.R spatPomp.R girf.R
 ##' @family particle filter methods
-##' @family \pkg{spatpomp} filtering methods
+##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams spatpomp
+##' @inheritParams spatPomp
 ##' @inheritParams pomp2::mif2
 ##'
 ##' @param Ngirf the number of iterations of perturbed GIRF.
 ##'
 ##' @return
 ##' Upon successful completion, \code{igirf} returns an object of class
-##' \sQuote{igirfd.spatpomp}.
+##' \sQuote{igirfd.spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' \item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
 ##' }
 ##'
 ##' @references
@@ -34,8 +34,8 @@ NULL
 rw.sd <- pomp2:::safecall
 
 setClass(
-  "igirfd_spatpomp",
-  contains="girfd_spatpomp",
+  "igirfd_spatPomp",
+  contains="girfd_spatPomp",
   slots=c(
     Ngirf = 'integer',
     rw.sd = 'matrix',
@@ -67,13 +67,13 @@ setMethod(
   }
 )
 
-##' @name igirf-spatpomp
-##' @aliases igirf,spatpomp-method
+##' @name igirf-spatPomp
+##' @aliases igirf,spatPomp-method
 ##' @rdname igirf
 ##' @export
 setMethod(
   "igirf",
-  signature=signature(data="spatpomp"),
+  signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
                         Ninter,lookahead,Nguide,h,theta.to.v,v.to.theta,
                         tol = 1e-17, max.fail = Inf,save.states = FALSE,
@@ -88,13 +88,13 @@ setMethod(
   }
 )
 
-##' @name igirf-igirfd_spatpomp
-##' @aliases igirf,igirfd_spatpomp-method
+##' @name igirf-igirfd_spatPomp
+##' @aliases igirf,igirfd_spatPomp-method
 ##' @rdname igirf
 ##' @export
 setMethod(
   "igirf",
-  signature=signature(data="igirfd_spatpomp"),
+  signature=signature(data="igirfd_spatPomp"),
   function (data,Ngirf,Np,rw.sd,cooling.type, cooling.fraction.50, Ninter,
             lookahead,Nguide,h,theta.to.v,v.to.theta,tol, ...,
             verbose = getOption("verbose", FALSE)) {
@@ -111,7 +111,7 @@ setMethod(
     if (missing(theta.to.v)) theta.to.v <- data@theta.to.v
     if (missing(v.to.theta)) v.to.theta <- data@v.to.theta
 
-    igirf(as(data,"spatpomp"), Ngirf=Ngirf, Np=Np,rw.sd = rw.sd, cooling.type = cooling.type,
+    igirf(as(data,"spatPomp"), Ngirf=Ngirf, Np=Np,rw.sd = rw.sd, cooling.type = cooling.type,
          cooling.fraction.50 = cooling.fraction.50, tol=tol, Ninter=Ninter, Nguide=Nguide, lookahead=lookahead,
          h=h,theta.to.v=theta.to.v, v.to.theta=v.to.theta, ..., verbose=verbose)
   }
@@ -231,7 +231,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                               .gnsi=gnsi)
 
   new(
-    "igirfd_spatpomp",
+    "igirfd_spatPomp",
     g,
     Ngirf=Ngirf,
     rw.sd=rw.sd,
@@ -426,7 +426,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
   }
   print(sum(cond.loglik))
   new(
-    "girfd_spatpomp",
+    "girfd_spatPomp",
     object,
     Ninter=Ninter,
     Nguide=Nguide,

@@ -3,18 +3,18 @@
 \docType{methods}
 \name{igirf}
 \alias{igirf}
-\alias{igirf-spatpomp}
-\alias{igirf,spatpomp-method}
-\alias{igirf-igirfd_spatpomp}
-\alias{igirf,igirfd_spatpomp-method}
+\alias{igirf-spatPomp}
+\alias{igirf,spatPomp-method}
+\alias{igirf-igirfd_spatPomp}
+\alias{igirf,igirfd_spatPomp-method}
 \title{Iterated guided intermediate resampling filter (iGIRF)}
 \usage{
-\S4method{igirf}{spatpomp}(data, Ngirf, Np, rw.sd, cooling.type,
+\S4method{igirf}{spatPomp}(data, Ngirf, Np, rw.sd, cooling.type,
   cooling.fraction.50, Ninter, lookahead, Nguide, h, theta.to.v,
   v.to.theta, tol = 1e-17, max.fail = Inf, save.states = FALSE, ...,
   verbose = getOption("verbose", FALSE))
 
-\S4method{igirf}{igirfd_spatpomp}(data, Ngirf, Np, rw.sd, cooling.type,
+\S4method{igirf}{igirfd_spatPomp}(data, Ngirf, Np, rw.sd, cooling.type,
   cooling.fraction.50, Ninter, lookahead, Nguide, h, theta.to.v,
   v.to.theta, tol, ..., verbose = getOption("verbose", FALSE))
 }
@@ -74,7 +74,7 @@ See the \link[=userdata]{userdata documentation here} for information on how to 
 }
 \value{
 Upon successful completion, \code{igirf} returns an object of class
-\sQuote{igirfd.spatpomp}.
+\sQuote{igirfd.spatPomp}.
 }
 \description{
 An implementation of a parameter estimation algorithm combining
@@ -84,7 +84,7 @@ GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in 
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
 }
 }
 
@@ -97,8 +97,8 @@ The following methods are available for such an object:
 Other particle filter methods: \code{\link{asif}},
   \code{\link{girf}}, \code{\link{hippie}}
 
-Other \pkg{spatpomp} filtering methods: \code{\link{asif}},
+Other \pkg{spatPomp} filtering methods: \code{\link{asif}},
   \code{\link{girf}}
 }
-\concept{\pkg{spatpomp} filtering methods}
+\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

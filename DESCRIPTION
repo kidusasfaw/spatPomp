@@ -1,4 +1,4 @@
-Package: spatpomp
+Package: spatPomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
 Version: 0.1.2
@@ -16,10 +16,10 @@ Suggests: scales, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate:
     'generics.R'
-    'spatpomp_class.R'
+    'spatPomp_class.R'
     'asif.R'
     'bm.R'
-    'spatpomp.R'
+    'spatPomp.R'
     'enkf.R'
     'gbm.R'
     'girf.R'
@@ -30,8 +30,8 @@ Collate:
     'ou.R'
     'package.R'
     'plot.R'
+    'spatPomp_methods.R'
     'spat_sir.R'
-    'spatpomp_methods.R'
     'vec_dmeasure.R'
     'vec_rmeasure.R'
 RoxygenNote: 6.1.1

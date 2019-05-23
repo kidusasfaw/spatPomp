@@ -5,13 +5,13 @@
 ##'
 ##' @name girf
 ##' @rdname girf
-##' @include spatpomp_class.R generics.R spatpomp.R
+##' @include spatPomp_class.R generics.R spatPomp.R
 ##' @family particle filter methods
-##' @family \pkg{spatpomp} filtering methods
+##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams spatpomp
-##' @param object A \code{spatpomp} object.
+##' @inheritParams spatPomp
+##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used.
 ##' @param h A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.
@@ -23,12 +23,12 @@
 ##'
 ##' @return
 ##' Upon successful completion, \code{girf} returns an object of class
-##' \sQuote{girfd.spatpomp}.
+##' \sQuote{girfd.spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
 ##' @references
@@ -39,8 +39,8 @@ NULL
 
 
 setClass(
-  "girfd_spatpomp",
-  contains="spatpomp",
+  "girfd_spatPomp",
+  contains="spatPomp",
   slots=c(
     Ninter="numeric",
     Nguide="numeric",
@@ -95,13 +95,13 @@ setMethod(
   }
 )
 
-##' @name girf-spatpomp
-##' @aliases girf,spatpomp-method
+##' @name girf-spatPomp
+##' @aliases girf,spatPomp-method
 ##' @rdname girf
 ##' @export
 setMethod(
   "girf",
-  signature=signature(data="spatpomp"),
+  signature=signature(data="spatPomp"),
   definition=function (
     data,
     Np,
@@ -136,13 +136,13 @@ setMethod(
   }
 )
 
-##' @name girf-girfd_spatpomp
-##' @aliases girf,girfd_spatpomp-method
+##' @name girf-girfd_spatPomp
+##' @aliases girf,girfd_spatPomp-method
 ##' @rdname girf
 ##' @export
 setMethod(
   "girf",
-  signature=signature(data="girfd_spatpomp"),
+  signature=signature(data="girfd_spatPomp"),
   function (data,
             Np,
             tol,
@@ -164,7 +164,7 @@ setMethod(
     if (missing(theta.to.v)) theta.to.v <- data@theta.to.v
     if (missing(v.to.theta)) v.to.theta <- data@v.to.theta
 
-    girf(as(data,"spatpomp"),
+    girf(as(data,"spatPomp"),
          Np=Np,
          tol=tol,
          Ninter=Ninter,
@@ -430,7 +430,7 @@ girf.internal <- function (object,
     }
   }
   new(
-    "girfd_spatpomp",
+    "girfd_spatPomp",
     object,
     Ninter=Ninter,
     Nguide=Nguide,

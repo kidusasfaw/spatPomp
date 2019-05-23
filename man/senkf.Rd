@@ -5,11 +5,11 @@
 \alias{senkf}
 \alias{senkf,ANY-method}
 \alias{senkf,missing-method}
-\alias{senkf-spatpomp}
-\alias{senkf,spatpomp-method}
+\alias{senkf-spatPomp}
+\alias{senkf,spatPomp-method}
 \title{Ensemble Kalman filters}
 \usage{
-\S4method{senkf}{spatpomp}(data, Np, h, R, ...,
+\S4method{senkf}{spatPomp}(data, Np, h, R, ...,
   verbose = getOption("verbose", FALSE))
 }
 \arguments{
@@ -37,7 +37,7 @@ See the \link[=userdata]{userdata documentation here} for information on how to 
 observation.}
 }
 \value{
-An object of class \sQuote{kalmand_spatpomp}.
+An object of class \sQuote{kalmand_spatPomp}.
 }
 \description{
 The ensemble Kalman filter
@@ -54,10 +54,10 @@ Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
 Assimilation Monthly Weather Review 129:2884--2903
 }
 \seealso{
-Other \pkg{spatpomp} parameter estimation methods: \code{\link{hippie}}
+Other \pkg{spatPomp} parameter estimation methods: \code{\link{hippie}}
 }
 \author{
 Kidus Asfaw
 }
-\concept{\pkg{spatpomp} parameter estimation methods}
+\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filtering methods}

@@ -1,4 +1,4 @@
-#' @include spatpomp_class.R
+#' @include spatPomp_class.R
 ## evaluate the unit measurement model density function for each unit
 
 vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .gnsi = TRUE, ...) {
@@ -24,7 +24,7 @@ vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .gn
 
 setMethod(
   "vec_dmeasure",
-  signature=signature(object="spatpomp"),
+  signature=signature(object="spatPomp"),
   definition=function (object, y, x, times, params, log = FALSE, ...)
     vec_dmeasure.internal(object=object,y=y,x=x,times=times,params=params,log=log,...)
 )

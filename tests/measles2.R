@@ -4,7 +4,7 @@ library(magrittr)
 library(plyr)
 library(reshape2)
 library(ggplot2)
-library(spatpomp3)
+library(spatPomp3)
 options(
   stringsAsFactors=FALSE,
   encoding="UTF-8"
@@ -25,7 +25,7 @@ subset(x,x$loc %in% meanpop$loc[1:20]) %>% mutate(loc=ordered(loc,levels=meanpop
   scale_y_continuous(breaks=c(0,4,40,400,4000),trans=scales::log1p_trans())+
   facet_wrap(~loc,ncol=4)+theme(text=element_text(size=7))
 
-## ----spatpomp_object-----------------------------------------------------
+## ----spatPomp_object-----------------------------------------------------
 D <- 3
 obs_names <- "cases"
 measles_long <- measles_long %>% dplyr::filter(unit %in% unique(measles_long[['unit']])[1:D])
@@ -258,7 +258,7 @@ measles_rmeas <- Csnippet("
     }
   }
 ")
-measles <- spatpomp(measles_long,
+measles <- spatPomp(measles_long,
   units = "unit",
   times = "year",
   t0 = min(measles_long$year)-1/26,
@@ -314,7 +314,7 @@ unit_dmeas <- Csnippet("
                            lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
                        }
                        ")
-measles <- spatpomp(measles_long,
+measles <- spatPomp(measles_long,
   units = "unit",
   times = "year",
   t0 = min(measles_long$year)-1/26,

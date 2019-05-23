@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-#include "spatpomp_defines.h"
+#include "spatPomp_defines.h"
 #include <Rdefines.h>
 
 void nosort_resamp (int nw, double *w, int np, int *p, int offset)

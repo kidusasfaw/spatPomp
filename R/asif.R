@@ -9,14 +9,14 @@
 ##'
 ##' @name asif
 ##' @rdname asif
-##' @include spatpomp_class.R generics.R
+##' @include spatPomp_class.R generics.R
 ##' @family particle filter methods
-##' @family \pkg{spatpomp} filtering methods
+##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams spatpomp
+##' @inheritParams spatPomp
 ##' @inheritParams pomp2::pfilter
-##' @param object A \code{spatpomp} object.
+##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
 ##' @param nbhd A function which when given a point in space-time \code{(d,n)} will output a 0-1 matrix of points in space-time considered to be
@@ -29,13 +29,13 @@
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
 NULL
 
 setClass(
-  "island.spatpomp",
+  "island.spatPomp",
   slots=c(
     wm.times.wp.avg="array",
     wp.avg="array",
@@ -76,8 +76,8 @@ setClass(
   )
 )
 setClass(
-  "asifd.spatpomp",
-  contains="spatpomp",
+  "asifd.spatPomp",
+  contains="spatPomp",
   slots=c(
     #loc.comb.filter.weights="array",
     #pred.mean="list",
@@ -127,9 +127,9 @@ asif.internal <- function (object, params, Np,
                               .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("asif"),": ")
   if(missing(nbhd))
-    stop(ep,sQuote("nbhd")," must be specified for the spatpomp object",call.=FALSE)
+    stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
   ep <- paste0("in ",sQuote("asif"),": ")
-  object <- as(object,"spatpomp")
+  object <- as(object,"spatPomp")
   pompLoad(object,verbose=verbose)
   gnsi <- as.logical(.gnsi)
   pred.mean <- as.logical(pred.mean)
@@ -401,7 +401,7 @@ asif.internal <- function (object, params, Np,
   #cond.densities = apply(cond.densities, c(1,3), FUN = mean)
   pompUnload(object,verbose=verbose)
   new(
-    "island.spatpomp",
+    "island.spatPomp",
     wm.times.wp.avg = wm.times.wp.avg,
     wp.avg = wp.avg,
     #loc.comb.pred.weights = loc.comb.pred.weights,
@@ -423,13 +423,13 @@ asif.internal <- function (object, params, Np,
 
 
 }
-##' @name asif-spatpomp
-##' @aliases asif,spatpomp-method
+##' @name asif-spatPomp
+##' @aliases asif,spatPomp-method
 ##' @rdname asif
 ##' @export
 setMethod(
   "asif",
-  signature=signature(object="spatpomp"),
+  signature=signature(object="spatPomp"),
   function (object, params, Np, nbhd, islands,
            tol = (1e-18)^9,
            max.fail = Inf,
@@ -513,7 +513,7 @@ setMethod(
    # }
 
    new(
-      "asifd.spatpomp",
+      "asifd.spatPomp",
       object,
       #loc.comb.filter.weights = loc.comb.filter.weights,
       #pred.mean=lapply(mult_island_output, "slot", "pred.mean"),

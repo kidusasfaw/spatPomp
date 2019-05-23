@@ -2,7 +2,7 @@
 % Please edit documentation in R/gbm.R
 \name{gbm}
 \alias{gbm}
-\title{Geometric Brownian motion spatpomp generator}
+\title{Geometric Brownian motion spatPomp generator}
 \usage{
 gbm(U = 5, N = 100, delta.t = 0.1)
 }
@@ -12,10 +12,10 @@ gbm(U = 5, N = 100, delta.t = 0.1)
 \item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
 }
 \value{
-A spatpomp object with the specified dimension and time steps.
+A spatPomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{U}-dimensional
+Generate a spatPomp object representing a \code{U}-dimensional
 Geometric Brownian motion with spatial correlation decaying geometrically with
 distance around a circle. The model is defined in continuous time
 though in this case an Euler approximation is exact at the evaluation

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ou.R
 \name{ou}
 \alias{ou}
-\title{Linear-Gaussian spatpomp generator}
+\title{Linear-Gaussian spatPomp generator}
 \usage{
 ou(U = 5, N = 100)
 }
@@ -12,10 +12,10 @@ ou(U = 5, N = 100)
 \item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
 }
 \value{
-A spatpomp object with the specified dimension and time steps.
+A spatPomp object with the specified dimension and time steps.
 }
 \description{
-Generate a spatpomp object representing a \code{U}-dimensional discrete-time
+Generate a spatPomp object representing a \code{U}-dimensional discrete-time
 Ornstein-Uhlenbeck process with \code{N} time steps.
 }
 \examples{

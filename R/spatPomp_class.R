@@ -9,7 +9,7 @@
 #' @slot unit_dmeasure A pomp_fun representing the unit measurement density for each spatial unit.
 #' @slot unit_rmeasure A pomp_fun representing the unit observation simulator.
 setClass(
-  'spatpomp',
+  'spatPomp',
   contains="pomp",
   slots=c(
     units = 'character',

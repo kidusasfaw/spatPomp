@@ -2,18 +2,18 @@
 % Please edit documentation in R/spat_sir.R
 \name{spat_sir}
 \alias{spat_sir}
-\title{SIR model inspired by UK measles: spatpomp generator}
+\title{SIR model inspired by UK measles: spatPomp generator}
 \usage{
 spat_sir(U = 10, Years = 20)
 }
 \arguments{
-\item{U}{A length-one numeric signifying the number of cities to be represented in the spatpomp object.}
+\item{U}{A length-one numeric signifying the number of cities to be represented in the spatPomp object.}
 }
 \value{
-A spatpomp object.
+A spatPomp object.
 }
 \description{
-Generate a spatpomp object for a coupled SIR process 
+Generate a spatPomp object for a coupled SIR process 
 Based on measles in the top-\code{U} most populous cities in England.
 Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 }

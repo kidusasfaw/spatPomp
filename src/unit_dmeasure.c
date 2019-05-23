@@ -6,7 +6,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-#include "spatpomp_defines.h"
+#include "spatPomp_defines.h"
 #include "pomp.h"
 
 static R_INLINE SEXP unit_dmeas_args (SEXP args, SEXP Onames, SEXP Snames,
@@ -209,7 +209,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
     int give_log;
-    spatpomp_unit_measure_model_density *ff = NULL;
+    spatPomp_unit_measure_model_density *ff = NULL;
     double *yp = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
     int *unit = INTEGER(units);
     double *ft = REAL(F);

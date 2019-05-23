@@ -1,6 +1,6 @@
-#' Geometric Brownian motion spatpomp generator
+#' Geometric Brownian motion spatPomp generator
 #'
-#' Generate a spatpomp object representing a \code{U}-dimensional
+#' Generate a spatPomp object representing a \code{U}-dimensional
 #' Geometric Brownian motion with spatial correlation decaying geometrically with
 #' distance around a circle. The model is defined in continuous time
 #' though in this case an Euler approximation is exact at the evaluation
@@ -8,7 +8,7 @@
 #'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
-#' @return A spatpomp object with the specified dimension and time steps.
+#' @return A spatPomp object with the specified dimension and time steps.
 #' @examples
 #' bm(U=4, N=20)
 #' @export
@@ -116,7 +116,7 @@ gbm_unit_rmeasure <- Csnippet("
   Y = X*exp(rnorm(0,tau+tol));
 ")
 
-gbm_spatpomp <- spatpomp(gbm_data,
+gbm_spatPomp <- spatPomp(gbm_data,
                times="time",
                t0=0,
                units="unit",
@@ -138,7 +138,7 @@ gbm_spatpomp <- spatpomp(gbm_data,
 test_ivps <- rep(1,U)
 names(test_ivps) <- gbm_IVPnames
 test_params <- c(rho=0.1, sigma=0.1, tau=0.1, test_ivps)
-simulate(gbm_spatpomp,params=test_params)
+simulate(gbm_spatPomp,params=test_params)
 
 }
 

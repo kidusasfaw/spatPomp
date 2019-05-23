@@ -1,11 +1,11 @@
-#' @include spatpomp_class.R
+#' @include spatPomp_class.R
 #'
 ## this file contains some basic methods definitions
 setAs(
   from="pomp",
-  to="spatpomp",
+  to="spatPomp",
   def = function (from) {
-    new("spatpomp",from,
+    new("spatPomp",from,
         unit_dmeasure=from@dmeasure,
         units="unit",
         unit_index="unit",
@@ -17,35 +17,35 @@ setAs(
 ## extract the vector of units
 setMethod(
   "unit",
-  signature=signature(x="spatpomp"),
+  signature=signature(x="spatPomp"),
   definition=function(x,...) x@units
 )
 
 ## extract the unit index
 setMethod(
   "unit_ix",
-  signature=signature(x="spatpomp"),
+  signature=signature(x="spatPomp"),
   definition=function(x,...) x@unit_index
 )
 
 
 setMethod(
   "print",
-  signature=signature(x="spatpomp"),
+  signature=signature(x="spatPomp"),
   definition=function (x, ...) {
-    cat("<object of class ",sQuote("spatpomp"),">\n",sep="")
+    cat("<object of class ",sQuote("spatPomp"),">\n",sep="")
     invisible(x)
   }
 )
 
 setMethod(
   "simulate",
-  signature=signature(object="spatpomp"),
+  signature=signature(object="spatPomp"),
   definition=function(object, nsim = 1, seed = NULL,
-                       format = c("spatpomps", "arrays", "data.frame"),
+                       format = c("spatPomps", "arrays", "data.frame"),
                        include.data = FALSE,...) {
     format <- match.arg(format)
-    if(format == 'spatpomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
+    if(format == 'spatPomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
       # convert to long format and output
@@ -64,12 +64,12 @@ setMethod(
         tidyr::spread(key = stateobstype, value = val)
       return(gathered)
     }
-    if(format=="spatpomps"){
-      # add back spatpomp components into a list of spatpomps
+    if(format=="spatPomps"){
+      # add back spatPomp components into a list of spatPomps
       if(nsim > 1){
         sp.list <- vector(mode="list", length = nsim)
         for(i in 1:length(sims)){
-          sp <- new("spatpomp",sims[[i]],
+          sp <- new("spatPomp",sims[[i]],
                     unit_rmeasure = object@unit_rmeasure,
                     unit_dmeasure = object@unit_dmeasure,
                     units=object@units,
@@ -81,7 +81,7 @@ setMethod(
         }
         return(sp.list)
       } else{
-        sp <- new("spatpomp",sims,
+        sp <- new("spatPomp",sims,
                   unit_dmeasure = object@unit_dmeasure,
                   units=object@units,
                   unit_index=object@unit_index,
@@ -96,7 +96,7 @@ setMethod(
 
 setMethod(
   "show",
-  signature=signature(object="spatpomp"),
+  signature=signature(object="spatPomp"),
   definition=function (object) {
     cat("<object of class ",sQuote(as.character(class(object))),">\n",sep="")
     invisible(NULL)

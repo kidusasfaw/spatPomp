@@ -1,11 +1,11 @@
-#' Linear-Gaussian spatpomp generator
+#' Linear-Gaussian spatPomp generator
 #'
-#' Generate a spatpomp object representing a \code{U}-dimensional discrete-time
+#' Generate a spatPomp object representing a \code{U}-dimensional discrete-time
 #' Ornstein-Uhlenbeck process with \code{N} time steps.
 #'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
-#' @return A spatpomp object with the specified dimension and time steps.
+#' @return A spatPomp object with the specified dimension and time steps.
 #' @examples
 #' ou(5, 100)
 
@@ -86,7 +86,7 @@ ou_unit_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik);
 ")
 
-ou <- spatpomp(ou_data,
+ou <- spatPomp(ou_data,
                times="time",
                t0=0,
                units="unit",

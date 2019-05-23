@@ -4,7 +4,7 @@
 ##'
 ##' @name plot
 ##' @rdname plot
-##' @include spatpomp_class.R
+##' @include spatPomp_class.R
 ##' @include igirf.R
 ##' @aliases plot
 ##'
@@ -20,7 +20,7 @@ setGeneric(
 ##' @export
 setMethod(
   "plot",
-  signature=signature(x="igirfd_spatpomp"),
+  signature=signature(x="igirfd_spatPomp"),
   definition=function (x, ...) {
     plot.df <- data.frame(x@traces)
     cn <- colnames(plot.df)

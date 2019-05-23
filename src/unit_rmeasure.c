@@ -8,7 +8,7 @@
 #include <R_ext/Arith.h>
 #include <string.h>
 
-#include "spatpomp_defines.h"
+#include "spatPomp_defines.h"
 #include "pomp.h"
 
 static R_INLINE SEXP add_args (SEXP args, SEXP Snames, SEXP Pnames, SEXP Cnames)
@@ -228,7 +228,7 @@ SEXP do_unit_rmeasure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
     int *unit = INTEGER(units);
     double *time = REAL(times), *xs = REAL(x), *ps = REAL(params);
     int *oidx, *sidx, *pidx, *cidx;
-    spatpomp_unit_measure_model_simulator *ff = NULL;
+    spatPomp_unit_measure_model_simulator *ff = NULL;
     int j, k;
 
     nobs = LENGTH(Onames);

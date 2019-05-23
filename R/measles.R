@@ -1,10 +1,10 @@
-#' Measles in UK spatpomp generator
+#' Measles in UK spatPomp generator
 #'
-#' Generate a spatpomp object for measles in the top-\code{U} most populous cities in England.
+#' Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
 #' Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #'
-#' @param U A length-one numeric signifying the number of cities to be represented in the spatpomp object.
-#' @return A spatpomp object.
+#' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
+#' @return A spatPomp object.
 #' @examples
 #' measles(7)
 measles <- function(U=6){
@@ -20,7 +20,7 @@ measlesUK$city<-as.character(measlesUK$city)
 
 ######## code for data cleaning: only re-run if dataset changes ######
 if(0){
-# datafile for measles spatpomp
+# datafile for measles spatPomp
 # derived from measlesUKUS.csv from
 # https://datadryad.org/resource/doi:10.5061/dryad.r4q34
 # US data come from Project Tycho.
@@ -277,7 +277,7 @@ measles_rinit <- Csnippet("
   }
 ")
 
-spatpomp(measles_cases,
+spatPomp(measles_cases,
                     units = "city",
                     times = "year",
                     t0 = min(measles_cases$year)-1/26,

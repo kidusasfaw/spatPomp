@@ -5,10 +5,10 @@
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 ##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms. 
 ##'
-##' @name spatpomp
-##' @rdname spatpomp
+##' @name spatPomp
+##' @rdname spatPomp
 ##'
-##' @include spatpomp_class.R
+##' @include spatPomp_class.R
 ##'
 ##' @param data either a data frame holding the spatiotemporal data,
 ##' or an object of class \sQuote{spatPomp},
@@ -16,13 +16,13 @@
 ##'
 ##' @inheritParams pomp2::pomp
 ##'
-spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
+spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
 
-  ep <- paste0("in ",sQuote("spatpomp"),": ")
+  ep <- paste0("in ",sQuote("spatPomp"),": ")
 
   if (missing(data))
     stop(ep,sQuote("data")," is a required argument",call.=FALSE)
@@ -196,7 +196,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     if (missing(userdata)) userdata <- list()
     added.userdata <- list(...)
     if (length(added.userdata)>0) {
-      message("In ",sQuote("spatpomp"),
+      message("In ",sQuote("spatPomp"),
         ": the following unrecognized argument(s) ",
         "will be stored for use by user-defined functions: ",
         paste(sQuote(names(added.userdata)),collapse=","))
@@ -243,9 +243,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     ud_template <- list(
       unit_dmeasure=list(
         slotname="unit_dmeasure",
-        Cname="__spatpomp_unit_dmeasure",
+        Cname="__spatPomp_unit_dmeasure",
         proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __spatpomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        header="\nvoid __spatPomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -272,9 +272,9 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       ),
       unit_rmeasure=list(
         slotname="unit_rmeasure",
-        Cname="__spatpomp_unit_rmeasure",
+        Cname="__spatPomp_unit_rmeasure",
         proto=quote(unit_rmeasure(x,t,d,params,log,...)),
-        header="\nvoid __spatpomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        header="\nvoid __spatPomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -309,7 +309,7 @@ spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     )
 
     pomp2:::solibs(po) <- hitches$lib
-    new("spatpomp",po,
+    new("spatPomp",po,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,

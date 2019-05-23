@@ -1,6 +1,6 @@
-#' Lorenz 96 spatpomp generator
+#' Lorenz 96 spatPomp generator
 #'
-#' Generate a spatpomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
+#' Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
 #' \code{N} measurements made at times \eqn{t_n= n dt_{obs}}, simulated using an Euler method
 #' with time increment $dt$.
 #'
@@ -8,7 +8,7 @@
 #' @param N A length-one numeric signifying the number of observations.
 #' @param dt_obs A length-one numeric giving the time between observations.
 #' @param dt A length-one numeric giving the Euler time step for the numerical solution.
-#' @return A spatpomp object with the specified dimension and time steps.
+#' @return A spatPomp object with the specified dimension and time steps.
 #' @examples
 #' lorenz(U=5, N=100, dt=0.01, dt_obs=1)
 
@@ -101,7 +101,7 @@ lorenz_unit_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik);
 ")
 
-lorenz <- spatpomp(lorenz_data,
+lorenz <- spatPomp(lorenz_data,
                times="time",
                t0=0,
                units="unit",

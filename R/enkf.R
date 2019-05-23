@@ -4,13 +4,13 @@
 ##'
 ##' @name senkf
 ##' @rdname senkf
-##' @include spatpomp_class.R spatpomp.R
+##' @include spatPomp_class.R spatPomp.R
 ##' @aliases senkf  senkf,ANY-method senkf,missing-method
 ##' @author Kidus Asfaw
 ##' @family particle filtering methods
-##' @family \pkg{spatpomp} parameter estimation methods
+##' @family \pkg{spatPomp} parameter estimation methods
 ##'
-##' @inheritParams spatpomp
+##' @inheritParams spatPomp
 ##' @param Np the number of particles to use.
 ##' @param h function returning the expected value of the observation given the
 ##' state.
@@ -19,7 +19,7 @@
 ##' @param R matrix; variance of the measurement noise.
 ##'
 ##' @return
-##' An object of class \sQuote{kalmand_spatpomp}.
+##' An object of class \sQuote{kalmand_spatPomp}.
 ##'
 ##' @references
 ##' Evensen, G. (1994) Sequential data assimilation with a
@@ -34,7 +34,7 @@
 NULL
 
 setClass(
-  "kalmand_spatpomp",
+  "kalmand_spatPomp",
   contains="kalmand_pomp",
   slots=c(
     units = 'character',
@@ -88,13 +88,13 @@ setMethod(
 ## Updated ensemble: $X^u_{t}=X_t + K_t\,(O_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
-##' @name senkf-spatpomp
-##' @aliases senkf,spatpomp-method
+##' @name senkf-spatPomp
+##' @aliases senkf,spatPomp-method
 ##' @rdname senkf
 ##' @export
 setMethod(
   "senkf",
-  signature=signature(data="spatpomp"),
+  signature=signature(data="spatPomp"),
   function (data,
     Np, h, R,
     ..., verbose = getOption("verbose", FALSE)) {
@@ -109,7 +109,7 @@ setMethod(
       ),
       error = function (e) pomp2:::pStop("senkf",conditionMessage(e))
     )
-    new("kalmand_spatpomp", kp,
+    new("kalmand_spatPomp", kp,
         unit_rmeasure = data@unit_rmeasure,
         unit_dmeasure = data@unit_dmeasure,
         units=data@units,

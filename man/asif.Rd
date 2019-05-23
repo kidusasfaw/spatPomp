@@ -3,18 +3,18 @@
 \docType{methods}
 \name{asif}
 \alias{asif}
-\alias{asif-spatpomp}
-\alias{asif,spatpomp-method}
+\alias{asif-spatPomp}
+\alias{asif,spatPomp-method}
 \title{Adapted Simulation Island Filter (ASIF)}
 \usage{
-\S4method{asif}{spatpomp}(object, params, Np, nbhd, islands,
+\S4method{asif}{spatPomp}(object, params, Np, nbhd, islands,
   tol = (1e-18)^9, max.fail = Inf, pred.mean = FALSE,
   pred.var = FALSE, filter.mean = FALSE, filter.traj = FALSE,
   save.states = FALSE, save.params = FALSE,
   verbose = getOption("verbose"), ...)
 }
 \arguments{
-\item{object}{A \code{spatpomp} object.}
+\item{object}{A \code{spatPomp} object.}
 
 \item{params}{A parameter set for the spatiotemporal POMP.}
 
@@ -69,7 +69,7 @@ As a by-product, we also get a biased estimate of the likelihood of the data.
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
 }
 }
 
@@ -77,8 +77,8 @@ The following methods are available for such an object:
 Other particle filter methods: \code{\link{girf}},
   \code{\link{hippie}}, \code{\link{igirf}}
 
-Other \pkg{spatpomp} filtering methods: \code{\link{girf}},
+Other \pkg{spatPomp} filtering methods: \code{\link{girf}},
   \code{\link{igirf}}
 }
-\concept{\pkg{spatpomp} filtering methods}
+\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

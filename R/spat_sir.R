@@ -1,11 +1,11 @@
-#' SIR model inspired by UK measles: spatpomp generator
+#' SIR model inspired by UK measles: spatPomp generator
 #'
-#' Generate a spatpomp object for a coupled SIR process 
+#' Generate a spatPomp object for a coupled SIR process 
 #' Based on measles in the top-\code{U} most populous cities in England.
 #' Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #'
-#' @param U A length-one numeric signifying the number of cities to be represented in the spatpomp object.
-#' @return A spatpomp object.
+#' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
+#' @return A spatPomp object.
 #' @examples
 #' sir1 <- spat_sir()
 spat_sir <- function(U=10,Years=20){
@@ -177,7 +177,7 @@ sir_unit_dmeasure <- Csnippet('
                        }
                        ')
 
-sir_spatpomp <- spatpomp(sir_empty_data,
+sir_spatPomp <- spatPomp(sir_empty_data,
                     units = "city",
                     times = "year",
                     t0 = 0,
@@ -192,6 +192,6 @@ sir_spatpomp <- spatpomp(sir_empty_data,
                     unit_dmeasure=sir_unit_dmeasure
 )
 
-simulate(sir_spatpomp,params=sir_params)
+simulate(sir_spatPomp,params=sir_params)
 
 }

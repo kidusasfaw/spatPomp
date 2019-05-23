@@ -1,5 +1,5 @@
 #include <R_ext/Rdynload.h>
-#include "spatpomp_defines.h"
+#include "spatPomp_defines.h"
 
 static const R_CallMethodDef callMethods[] = {
   {"do_unit_dmeasure", (DL_FUNC) &do_unit_dmeasure, 8},
@@ -10,7 +10,7 @@ static const R_CallMethodDef callMethods[] = {
   {NULL, NULL, 0}
 };
 
-void R_init_spatpomp (DllInfo *info) {
+void R_init_spatPomp (DllInfo *info) {
   // Register routines
 
   lsi = (load_stack_incr_t *) R_GetCCallable("pomp2", "load_stack_incr");

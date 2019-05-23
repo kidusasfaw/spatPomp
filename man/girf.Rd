@@ -3,17 +3,17 @@
 \docType{methods}
 \name{girf}
 \alias{girf}
-\alias{girf-spatpomp}
-\alias{girf,spatpomp-method}
-\alias{girf-girfd_spatpomp}
-\alias{girf,girfd_spatpomp-method}
+\alias{girf-spatPomp}
+\alias{girf,spatPomp-method}
+\alias{girf-girfd_spatPomp}
+\alias{girf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF)}
 \usage{
-\S4method{girf}{spatpomp}(data, Np, Ninter, lookahead, Nguide, h,
+\S4method{girf}{spatPomp}(data, Np, Ninter, lookahead, Nguide, h,
   theta.to.v, v.to.theta, tol = 1e-17, max.fail = Inf,
   save.states = FALSE, ..., verbose = getOption("verbose", FALSE))
 
-\S4method{girf}{girfd_spatpomp}(data, Np, tol, Ninter, Nguide, lookahead,
+\S4method{girf}{girfd_spatPomp}(data, Np, tol, Ninter, Nguide, lookahead,
   h, theta.to.v, v.to.theta, ..., verbose = getOption("verbose", FALSE))
 }
 \arguments{
@@ -44,13 +44,13 @@ See the \link[=userdata]{userdata documentation here} for information on how to 
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
-\item{object}{A \code{spatpomp} object.}
+\item{object}{A \code{spatPomp} object.}
 
 \item{params}{A parameter set for the spatiotemporal POMP.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class
-\sQuote{girfd.spatpomp}.
+\sQuote{girfd.spatPomp}.
 }
 \description{
 An implementation of the algorithm of Park and Ionides (2019),
@@ -60,7 +60,7 @@ following the pseudocode in Asfaw, Ionides and King (2019).
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{loglik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
 }
 }
 
@@ -73,8 +73,8 @@ The following methods are available for such an object:
 Other particle filter methods: \code{\link{asif}},
   \code{\link{hippie}}, \code{\link{igirf}}
 
-Other \pkg{spatpomp} filtering methods: \code{\link{asif}},
+Other \pkg{spatPomp} filtering methods: \code{\link{asif}},
   \code{\link{igirf}}
 }
-\concept{\pkg{spatpomp} filtering methods}
+\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

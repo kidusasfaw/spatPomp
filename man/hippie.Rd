@@ -23,7 +23,7 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 }
 \value{
 Upon successful completion, \code{hippie} returns an object of class
-\sQuote{hippied.spatpomp}.
+\sQuote{hippied.spatPomp}.
 }
 \description{
 An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.
@@ -66,7 +66,7 @@ Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a
 Other particle filter methods: \code{\link{asif}},
   \code{\link{girf}}, \code{\link{igirf}}
 
-Other \pkg{spatpomp} parameter estimation methods: \code{\link{senkf}}
+Other \pkg{spatPomp} parameter estimation methods: \code{\link{senkf}}
 }
-\concept{\pkg{spatpomp} parameter estimation methods}
+\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}

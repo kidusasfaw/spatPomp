@@ -9,11 +9,11 @@
 #include <Rinternals.h>
 #include "pomp_defines.h"
 
-typedef void spatpomp_unit_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
+typedef void spatPomp_unit_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
                                          const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                          int ncovars, const double *covars, double t, int u);
 
-typedef void spatpomp_unit_measure_model_simulator (double *y, const double *x, const double *p,
+typedef void spatPomp_unit_measure_model_simulator (double *y, const double *x, const double *p,
                                                   const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                                   int ncovars, const double *covars, double t, int u);
 

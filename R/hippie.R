@@ -9,11 +9,11 @@
 ##'
 ##' @name hippie
 ##' @rdname hippie
-##' @include spatpomp_class.R
+##' @include spatPomp_class.R
 ##' @family particle filter methods
-##' @family \pkg{spatpomp} parameter estimation methods
+##' @family \pkg{spatPomp} parameter estimation methods
 ##'
-##' @inheritParams spatpomp
+##' @inheritParams spatPomp
 ##' @inheritParams pfilter
 ##' @param Nhippie The number of iterations to perform.
 ##' @param islands The number of islands for the adapted simulations.
@@ -30,7 +30,7 @@
 ##'
 ##' @return
 ##' Upon successful completion, \code{hippie} returns an object of class
-##' \sQuote{hippied.spatpomp}.
+##' \sQuote{hippied.spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -61,10 +61,10 @@ NULL
 rw.sd <- pomp2:::safecall
 
 
-## define the hippied.spatpomp class
+## define the hippied.spatPomp class
 setClass(
-  'hippied.spatpomp',
-  contains='spatpomp',
+  'hippied.spatPomp',
+  contains='spatPomp',
   slots=c(
     Nhippie = 'integer',
     rw.sd = 'matrix',
@@ -290,7 +290,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
     if (transform)
       island.param.list[[i]] <- partrans(object,island.param.list[[i]],dir="toEst",.gnsi=gnsi)
   }
-  object <- as(object,"spatpomp")
+  object <- as(object,"spatPomp")
 
   # iterate the filtering
   # cores <- parallel:::detectCores()-1
@@ -382,7 +382,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
   pompUnload(object,verbose=verbose)
 
   new(
-    "hippied.spatpomp",
+    "hippied.spatPomp",
     object,
     Nhippie=Nhippie,
     rw.sd=rw.sd,
@@ -397,7 +397,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
 
 setMethod(
   "hippie",
-  signature=signature(object="spatpomp"),
+  signature=signature(object="spatPomp"),
   definition = function (object, Nhippie = 1, islands, prop, start, Np,
                          rw.sd, transform = FALSE,
                          cooling.type = c("hyperbolic", "geometric"),
