@@ -25,59 +25,52 @@ i.e., the output of another \pkg{spatPomp} calculation.}
 
 \item{Ngirf}{the number of iterations of perturbed GIRF.}
 
-\item{Np}{
-    the number of particles to use in filtering.
-    This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-    Alternatively, if one wishes the number of particles to vary across timestep, one may specify \code{Np} either as a vector of positive integers (of length \code{length(time(object))}) or as a function taking a positive integer argument.
-    In the latter case, \code{Np(n)} must be a single positive integer, representing the number of particles to be used at the \code{n}-th timestep:
-    \code{Np(1)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-    \code{Np(2)}, from \code{time(object)[1]} to \code{time(object)[2]},
-    and so on.
-    \strong{Note that this behavior differs from that of \code{\link{mif}}!}
-  }
+\item{Np}{the number of particles to use in filtering.
+This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
+Alternatively, if one wishes the number of particles to vary across timestep, one may specify \code{Np} either as a vector of positive integers (of length \code{length(time(object))}) or as a function taking a positive integer argument.
+In the latter case, \code{Np(n)} must be a single positive integer,
+representing the number of particles to be used at the \code{n}-th timestep:
+\code{Np(1)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
+\code{Np(2)}, from \code{time(object)[1]} to \code{time(object)[2]},
+and so on.}
 
-\item{rw.sd}{
-    specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
-    Parameters that are to be estimated should have positive perturbations specified here.
-    The specification is given using the \code{rw.sd} function, which creates a list of unevaluated expressions.
-    The latter are evaluated in a context where the model time variable is defined (as \code{time}).
-    The expression \code{ivp(s)} can be used in this context as shorthand for \preformatted{ifelse(time==time[1],s,0).}
-    Likewise, \code{ivp(s,lag)} is equivalent to \preformatted{ifelse(time==time[lag],s,0).}
-    See below for some examples.
-    The perturbations that are applied are normally distributed with the specified s.d.
-    If \code{transform = TRUE}, then they are applied on the estimation scale.
-  }
+\item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
+Parameters that are to be estimated should have positive perturbations specified here.
+The specification is given using the \code{\link{rw.sd}} function, which creates a list of unevaluated expressions.
+The latter are evaluated in a context where the model time variable is defined (as \code{time}).
+The expression \code{ivp(s)} can be used in this context as shorthand for \preformatted{ifelse(time==time[1],s,0).}
+Likewise, \code{ivp(s,lag)} is equivalent to \preformatted{ifelse(time==time[lag],s,0).}
+See below for some examples.
 
-\item{cooling.type}{
-    specifications for the cooling schedule, i.e., the manner in which the intensity of the parameter perturbations is reduced with successive filtering iterations.
-    \code{cooling.type} specifies the nature of the cooling schedule.
-    See below (under \dQuote{Specifying the perturbations}) for more detail.
-  }
+The perturbations that are applied are normally distributed with the specified s.d.
+If parameter transformations have been supplied, then the perturbations are applied on the transformed (estimation) scale.}
 
-\item{cooling.fraction.50}{
-    specifications for the cooling schedule, i.e., the manner in which the intensity of the parameter perturbations is reduced with successive filtering iterations.
-    \code{cooling.type} specifies the nature of the cooling schedule.
-    See below (under \dQuote{Specifying the perturbations}) for more detail.
-  }
+\item{cooling.type}{specifications for the cooling schedule,
+i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
+\code{cooling.type} specifies the nature of the cooling schedule.
+See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{tol}{
-    passed to the particle filter.
-    See the descriptions under \code{\link{pfilter}}.
-  }
+\item{cooling.fraction.50}{specifications for the cooling schedule,
+i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
+\code{cooling.type} specifies the nature of the cooling schedule.
+See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{max.fail}{
-    passed to the particle filter.
-    See the descriptions under \code{\link{pfilter}}.
-  }
+\item{tol}{positive numeric scalar;
+particles with likelihood less than \code{tol} are considered to be incompatible with the data.
+See the section on \emph{Filtering Failures} for more information.}
 
-\item{...}{
-    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
-    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
-  }
+\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
+If the number of filtering failures exceeds this number, execution will terminate with an error.
+By default, \code{max.fail} is set to infinity, so no error can be triggered.}
 
-\item{verbose}{
-    logical; if TRUE, print progress reports.
-  }
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link{pomp}} for a full list of recognized arguments.
+
+When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See the \link[=userdata]{userdata documentation here} for information on how to use this facility.}
+
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{igirf} returns an object of class

@@ -11,7 +11,7 @@
 ##'
 ##'
 ##' @inheritParams spatpomp
-##' @inheritParams pomp::mif2
+##' @inheritParams pomp2::mif2
 ##'
 ##' @param Ngirf the number of iterations of perturbed GIRF.
 ##'

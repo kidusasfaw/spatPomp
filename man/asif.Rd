@@ -25,53 +25,33 @@ in the neighborhood of \code{(d,n)}.}
 
 \item{islands}{The number of islands for the adapted simulations.}
 
-\item{tol}{
-    positive numeric scalar; particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-    See the section on \emph{Filtering Failures} below for more information.
-  }
+\item{tol}{positive numeric scalar;
+particles with likelihood less than \code{tol} are considered to be incompatible with the data.
+See the section on \emph{Filtering Failures} for more information.}
 
-\item{max.fail}{
-    integer; the maximum number of filtering failures allowed (see below).
-    If the number of filtering failures exceeds this number, execution will terminate with an error.
-    By default, \code{max.fail} is set to infinity, so no error can be triggered.
-  }
+\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
+If the number of filtering failures exceeds this number, execution will terminate with an error.
+By default, \code{max.fail} is set to infinity, so no error can be triggered.}
 
-\item{pred.mean}{
-    logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.
-  }
+\item{pred.mean}{logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.}
 
-\item{pred.var}{
-    logical; if \code{TRUE}, the prediction variances are calculated for the state variables and parameters.
-  }
+\item{pred.var}{logical; if \code{TRUE}, the prediction variances are calculated for the state variables and parameters.}
 
-\item{filter.mean}{
-    logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.
-  }
+\item{filter.mean}{logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.}
 
-\item{filter.traj}{
-    logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
-  }
+\item{filter.traj}{logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.}
 
-\item{save.states}{
-    logical.
-    If \code{save.states=TRUE}, the state-vector for each particle at each time is saved in the \code{saved.states} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
-    If \code{save.params=TRUE}, the parameter-vector for each particle at each time is saved in the \code{saved.params} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
-  }
+\item{save.states}{logical.
+If \code{save.states=TRUE}, the state-vector for each particle at each time is saved.}
 
-\item{save.params}{
-    logical.
-    If \code{save.states=TRUE}, the state-vector for each particle at each time is saved in the \code{saved.states} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
-    If \code{save.params=TRUE}, the parameter-vector for each particle at each time is saved in the \code{saved.params} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
-  }
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
-\item{verbose}{
-    logical; if \code{TRUE}, progress information is reported as \code{pfilter} works.
-  }
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link{pomp}} for a full list of recognized arguments.
 
-\item{...}{
-    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
-    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
-  }
+When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See the \link[=userdata]{userdata documentation here} for information on how to use this facility.}
 }
 \value{
 Upon successful completion, \code{asif} returns an object of class

@@ -41,7 +41,7 @@
 #' @keywords models datasets ts
 #' 
 #' @import methods
-#' @import pomp
+#' @import pomp2
 #' @importFrom stats dnorm runif setNames var
 #' @importFrom utils tail
 NULL        # replacing NULL by "_PACKAGE" results in roxygen2 adding an 

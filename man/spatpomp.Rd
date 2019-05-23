@@ -15,138 +15,106 @@ spatpomp(data, units, unit_index, times, covar, tcovar, t0, ...,
 or an object of class \sQuote{spatPomp},
 i.e., the output of another \pkg{spatPomp} calculation.}
 
-\item{times}{
-    required; the time series data and times at which observations are made.
-    \code{data} should be given as a data-frame and \code{times} must indicate the column of observation times by name or index.
-    \code{times} must be numeric and strictly increasing.
-    Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.
+\item{times}{the times at which observations are made.
+\code{times} must indicate the column of observation times by name or index.
+The time vector must be numeric and non-decreasing.
+Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
 
-    In addition, a \code{pomp} object can be supplied in the \code{data} argument.
-    In this case, the call to \code{pomp} will add element to, or replace elements of, the supplied \code{pomp} object.
-  }
+\item{covar}{optional covariate table, constructed using \code{\link{covariate_table}}.
 
-\item{covar}{
-    optional data frame of covariates:
-    \code{covar} is the table of covariates (one column per variable);
-    \code{tcovar} the name or the index of the time variable.
+If a covariate table is supplied, then the value of each of the covariates is interpolated as needed.
+The resulting interpolated values are made available to the appropriate basic components.
+See the documentation for \code{\link{covariate_table}} for details.}
 
-    If a covariate table is supplied, then the value of each of the covariates is interpolated as needed.
-    The resulting interpolated values are made available to the appropriate basic components.
-    Note that \code{covar} will be coerced internally to storage mode \code{double}.
-    See below under \dQuote{Covariates} for more details.
-  }
+\item{t0}{The zero-time, i.e., the time of the initial state.
+This must be no later than the time of the first observation, i.e., \code{t0 <= times[1]}.}
 
-\item{tcovar}{
-    optional data frame of covariates:
-    \code{covar} is the table of covariates (one column per variable);
-    \code{tcovar} the name or the index of the time variable.
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link{pomp}} for a full list of recognized arguments.
 
-    If a covariate table is supplied, then the value of each of the covariates is interpolated as needed.
-    The resulting interpolated values are made available to the appropriate basic components.
-    Note that \code{covar} will be coerced internally to storage mode \code{double}.
-    See below under \dQuote{Covariates} for more details.
-  }
+When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See the \link[=userdata]{userdata documentation here} for information on how to use this facility.}
 
-\item{t0}{
-    The zero-time, at which the stochastic dynamical system is to be initialized.
-    This must be no later than the time of the first observation, i.e., \code{t0 <= times[1]}.
-    This argument is required whenever \code{data} is a data-frame.
-  }
+\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
+Setting \code{rprocess=NULL} removes the latent-state simulator.
+For more information, \link[=rprocess_spec]{see the documentation on these plugins}.}
 
-\item{...}{
-    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
-    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
-  }
+\item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+Setting \code{rmeasure=NULL} removes the measurement model simulator.
+For more information, see \link[=rmeasure_spec]{here}.}
 
-\item{rprocess}{
-    optional; specification of the simulator and probability density evaluation function of the unobserved state process.
-    See below under \dQuote{The Unobserved Markov State-Process Model} for details.
+\item{dprocess}{optional;
+specification of the probability density evaluation function of the unobserved state process.
+Setting \code{dprocess=NULL} removes the latent-state density evaluator.
+For more information, see \link[=dprocess_spec]{here}.}
 
-    \strong{Note:} it is not typically necessary (or even feasible) to define \code{dprocess}.
-    In fact, no current \pkg{pomp} inference algorithm makes use of \code{dprocess}.
-    This functionality is provided only to support future algorithm development.
-  }
+\item{dmeasure}{evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+Setting \code{dmeasure=NULL} removes the measurement density evaluator.
+For more information, see \link[=dmeasure_spec]{here}.}
 
-\item{rmeasure}{
-    optional; specifications of the measurement model.
-    See below under \dQuote{The Measurement Model} for details.
-  }
+\item{skeleton}{optional; the deterministic skeleton of the unobserved state process.
+Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
+Accordingly, this is supplied using either the \code{\link[=skeleton_spec]{vectorfield}} or \code{\link[=skeleton_spec]{map}} fnctions.
+For more information, see \link[=skeleton_spec]{here}.
+Setting \code{skeleton=NULL} removes the deterministic skeleton.}
 
-\item{dprocess}{
-    optional; specification of the simulator and probability density evaluation function of the unobserved state process.
-    See below under \dQuote{The Unobserved Markov State-Process Model} for details.
+\item{rinit}{simulator of the initial-state distribution.
+This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+Setting \code{rinit=NULL} sets the initial-state simulator to its default.
+For more information, see \link[=rinit_spec]{here}.}
 
-    \strong{Note:} it is not typically necessary (or even feasible) to define \code{dprocess}.
-    In fact, no current \pkg{pomp} inference algorithm makes use of \code{dprocess}.
-    This functionality is provided only to support future algorithm development.
-  }
+\item{cdir}{optional character variables.
+\code{cdir} specifies the name of the directory within which C snippet code will be compiled.
+By default, this is in a temporary directory specific to the \R session.
+\code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
+By default, a random filename is used.}
 
-\item{dmeasure}{
-    optional; specifications of the measurement model.
-    See below under \dQuote{The Measurement Model} for details.
-  }
+\item{cfile}{optional character variables.
+\code{cdir} specifies the name of the directory within which C snippet code will be compiled.
+By default, this is in a temporary directory specific to the \R session.
+\code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
+By default, a random filename is used.}
 
-\item{skeleton}{
-    optional; the deterministic skeleton of the unobserved state process.
-    See below under \dQuote{The Deterministic Skeleton} for details.
-  }
+\item{shlib.args}{optional character variables.
+Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.}
 
-\item{cdir}{
-    optional character variables.
-    \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
-    By default, this is in a temporary directory specific to the running instance of \R.
-    \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
-    By default, a random filename is used.
-    The \code{shlib.args} can be used to pass command-line arguments to the \code{R CMD SHLIB} call that will compile the C snippets.
-  }
+\item{PACKAGE}{optional character;
+the name (without extension) of the external, dynamically loaded library in which any native routines are to be found.
+This is only useful if one or more of the model components has been specified using a precompiled dynamically loaded library;
+it is not used for any component specified using C snippets.
+\code{PACKAGE} can name at most one library.}
 
-\item{cfile}{
-    optional character variables.
-    \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
-    By default, this is in a temporary directory specific to the running instance of \R.
-    \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
-    By default, a random filename is used.
-    The \code{shlib.args} can be used to pass command-line arguments to the \code{R CMD SHLIB} call that will compile the C snippets.
-  }
+\item{globals}{optional character;
+arbitrary C code that will be hard-coded into the shared-object library created when  C snippets are provided.
+If no C snippets are used, \code{globals} has no effect.}
 
-\item{shlib.args}{
-    optional character variables.
-    \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
-    By default, this is in a temporary directory specific to the running instance of \R.
-    \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
-    By default, a random filename is used.
-    The \code{shlib.args} can be used to pass command-line arguments to the \code{R CMD SHLIB} call that will compile the C snippets.
-  }
+\item{statenames}{optional character vector;
+names of the latent state variables.
+It is typically only necessary to supply \code{statenames} when C snippets are in use.}
 
-\item{PACKAGE}{
-    optional string giving the name of the dynamically loaded library in which any native routines are to be found.
-    This is only useful if one or more of the model components has been specified using a precompiled dynamically loaded library;
-    it is not used for any component specified using C snippets.
-  }
+\item{paramnames}{optional character vector;
+names of model parameters.
+It is typically only necessary to supply \code{paramnames} when C snippets are in use.}
 
-\item{globals}{
-    optional character;
-    C code that will be included in the source for (and therefore hard-coded into) the shared-object library created when the call to \code{pomp} uses C snippets.
-    If no C snippets are used, \code{globals} has no effect.
-  }
+\item{accumvars}{optional character vector;
+contains the names of accumulator variables.
+See \link[=accumulators]{here} for a definition and discussion of accumulator variables.}
 
-\item{statenames}{
-    optional character vectors specifying the names of observables, state variables, parameters, and covariates, respectively.
-    These are used only in the event that one or more of the basic components are defined using C snippets or native routines.
-    It is usually unnecessary to specify \code{obsnames} or \code{covarnames}, as these will by default be read from \code{data} and \code{covars}, respectively.
-  }
+\item{covarnames}{optional character vector;
+names of the covariates.
+It is not usually necessary to specify \code{covarnames} since, by default,
+these are read from the names of the covariates.}
 
-\item{paramnames}{
-    optional character vectors specifying the names of observables, state variables, parameters, and covariates, respectively.
-    These are used only in the event that one or more of the basic components are defined using C snippets or native routines.
-    It is usually unnecessary to specify \code{obsnames} or \code{covarnames}, as these will by default be read from \code{data} and \code{covars}, respectively.
-  }
+\item{partrans}{optional parameter transformations, constructed using \code{\link{parameter_trans}}.
 
-\item{covarnames}{
-    optional character vectors specifying the names of observables, state variables, parameters, and covariates, respectively.
-    These are used only in the event that one or more of the basic components are defined using C snippets or native routines.
-    It is usually unnecessary to specify \code{obsnames} or \code{covarnames}, as these will by default be read from \code{data} and \code{covars}, respectively.
-  }
+Many algorithms for parameter estimation search an unconstrained space of parameters.
+When working with such an algorithm and a model for which the parameters are constrained, it can be useful to transform parameters.
+One should supply the \code{partrans} argument via a call to \code{\link{parameter_trans}}.
+For more information, see \link[=parameter_trans]{here}.
+Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.}
+
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \description{
 This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.

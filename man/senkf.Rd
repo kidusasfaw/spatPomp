@@ -24,10 +24,14 @@ state.}
 
 \item{R}{matrix; variance of the measurement noise.}
 
-\item{...}{
-    Any additional arguments given to \code{pomp} will be made available to each of the basic components.
-    To prevent errors due to misspellings, a warning is issued if any such arguments are detected.
-  }
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link{pomp}} for a full list of recognized arguments.
+
+When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See the \link[=userdata]{userdata documentation here} for information on how to use this facility.}
+
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
 \item{C}{matrix converting state vector into expected value of the
 observation.}

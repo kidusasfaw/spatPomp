@@ -14,7 +14,7 @@
 ##' or an object of class \sQuote{spatPomp},
 ##' i.e., the output of another \pkg{spatPomp} calculation.
 ##'
-##' @inheritParams pomp::pomp
+##' @inheritParams pomp2::pomp
 ##'
 spatpomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,

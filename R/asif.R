@@ -15,7 +15,7 @@
 ##'
 ##'
 ##' @inheritParams spatpomp
-##' @inheritParams pomp::pfilter
+##' @inheritParams pomp2::pfilter
 ##' @param object A \code{spatpomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
