@@ -25,4 +25,5 @@ with time increment $dt$.
 }
 \examples{
 lorenz(U=5, N=100, dt=0.01, dt_obs=1)
+
 }

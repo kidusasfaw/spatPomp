@@ -1,5 +1,5 @@
-#' @include spatPomp_class.R
-## simulate from the unit measurement model density function for each unit
+##' Simulate from the unit measurement model density function for each unit##' @include spatPomp_class.R
+##' @rdname vec_rmeasure
 
 vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) {
   pompLoad(object)
@@ -21,6 +21,7 @@ vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) 
   return(weights)
 }
 
+##' @export
 setMethod(
   "vec_rmeasure",
   signature=signature(object="spatPomp"),

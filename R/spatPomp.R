@@ -16,6 +16,7 @@
 ##'
 ##' @inheritParams pomp2::pomp
 ##'
+##' @export
 spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,

@@ -20,4 +20,5 @@ Ornstein-Uhlenbeck process with \code{N} time steps.
 }
 \examples{
 ou(5, 100)
+
 }

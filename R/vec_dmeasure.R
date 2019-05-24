@@ -1,6 +1,7 @@
-#' @include spatPomp_class.R
-## evaluate the unit measurement model density function for each unit
-
+##' Evaluate the unit measurement model density function for each unit
+##' @include spatPomp_class.R
+##' @rdname vec_dmeasure
+##'
 vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .gnsi = TRUE, ...) {
   pompLoad(object)
   nunits <- length(object@units)
@@ -22,6 +23,7 @@ vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .gn
   return(weights)
 }
 
+##' @export
 setMethod(
   "vec_dmeasure",
   signature=signature(object="spatPomp"),

@@ -5,9 +5,13 @@
 #' Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
+#'
 #' @return A spatPomp object.
+#'
 #' @examples
 #' sir1 <- spat_sir()
+#'
+#' @export
 spat_sir <- function(U=10,Years=20){
 
 cities <- paste0("city",1:U)

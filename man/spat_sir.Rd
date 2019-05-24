@@ -19,4 +19,5 @@ Model adapted from He et al. (2010) with gravity transport following Park and Io
 }
 \examples{
 sir1 <- spat_sir()
+
 }

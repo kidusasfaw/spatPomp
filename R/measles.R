@@ -7,6 +7,8 @@
 #' @return A spatPomp object.
 #' @examples
 #' measles(7)
+#' @export
+
 measles <- function(U=6){
 
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks

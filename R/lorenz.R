@@ -8,9 +8,13 @@
 #' @param N A length-one numeric signifying the number of observations.
 #' @param dt_obs A length-one numeric giving the time between observations.
 #' @param dt A length-one numeric giving the Euler time step for the numerical solution.
+#'
 #' @return A spatPomp object with the specified dimension and time steps.
+#'
 #' @examples
 #' lorenz(U=5, N=100, dt=0.01, dt_obs=1)
+#'
+#' @export
 
 lorenz <- function(U=5,N=100,dt=0.01,dt_obs=0.5){
 

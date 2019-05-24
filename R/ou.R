@@ -8,7 +8,9 @@
 #' @return A spatPomp object with the specified dimension and time steps.
 #' @examples
 #' ou(5, 100)
-
+#'
+#' @export
+#'
 ou <- function(U=5,N=100){
 
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))

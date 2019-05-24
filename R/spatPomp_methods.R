@@ -1,6 +1,11 @@
-#' @include spatPomp_class.R
-#'
-## this file contains some basic methods definitions
+##' Basic methods for the spatPomp class
+##'
+##' @rdname spatPomp-methods
+##' 
+##' @include spatPomp_class.R
+##'
+NULL
+
 setAs(
   from="pomp",
   to="spatPomp",
@@ -14,14 +19,15 @@ setAs(
         obstypes = rownames(from@data))
   }
 )
-## extract the vector of units
+
+##' @export
 setMethod(
   "unit",
   signature=signature(x="spatPomp"),
   definition=function(x,...) x@units
 )
 
-## extract the unit index
+##' @export
 setMethod(
   "unit_ix",
   signature=signature(x="spatPomp"),
@@ -29,6 +35,7 @@ setMethod(
 )
 
 
+##' @export
 setMethod(
   "print",
   signature=signature(x="spatPomp"),
@@ -38,6 +45,7 @@ setMethod(
   }
 )
 
+##' @export
 setMethod(
   "simulate",
   signature=signature(object="spatPomp"),
@@ -94,6 +102,7 @@ setMethod(
   }
 )
 
+##' @export
 setMethod(
   "show",
   signature=signature(object="spatPomp"),
