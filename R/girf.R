@@ -254,17 +254,22 @@ girf.internal <- function (object,
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
   ## begin multi-thread code
-  doParallel::registerDoParallel(cores = NULL)
+  #
+  # foreach now registered outside of girf
+  # doParallel::registerDoParallel(cores = NULL)
+  #
   mcopts <- list(set.seed=TRUE)
   acomb <- function(...) abind::abind(..., along=3)
   acombb <- function(...) abind::abind(..., along=4)
-
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- foreach::foreach(i=1:Np[1], .combine = 'acomb', .multicombine = TRUE, .options.multicore=mcopts) %dopar%  {
+    fcst_samp_var <- foreach::foreach(i=1:Np[1], 
+         .packages=c("pomp2","spatPomp"),
+         .combine = 'acomb', .multicombine = TRUE, 
+         .options.multicore=mcopts) %dopar%  {
       Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps))
       xp = matrix(x[,i], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
       # get all the guides for this particle
@@ -323,7 +328,10 @@ girf.internal <- function (object,
       inflated_var <- meas_var_skel + fcst_var_upd
       #print(paste0("inflated_var"))
       #print(inflated_var)
-      mom_match_param <- foreach::foreach(i=1:Np[1], .combine = acombb, .multicombine = TRUE, .options.multicore=mcopts) %dopar%  {
+      mom_match_param <- foreach::foreach(i=1:Np[1], 
+           .packages=c("pomp2","spatPomp"),
+           .combine = acombb, .multicombine = TRUE, 
+           .options.multicore=mcopts) %dopar%  {
         mmp <- array(0, dim = c(length(params), length(unit(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
         for(u in 1:length(object@units)){
           snames = paste0(object@unit_statenames,u)

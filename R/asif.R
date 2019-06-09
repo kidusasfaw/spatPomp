@@ -462,10 +462,15 @@ setMethod(
    ## end single thread for testing
    ## begin multi-thread code
    # cores <- parallel:::detectCores() - 1
-   doParallel::registerDoParallel(cores = NULL)
+   #
+   # foreach now registered outside asif 
+   # doParallel::registerDoParallel(cores = NULL)
+   #
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
-   mult_island_output <- foreach::foreach(i=1:islands, .options.multicore=mcopts) %dopar%  asif.internal(
+   mult_island_output <- foreach::foreach(i=1:islands, 
+       .packages=c("pomp2","spatPomp"),
+       .options.multicore=mcopts) %dopar%  spatPomp:::asif.internal(
      object=object,
      params=params,
      Np=Np,
