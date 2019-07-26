@@ -10,8 +10,8 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: pomp2 (>= 2.0)
-LinkingTo: pomp2
+Depends: pomp (>= 2.0)
+LinkingTo: pomp
 Suggests: scales, geosphere, ggplot2, magrittr,
   plyr, reshape2
 Collate:

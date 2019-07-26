@@ -46,8 +46,8 @@ setClass(
     unit_rmeasure = 'pomp_fun'
   ),
   prototype=prototype(
-    unit_dmeasure = pomp2:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp2:::pomp_fun(slotname="unit_rmeasure")
+    unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
+    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure")
   )
 )
 
@@ -62,7 +62,7 @@ setMethod(
   "senkf",
   signature=signature(data="missing"),
   definition=function (...) {
-    pomp2:::reqd_arg("senkf","data")
+    pomp:::reqd_arg("senkf","data")
   }
 )
 
@@ -99,7 +99,7 @@ setMethod(
     Np, h, R,
     ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
-      kp <- pomp2:::enkf.internal(
+      kp <- pomp:::enkf.internal(
         data,
         Np=Np,
         h=h,
@@ -107,7 +107,7 @@ setMethod(
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp2:::pStop("senkf",conditionMessage(e))
+      error = function (e) pomp:::pStop("senkf",conditionMessage(e))
     )
     new("kalmand_spatPomp", kp,
         unit_rmeasure = data@unit_rmeasure,

@@ -15,7 +15,7 @@
 ##'
 ##'
 ##' @inheritParams spatPomp
-##' @inheritParams pomp2::pfilter
+##' @inheritParams pomp::pfilter
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
@@ -469,7 +469,7 @@ setMethod(
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
    mult_island_output <- foreach::foreach(i=1:islands, 
-       .packages=c("pomp2","spatPomp"),
+       .packages=c("pomp","spatPomp"),
        .options.multicore=mcopts) %dopar%  spatPomp:::asif.internal(
      object=object,
      params=params,

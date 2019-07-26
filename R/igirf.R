@@ -11,7 +11,7 @@
 ##'
 ##'
 ##' @inheritParams spatPomp
-##' @inheritParams pomp2::mif2
+##' @inheritParams pomp::mif2
 ##'
 ##' @param Ngirf the number of iterations of perturbed GIRF.
 ##'
@@ -31,7 +31,7 @@
 ##' \asfaw2019
 NULL
 
-rw.sd <- pomp2:::safecall
+rw.sd <- pomp:::safecall
 
 setClass(
   "igirfd_spatPomp",
@@ -83,7 +83,7 @@ setMethod(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,h,theta.to.v,v.to.theta,tol = tol,
         max.fail = Inf, save.states = FALSE,...,verbose=verbose),
-      error = function (e) pomp2:::pStop("igirf",conditionMessage(e))
+      error = function (e) pomp:::pStop("igirf",conditionMessage(e))
     )
   }
 )
@@ -123,7 +123,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
-  if (pomp2:::undefined(object@rprocess) || pomp2:::undefined(object@dmeasure))
+  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
@@ -175,7 +175,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   if (missing(rw.sd))
     pStop_(sQuote("rw.sd")," must be specified!")
-  rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
   if (missing(cooling.fraction.50))
     pStop_(sQuote("cooling.fraction.50")," is a required argument.")
@@ -185,7 +185,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
-  cooling.fn <- pomp2:::mif2.cooling(
+  cooling.fn <- pomp:::mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -271,7 +271,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
   for (nt in 0:(ntimes-1)) {
     ## perturb parameters
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp2')
+    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
     ## get initial states
     if (nt == 0) {
@@ -311,7 +311,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp2::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)])
+        skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)])
       } else {
         skel <- X
       }
@@ -390,7 +390,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
         if (any(weights>0)) {
           coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=weights)
         } else {
-          pomp2:::pWarn("igirf","filtering failure at last filter iteration; using ",
+          pomp:::pWarn("igirf","filtering failure at last filter iteration; using ",
                 "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }

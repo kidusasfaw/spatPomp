@@ -131,7 +131,7 @@ setMethod(
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp2:::pStop("girf",conditionMessage(e))
+      error = function (e) pomp:::pStop("girf",conditionMessage(e))
     )
   }
 )
@@ -195,8 +195,8 @@ girf.internal <- function (object,
   verbose <- as.logical(verbose)
   ep <- paste0("in ",sQuote("girf"),": ")
 
-  if (pomp2:::undefined(object@rprocess) || pomp2:::undefined(object@dmeasure))
-    pomp2:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
+    pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
@@ -210,31 +210,31 @@ girf.internal <- function (object,
   ntimes <- length(times)-1
 
   if (missing(Np) || is.null(Np)) {
-    pomp2:::pStop_(sQuote("Np")," must be specified.")
+    pomp:::pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
     Np <- tryCatch(
       vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
       error = function (e) {
-        pomp2:::pStop_("if ",sQuote("Np")," is a function, it must return ",
+        pomp:::pStop_("if ",sQuote("Np")," is a function, it must return ",
           "a single positive integer.")
       }
     )
   } else if (!is.numeric(Np)) {
-    pomp2:::pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
+    pomp:::pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
   }
 
   if (length(Np) == 1)
     Np <- rep(Np,times=ntimes+1)
   else if (length(Np) != (ntimes+1))
-    pomp2:::pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
+    pomp:::pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
 
   if (!all(is.finite(Np)) || any(Np <= 0))
-    pomp2:::pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
+    pomp:::pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
 
   Np <- as.integer(Np)
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pomp2:::pStop_(sQuote("tol")," should be a small positive number.")
+    pomp:::pStop_(sQuote("tol")," should be a small positive number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
@@ -267,7 +267,7 @@ girf.internal <- function (object,
     lookahead_steps = min(lookahead, ntimes-nt)
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
     fcst_samp_var <- foreach::foreach(i=1:Np[1], 
-         .packages=c("pomp2","spatPomp"),
+         .packages=c("pomp","spatPomp"),
          .combine = 'acomb', .multicombine = TRUE, 
          .options.multicore=mcopts) %dopar%  {
       Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps))
@@ -297,7 +297,7 @@ girf.internal <- function (object,
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp2::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
+        skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
       } else {
         skel <- X
       }
@@ -329,7 +329,7 @@ girf.internal <- function (object,
       #print(paste0("inflated_var"))
       #print(inflated_var)
       mom_match_param <- foreach::foreach(i=1:Np[1], 
-           .packages=c("pomp2","spatPomp"),
+           .packages=c("pomp","spatPomp"),
            .combine = acombb, .multicombine = TRUE, 
            .options.multicore=mcopts) %dopar%  {
         mmp <- array(0, dim = c(length(params), length(unit(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))

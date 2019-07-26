@@ -58,7 +58,7 @@
 ##' Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a fraction \eqn{\alpha}{alpha} smaller than they are at first.
 ##'
 NULL
-rw.sd <- pomp2:::safecall
+rw.sd <- pomp:::safecall
 
 
 ## define the hippied.spatPomp class
@@ -131,10 +131,10 @@ hippie_pfilter.internal <- function (object, params, Np,
 
     ## perturb parameters
     pmag <- cooling.fn(nt,hippieiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp2')
+    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
 
     if (transform)
-      tparams <- pomp2::partrans(object,params,dir="fromEst",
+      tparams <- pomp::partrans(object,params,dir="fromEst",
                           .gnsi=gnsi)
 
     if (nt == 1L) {
@@ -261,7 +261,7 @@ hippie.internal <- function (object, islands, prop, Nhippie, start, Np, rw.sd, t
   if (islands <= 0)
     stop(ep,sQuote("islands")," must be a positive integer",call.=FALSE)
 
-  cooling.fn <- pomp2:::mif2.cooling(
+  cooling.fn <- pomp:::mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -450,7 +450,7 @@ setMethod(
            sQuote("prop"),", must be specified!",call.=FALSE)
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
-    rw.sd <- pomp2:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+    rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
     cooling.type <- match.arg(cooling.type)
 
     cooling.fraction.50 <- as.numeric(cooling.fraction.50)

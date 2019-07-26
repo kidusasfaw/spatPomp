@@ -14,7 +14,7 @@
 ##' or an object of class \sQuote{spatPomp},
 ##' i.e., the output of another \pkg{spatPomp} calculation.
 ##'
-##' @inheritParams pomp2::pomp
+##' @inheritParams pomp::pomp
 ##'
 ##' @export
 spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
@@ -37,7 +37,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   if (missing(rinit)) rinit <- NULL
 
   if (missing(rprocess) || is.null(rprocess)) {
-    rprocess <- pomp2:::rproc_plugin()
+    rprocess <- pomp:::rproc_plugin()
   }
 
   if (missing(dprocess)) dprocess <- NULL
@@ -45,7 +45,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   if (missing(dmeasure)) dmeasure <- NULL
 
   if (missing(skeleton) || is.null(skeleton)) {
-    skeleton <- pomp2:::skel_plugin()
+    skeleton <- pomp:::skel_plugin()
   }
 
 
@@ -293,7 +293,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
         )
       )
     )
-    hitches <- pomp2::hitch(
+    hitches <- pomp::hitch(
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=ud_template,
@@ -309,7 +309,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       verbose=verbose
     )
 
-    pomp2:::solibs(po) <- hitches$lib
+    pomp:::solibs(po) <- hitches$lib
     new("spatPomp",po,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       unit_rmeasure=hitches$funs$unit_rmeasure,

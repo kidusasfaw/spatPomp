@@ -21,7 +21,7 @@ setClass(
     unit_rmeasure = 'pomp_fun'
   ),
   prototype=prototype(
-    unit_dmeasure = pomp2:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp2:::pomp_fun(slotname="unit_rmeasure")
+    unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
+    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure")
   )
 )

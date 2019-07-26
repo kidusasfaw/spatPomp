@@ -41,7 +41,7 @@
 #' @keywords models datasets ts
 #' 
 #' @import methods
-#' @import pomp2
+#' @import pomp
 #' @useDynLib spatPomp, .registration=TRUE
 #' @importFrom stats dnorm runif setNames var
 #' @importFrom utils tail
