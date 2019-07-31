@@ -18,6 +18,7 @@ Collate:
     'generics.R'
     'spatPomp_class.R'
     'asif.R'
+    'asifir.R'
     'bm.R'
     'spatPomp.R'
     'enkf.R'

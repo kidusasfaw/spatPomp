@@ -1,6 +1,9 @@
 ## Adapted Simulation Island Filter (ASIF)
 setGeneric("asif",function(object,...)standardGeneric("asif"))
 
+## Adapted Simulation Island Filter (ASIF)
+setGeneric("asifir",function(object,...)standardGeneric("asifir"))
+
 ## Extract units from spatPomp object
 setGeneric("unit", function(x,...)standardGeneric("unit"))
 

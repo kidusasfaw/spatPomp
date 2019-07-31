@@ -34,47 +34,45 @@ See \code{\link{pomp}} for a full list of recognized arguments.
 
 When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See the \link[=userdata]{userdata documentation here} for information on how to use this facility.}
+See \link[=userdata]{?userdata} for information on how to use this facility.}
 
 \item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, \link[=rprocess_spec]{see the documentation on these plugins}.}
+For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
 
 \item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rmeasure=NULL} removes the measurement model simulator.
-For more information, see \link[=rmeasure_spec]{here}.}
+For more information, see \link[=rmeasure_spec]{?rmeasure_spec}.}
 
 \item{dprocess}{optional;
 specification of the probability density evaluation function of the unobserved state process.
 Setting \code{dprocess=NULL} removes the latent-state density evaluator.
-For more information, see \link[=dprocess_spec]{here}.}
+For more information, see \link[=dprocess_spec]{?dprocess_spec}.}
 
 \item{dmeasure}{evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{dmeasure=NULL} removes the measurement density evaluator.
-For more information, see \link[=dmeasure_spec]{here}.}
+For more information, see \link[=dmeasure_spec]{?dmeasure_spec}.}
 
 \item{skeleton}{optional; the deterministic skeleton of the unobserved state process.
 Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
 Accordingly, this is supplied using either the \code{\link[=skeleton_spec]{vectorfield}} or \code{\link[=skeleton_spec]{map}} fnctions.
-For more information, see \link[=skeleton_spec]{here}.
+For more information, see \link[=skeleton_spec]{?skeleton_spec}.
 Setting \code{skeleton=NULL} removes the deterministic skeleton.}
 
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[=rinit_spec]{here}.}
+For more information, see \link[=rinit_spec]{?rinit_spec}.}
 
-\item{cdir}{optional character variables.
+\item{cdir}{optional character variable.
 \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
 By default, this is in a temporary directory specific to the \R session.
-\code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
-By default, a random filename is used.}
+One can also set this directory using the \code{pomp_cdir} option.}
 
-\item{cfile}{optional character variables.
-\code{cdir} specifies the name of the directory within which C snippet code will be compiled.
-By default, this is in a temporary directory specific to the \R session.
+\item{cfile}{optional character variable.
 \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
-By default, a random filename is used.}
+By default, a random filename is used.
+If the chosen filename would result in over-writing an existing file, an error is generated.}
 
 \item{shlib.args}{optional character variables.
 Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.}
@@ -99,7 +97,7 @@ It is typically only necessary to supply \code{paramnames} when C snippets are i
 
 \item{accumvars}{optional character vector;
 contains the names of accumulator variables.
-See \link[=accumulators]{here} for a definition and discussion of accumulator variables.}
+See \link[=accumulators]{?accumulators} for a definition and discussion of accumulator variables.}
 
 \item{covarnames}{optional character vector;
 names of the covariates.
@@ -111,7 +109,7 @@ these are read from the names of the covariates.}
 Many algorithms for parameter estimation search an unconstrained space of parameters.
 When working with such an algorithm and a model for which the parameters are constrained, it can be useful to transform parameters.
 One should supply the \code{partrans} argument via a call to \code{\link{parameter_trans}}.
-For more information, see \link[=parameter_trans]{here}.
+For more information, see \link[=parameter_trans]{?parameter_trans}.
 Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
