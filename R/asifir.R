@@ -1,0 +1,344 @@
+##' Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)
+##'
+##' An algorithm for estimating the likelihood of a spatiotemporal partially-observed 
+##' Markov process (SpatPOMP for short).
+##' Running \code{asifir} causes the algorithm to run independent island jobs which  
+##' each carry out an adapted simulation using intermediate resampling.
+##' Adapted simulation is an easier task than filtering, since particles in each island
+##' remain close to each other. Intermediate resampling further assists against
+##' the curse of dimensionality (COD) problem for importance sampling.
+##' The adapted simulations are then weighted in a way that tries to avert COD by 
+##' making a weak coupling assumption to get an approximate filter distribution.
+##' As a by-product, we also get an approximation to the likelihood of the data.
+##'
+##' @name asifir
+##' @rdname asifir
+##' @include spatPomp_class.R generics.R
+##' @family particle filter methods
+##' @family \pkg{spatPomp} filtering methods
+##'
+##'
+##' @inheritParams asif
+##' @inheritParams girf
+##' @inheritParams pomp::pfilter
+##' @param object A \code{spatPomp} object.
+##' @param Np The number of particles for the adapted simulations within each island.
+##' @param islands The number of islands for the adapted simulations.
+##' @return
+##' Upon successful completion, \code{asifir} returns an object of class
+##' \sQuote{asifird_spatPomp}.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of 
+##' the data under the model. }
+##' }
+##'
+NULL
+
+#setGeneric("asifir",function(object,...)standardGeneric("asifir"))
+
+setClass(
+  "asifird_spatPomp",
+  contains="spatPomp",
+  slots=c(
+    lookahead="numeric",
+    h = "function",
+    theta.to.v = "function",
+    v.to.theta = "function",
+    Np="integer",
+    tol="numeric",
+    loglik="numeric"
+  ),
+  prototype=prototype(
+    Np=as.integer(NA),
+    lookahead=as.double(NA),
+    h = function(){},
+    theta.to.v = function(){},
+    v.to.theta = function(){},
+    tol=as.double(NA),
+    #nfail=list(),
+    loglik=as.double(NA)
+  )
+)
+asifir.internal <- function (object, params, Np, nbhd,
+      h, theta.to.v, v.to.theta, Ninter,
+      tol, max.fail, save.states=FALSE, .gnsi = TRUE, verbose=verbose,...) {
+  ep <- paste0("in ",sQuote("asifir"),": ")
+  if(missing(nbhd))
+    stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
+  object <- as(object,"spatPomp")
+  pompLoad(object,verbose=verbose)
+  gnsi <- as.logical(.gnsi)
+  verbose <- as.logical(verbose)
+  save.states <- as.logical(save.states)
+
+  if (length(params)==0) stop(ep,sQuote("params")," must be specified",call.=FALSE)
+  if (missing(tol)) stop(ep,sQuote("tol")," must be specified",call.=FALSE)
+
+  times <- time(object,t0=TRUE)
+  N <- length(times)-1
+  U <- length(object@units)
+
+  if (missing(Np)) stop(ep,sQuote("Np")," must be specified",call.=FALSE)
+  if (is.function(Np)) stop(ep,"Functions for Np not supported by asifir",call.=FALSE)
+  if (length(Np)!=1) stop(ep,"Np should be a length 1 vector",call.=FALSE)
+  Np <- as.integer(Np)
+
+  if (NCOL(params)==1) {        # there is only one parameter vector
+    coef(object) <- params     # set params slot to the parameters
+    param_matrix <- matrix(params,nrow=length(params),ncol=Np,dimnames=list(names(params),NULL))
+    paramnames <- names(params)
+  } else stop(ep,"does not accept matrix parameter input",call.=FALSE)
+
+  if (is.null(paramnames))
+    stop(ep,sQuote("params")," must have rownames",call.=FALSE)
+
+  x_init <- rinit(object,params=params,nsim=1,.gnsi=gnsi) # Nx x 1 matrix
+  statenames <- rownames(x_init)
+  Nx <- nrow(x_init)
+  xas <- as.numeric(x_init) # adapted simulation state vector
+
+  loglik <- rep(NA,N)
+  nfail <- 0
+  cond.densities <- array(data = numeric(0), dim=c(U,Np,N)) 
+  dimnames(cond.densities) <- list(unit = 1:U, rep = 1:Np, time = 1:N)
+
+  for (n in seq_len(N)) { 
+    ## assimilate observation n given filter at n-1
+    ## note that times[n+1] is the time for observation n
+
+    ## xg: Nx x Np x 1 matrix of guide simulations
+    ## also used to calculate local prediction weights
+    xg <- tryCatch( 
+      rprocess(
+        object,
+        x0=matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL)),
+        t0=times[n],
+        times=times[n+1],
+        params=param_matrix,
+        .gnsi=gnsi
+      ),
+      error = function (e) stop(ep,"process simulation error: ",
+        conditionMessage(e),call.=FALSE)
+    )
+
+    fcst_samp_var <- apply(xg,1,var)
+
+    ## determine the weights
+    weights <- tryCatch(
+      vec_dmeasure(
+        object,
+        y=object@data[,n,drop=FALSE],
+        x=xg,
+        times=times[n+1],
+        params=param_matrix,
+        log=FALSE,
+        .gnsi=gnsi
+      ),
+      error = function (e) {
+        stop(ep,"error in calculation of weights: ",
+             conditionMessage(e),call.=FALSE)
+      }
+    )
+
+    weights[weights < tol] <- tol
+    cond.densities[,,n] <- weights[,,1]
+    resamp_weights <- apply(weights, 2, function(x) prod(x))
+
+    ## adapted simulation via intermediate resampling
+    # tt has S+1 (or Ninter+1) entries
+    tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
+    xf <- matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL))    
+    gf <- rep(1,Np) # filtered guide function
+
+    for (s in 1:Ninter){
+      xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
+        params=params,.gnsi=gnsi) # an Nx by nreps by 1 array
+      if(s < Ninter){
+        skel <- pomp::flow(object, x0=xp[,,1], t0=tt[s+1], 
+          params=param_matrix, times = times[n + 1],...)
+      } else {
+        skel <- xp
+      }
+
+      # create measurement variance at skeleton matrix
+      meas_var_skel <- array(0, dim = c(U, Np))
+      for(u in 1:U){
+        snames = paste0(object@unit_statenames,u)
+        hskel <- apply(skel[snames,,1,drop=FALSE],2,h,param.vec=params)
+        meas_var_skel[u,] <- theta.to.v(hskel,params)
+      }
+      fcst_var_upd <- array(0, dim = c(U, Np))
+      for(u in 1:U){
+        fcst_var_upd[u,] <- fcst_samp_var[u] *
+          (times[n+1] - tt[s+1])/(times[n+1] - times[n])
+      }
+      mom_match_param <- array(0, dim = c(length(params), U, Np), 
+        dimnames = list(params = names(params), unit = NULL, J = NULL))
+      inflated_var <- meas_var_skel + fcst_var_upd
+      for(u in 1:U){
+        for(np in 1:Np){
+          snames = paste0(object@unit_statenames,u)
+          mom_match_param[,u,np] <- v.to.theta(inflated_var[u,np],
+	    params, skel[snames, np])
+        }
+      }
+      
+      # U x Np x 1 matrix of skeleton prediction weights
+      wp <- tryCatch( 
+        vec_dmeasure(
+          object,
+          y=object@data[,n,drop=FALSE],
+          x=skel,
+          times=times[n+1],
+          params=mom_match_param,
+          log=FALSE,
+          .gnsi=gnsi
+        ),
+        error = function (e) stop(ep,"error in calculation of wp: ",
+          conditionMessage(e),call.=FALSE)
+      )
+      gp <- apply(wp[,,1,drop=FALSE],2,prod)
+      gp[gp < tol] <- tol
+      weights <- gp/gf 
+      gnsi <- FALSE
+      
+      xx <- tryCatch(
+          .Call('asifir_resample', xp, Np, weights, gp, tol),
+          error = function (e) stop(ep,conditionMessage(e),call.=FALSE)
+      )
+      xf <- xx$states
+      gf <- xx$filterguides
+    } ## end of intermediate resampling loop s = 1:Ninter
+
+    # resample down to one particle, making Np copies of, say, particle #1.
+    xas <- xf[,1]
+       
+    if (verbose && (n%%5==0)) cat("asif timestep",n,"of",N,"finished\n")
+
+  } ## end of main loop n = 1:N
+
+  # compute locally combined pred. weights for each time, unit and particle
+  loc.comb.pred.weights = array(data = numeric(0), dim=c(U,Np, N))
+  wm.times.wp.avg = array(data = numeric(0), dim = c(U, N))
+  wp.avg = array(data = numeric(0), dim = c(U, N))
+  for (n in seq_len(N)){
+    for (u in seq_len(U)){
+      prod_over_times = 1
+      full_nbhd = nbhd(object, n, u)
+      for (prev_t in 1:n){
+        if(prev_t == n){
+          if(u == 1) loc.comb.pred.weights[u,,n] = prod_over_times
+          else{
+            for(np in seq_len(Np)){
+              part_prod = 1
+              for (prev_u in (1:u)-1){
+                if (prev_u == 0) next
+                if (full_nbhd[prev_u, prev_t]){
+                  part_prod = part_prod*cond.densities[prev_u, np, prev_t]
+                }
+              }
+              loc.comb.pred.weights[u,np,n] = prod_over_times*part_prod
+            }
+          }
+        }
+        else{
+          time_sum = 0
+          for(np in seq_len(Np)){
+            part_prod = 1
+            for (prev_u in 1:U){
+              if (full_nbhd[prev_u, prev_t]){
+                part_prod = part_prod*cond.densities[prev_u, np, prev_t]
+              }
+            }
+            time_sum = time_sum + part_prod
+          }
+          time_avg = time_sum/Np
+          prod_over_times = prod_over_times * time_avg
+        }
+      }
+    }
+  }
+  wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
+  wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
+
+  pompUnload(object,verbose=verbose)
+  new(
+    "island.spatPomp",
+    wm.times.wp.avg = wm.times.wp.avg,
+    wp.avg = wp.avg,
+    Np=as.integer(Np),
+    tol=tol
+    #nfail=as.integer(nfail),
+    #loglik=sum(loglik)
+  )
+
+
+}
+##' @name asifir-spatPomp
+##' @aliases asifir,spatPomp-method
+##' @rdname asifir
+##' @export
+setMethod(
+  "asifir",
+  signature=signature(object="spatPomp"),
+  function (object, params, Np, islands, nbhd,
+           h, theta.to.v, v.to.theta, Ninter,
+           tol = (1e-18), max.fail = Inf, save.states = FALSE,
+           verbose = getOption("verbose"), ...) {
+  if (missing(params)) params <- coef(object)
+  if (missing(Np)) Np <- data@Np
+  if (missing(h)) h <- data@h
+  if (missing(theta.to.v)) theta.to.v <- data@theta.to.v
+  if (missing(v.to.theta)) v.to.theta <- data@v.to.theta
+  if (missing(islands)) islands <- data@islands
+  if (missing(nbhd)) islands <- data@nbhd
+  if (missing(Ninter)) Ninter <- data@Ninter
+  if (missing(tol)) tol <- data@tol
+
+  mult_island_output <- foreach::foreach(i=1:islands,
+     .packages=c("pomp","spatPomp"),
+     .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::asifir.internal(
+       object=object,
+       params=params,
+       Np=Np,
+       nbhd=nbhd,
+       h=h,
+       theta.to.v=theta.to.v,
+       v.to.theta=v.to.theta,,
+       Ninter=Ninter,
+       tol=tol,
+       max.fail=max.fail,
+       save.states=save.states,
+       verbose=verbose,
+       ...
+     )
+   # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
+   N <- length(object@times)
+   U <- length(object@units)
+   island_mp_sums = array(data = numeric(0), dim = c(U,N))
+   island_p_sums = array(data = numeric(0), dim = c(U, N))
+   cond.loglik = array(data = numeric(0), dim=c(U, N))
+   for (u in seq_len(U)){
+     for (n in seq_len(N)){
+       mp_sum = 0
+       p_sum = 0
+       for (k in seq_len(islands)){
+         mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,n]
+         p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,n]
+       }
+       cond.loglik[u,n] = log(mp_sum) - log(p_sum)
+     }
+   }
+   new(
+      "asifird_spatPomp",
+      object,
+      Np=as.integer(Np),
+      tol=tol,
+      loglik=sum(cond.loglik)
+     )
+  }
+)
+
