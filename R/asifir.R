@@ -86,14 +86,16 @@ asifir.internal <- function (object, params, Np, nbhd,
   if (length(Np)!=1) stop(ep,"Np should be a length 1 vector",call.=FALSE)
   Np <- as.integer(Np)
 
-  if (NCOL(params)==1) {        # there is only one parameter vector
-    coef(object) <- params     # set params slot to the parameters
-    param_matrix <- matrix(params,nrow=length(params),ncol=Np,dimnames=list(names(params),NULL))
-    paramnames <- names(params)
-  } else stop(ep,"does not accept matrix parameter input",call.=FALSE)
+  if (NCOL(params)>1) stop(ep,"does not accept matrix parameter input",call.=FALSE)
 
+  coef(object) <- params     
+  paramnames <- names(params)
   if (is.null(paramnames))
-    stop(ep,sQuote("params")," must have rownames",call.=FALSE)
+    stop(ep,sQuote("params")," must have names",call.=FALSE)
+
+  ## ideally, we shouldn't need param_matrix in asifir
+  param_matrix <- matrix(params,nrow=length(params),ncol=Np,
+    dimnames=list(names(params),NULL))
 
   x_init <- rinit(object,params=params,nsim=1,.gnsi=gnsi) # Nx x 1 matrix
   statenames <- rownames(x_init)
@@ -111,13 +113,14 @@ asifir.internal <- function (object, params, Np, nbhd,
 
     ## xg: Nx x Np x 1 matrix of guide simulations
     ## also used to calculate local prediction weights
+    xf <- matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL))    
     xg <- tryCatch( 
       rprocess(
         object,
-        x0=matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL)),
+        x0=xf,
         t0=times[n],
         times=times[n+1],
-        params=param_matrix,
+        params=params,
         .gnsi=gnsi
       ),
       error = function (e) stop(ep,"process simulation error: ",
@@ -145,13 +148,11 @@ asifir.internal <- function (object, params, Np, nbhd,
 
     weights[weights < tol] <- tol
     cond.densities[,,n] <- weights[,,1]
-    resamp_weights <- apply(weights, 2, function(x) prod(x))
 
     ## adapted simulation via intermediate resampling
     # tt has S+1 (or Ninter+1) entries
     tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
-    xf <- matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL))    
-    gf <- rep(1,Np) # filtered guide function
+    log_gf <- rep(0,Np) # filtered guide function
 
     for (s in 1:Ninter){
       xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
@@ -187,30 +188,32 @@ asifir.internal <- function (object, params, Np, nbhd,
       }
       
       # U x Np x 1 matrix of skeleton prediction weights
-      wp <- tryCatch( 
+      log_wp <- tryCatch( 
         vec_dmeasure(
           object,
           y=object@data[,n,drop=FALSE],
           x=skel,
           times=times[n+1],
           params=mom_match_param,
-          log=FALSE,
+          log=TRUE,
           .gnsi=gnsi
         ),
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )
-      gp <- apply(wp[,,1,drop=FALSE],2,prod)
-      gp[gp < tol] <- tol
-      weights <- gp/gf 
+      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
+      log_gp <- log_gp - max(log_gp)
+      log_gp[log_gp < log(tol)] <- log(tol)
+      weights <- exp(log_gp - log_gf)
+
       gnsi <- FALSE
       
       xx <- tryCatch(
-          .Call('asifir_resample', xp, Np, weights, gp, tol),
+          .Call('asifir_resample', xp, Np, weights, log_gp, tol),
           error = function (e) stop(ep,conditionMessage(e),call.=FALSE)
       )
       xf <- xx$states
-      gf <- xx$filterguides
+      log_gf <- xx$filterguides
     } ## end of intermediate resampling loop s = 1:Ninter
 
     # resample down to one particle, making Np copies of, say, particle #1.
