@@ -463,12 +463,12 @@ setMethod(
    ## begin multi-thread code
    # cores <- parallel:::detectCores() - 1
    #
-   # foreach now registered outside asif 
+   # foreach now registered outside asif
    # doParallel::registerDoParallel(cores = NULL)
    #
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
-   mult_island_output <- foreach::foreach(i=1:islands, 
+   mult_island_output <- foreach::foreach(i=1:islands,
        .packages=c("pomp","spatPomp"),
        .options.multicore=mcopts) %dopar%  spatPomp:::asif.internal(
      object=object,
@@ -507,6 +507,7 @@ setMethod(
       cond.loglik[i,j] = log(mp_sum) - log(p_sum)
     }
    }
+   print(cond.loglik)
    # end multi-threaded code
    #
    # compute conditional log-likelihood estimate
