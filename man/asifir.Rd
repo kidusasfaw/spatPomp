@@ -7,9 +7,9 @@
 \alias{asifir,spatPomp-method}
 \title{Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)}
 \usage{
-\S4method{asifir}{spatPomp}(object, params, Np, nbhd, islands,
-  tol = (1e-18)^9, max.fail = Inf, save.states = FALSE,
-  verbose = getOption("verbose"), ...)
+\S4method{asifir}{spatPomp}(object, params, Np, islands, nbhd, h,
+  theta.to.v, v.to.theta, Ninter, tol = (1e-18), max.fail = Inf,
+  save.states = FALSE, verbose = getOption("verbose"), ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -18,10 +18,18 @@
 
 \item{Np}{The number of particles for the adapted simulations within each island.}
 
+\item{islands}{The number of islands for the adapted simulations.}
+
 \item{nbhd}{A function which when given a point in space-time \code{(d,n)} will output a 0-1 matrix of points in space-time considered to be
 in the neighborhood of \code{(d,n)}.}
 
-\item{islands}{The number of islands for the adapted simulations.}
+\item{h}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.}
+
+\item{theta.to.v}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the variance of an observation given a latent state and parameter vector.}
+
+\item{v.to.theta}{A function with template \code{function(var, state.vec, param.vec)} which returns a parameter vector having observation noise consistent with variance \code{var} at latent state \code{state.vec} with other paramters given by \code{param.vec}.}
+
+\item{Ninter}{the number of intermediate resampling timepoints.}
 
 \item{tol}{positive numeric scalar;
 particles with likelihood less than \code{tol} are considered to be incompatible with the data.
