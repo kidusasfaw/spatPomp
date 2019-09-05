@@ -367,7 +367,7 @@ asif.internal <- function (object, params, Np,
               if (neighbor_n == nt)
                   prod_cond_dens_nt  <- prod_cond_dens_nt * cond.densities[neighbor_u, ,neighbor_n]
               else
-                  prod_cond_dens_not_nt <- prod_cond_dens_not_nt * cond.densities[neighbor_u, ,neighbor_n]
+                  prod_cond_dens_not_nt[, neighbor_n] <- prod_cond_dens_not_nt[, neighbor_n] * cond.densities[neighbor_u, ,neighbor_n]
           }
           loc.comb.pred.weights[unit, ,nt]  <- prod(apply(prod_cond_dens_not_nt, 2, mean))*prod_cond_dens_nt
       }
@@ -530,6 +530,7 @@ setMethod(
       cond.loglik[i,j] = log(mp_sum) - log(p_sum)
     }
    }
+   print(cond.loglik)
    # end multi-threaded code
    #
    # compute conditional log-likelihood estimate
