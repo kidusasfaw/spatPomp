@@ -507,7 +507,6 @@ setMethod(
       cond.loglik[i,j] = log(mp_sum) - log(p_sum)
     }
    }
-   print(cond.loglik)
    # end multi-threaded code
    #
    # compute conditional log-likelihood estimate
