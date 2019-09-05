@@ -483,12 +483,12 @@ setMethod(
    #  ...)
    # return(single_island_output)
    ## end single thread for testing
+   ## cores <- parallel:::detectCores() - 1
+   #
+   ## foreach now registered outside asif
+   ## doParallel::registerDoParallel(cores = NULL)
+   #
    ## begin multi-thread code
-   # cores <- parallel:::detectCores() - 1
-   #
-   # foreach now registered outside asif
-   # doParallel::registerDoParallel(cores = NULL)
-   #
    mcopts <- list(set.seed=TRUE)
    # set.seed(396658101,kind="L'Ecuyer")
    mult_island_output <- foreach::foreach(i=1:islands,
