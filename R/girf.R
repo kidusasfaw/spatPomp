@@ -266,9 +266,9 @@ girf.internal <- function (object,
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- foreach::foreach(i=1:Np[1], 
+    fcst_samp_var <- foreach::foreach(i=1:Np[1],
          .packages=c("pomp","spatPomp"),
-         .combine = 'acomb', .multicombine = TRUE, 
+         .combine = 'acomb', .multicombine = TRUE,
          .options.multicore=mcopts) %dopar%  {
       Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps))
       xp = matrix(x[,i], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
@@ -328,9 +328,9 @@ girf.internal <- function (object,
       inflated_var <- meas_var_skel + fcst_var_upd
       #print(paste0("inflated_var"))
       #print(inflated_var)
-      mom_match_param <- foreach::foreach(i=1:Np[1], 
+      mom_match_param <- foreach::foreach(i=1:Np[1],
            .packages=c("pomp","spatPomp"),
-           .combine = acombb, .multicombine = TRUE, 
+           .combine = acombb, .multicombine = TRUE,
            .options.multicore=mcopts) %dopar%  {
         mmp <- array(0, dim = c(length(params), length(unit(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
         for(u in 1:length(object@units)){
@@ -353,17 +353,17 @@ girf.internal <- function (object,
       #print(mom_match_param)
       # return(1)
       # guide functions as product (so base case is 1)
-      guide_fun = vector(mode = "numeric", length = Np[1]) + 1
+      log_guide_fun = vector(mode = "numeric", length = Np[1])
 
       for(l in 1:lookahead_steps){
-        dmeas_weights <- tryCatch(
+        log_dmeas_weights <- tryCatch(
           vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
             params=mom_match_param[,,l,],
-            log=FALSE,
+            log=TRUE,
             .gnsi=gnsi
           ),
           error = function (e) {
@@ -371,30 +371,30 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
-        guide_fun = guide_fun*resamp_weights
+        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))
+        log_guide_fun = log_guide_fun + log_resamp_weights
       }
       #print("dmeas_weights")
       #print(dmeas_weights)
-      guide_fun[guide_fun < tol] <- tol
+      log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
       #print(paste0("guide_fun"))
       #print(guide_fun)
-      s_not_1_weights <- guide_fun/filter_guide_fun
+      log_s_not_1_weights <- log_guide_fun - log(filter_guide_fun)
       if (!(s==1 & nt!=0)){
-        weights <- s_not_1_weights
+        log_weights <- log_s_not_1_weights
       }
       else {
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        weights <- tryCatch(
+        log_weights <- tryCatch(
           dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
             times=times[nt+1],
             params=params,
-            log=FALSE,
+            log=TRUE,
             .gnsi=gnsi
           ),
           error = function (e) {
@@ -403,11 +403,12 @@ girf.internal <- function (object,
           }
         )
         gnsi <- FALSE
-        weights <- as.numeric(weights)*s_not_1_weights
+        log_weights <- as.numeric(log_weights) + log_s_not_1_weights
       }
-      #print(paste0("weights"))
-      #print(weights)
-
+      max_log_weights <- max(log_weights)
+      log_weights <- log_weights - max_log_weights
+      weights <- exp(log_weights)
+      guide_fun <- exp(log_guide_fun)
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
@@ -429,7 +430,7 @@ girf.internal <- function (object,
       )
       all.fail <- xx$fail
       eff.sample.size[nt+1, s] <- xx$ess
-      cond.loglik[nt+1, s] <- xx$loglik
+      cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
