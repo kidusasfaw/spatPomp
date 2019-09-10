@@ -28,10 +28,10 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
   if (missing(data))
     stop(ep,sQuote("data")," is a required argument",call.=FALSE)
 
-  if (missing(units))
+  if (missing(units) && !inherits(data,"spatPomp"))
     stop(ep,sQuote("units")," is a required argument",call.=FALSE)
 
-  if (missing(times))
+  if (missing(times) && !inherits(data,"spatPomp"))
     stop(ep,sQuote("times")," is a required argument",call.=FALSE)
 
   if (missing(rinit)) rinit <- NULL
@@ -53,9 +53,9 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     partrans <- parameter_trans()
   }
 
-  if (missing(unit_dmeasure)) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
+  if (missing(unit_dmeasure) && !inherits(data,"spatPomp")) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
-  if (missing(unit_rmeasure)) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
+  if (missing(unit_rmeasure) && !inherits(data,"spatPomp")) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_rmeasure")," not specified")
 
   if (missing(unit_statenames)) unit_statenames <- character(0)
@@ -69,6 +69,8 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     else{
       if(missing(unit_dmeasure) && missing(unit_rmeasure)){
         # only pomp components are changing
+        print("here")
+        print(names(data@params))
         po <- pomp(data = data,
                    times=times,
                    t0 = t0,
@@ -103,7 +105,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
         covarnames = rownames(data@covar@table)
         unit_statenames = data@unit_statenames
         obstypes = data@obstypes
-        if(missing(paramnames)) paramnames <- character(0)
+        paramnames = names(data@params)
         if(!missing(unit_dmeasure)){
           ## handle unit_dmeasure C Snippet
           ud_template <- list(
@@ -152,13 +154,14 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
           )
           # construct new spatpomp object
           pomp:::solibs(po) <- hitches$lib
-          new("spatPomp",po,
+          sp <- new("spatPomp",po,
               unit_dmeasure=hitches$funs$unit_dmeasure,
               units=data@units,
               unit_index=data@unit_index,
               unit_statenames=data@unit_statenames,
               global_statenames=data@global_statenames,
               obstypes = data@obstypes)
+          return(sp)
           } else{
               if(!missing(unit_rmeasure)){
                 ur_template <- list(
@@ -199,13 +202,14 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                 )
                 # construct new spatpomp object
                 pomp:::solibs(po) <- hitches$lib
-                new("spatPomp",po,
+                sp <- new("spatPomp",po,
                     unit_rmeasure=hitches$funs$unit_rmeasure,
                     units=data@units,
                     unit_index=data@unit_index,
                     unit_statenames=data@unit_statenames,
                     global_statenames=data@global_statenames,
                     obstypes = data@obstypes)
+                return(sp)
               }
         }
 
@@ -469,7 +473,5 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       global_statenames=global_statenames,
       obstypes = obstypes)
 
-  } else {
-    stop(ep,sQuote("data"), " must be a data frame", call.=FALSE)
   }
 }
