@@ -20,7 +20,7 @@
 
 \item{islands}{The number of islands for the adapted simulations.}
 
-\item{nbhd}{A function which when given a point in space-time \code{(d,n)} will output a 0-1 matrix of points in space-time considered to be
+\item{nbhd}{A function of protype function(object, time, unit) which returns a list of pairs (n,u) that are neighbors of (time,unit).
 in the neighborhood of \code{(d,n)}.}
 
 \item{h}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.}
