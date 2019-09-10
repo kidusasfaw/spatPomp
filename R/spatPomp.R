@@ -3,7 +3,7 @@
 ##' This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
 ##' Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
-##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms. 
+##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
 ##'
 ##' @name spatPomp
 ##' @rdname spatPomp
@@ -62,6 +62,156 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
   if (missing(global_statenames)) global_statenames <- character(0)
 
+  if (inherits(data, what = "spatPomp")){
+    if(!missing(units) && !missing(unit_index) && !missing(unit_statenames) &&
+       !missing(global_statenames) && !missing(obstypes))
+      stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure and unit_rmeasure",call.=FALSE)
+    else{
+      if(missing(unit_dmeasure) && missing(unit_rmeasure)){
+        # only pomp components are changing
+        po <- pomp(data = data,
+                   times=times,
+                   t0 = t0,
+                   rprocess = rprocess,
+                   rmeasure = rmeasure,
+                   dprocess = dprocess,
+                   dmeasure = dmeasure,
+                   skeleton = skeleton,
+                   rinit = rinit,
+                   statenames=rownames(data@states),
+                   accumvars=accumvars,
+                   paramnames = paramnames,
+                   globals = globals,
+                   cdir = cdir,
+                   cfile = cfile,
+                   shlib.args = shlib.args,
+                   partrans = partrans,
+                   ...,
+                   verbose=verbose
+        )
+        sp <- new("spatPomp",po,
+                  unit_rmeasure = data@unit_rmeasure,
+                  unit_dmeasure = data@unit_dmeasure,
+                  units=data@units,
+                  unit_index=data@unit_index,
+                  unit_statenames=data@unit_statenames,
+                  global_statenames=data@global_statenames,
+                  obstypes = data@obstypes)
+        return(sp)
+      } else{
+        po <- pomp(data)
+        covarnames = rownames(data@covar@table)
+        unit_statenames = data@unit_statenames
+        obstypes = data@obstypes
+        if(missing(paramnames)) paramnames <- character(0)
+        if(!missing(unit_dmeasure)){
+          ## handle unit_dmeasure C Snippet
+          ud_template <- list(
+            unit_dmeasure=list(
+              slotname="unit_dmeasure",
+              Cname="__spatPomp_unit_dmeasure",
+              proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
+              header="\nvoid __spatPomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+              footer="\n}\n\n",
+              vars=list(
+                params=list(
+                  names=quote(paramnames),
+                  cref="__p[__parindex[{%v%}]]"
+                ),
+                covars=list(
+                  names=quote(covarnames),
+                  cref="__covars[__covindex[{%v%}]]"
+                ),
+                unit_states=list(
+                  names=unit_statenames,
+                  cref="__x[__stateindex[{%v%}]+unit-1]"
+                ),
+                obstyp=list(
+                  names=obstypes,
+                  cref="__y[__obsindex[{%v%}]+unit-1]"
+                ),
+                lik=list(
+                  names="lik",
+                  cref="__lik[0]"
+                )
+              )
+            ))
+          hitches <- pomp::hitch(
+            unit_dmeasure=unit_dmeasure,
+            templates=ud_template,
+            obsnames = paste0(obstypes,"1"),
+            statenames = paste0(unit_statenames,"1"),
+            paramnames=paramnames,
+            covarnames=covarnames,
+            PACKAGE=PACKAGE,
+            globals=globals,
+            cfile=cfile,
+            cdir=cdir,
+            shlib.args=shlib.args,
+            verbose=verbose
+          )
+          # construct new spatpomp object
+          pomp:::solibs(po) <- hitches$lib
+          new("spatPomp",po,
+              unit_dmeasure=hitches$funs$unit_dmeasure,
+              units=data@units,
+              unit_index=data@unit_index,
+              unit_statenames=data@unit_statenames,
+              global_statenames=data@global_statenames,
+              obstypes = data@obstypes)
+          } else{
+              if(!missing(unit_rmeasure)){
+                ur_template <- list(
+                  unit_rmeasure=list(
+                    slotname="unit_rmeasure",
+                    Cname="__spatPomp_unit_rmeasure",
+                    proto=quote(unit_rmeasure(x,t,d,params,log,...)),
+                    header="\nvoid __spatPomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+                    footer="\n}\n\n",
+                    vars=list(
+                      params=list(
+                        names=quote(paramnames),
+                        cref="__p[__parindex[{%v%}]]"
+                      ),
+                      covars=list(
+                        names=quote(covarnames),
+                        cref="__covars[__covindex[{%v%}]]"
+                      ),
+                      unit_states=list(
+                        names=unit_statenames,
+                        cref="__x[__stateindex[{%v%}]+unit-1]"
+                      )
+                    )
+                  ))
+                hitches <- pomp::hitch(
+                  unit_rmeasure=unit_rmeasure,
+                  templates=ur_template,
+                  obsnames = paste0(obstypes,"1"),
+                  statenames = paste0(unit_statenames,"1"),
+                  paramnames=paramnames,
+                  covarnames=covarnames,
+                  PACKAGE=PACKAGE,
+                  globals=globals,
+                  cfile=cfile,
+                  cdir=cdir,
+                  shlib.args=shlib.args,
+                  verbose=verbose
+                )
+                # construct new spatpomp object
+                pomp:::solibs(po) <- hitches$lib
+                new("spatPomp",po,
+                    unit_rmeasure=hitches$funs$unit_rmeasure,
+                    units=data@units,
+                    unit_index=data@unit_index,
+                    unit_statenames=data@unit_statenames,
+                    global_statenames=data@global_statenames,
+                    obstypes = data@obstypes)
+              }
+        }
+
+      }
+    }
+  }
   if (is.data.frame(data)) {
     ## 'data' is a data frame. find the units position
     if ((is.numeric(units) && (units<1 || units>ncol(data) ||
