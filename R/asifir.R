@@ -168,8 +168,10 @@ asifir.internal <- function (object, params, Np, nbhd,
       meas_var_skel <- array(0, dim = c(U, Np))
       for(u in 1:U){
         snames = paste0(object@unit_statenames,u)
-        hskel <- apply(skel[snames,,1,drop=FALSE],2,h,param.vec=params)
-        meas_var_skel[u,] <- theta.to.v(hskel,params)
+        for(np in 1:Np){
+          hskel <- h(state.vec=skel[snames,np,1],param.vec=params)
+          meas_var_skel[u,np] <- theta.to.v(state.vec=hskel,param.vec=params)
+        }
       }
       fcst_var_upd <- array(0, dim = c(U, Np))
       for(u in 1:U){
@@ -182,8 +184,8 @@ asifir.internal <- function (object, params, Np, nbhd,
       for(u in 1:U){
         for(np in 1:Np){
           snames = paste0(object@unit_statenames,u)
-          mom_match_param[,u,np] <- v.to.theta(inflated_var[u,np],
-	    params, skel[snames, np])
+          mom_match_param[,u,np] <- v.to.theta(var=inflated_var[u,np],
+	    param.vec=params, state.vec=skel[snames,np,1])
         }
       }
       
@@ -224,48 +226,78 @@ asifir.internal <- function (object, params, Np, nbhd,
   } ## end of main loop n = 1:N
 
   # compute locally combined pred. weights for each time, unit and particle
+  # 
+  # matches asif.R except 
+  #   pp -> np
+  #   Np is assumed scalar
+  #   ntimes -> N , nt -> n
+  #   nunits -> U , unit -> u 
   loc.comb.pred.weights = array(data = numeric(0), dim=c(U,Np, N))
   wm.times.wp.avg = array(data = numeric(0), dim = c(U, N))
   wp.avg = array(data = numeric(0), dim = c(U, N))
   for (n in seq_len(N)){
-    for (u in seq_len(U)){
-      prod_over_times = 1
-      full_nbhd = nbhd(object, n, u)
-      for (prev_t in 1:n){
-        if(prev_t == n){
-          if(u == 1) loc.comb.pred.weights[u,,n] = prod_over_times
-          else{
-            for(np in seq_len(Np)){
-              part_prod = 1
-              for (prev_u in (1:u)-1){
-                if (prev_u == 0) next
-                if (full_nbhd[prev_u, prev_t]){
-                  part_prod = part_prod*cond.densities[prev_u, np, prev_t]
-                }
-              }
-              loc.comb.pred.weights[u,np,n] = prod_over_times*part_prod
-            }
+      for (u in seq_len(U)){
+          full_nbhd <- nbhd(object, n, u)
+          prod_cond_dens_nt  <- rep(1, Np)
+          prod_cond_dens_not_nt <- matrix(1, Np, n-1)
+          for (neighbor in full_nbhd){
+              neighbor_u <- neighbor[1]
+              neighbor_n <- neighbor[2]
+              if (neighbor_n == n)
+                  prod_cond_dens_nt  <- prod_cond_dens_nt * cond.densities[neighbor_u, ,neighbor_n]
+              else
+                  prod_cond_dens_not_nt[, neighbor_n] <- prod_cond_dens_not_nt[, neighbor_n] * cond.densities[neighbor_u, ,neighbor_n]
           }
-        }
-        else{
-          time_sum = 0
-          for(np in seq_len(Np)){
-            part_prod = 1
-            for (prev_u in 1:U){
-              if (full_nbhd[prev_u, prev_t]){
-                part_prod = part_prod*cond.densities[prev_u, np, prev_t]
-              }
-            }
-            time_sum = time_sum + part_prod
-          }
-          time_avg = time_sum/Np
-          prod_over_times = prod_over_times * time_avg
-        }
+          loc.comb.pred.weights[u,,n]  <- prod(apply(prod_cond_dens_not_nt, 2, mean))*prod_cond_dens_nt
       }
-    }
   }
   wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
   wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
+
+  
+  ## compute locally combined pred. weights for each time, unit and particle
+  ## loc.comb.pred.weights = array(data = numeric(0), dim=c(U,Np, N))
+  ## wm.times.wp.avg = array(data = numeric(0), dim = c(U, N))
+  ## wp.avg = array(data = numeric(0), dim = c(U, N))
+  ## for (n in seq_len(N)){
+  ##   for (u in seq_len(U)){
+  ##     prod_over_times = 1
+  ##     full_nbhd = nbhd(object, n, u)
+  ##     for (prev_t in 1:n){
+  ##       if(prev_t == n){
+  ##         if(u == 1) loc.comb.pred.weights[u,,n] = prod_over_times
+  ##         else{
+  ##           for(np in seq_len(Np)){
+  ##             part_prod = 1
+  ##             for (prev_u in (1:u)-1){
+  ##               if (prev_u == 0) next
+  ##               if (full_nbhd[prev_u, prev_t]){
+  ##                 part_prod = part_prod*cond.densities[prev_u, np, prev_t]
+  ##               }
+  ##             }
+  ##              loc.comb.pred.weights[u,np,n] = prod_over_times*part_prod
+  ##          }
+  ##         }
+  ##       }
+  ##       else{
+  ##         time_sum = 0
+  ##         for(np in seq_len(Np)){
+  ##           part_prod = 1
+  ##           for (prev_u in 1:U){
+  ##             if (full_nbhd[prev_u, prev_t]){
+  ##               part_prod = part_prod*cond.densities[prev_u, np, prev_t]
+  ##             }
+  ##           }
+  ##           time_sum = time_sum + part_prod
+  ##         }
+  ##         time_avg = time_sum/Np
+  ##         prod_over_times = prod_over_times * time_avg
+  ##       }
+  ##     }
+  ##   }
+  ## }
+  ## wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
+  ## wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
 
   pompUnload(object,verbose=verbose)
   new(

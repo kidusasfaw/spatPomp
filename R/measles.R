@@ -179,30 +179,6 @@ measles_rprocess <- Csnippet("
   }
 ")
 
-measles_rinit <- Csnippet("
-  double *S = &S1;
-  double *E = &E1;
-  double *I = &I1;
-  double *R = &R1;
-  double *C = &C1;
-  double *W = &W1;
-  const double *S_0 = &S1_0;
-  const double *E_0 = &E1_0;
-  const double *I_0 = &I1_0;
-  const double *R_0 = &R1_0;
-  const double *pop = &pop1;
-  double m;
-  int u;
-  for (u = 0; u < U; u++) {
-    m = pop[u]/(S_0[u]+E_0[u]+I_0[u]+R_0[u]);
-    S[u] = nearbyint(m*S_0[u]);
-    E[u] = nearbyint(m*E_0[u]);
-    I[u] = nearbyint(m*I_0[u]);
-    R[u] = nearbyint(m*R_0[u]);
-    W[u] = 0;
-    C[u] = 0;
-  }
-")
 
 measles_dmeasure <- Csnippet("
   const double *C = &C1;
@@ -279,6 +255,57 @@ measles_rinit <- Csnippet("
   }
 ")
 
+measles_skel <- Csnippet("
+  double beta, br, seas, foi;
+  double *S = &S1;
+  double *E = &E1;
+  double *I = &I1;
+  double *R = &R1;
+  double *C = &C1;
+  double *W = &W1;
+  double *DS = &DS1;
+  double *DE = &DE1;
+  double *DI = &DI1;
+  double *DR = &DR1;
+  double *DC = &DC1;
+  double *DW = &DW1;
+  const double *pop = &pop1;
+  const double *lag_birthrate = &lag_birthrate1;
+  int u,v;
+
+  // term-time seasonality
+   t = (t-floor(t))*365.25;
+  if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
+      seas = 1.0+amplitude*0.2411/0.7589;
+    else
+      seas = 1.0-amplitude;
+
+  // transmission rate
+  beta = R0*(gamma+mu)*seas;
+
+  for (u = 0 ; u < U ; u++) {
+
+    // cannot readily put the cohort effect into a vectorfield for the skeleton
+    // therefore, we ignore it here.
+    // this is okay as long as the skeleton is being used for short-term forecasts
+    br = lag_birthrate[u]; 
+
+    foi = pow( (I[u]+iota)/pop[u],alpha);
+    for (v=0; v < U ; v++) {
+      if(v != u)
+        foi += g * v_by_g[u][v] * (pow(I[v]/pop[v],alpha) - pow(I[u]/pop[u],alpha)) / pop[u];
+    }
+
+    DS[u] = br - (beta*foi + mu)*S[u];
+    DE[u] = beta*foi*S[u] - (sigma+mu)*E[u];
+    DI[u] = sigma*E[u] - (gamma+mu)*I[u];
+    DR[u] = gamma*I[u] - mu*R[u];
+    DW[u] = 0; 
+    DC[u] = gamma*I[u];
+  }
+")
+
+
 spatPomp(measles_cases,
                     units = "city",
                     times = "year",
@@ -287,6 +314,7 @@ spatPomp(measles_cases,
                     covar = measles_covar,
                     tcovar = "year",
                     rprocess=euler(measles_rprocess, delta.t=2/365),
+                    skeleton=vectorfield(measles_skel),
                     accumvars = c(paste0("C",1:U),paste0("W",1:U)),
                     paramnames=measles_paramnames,
                     covarnames=measles_covarnames,
@@ -296,5 +324,4 @@ spatPomp(measles_cases,
                     rmeasure=measles_rmeasure,
                     unit_dmeasure=measles_unit_dmeasure
 )
-
 }

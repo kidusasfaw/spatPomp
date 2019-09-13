@@ -313,6 +313,22 @@ girf.internal <- function (object,
           meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],coef(object)))
         }
       }
+      #
+      # CURRENT ASSUMPTIONS ARE THAT theta.to.v(state.vec, param.vec) has state.vec being a scalar
+      # on the measurement scale, produced by applying h() to the skeleton.
+      # This differs from the pseudocode, where state.vec would be the skeleton itself.
+      # 
+      # h(state.vec, param.vec) should map a state vector to a scalar. 
+      # 
+      # v.to.theta(var, param.vec, state.vec) is scalar-valued.
+      # it should take a scalar "var",
+      # a parameter vector and a state vector -- unlike theta.to.v which wants 
+      # the state.vec argument to be h(state).
+      #
+      # there is room for code improvements here. 
+      #
+
+      #
       #print(paste0("meas_var_skel"))
       #print(meas_var_skel)
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))

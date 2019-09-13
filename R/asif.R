@@ -19,7 +19,7 @@
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
-##' @param nbhd A function which when given a point in space-time \code{(d,n)} will output a 0-1 matrix of points in space-time considered to be
+##' @param nbhd A function of protype function(object, time, unit) which returns a list of pairs (n,u) that are neighbors of (time,unit).
 ##' in the neighborhood of \code{(d,n)}.
 ##' @param islands The number of islands for the adapted simulations.
 ##' @return
