@@ -300,10 +300,11 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-      # print(paste0("skel done"))
-      # print(skel)
+       #print(paste0("skel done"))
+       #print(skel)
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+
       for(u in 1:length(object@units)){
         snames = paste0(object@unit_statenames,u)
         for (l in 1:lookahead_steps){
@@ -328,8 +329,8 @@ girf.internal <- function (object,
       #
 
       #
-      #print(paste0("meas_var_skel"))
-      #print(meas_var_skel)
+      # print(paste0("meas_var_skel"))
+      # print(meas_var_skel)
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
         for(l in 1:lookahead_steps){
@@ -337,12 +338,12 @@ girf.internal <- function (object,
                                       FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
         }
       }
-      #print(paste0("fcst_var_upd"))
-      #print(fcst_var_upd)
+      # print(paste0("fcst_var_upd"))
+      # print(fcst_var_upd)
       mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL, J = NULL))
       inflated_var <- meas_var_skel + fcst_var_upd
-      #print(paste0("inflated_var"))
-      #print(inflated_var)
+      # print(paste0("inflated_var"))
+      # print(inflated_var)
       mom_match_param <- foreach::foreach(i=1:Np[1],
            .packages=c("pomp","spatPomp"),
            .combine = acombb, .multicombine = TRUE,
@@ -364,8 +365,8 @@ girf.internal <- function (object,
       #     }
       #   }
       # }
-      #print(paste0("mom_match_param"))
-      #print(mom_match_param)
+      # print(paste0("mom_match_param"))
+      # print(mom_match_param)
       #return(1)
       # guide functions as product (so base case is 1)
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
