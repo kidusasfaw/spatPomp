@@ -282,8 +282,7 @@ girf.internal <- function (object,
         fsv[u,] <- apply(hXgp, MARGIN = 2, FUN = var)
       }
       fsv
-    }
-
+         }
     #print(paste0("fcst_samp_var"))
     #print(fcst_samp_var)
 
@@ -292,8 +291,8 @@ girf.internal <- function (object,
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
-      #print(paste0("X"))
-      #print(X)
+      # print(paste0("X"))
+      # print(X)
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
@@ -301,8 +300,8 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-      #print(paste0("skel done"))
-      #print(skel)
+      # print(paste0("skel done"))
+      # print(skel)
       # create measurement variance at skeleton matrix
       meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(u in 1:length(object@units)){
@@ -317,15 +316,15 @@ girf.internal <- function (object,
       # CURRENT ASSUMPTIONS ARE THAT theta.to.v(state.vec, param.vec) has state.vec being a scalar
       # on the measurement scale, produced by applying h() to the skeleton.
       # This differs from the pseudocode, where state.vec would be the skeleton itself.
-      # 
-      # h(state.vec, param.vec) should map a state vector to a scalar. 
-      # 
+      #
+      # h(state.vec, param.vec) should map a state vector to a scalar.
+      #
       # v.to.theta(var, param.vec, state.vec) is scalar-valued.
       # it should take a scalar "var",
-      # a parameter vector and a state vector -- unlike theta.to.v which wants 
+      # a parameter vector and a state vector -- unlike theta.to.v which wants
       # the state.vec argument to be h(state).
       #
-      # there is room for code improvements here. 
+      # there is room for code improvements here.
       #
 
       #
@@ -367,19 +366,19 @@ girf.internal <- function (object,
       # }
       #print(paste0("mom_match_param"))
       #print(mom_match_param)
-      # return(1)
+      #return(1)
       # guide functions as product (so base case is 1)
-      log_guide_fun = vector(mode = "numeric", length = Np[1])
+      guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
-        log_dmeas_weights <- tryCatch(
+        dmeas_weights <- tryCatch(
           vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
             params=mom_match_param[,,l,],
-            log=TRUE,
+            log=FALSE,
             .gnsi=gnsi
           ),
           error = function (e) {
@@ -387,30 +386,30 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))
-        log_guide_fun = log_guide_fun + log_resamp_weights
+        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
+        guide_fun = guide_fun * resamp_weights
       }
       #print("dmeas_weights")
       #print(dmeas_weights)
-      log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
+      guide_fun[guide_fun < tol] <- tol
       #print(paste0("guide_fun"))
       #print(guide_fun)
-      log_s_not_1_weights <- log_guide_fun - log(filter_guide_fun)
+      s_not_1_weights <- guide_fun / filter_guide_fun
       if (!(s==1 & nt!=0)){
-        log_weights <- log_s_not_1_weights
+        weights <- s_not_1_weights
       }
       else {
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        log_weights <- tryCatch(
+        meas_weights <- tryCatch(
           dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
             times=times[nt+1],
             params=params,
-            log=TRUE,
+            log=FALSE,
             .gnsi=gnsi
           ),
           error = function (e) {
@@ -419,12 +418,12 @@ girf.internal <- function (object,
           }
         )
         gnsi <- FALSE
-        log_weights <- as.numeric(log_weights) + log_s_not_1_weights
+        weights <- as.numeric(meas_weights) * s_not_1_weights
       }
-      max_log_weights <- max(log_weights)
-      log_weights <- log_weights - max_log_weights
-      weights <- exp(log_weights)
-      guide_fun <- exp(log_guide_fun)
+      #max_log_weights <- max(log_weights)
+      #log_weights <- log_weights - max_log_weights
+      #weights <- exp(log_weights)
+      #guide_fun <- exp(log_guide_fun)
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
@@ -446,12 +445,11 @@ girf.internal <- function (object,
       )
       all.fail <- xx$fail
       eff.sample.size[nt+1, s] <- xx$ess
-      cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
+      cond.loglik[nt+1, s] <- xx$loglik
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
-      #print(filter_guide_fun)
     }
   }
   new(

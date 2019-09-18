@@ -103,13 +103,15 @@ measles_globals <- Csnippet(
   paste0("const int U = ",U,"; \n ", v_by_g_C)
 )
 
-measles_unit_statenames <- c('S','E','I','R','C','W')
+#measles_unit_statenames <- c('S','E','I','R','C','W')
+measles_unit_statenames <- c('S','E','I','R','Acc','C','W')
+
 measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
-measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
+measles_IVPnames <- paste0(measles_statenames[1:(5*U)],"_0")
 measles_RPnames <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi","g")
 measles_paramnames <- c(measles_RPnames,measles_IVPnames)
 
-measles_rprocess <- Csnippet("
+measles_rprocess <- Csnippet('
   double beta, br, seas, foi, dw, births;
   double rate[6], trans[6];
   double *S = &S1;
@@ -118,10 +120,16 @@ measles_rprocess <- Csnippet("
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
+  double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
+  int obstime = 0;
   int u,v;
-
+  // obstime variable to be used later. See note on if(obstime) conditional
+  if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
+       obstime = 1;
+       //Rprintf("t=%f is an observation time\\n",t);
+  }
   // term-time seasonality
   t = (t-floor(t))*365.25;
   if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
@@ -144,7 +152,7 @@ measles_rprocess <- Csnippet("
     foi = pow( (I[u]+iota)/pop[u],alpha);
     // Do we still need iota in a spatPomp version?
     // See also discrepancy between Joonha and Daihai versions
-    // Daihai didn't raise pop to the alpha power
+    // Daihai did not raise pop to the alpha power
 
     for (v=0; v < U ; v++) {
       if(v != u)
@@ -175,9 +183,21 @@ measles_rprocess <- Csnippet("
     I[u] += trans[2] - trans[4] - trans[5];
     R[u] = pop[u] - S[u] - E[u] - I[u];
     W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
-    C[u] += trans[4];           // true incidence
+    //C[u] += trans[4];           // true incidence
+
+    // For girf, we want to override the default behavior of the rprocess
+    // function, which sets accumulator variables (in this case C) to 0
+    // at each call. We only want this if the call is during an observation
+    // time.
+    if(obstime){
+       Acc[u] = trans[4];
+       C[u] = Acc[u];
+    } else{
+       Acc[u] += trans[4];
+       C[u] = Acc[u];
+    }
   }
-")
+')
 
 
 measles_dmeasure <- Csnippet("
@@ -237,10 +257,12 @@ measles_rinit <- Csnippet("
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
+  double *Acc = &Acc1;
   const double *S_0 = &S1_0;
   const double *E_0 = &E1_0;
   const double *I_0 = &I1_0;
   const double *R_0 = &R1_0;
+  const double *Acc_0 = &Acc1_0;
   const double *pop = &pop1;
   double m;
   int u;
@@ -252,10 +274,11 @@ measles_rinit <- Csnippet("
     R[u] = nearbyint(m*R_0[u]);
     W[u] = 0;
     C[u] = 0;
+    Acc[u] = Acc_0[u];
   }
 ")
 
-measles_skel <- Csnippet("
+measles_skel <- Csnippet('
   double beta, br, seas, foi;
   double *S = &S1;
   double *E = &E1;
@@ -267,11 +290,17 @@ measles_skel <- Csnippet("
   double *DE = &DE1;
   double *DI = &DI1;
   double *DR = &DR1;
+  double *DAcc = &DAcc1;
   double *DC = &DC1;
   double *DW = &DW1;
+  double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
   int u,v;
+  int obstime = 0;
+  if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
+       obstime = 1;
+  }
 
   // term-time seasonality
    t = (t-floor(t))*365.25;
@@ -284,11 +313,13 @@ measles_skel <- Csnippet("
   beta = R0*(gamma+mu)*seas;
 
   for (u = 0 ; u < U ; u++) {
-
+    if(obstime != 1){
+       C[u] = Acc[u];
+    }
     // cannot readily put the cohort effect into a vectorfield for the skeleton
     // therefore, we ignore it here.
     // this is okay as long as the skeleton is being used for short-term forecasts
-    br = lag_birthrate[u]; 
+    br = lag_birthrate[u];
 
     foi = pow( (I[u]+iota)/pop[u],alpha);
     for (v=0; v < U ; v++) {
@@ -300,10 +331,11 @@ measles_skel <- Csnippet("
     DE[u] = beta*foi*S[u] - (sigma+mu)*E[u];
     DI[u] = sigma*E[u] - (gamma+mu)*I[u];
     DR[u] = gamma*I[u] - mu*R[u];
-    DW[u] = 0; 
+    DW[u] = 0;
     DC[u] = gamma*I[u];
+    DAcc[u] = 0;
   }
-")
+')
 
 
 spatPomp(measles_cases,
