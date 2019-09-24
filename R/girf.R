@@ -23,7 +23,7 @@
 ##'
 ##' @return
 ##' Upon successful completion, \code{girf} returns an object of class
-##' \sQuote{girfd.spatPomp}.
+##' \sQuote{girfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

@@ -5,7 +5,7 @@ setGeneric("asif",function(object,...)standardGeneric("asif"))
 setGeneric("asifir",function(object,...)standardGeneric("asifir"))
 
 ## Extract units from spatPomp object
-setGeneric("unit", function(x,...)standardGeneric("unit"))
+setGeneric("spat_units", function(x,...)standardGeneric("spat_units"))
 
 ## Extract the unit index from spatPomp object
 setGeneric("unit_ix", function(x,...)standardGeneric("unit_ix"))

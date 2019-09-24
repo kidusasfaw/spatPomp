@@ -1,7 +1,9 @@
 ##' Basic methods for the spatPomp class
 ##'
+##' @name spatpomp-methods
+##' @title spatpomp-methods
 ##' @rdname spatPomp-methods
-##' 
+##'
 ##' @include spatPomp_class.R
 ##'
 NULL
@@ -22,7 +24,7 @@ setAs(
 
 ##' @export
 setMethod(
-  "unit",
+  "spat_units",
   signature=signature(x="spatPomp"),
   definition=function(x,...) x@units
 )
@@ -112,3 +114,35 @@ setMethod(
   }
 )
 
+##' @name logLik-girfd_spatPomp
+##' @title loglik
+##' @aliases logLik,girfd_spatPomp-method
+##' @rdname loglik
+##' @export
+setMethod(
+  "logLik",
+  signature=signature(object="girfd_spatPomp"),
+  definition=function(object)object@loglik
+)
+
+##' @name logLik-asifd.spatPomp
+##' @title loglik
+##' @aliases logLik,asifd.spatPomp-method
+##' @rdname loglik
+##' @export
+setMethod(
+  "logLik",
+  signature=signature(object="asifd.spatPomp"),
+  definition=function(object)object@loglik
+)
+
+##' @name logLik-asifird_spatPomp
+##' @title loglik
+##' @aliases logLik,asifird_spatPomp-method
+##' @rdname loglik
+##' @export
+setMethod(
+  "logLik",
+  signature=signature(object="asifird_spatPomp"),
+  definition=function(object)object@loglik
+)

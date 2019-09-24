@@ -50,7 +50,7 @@ See \link[=userdata]{?userdata} for information on how to use this facility.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class
-\sQuote{girfd.spatPomp}.
+\sQuote{girfd_spatPomp}.
 }
 \description{
 An implementation of the algorithm of Park and Ionides (2019),
