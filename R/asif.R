@@ -510,7 +510,7 @@ setMethod(
      ...
      )
    ntimes = length(time(object))
-   nunits = length(unit(object))
+   nunits = length(spat_units(object))
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))

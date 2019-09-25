@@ -275,8 +275,8 @@ girf.internal <- function (object,
       # get all the guides for this particle
       Xg <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
                  params=params,.gnsi=gnsi)
-      fsv <- array(0, dim = c(length(unit(object)),lookahead_steps))
-      for(u in 1:length(unit(object))){
+      fsv <- array(0, dim = c(length(spat_units(object)),lookahead_steps))
+      for(u in 1:length(spat_units(object))){
         snames <- paste0(object@unit_statenames,u)
         hXgp <- apply(Xg[snames,,, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = coef(object))
         fsv[u,] <- apply(hXgp, MARGIN = 2, FUN = var)
@@ -310,7 +310,7 @@ girf.internal <- function (object,
         for (l in 1:lookahead_steps){
           hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = coef(object)))
           dim(hskel) <- c(1,Np[1],1)
-          meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],coef(object)))
+          meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(meas.mean = hskel[1,i,1], param.vec = coef(object)))
         }
       }
       #
@@ -348,11 +348,11 @@ girf.internal <- function (object,
            .packages=c("pomp","spatPomp"),
            .combine = acombb, .multicombine = TRUE,
            .options.multicore=mcopts) %dopar%  {
-        mmp <- array(0, dim = c(length(params), length(unit(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
+        mmp <- array(0, dim = c(length(params), length(spat_units(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
         for(u in 1:length(object@units)){
           snames = paste0(object@unit_statenames,u)
           for (l in 1:lookahead_steps){
-            mmp[,u,l] = v.to.theta(inflated_var[u,l,i], coef(object), skel[snames, i, l])
+            mmp[,u,l] = v.to.theta(var = inflated_var[u,l,i], param.vec = coef(object), state.vec = skel[snames, i, l])
           }
         }
         mmp

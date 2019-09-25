@@ -32,7 +32,6 @@ Collate:
     'package.R'
     'plot.R'
     'spatPomp_methods.R'
-    'spat_sir.R'
     'vec_dmeasure.R'
     'vec_rmeasure.R'
 RoxygenNote: 6.1.1

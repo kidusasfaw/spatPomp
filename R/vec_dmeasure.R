@@ -4,7 +4,7 @@
 ##'
 vec_dmeasure.internal <- function (object, y, x, times, params, log = FALSE, .gnsi = TRUE, ...) {
   pompLoad(object)
-  nunits <- length(object@units)
+  nunits <- length(spat_units(object))
   nparticles <- ncol(x)
   ntimes <- length(times)
   storage.mode(y) <- "double"
