@@ -20,8 +20,8 @@
 
 \item{islands}{The number of islands for the adapted simulations.}
 
-\item{nbhd}{A function of protype function(object, time, unit) which returns a list of pairs (n,u) that are neighbors of (time,unit).
-in the neighborhood of \code{(d,n)}.}
+\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of vectors two-element vectors. The list output of
+\code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
 
 \item{h}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.}
 

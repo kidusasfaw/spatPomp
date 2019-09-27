@@ -19,8 +19,8 @@
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of particles used within each island for the adapted simulations.
-##' @param nbhd A function of protype function(object, time, unit) which returns a list of pairs (n,u) that are neighbors of (time,unit).
-##' in the neighborhood of \code{(d,n)}.
+##' @param nbhd A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of vectors two-element vectors. The list output of
+##' \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.
 ##' @param islands The number of islands for the adapted simulations.
 ##' @return
 ##' Upon successful completion, \code{asif} returns an object of class
