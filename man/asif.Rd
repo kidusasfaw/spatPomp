@@ -7,44 +7,22 @@
 \alias{asif,spatPomp-method}
 \title{Adapted Simulation Island Filter (ASIF)}
 \usage{
-\S4method{asif}{spatPomp}(object, params, Np, nbhd, islands,
-  tol = (1e-18)^9, max.fail = Inf, pred.mean = FALSE,
-  pred.var = FALSE, filter.mean = FALSE, filter.traj = FALSE,
-  save.states = FALSE, save.params = FALSE,
-  verbose = getOption("verbose"), ...)
+\S4method{asif}{spatPomp}(object, islands, Np, nbhd, params,
+  tol = (1e-18)^9, ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
-\item{params}{A parameter set for the spatiotemporal POMP.}
+\item{islands}{The number of islands for the adapted simulations.}
 
 \item{Np}{The number of particles used within each island for the adapted simulations.}
 
 \item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of vectors two-element vectors. The list output of
 \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
 
-\item{islands}{The number of islands for the adapted simulations.}
+\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}}
 
-\item{tol}{positive numeric scalar;
-particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-See the section on \emph{Filtering Failures} for more information.}
-
-\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
-If the number of filtering failures exceeds this number, execution will terminate with an error.
-By default, \code{max.fail} is set to infinity, so no error can be triggered.}
-
-\item{pred.mean}{logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.}
-
-\item{pred.var}{logical; if \code{TRUE}, the prediction variances are calculated for the state variables and parameters.}
-
-\item{filter.mean}{logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.}
-
-\item{filter.traj}{logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.}
-
-\item{save.states}{logical.
-If \code{save.states=TRUE}, the state-vector for each particle at each time is saved.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+\item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link{pomp}} for a full list of recognized arguments.
@@ -73,6 +51,27 @@ The following methods are available for such an object:
 }
 }
 
+\examples{
+# Create a simulation of a BM using default parameter set
+b <- bm(U=3, N=10)
+
+# Create a neighborhood function mapping a point in space-time to a list of ``neighboring points" in space-time
+bm_nbhd <- function(object, time, unit) {
+  nbhd_list = list()
+  if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
+  return(nbhd_list)
+}
+
+# Run ASIF specified number of Monte Carlo islands and particles per island
+asifd.b <- asif(b, islands = 50, Np = 10, nbhd = bm_nbhd)
+
+# Get the likelihood estimate from ASIF
+logLik(asifd.b)
+
+# Compare with the likelihood estimate from Particle Filter
+pfd.b <- pfilter(b, Np = 500)
+logLik(pfd.b)
+}
 \seealso{
 Other particle filter methods: \code{\link{asifir}},
   \code{\link{girf}}, \code{\link{hippie}},

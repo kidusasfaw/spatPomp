@@ -14,7 +14,7 @@
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
-\item{params}{A parameter set for the spatiotemporal POMP.}
+\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}}
 
 \item{Np}{The number of particles for the adapted simulations within each island.}
 
@@ -31,9 +31,7 @@
 
 \item{Ninter}{the number of intermediate resampling timepoints.}
 
-\item{tol}{positive numeric scalar;
-particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-See the section on \emph{Filtering Failures} for more information.}
+\item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
 \item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
 If the number of filtering failures exceeds this number, execution will terminate with an error.
