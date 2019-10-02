@@ -13,14 +13,58 @@
 ##' @inheritParams spatPomp
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
-##' @param Np The number of particles used.
-##' @param h A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.
-##' @param theta.to.v A function with template \code{function(state.vec, param.vec)} which returns an approximation to the variance of an observation given a latent state and parameter vector.
-##' @param v.to.theta A function with template \code{function(var, state.vec, param.vec)} which returns a parameter vector having observation noise consistent with variance \code{var} at latent state \code{state.vec} with other paramters given by \code{param.vec}.
+##' @param Np The number of Monte Carlo particles to be used.
+##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
+##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+##' to the expected observed value given a latent state and parameter vector. The function will be run inside GIRF.
+##' For more information, see the examples section below.
+##' @param theta.to.v A user-provided function taking two named arguments:
+##' \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
+##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+##' to the variance of the observed value given a latent state and parameter vector. The function will be run inside GIRF.
+##' For more information, see the examples section below.
+##' @param v.to.theta A user-provided function taking three named arguments:
+##' \code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
+##'  (representing a parameter vector for the model). The function should return a parameter vector having observation
+##'   noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.
 ##' @param Ninter the number of intermediate resampling timepoints.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
+##' @param tol If the guide functions become too small (beyond floating-point precision limits), we set them to this value.
 ##'
+##' @examples
+##' # Create a simulation of a BM using default parameter set
+##' b <- bm(U=3, N=10)
+##'
+##' # Specify the expected measurement, theta.to.v and v.to.theta
+##' girf.h <- function(state.vec, param.vec){
+##'   # find index matching unit_statename
+##'   ix<-grep('X',names(state.vec))
+##'   state.vec[ix]
+##' }
+##' girf.theta.to.v <- function(meas.mean, param.vec){
+##'   param.vec['tau']^2
+##' }
+##' girf.v.to.theta <- function(var, state.vec, param.vec){
+##'   param.vec['tau'] <- sqrt(var)
+##'   param.vec
+##' }
+##' # Run GIRF
+##' girfd.b <- girf(b,
+##'                 Np = 100,
+##'                 Ninter = length(spat_units(b)),
+##'                 lookahead = 1,
+##'                 Nguide = 50,
+##'                 h = girf.h,
+##'                 theta.to.v = girf.theta.to.v,
+##'                 v.to.theta = girf.v.to.theta
+##' )
+##' # Get the likelihood estimate from GIRF
+##' logLik(girfd.b)
+##'
+##' # Compare with the likelihood estimate from particle filter
+##' pfd.b <- pfilter(b, Np = 500)
+##' logLik(pfd.b)
 ##' @return
 ##' Upon successful completion, \code{girf} returns an object of class
 ##' \sQuote{girfd_spatPomp}.
@@ -28,7 +72,7 @@
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' \item{\code{\link{logLik}}}{ yields an unbiased estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
 ##' @references
@@ -48,10 +92,7 @@ setClass(
     h = "function",
     theta.to.v = "function",
     v.to.theta = "function",
-    paramMatrix="array",
-    eff.sample.size="array",
     cond.loglik="array",
-    saved.states="array",
     Np="integer",
     tol="numeric",
     loglik="numeric"
@@ -63,10 +104,7 @@ setClass(
     h = function(){},
     theta.to.v = function(){},
     v.to.theta = function(){},
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    eff.sample.size=array(data=numeric(0),dim=c(0,0)),
     cond.loglik=array(data=numeric(0),dim=c(0,0)),
-    saved.states=array(data=numeric(0), dim = c(0,0)),
     Np=as.integer(NA),
     tol=as.double(NA),
     loglik=as.double(NA)
@@ -75,13 +113,13 @@ setClass(
 
 setGeneric(
   "girf",
-  function (data, ...)
+  function (object, ...)
     standardGeneric("girf")
 )
 
 setMethod(
   "girf",
-  signature=signature(data="missing"),
+  signature=signature(object="missing"),
   definition=function (...) {
     reqd_arg("girf","data")
   }
@@ -89,9 +127,9 @@ setMethod(
 
 setMethod(
   "girf",
-  signature=signature(data="ANY"),
-  definition=function (data, ...) {
-    undef_method("girf",data)
+  signature=signature(object="ANY"),
+  definition=function (object, ...) {
+    undef_method("girf",object)
   }
 )
 
@@ -101,9 +139,9 @@ setMethod(
 ##' @export
 setMethod(
   "girf",
-  signature=signature(data="spatPomp"),
+  signature=signature(object="spatPomp"),
   definition=function (
-    data,
+    object,
     Np,
     Ninter,
     lookahead,
@@ -111,14 +149,16 @@ setMethod(
     h,
     theta.to.v,
     v.to.theta,
-    tol = 1e-17, max.fail = Inf,
-    save.states = FALSE,
-    ...,
-    verbose = getOption("verbose", FALSE)) {
+    params,
+    tol,
+    ...) {
+
+    if (missing(params)) params <- coef(object)
+    if (missing(tol)) tol <- 1e-300
 
     tryCatch(
       girf.internal(
-        data,
+        object,
         Np,
         Ninter,
         lookahead,
@@ -126,10 +166,9 @@ setMethod(
         h,
         theta.to.v,
         v.to.theta,
-        tol = tol, max.fail = Inf,
-        save.states = FALSE,
-        ...,
-        verbose=verbose
+        params,
+        tol,
+        ...
       ),
       error = function (e) pomp:::pStop("girf",conditionMessage(e))
     )
@@ -142,39 +181,40 @@ setMethod(
 ##' @export
 setMethod(
   "girf",
-  signature=signature(data="girfd_spatPomp"),
-  function (data,
+  signature=signature(object="girfd_spatPomp"),
+  function (object,
             Np,
-            tol,
             Ninter,
-            Nguide,
             lookahead,
+            Nguide,
             h,
             theta.to.v,
             v.to.theta,
-            ...,
-            verbose = getOption("verbose", FALSE)
+            params,
+            tol,
+            ...
             ) {
-    if (missing(Np)) Np <- data@Np
-    if (missing(tol)) tol <- data@tol
-    if (missing(Ninter)) Ninter <- data@Ninter
-    if (missing(Nguide)) Nguide <- data@Nguide
-    if (missing(lookahead)) lookahead <- data@lookahead
-    if (missing(h)) h <- data@h
-    if (missing(theta.to.v)) theta.to.v <- data@theta.to.v
-    if (missing(v.to.theta)) v.to.theta <- data@v.to.theta
+    if (missing(Np)) Np <- object@Np
+    if (missing(tol)) tol <- object@tol
+    if (missing(Ninter)) Ninter <- object@Ninter
+    if (missing(Nguide)) Nguide <- object@Nguide
+    if (missing(lookahead)) lookahead <- object@lookahead
+    if (missing(h)) h <- object@h
+    if (missing(theta.to.v)) theta.to.v <- object@theta.to.v
+    if (missing(v.to.theta)) v.to.theta <- object@v.to.theta
+    if (missing(params)) params <- coef(object)
 
-    girf(as(data,"spatPomp"),
+    girf(as(object,"spatPomp"),
          Np=Np,
-         tol=tol,
          Ninter=Ninter,
-         Nguide=Nguide,
          lookahead=lookahead,
+         Nguide=Nguide,
          h=h,
          theta.to.v=theta.to.v,
          v.to.theta=v.to.theta,
-         ...,
-         verbose=verbose)
+         params = params,
+         tol=tol,
+         ...)
 
   }
 )
@@ -187,22 +227,23 @@ girf.internal <- function (object,
         h,
         theta.to.v,
         v.to.theta,
-        tol = 1e-17, max.fail = Inf,
-        save.states = FALSE,
+        params,
+        tol,
         ...,
-        .gnsi = TRUE, verbose = FALSE) {
+        .gnsi = TRUE) {
 
-  verbose <- as.logical(verbose)
+  verbose <- FALSE
   ep <- paste0("in ",sQuote("girf"),": ")
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
+  if (length(params)==0)
+    stop(ep,sQuote("params")," must be specified",call.=FALSE)
+
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
-  save.states <- as.logical(save.states)
 
-  params <- coef(object)
   params.matrix <- matrix(params,nrow=length(params), ncol = Np[1])
   rownames(params.matrix) <- names(params)
   times <- time(object,t0=TRUE)
@@ -243,14 +284,7 @@ girf.internal <- function (object,
   statenames <- rownames(init.x)
   nvars <- nrow(init.x)
   x <- init.x
-
-  ## set up storage for saving samples from filtering distributions
-  if (save.states) {
-    xparticles <- setNames(vector(mode="list",length=ntimes),time(object))
-  }
-
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
-  eff.sample.size <- array(0, dim = c(ntimes, Ninter))
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
   ## begin multi-thread code
@@ -430,9 +464,6 @@ girf.internal <- function (object,
               x=X,
               params=params,
               Np=Np[nt+1],
-              predmean=FALSE,
-              predvar=FALSE,
-              filtmean=FALSE,
               trackancestry=FALSE,
               doparRS=FALSE,
               weights=weights,
@@ -444,8 +475,6 @@ girf.internal <- function (object,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      all.fail <- xx$fail
-      eff.sample.size[nt+1, s] <- xx$ess
       cond.loglik[nt+1, s] <- xx$loglik
       x <- xx$states
       filter_guide_fun <- xx$filterguides
@@ -462,10 +491,7 @@ girf.internal <- function (object,
     h = h,
     theta.to.v = theta.to.v,
     v.to.theta = v.to.theta,
-    paramMatrix=params.matrix,
-    eff.sample.size=eff.sample.size,
     cond.loglik=cond.loglik,
-    saved.states=x,
     Np=Np[1],
     tol=tol,
     loglik=sum(cond.loglik)

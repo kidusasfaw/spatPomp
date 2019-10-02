@@ -12,22 +12,21 @@
 // tracks ancestry of particles if desired.
 // returns all of the above in a named list.
 SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
-                           SEXP predmean, SEXP predvar,
-                           SEXP filtmean, SEXP trackancestry, SEXP doparRS,
+                           SEXP trackancestry, SEXP doparRS,
                            SEXP weights, SEXP gps, SEXP fsv, SEXP tol)
 {
   int nprotect = 0;
-  SEXP pm = R_NilValue, pv = R_NilValue, fm = R_NilValue, anc = R_NilValue;
+  SEXP anc = R_NilValue;
   SEXP ess, fail, loglik;
   SEXP newstates = R_NilValue, newparams = R_NilValue, gfs = R_NilValue, newfsv = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
-  double *xpm = 0, *xpv = 0, *xfm = 0, *xw = 0, *xx = 0, *xp = 0, *g = 0, *f = 0;
+  double *xw = 0, *xx = 0, *xp = 0, *g = 0, *f = 0;
   int *xanc = 0;
   SEXP dimX, dimP, dimfsv, newdim, Xnames, Pnames;
   int *dim, np;
   int nvars, npars = 0, nreps, nlost, nunits, nlookaheads;
-  int do_pm, do_pv, do_fm, do_ta, do_pr, all_fail = 0;
+  int do_ta, do_pr, all_fail = 0;
   double sum = 0, sumsq = 0, vsq, ws, w, toler;
   int j, k;
 
@@ -52,9 +51,6 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
 
   np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
 
-  do_pm = *(LOGICAL(AS_LOGICAL(predmean))); // calculate prediction means?
-  do_pv = *(LOGICAL(AS_LOGICAL(predvar)));  // calculate prediction variances?
-  do_fm = *(LOGICAL(AS_LOGICAL(filtmean))); // calculate filtering means?
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
   // Do we need to do parameter resampling?
   do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
@@ -91,55 +87,9 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   }
   *(LOGICAL(fail)) = all_fail;
 
-  if (do_pm || do_pv) {
-    PROTECT(pm = NEW_NUMERIC(nvars)); nprotect++;
-    xpm = REAL(pm);
-  }
-
-  if (do_pv) {
-    PROTECT(pv = NEW_NUMERIC(nvars)); nprotect++;
-    xpv = REAL(pv);
-  }
-
-  if (do_fm) {
-    PROTECT(fm = NEW_NUMERIC(nvars)); nprotect++;
-    xfm = REAL(fm);
-  }
-
   if (do_ta) {
     PROTECT(anc = NEW_INTEGER(np)); nprotect++;
     xanc = INTEGER(anc);
-  }
-
-  for (j = 0; j < nvars; j++) {	// state variables
-
-    // compute prediction mean
-    if (do_pm || do_pv) {
-      for (k = 0, sum = 0; k < nreps; k++) sum += xx[j+k*nvars];
-      sum /= ((double) nreps);
-      xpm[j] = sum;
-    }
-
-    // compute prediction variance
-    if (do_pv) {
-      for (k = 0, sumsq = 0; k < nreps; k++) {
-        vsq = xx[j+k*nvars]-sum;
-        sumsq += vsq*vsq;
-      }
-      xpv[j] = sumsq / ((double) (nreps - 1));
-    }
-
-    //  compute filter mean
-    if (do_fm) {
-      if (all_fail) {		// unweighted average
-        for (k = 0, ws = 0; k < nreps; k++) ws += xx[j+k*nvars];
-        xfm[j] = ws/((double) nreps);
-      } else { 			// weighted average
-        for (k = 0, ws = 0; k < nreps; k++) ws += xx[j+k*nvars]*xw[k];
-        xfm[j] = ws/w;
-      }
-    }
-
   }
 
   GetRNGstate();
@@ -223,12 +173,9 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   SET_STRING_ELT(retvalnames,2,mkChar("ess"));
   SET_STRING_ELT(retvalnames,3,mkChar("states"));
   SET_STRING_ELT(retvalnames,4,mkChar("params"));
-  SET_STRING_ELT(retvalnames,5,mkChar("pm"));
-  SET_STRING_ELT(retvalnames,6,mkChar("pv"));
-  SET_STRING_ELT(retvalnames,7,mkChar("fm"));
-  SET_STRING_ELT(retvalnames,8,mkChar("ancestry"));
-  SET_STRING_ELT(retvalnames,9,mkChar("filterguides"));
-  SET_STRING_ELT(retvalnames,10,mkChar("newfsv"));
+  SET_STRING_ELT(retvalnames,5,mkChar("ancestry"));
+  SET_STRING_ELT(retvalnames,6,mkChar("filterguides"));
+  SET_STRING_ELT(retvalnames,7,mkChar("newfsv"));
   SET_NAMES(retval,retvalnames);
 
   SET_ELEMENT(retval,0,fail);
@@ -247,27 +194,18 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
     SET_ELEMENT(retval,4,newparams);
   }
 
-  if (do_pm) {
-    SET_ELEMENT(retval,5,pm);
-  }
-  if (do_pv) {
-    SET_ELEMENT(retval,6,pv);
-  }
-  if (do_fm) {
-    SET_ELEMENT(retval,7,fm);
-  }
   if (do_ta) {
-    SET_ELEMENT(retval,8,anc);
+    SET_ELEMENT(retval,5,anc);
   }
   if (all_fail) {
-    SET_ELEMENT(retval,9,gps);
+    SET_ELEMENT(retval,6,gps);
   } else {
-    SET_ELEMENT(retval,9,gfs);
+    SET_ELEMENT(retval,6,gfs);
   }
   if (all_fail) {
-    SET_ELEMENT(retval,10,fsv);
+    SET_ELEMENT(retval,7,fsv);
   } else {
-    SET_ELEMENT(retval,10,newfsv);
+    SET_ELEMENT(retval,7,newfsv);
   }
 
   UNPROTECT(nprotect);

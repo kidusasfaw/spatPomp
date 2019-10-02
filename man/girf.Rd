@@ -9,19 +9,16 @@
 \alias{girf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF)}
 \usage{
-\S4method{girf}{spatPomp}(data, Np, Ninter, lookahead, Nguide, h,
-  theta.to.v, v.to.theta, tol = 1e-17, max.fail = Inf,
-  save.states = FALSE, ..., verbose = getOption("verbose", FALSE))
+\S4method{girf}{spatPomp}(object, Np, Ninter, lookahead, Nguide, h,
+  theta.to.v, v.to.theta, params, tol, ...)
 
-\S4method{girf}{girfd_spatPomp}(data, Np, tol, Ninter, Nguide, lookahead,
-  h, theta.to.v, v.to.theta, ..., verbose = getOption("verbose", FALSE))
+\S4method{girf}{girfd_spatPomp}(object, Np, Ninter, lookahead, Nguide, h,
+  theta.to.v, v.to.theta, params, tol, ...)
 }
 \arguments{
-\item{data}{either a data frame holding the spatiotemporal data,
-or an object of class \sQuote{spatPomp},
-i.e., the output of another \pkg{spatPomp} calculation.}
+\item{object}{A \code{spatPomp} object.}
 
-\item{Np}{The number of particles used.}
+\item{Np}{The number of Monte Carlo particles to be used.}
 
 \item{Ninter}{the number of intermediate resampling timepoints.}
 
@@ -29,11 +26,25 @@ i.e., the output of another \pkg{spatPomp} calculation.}
 
 \item{Nguide}{The number of simulations used to estimate state process uncertainty for each particle.}
 
-\item{h}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the expected observed value given a latent state and parameter vector.}
+\item{h}{A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
+and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+to the expected observed value given a latent state and parameter vector. The function will be run inside GIRF.
+For more information, see the examples section below.}
 
-\item{theta.to.v}{A function with template \code{function(state.vec, param.vec)} which returns an approximation to the variance of an observation given a latent state and parameter vector.}
+\item{theta.to.v}{A user-provided function taking two named arguments:
+\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
+and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+to the variance of the observed value given a latent state and parameter vector. The function will be run inside GIRF.
+For more information, see the examples section below.}
 
-\item{v.to.theta}{A function with template \code{function(var, state.vec, param.vec)} which returns a parameter vector having observation noise consistent with variance \code{var} at latent state \code{state.vec} with other paramters given by \code{param.vec}.}
+\item{v.to.theta}{A user-provided function taking three named arguments:
+\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
+ (representing a parameter vector for the model). The function should return a parameter vector having observation
+  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
+
+\item{params}{A parameter set for the spatiotemporal POMP.}
+
+\item{tol}{If the guide functions become too small (beyond floating-point precision limits), we set them to this value.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link{pomp}} for a full list of recognized arguments.
@@ -41,12 +52,6 @@ See \code{\link{pomp}} for a full list of recognized arguments.
 When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[=userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
-
-\item{object}{A \code{spatPomp} object.}
-
-\item{params}{A parameter set for the spatiotemporal POMP.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class
@@ -60,10 +65,44 @@ following the pseudocode in Asfaw, Ionides and King (2019).
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{logLik}}}{ yields an unbiased estimate of the log-likelihood of the data under the model. }
 }
 }
 
+\examples{
+# Create a simulation of a BM using default parameter set
+b <- bm(U=3, N=10)
+
+# Specify the expected measurement, theta.to.v and v.to.theta
+girf.h <- function(state.vec, param.vec){
+  # find index matching unit_statename
+  ix<-grep('X',names(state.vec))
+  state.vec[ix]
+}
+girf.theta.to.v <- function(meas.mean, param.vec){
+  param.vec['tau']^2
+}
+girf.v.to.theta <- function(var, state.vec, param.vec){
+  param.vec['tau'] <- sqrt(var)
+  param.vec
+}
+# Run GIRF
+girfd.b <- girf(b,
+                Np = 100,
+                Ninter = length(spat_units(b)),
+                lookahead = 1,
+                Nguide = 50,
+                h = girf.h,
+                theta.to.v = girf.theta.to.v,
+                v.to.theta = girf.v.to.theta
+)
+# Get the likelihood estimate from GIRF
+logLik(girfd.b)
+
+# Compare with the likelihood estimate from particle filter
+pfd.b <- pfilter(b, Np = 500)
+logLik(pfd.b)
+}
 \references{
 \park2019
 
