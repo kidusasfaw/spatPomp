@@ -16,12 +16,12 @@
 ##' @param Np The number of Monte Carlo particles to be used.
 ##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
 ##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the expected observed value given a latent state and parameter vector. The function will be run inside GIRF.
+##' to the expected observed value given a latent state and parameter vector.
 ##' For more information, see the examples section below.
 ##' @param theta.to.v A user-provided function taking two named arguments:
 ##' \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
 ##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the variance of the observed value given a latent state and parameter vector. The function will be run inside GIRF.
+##' to the variance of the observed value given a latent state and parameter vector.
 ##' For more information, see the examples section below.
 ##' @param v.to.theta A user-provided function taking three named arguments:
 ##' \code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}

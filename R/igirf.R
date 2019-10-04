@@ -1,7 +1,7 @@
 ##' Iterated guided intermediate resampling filter (iGIRF)
 ##'
 ##' An implementation of a parameter estimation algorithm combining
-##' GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in Asfaw, Ionides and King (2019). 
+##' GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in Asfaw, Ionides and King (2019).
 ##'
 ##' @name igirf
 ##' @rdname igirf
@@ -401,9 +401,6 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
               x=X,
               params=params,
               Np=Np[nt+1],
-              predmean=FALSE,
-              predvar=FALSE,
-              filtmean=FALSE,
               trackancestry=FALSE,
               doparRS=TRUE,
               weights=weights,

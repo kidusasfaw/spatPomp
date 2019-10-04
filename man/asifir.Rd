@@ -8,8 +8,7 @@
 \title{Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)}
 \usage{
 \S4method{asifir}{spatPomp}(object, params, Np, islands, nbhd, h,
-  theta.to.v, v.to.theta, Ninter, tol = (1e-18), max.fail = Inf,
-  save.states = FALSE, verbose = getOption("verbose"), ...)
+  theta.to.v, v.to.theta, Ninter, tol = (1e-18), ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -20,18 +19,18 @@
 
 \item{islands}{The number of islands for the adapted simulations.}
 
-\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of vectors two-element vectors. The list output of
+\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
 \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
 
 \item{h}{A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
 and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the expected observed value given a latent state and parameter vector. The function will be run inside GIRF.
+to the expected observed value given a latent state and parameter vector.
 For more information, see the examples section below.}
 
 \item{theta.to.v}{A user-provided function taking two named arguments:
 \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
 and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the variance of the observed value given a latent state and parameter vector. The function will be run inside GIRF.
+to the variance of the observed value given a latent state and parameter vector.
 For more information, see the examples section below.}
 
 \item{v.to.theta}{A user-provided function taking three named arguments:
@@ -42,15 +41,6 @@ For more information, see the examples section below.}
 \item{Ninter}{the number of intermediate resampling timepoints.}
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
-
-\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
-If the number of filtering failures exceeds this number, execution will terminate with an error.
-By default, \code{max.fail} is set to infinity, so no error can be triggered.}
-
-\item{save.states}{logical.
-If \code{save.states=TRUE}, the state-vector for each particle at each time is saved.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link{pomp}} for a full list of recognized arguments.
@@ -64,14 +54,14 @@ Upon successful completion, \code{asifir} returns an object of class
 \sQuote{asifird_spatPomp}.
 }
 \description{
-An algorithm for estimating the likelihood of a spatiotemporal partially-observed 
+An algorithm for estimating the likelihood of a spatiotemporal partially-observed
 Markov process (SpatPOMP for short).
-Running \code{asifir} causes the algorithm to run independent island jobs which  
+Running \code{asifir} causes the algorithm to run independent island jobs which
 each carry out an adapted simulation using intermediate resampling.
 Adapted simulation is an easier task than filtering, since particles in each island
 remain close to each other. Intermediate resampling further assists against
 the curse of dimensionality (COD) problem for importance sampling.
-The adapted simulations are then weighted in a way that tries to avert COD by 
+The adapted simulations are then weighted in a way that tries to avert COD by
 making a weak coupling assumption to get an approximate filter distribution.
 As a by-product, we also get an approximation to the likelihood of the data.
 }
@@ -79,7 +69,7 @@ As a by-product, we also get an approximation to the likelihood of the data.
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of 
+\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of
 the data under the model. }
 }
 }

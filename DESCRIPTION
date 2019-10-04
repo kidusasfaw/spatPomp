@@ -13,7 +13,8 @@ LazyData: true
 Depends: pomp (>= 2.0)
 LinkingTo: pomp
 Suggests: scales, geosphere, ggplot2, magrittr,
-  plyr, reshape2
+  plyr, reshape2,
+    testthat
 Collate:
     'generics.R'
     'spatPomp_class.R'
