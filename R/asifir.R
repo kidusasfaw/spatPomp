@@ -24,6 +24,44 @@
 ##' @param object A \code{spatPomp} object.
 ##' @param Np The number of particles for the adapted simulations within each island.
 ##' @param islands The number of islands for the adapted simulations.
+##' @examples
+##' # Create a simulation of a BM using default parameter set
+##' b <- bm(U=3, N=10)
+##'
+##' # Create a neighborhood function mapping a point in space-time to a list of ``neighboring points" in space-time
+##' bm_nbhd <- function(object, time, unit) {
+##'   nbhd_list = list()
+##'   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
+##'   return(nbhd_list)
+##' }
+##' # Specify the expected measurement, theta.to.v and v.to.theta
+##' girf.h <- function(state.vec, param.vec){
+##'   # find index matching unit_statename
+##'   ix<-grep('X',names(state.vec))
+##'   state.vec[ix]
+##' }
+##' girf.theta.to.v <- function(meas.mean, param.vec){
+##'   param.vec['tau']^2
+##' }
+##' girf.v.to.theta <- function(var, state.vec, param.vec){
+##'   param.vec['tau'] <- sqrt(var)
+##'   param.vec
+##' }
+##' # Run ASIFIR specified number of Monte Carlo islands and particles per island
+##' asifird.b <- asifir(b,
+##'                    islands = 50,
+##'                    Np=20,
+##'                    nbhd = bm_nbhd,
+##'                    Ninter = length(spat_units(bm3)),
+##'                    h = girf.h,
+##'                    theta.to.v = girf.theta.to.v,
+##'                    v.to.theta = girf.v.to.theta)
+##' # Get the likelihood estimate from ASIFIR
+##' logLik(asifird.b)
+##'
+##' # Compare with the likelihood estimate from Particle Filter
+##' pfd.b <- pfilter(b, Np = 500)
+##' logLik(pfd.b)
 ##' @return
 ##' Upon successful completion, \code{asifir} returns an object of class
 ##' \sQuote{asifird_spatPomp}.
@@ -58,7 +96,6 @@ setClass(
     theta.to.v = function(){},
     v.to.theta = function(){},
     tol=as.double(NA),
-    #nfail=list(),
     loglik=as.double(NA)
   )
 )
