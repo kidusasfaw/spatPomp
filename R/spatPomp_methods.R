@@ -146,3 +146,36 @@ setMethod(
   signature=signature(object="asifird_spatPomp"),
   definition=function(object)object@loglik
 )
+
+##' @name spatPomp_Csnippet
+##' @title spatPomp_Csnippet
+##' @rdname spatPomp_Csnippet
+##' @export
+setMethod(
+  "spatPomp_Csnippet",
+  signature=signature(object="character"),
+  definition=function(object, unit_statenames, unit_covarnames){
+    if(missing(unit_statenames) && missing(unit_covarnames))
+      return(pomp::Csnippet(object))
+    else{
+      if(missing(unit_statenames)) sn.inits <- character()
+      else{
+        sn.inits.lhs <- paste("double *",unit_statenames, sep = "")
+        sn.inits.rhs <- paste("&", unit_statenames,"1;",sep="")
+        sn.inits.vec <- paste(sn.inits.lhs, sn.inits.rhs, sep = " = ")
+        sn.inits <- paste0(sn.inits.vec, collapse = "\n")
+      }
+      if(missing(unit_covarnames)) cn.inits <- character()
+      else{
+        cn.inits.lhs <- paste("const double *",unit_covarnames, sep = "")
+        cn.inits.rhs <- paste("&", unit_covarnames,"1;",sep="")
+        cn.inits.vec <- paste(cn.inits.lhs, cn.inits.rhs, sep = " = ")
+        cn.inits <- paste0(cn.inits.vec, collapse = "\n")
+      }
+      all.inits <- paste(sn.inits, cn.inits, sep = "\n")
+      full.csnippet <- paste(all.inits, object, sep = "\n")
+      return(pomp::Csnippet(full.csnippet))
+    }
+  }
+)
+

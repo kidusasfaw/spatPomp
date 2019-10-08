@@ -41,9 +41,7 @@ bm_IVPnames <- paste0(bm_statenames,"_0")
 bm_RPnames <- c("rho","sigma","tau")
 bm_paramnames <- c(bm_RPnames,bm_IVPnames)
 
-bm_rprocess <- Csnippet("
-  double *X = &X1;
-//  double nextX[U];
+bm_rprocess <- spatPomp_Csnippet("
   double dW[U];
   int u,v;
 
@@ -55,7 +53,7 @@ bm_rprocess <- Csnippet("
       X[u] += dW[v]*pow(rho,dist[u][v]);
     }
   }
-")
+", unit_statenames = c("X"))
 
 bm_skel2 <- Csnippet("
   //double *X = &X1;

@@ -16,6 +16,9 @@ setGeneric("vec_dmeasure", function(object,...)standardGeneric("vec_dmeasure"))
 ## Simulate observations over all units given states
 setGeneric("vec_rmeasure", function(object,...)standardGeneric("vec_rmeasure"))
 
+## Csnippet utility that frees the user from declaring shorthand pointers
+setGeneric("spatPomp_Csnippet", function(object,...)standardGeneric("spatPomp_Csnippet"))
+
 ## Adapted simulation for HIPPIE
 setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter"))
 
