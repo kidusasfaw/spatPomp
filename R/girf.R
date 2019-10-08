@@ -403,11 +403,11 @@ girf.internal <- function (object,
       # print(mom_match_param)
       #return(1)
       # guide functions as product (so base case is 1)
-      guide_fun = vector(mode = "numeric", length = Np[1]) + 1
+      log_guide_fun = vector(mode = "numeric", length = Np[1])
 
       for(l in 1:lookahead_steps){
-        dmeas_weights <- tryCatch(
-          vec_dmeasure(
+        log_dmeas_weights <- tryCatch(
+          log(vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
@@ -415,30 +415,30 @@ girf.internal <- function (object,
             params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
-          ),
+          )),
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
-        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
-        guide_fun = guide_fun * resamp_weights
+        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))
+        log_guide_fun = log_guide_fun + log_resamp_weights
       }
       #print("dmeas_weights")
       #print(dmeas_weights)
-      guide_fun[guide_fun < tol] <- tol
+      log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
       #print(paste0("guide_fun"))
       #print(guide_fun)
-      s_not_1_weights <- guide_fun / filter_guide_fun
+      log_s_not_1_weights <- log_guide_fun - log(filter_guide_fun)
       if (!(s==1 & nt!=0)){
-        weights <- s_not_1_weights
+        log_weights <- log_s_not_1_weights
       }
       else {
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        meas_weights <- tryCatch(
-          dmeasure(
+        log_meas_weights <- tryCatch(
+          log(dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
@@ -446,19 +446,19 @@ girf.internal <- function (object,
             params=params,
             log=FALSE,
             .gnsi=gnsi
-          ),
+          )),
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
         gnsi <- FALSE
-        weights <- as.numeric(meas_weights) * s_not_1_weights
+        log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
-      #max_log_weights <- max(log_weights)
-      #log_weights <- log_weights - max_log_weights
-      #weights <- exp(log_weights)
-      #guide_fun <- exp(log_guide_fun)
+      max_log_weights <- max(log_weights)
+      log_weights <- log_weights - max_log_weights
+      weights <- exp(log_weights)
+      guide_fun <- exp(log_guide_fun)
       xx <- tryCatch(
         .Call('girf_computations',
               x=X,
@@ -475,7 +475,7 @@ girf.internal <- function (object,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      cond.loglik[nt+1, s] <- xx$loglik
+      cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]
