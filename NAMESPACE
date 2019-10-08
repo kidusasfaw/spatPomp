@@ -2,6 +2,7 @@
 
 export(bm)
 export(gbm)
+export(girfd_measles)
 export(lorenz)
 export(measles)
 export(ou)
