@@ -132,6 +132,45 @@ test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
 test_params <- c(rho=0.4, sigma=1, tau=2, test_ivps)
 simulate(bm_spatPomp,params=test_params)
+}
+
+#' @export
+girfd_bm <- function(U=5, N = 10){
+  b <- bm(U = U, N = N)
+  # girfd_spatPomp object creation requirements
+  bm_Ninter <- length(spat_units(b))
+  bm_lookahead <- 1
+  bm_Nguide <- 50
+  bm_Np <- 100
+  bm_tol <- 1e-300
+  bm_h <- function(state.vec, param.vec){
+    ix<-grep("X",names(state.vec))
+    state.vec[ix]
+  }
+  bm_theta.to.v <- function(meas.mean, param.vec){
+    (param.vec["tau"])^2
+  }
+  bm_v.to.theta <- function(var, state.vec, param.vec){
+    param.vec['tau'] <- sqrt(var)
+    param.vec
+  }
+
+  # Output girfd_spatPomp object
+  new(
+    "girfd_spatPomp",
+    b,
+    Ninter=bm_Ninter,
+    Nguide=bm_Nguide,
+    lookahead=bm_lookahead,
+    h = bm_h,
+    theta.to.v = bm_theta.to.v,
+    v.to.theta = bm_v.to.theta,
+    cond.loglik = array(data=numeric(0),dim=c(0,0)),
+    Np = as.integer(bm_Np),
+    tol= bm_tol,
+    loglik=as.double(NA)
+  )
 
 }
+
 
