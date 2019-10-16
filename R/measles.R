@@ -150,9 +150,8 @@ measles_rprocess <- Csnippet('
 
     // expected force of infection
     foi = pow( (I[u]+iota)/pop[u],alpha);
-    // Do we still need iota in a spatPomp version?
-    // See also discrepancy between Joonha and Daihai versions
-    // Daihai did not raise pop to the alpha power
+    // we follow Park and Ionides (2019) and raise pop to the alpha power
+    // He et al (2010) did not do this.
 
     for (v=0; v < U ; v++) {
       if(v != u)
