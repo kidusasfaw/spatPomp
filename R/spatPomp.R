@@ -18,7 +18,7 @@
 ##'
 ##' @export
 spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
-  unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
+  emeasure, unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
@@ -53,6 +53,8 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     partrans <- parameter_trans()
   }
 
+  if (missing(emeasure) && !inherits(data,"spatPomp")) emeasure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("emeasure")," not specified")
   if (missing(unit_dmeasure) && !inherits(data,"spatPomp")) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
   if (missing(unit_rmeasure) && !inherits(data,"spatPomp")) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
@@ -396,6 +398,31 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     }
     ## handle unit_dmeasure C Snippet
     ud_template <- list(
+      emeasure=list(
+        slotname="emeasure",
+        Cname="__spatPomp_emeasure",
+        proto=quote(emeasure(y,x,t,d,params,log,...)),
+        header="\nvoid __spatPomp_emeasure (double *__ey, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        footer="\n}\n\n",
+        vars=list(
+          params=list(
+            names=quote(paramnames),
+            cref="__p[__parindex[{%v%}]]"
+          ),
+          covars=list(
+            names=quote(covarnames),
+            cref="__covars[__covindex[{%v%}]]"
+          ),
+          unit_states=list(
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit]"
+          ),
+          ey=list(
+            names="ey",
+            cref="__ey[0]"
+          )
+        )
+      ),
       unit_dmeasure=list(
         slotname="unit_dmeasure",
         Cname="__spatPomp_unit_dmeasure",
@@ -448,6 +475,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       )
     )
     hitches <- pomp::hitch(
+      emeasure=emeasure,
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=ud_template,
@@ -465,6 +493,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     pomp:::solibs(po) <- hitches$lib
     new("spatPomp",po,
+      emeasure=hitches$funs$emeasure,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,

@@ -87,6 +87,9 @@ bm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
+bm_emeasure <- Csnippet("
+  ey = X;
+")
 bm_rmeasure <- Csnippet("
   const double *X = &X1;
   double *Y = &Y1;
@@ -120,6 +123,7 @@ bm_spatPomp <- spatPomp(bm_data,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
                dmeasure=bm_dmeasure,
+               emeasure=bm_emeasure,
                unit_dmeasure=bm_unit_dmeasure,
                unit_rmeasure=bm_unit_rmeasure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),
@@ -135,13 +139,13 @@ simulate(bm_spatPomp,params=test_params)
 }
 
 #' @export
-girfd_bm <- function(U=5, N = 10){
+girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
   bm_Ninter <- length(spat_units(b))
   bm_lookahead <- 1
-  bm_Nguide <- 50
-  bm_Np <- 100
+  bm_Nguide <- Nguide
+  bm_Np <- Np
   bm_tol <- 1e-300
   bm_h <- function(state.vec, param.vec){
     ix<-grep("X",names(state.vec))

@@ -299,26 +299,23 @@ girf.internal <- function (object,
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
-    ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- foreach::foreach(i=1:Np[1],
-         .packages=c("pomp","spatPomp"),
-         .combine = 'acomb', .multicombine = TRUE,
-         .options.multicore=mcopts) %dopar%  {
-      Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps))
-      xp = matrix(x[,i], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
-      # get all the guides for this particle
-      Xg <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
-                 params=params,.gnsi=gnsi)
-      fsv <- array(0, dim = c(length(spat_units(object)),lookahead_steps))
-      for(u in 1:length(spat_units(object))){
-        snames <- paste0(object@unit_statenames,u)
-        hXgp <- apply(Xg[snames,,, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = coef(object))
-        fsv[u,] <- apply(hXgp, MARGIN = 2, FUN = var)
+    # get a matrix with nguides times nreps columns to propagate using rprocess
+    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+                   params=params,.gnsi=gnsi)
+    xx <- tryCatch(
+      .Call('do_h',
+            object=object,
+            X=Xg,
+            Np = as.integer(Np[1]),
+            times=times[(nt+2):(nt+1+lookahead_steps)],
+            params=params,
+            gnsi=TRUE),
+      error = function (e) {
+        stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
-      fsv
-         }
-    #print(paste0("fcst_samp_var"))
-    #print(fcst_samp_var)
+    )
+    return(xx)
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){

@@ -4,7 +4,7 @@
 \alias{spatPomp}
 \title{Constructor of the basic spatPomp object}
 \usage{
-spatPomp(data, units, unit_index, times, covar, tcovar, t0, ...,
+spatPomp(data, units, unit_index, times, covar, tcovar, t0, ..., emeasure,
   unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames,
   rprocess, rmeasure, dprocess, dmeasure, skeleton, rinit, cdir, cfile,
   shlib.args, userdata, PACKAGE, globals, statenames, paramnames, obstypes,

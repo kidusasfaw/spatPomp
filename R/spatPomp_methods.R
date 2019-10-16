@@ -82,6 +82,7 @@ setMethod(
           sp <- new("spatPomp",sims[[i]],
                     unit_rmeasure = object@unit_rmeasure,
                     unit_dmeasure = object@unit_dmeasure,
+                    emeasure = object@emeasure,
                     units=object@units,
                     unit_index=object@unit_index,
                     unit_statenames=object@unit_statenames,
@@ -93,6 +94,8 @@ setMethod(
       } else{
         sp <- new("spatPomp",sims,
                   unit_dmeasure = object@unit_dmeasure,
+                  unit_rmeasure = object@unit_rmeasure,
+                  emeasure = object@emeasure,
                   units=object@units,
                   unit_index=object@unit_index,
                   unit_statenames=object@unit_statenames,
