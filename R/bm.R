@@ -135,13 +135,13 @@ simulate(bm_spatPomp,params=test_params)
 }
 
 #' @export
-girfd_bm <- function(U=5, N = 10){
+girfd_bm <- function(U=5, N = 10, Nguide = 50, Np = 100){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
   bm_Ninter <- length(spat_units(b))
   bm_lookahead <- 1
-  bm_Nguide <- 50
-  bm_Np <- 100
+  bm_Nguide <- Nguide
+  bm_Np <- Np
   bm_tol <- 1e-300
   bm_h <- function(state.vec, param.vec){
     ix<-grep("X",names(state.vec))
