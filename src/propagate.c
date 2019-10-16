@@ -72,7 +72,6 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
 
   PROTECT(unitnames = GET_SLOT(object,install("units"))); nprotect++;
   nunits = length(unitnames);
-  Rprintf("nunits = %d", nunits);
 
   // extract 'userdata' as pairlist
   PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
@@ -140,7 +139,6 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
     *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
     (*spu)(args);
-    Rprintf("ntimes = %d, nreps = %d, nunits = %d", ntimes, nreps, nunits);
     for (k = 0; k < ntimes; k++, time++) { // loop over times
       // interpolate the covar functions for the covariates
       (*tl)(&covariate_table,*time,cov);

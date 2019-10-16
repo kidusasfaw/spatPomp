@@ -315,7 +315,8 @@ girf.internal <- function (object,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    return(xx)
+    fcst_samp_var <- xx
+    return(fcst_samp_var)
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
