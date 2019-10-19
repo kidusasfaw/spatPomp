@@ -19,6 +19,9 @@ typedef void spatPomp_unit_measure_model_simulator (double *y, const double *x, 
 typedef void spatPomp_unit_measure_mean (double *y, const double *x, const double *p,
                                                     const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                                     int ncovars, const double *covars, double t, int u);
+typedef void spatPomp_unit_mmeasure (double *y, const double *x, const double *p, const double *v,
+                                     const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                     int ncovars, const double *covars, double t, int u);
 
 
 
@@ -66,6 +69,10 @@ extern SEXP hippie_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP p
 
 //propagate.c
 extern SEXP do_h(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+
+//mmeasure.c
+extern SEXP do_mmeasure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+
 
 //userdata.c
 //extern void set_pomp_userdata(SEXP userdata);

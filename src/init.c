@@ -8,6 +8,7 @@ static const R_CallMethodDef callMethods[] = {
   {"girf_computations", (DL_FUNC) &girf_computations, 9},
   {"hippie_computations", (DL_FUNC) &hippie_computations, 10},
   {"do_h", (DL_FUNC) &do_h, 6},
+  {"do_mmeasure", (DL_FUNC) &do_mmeasure, 7},
   {NULL, NULL, 0}
 };
 
