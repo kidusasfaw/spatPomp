@@ -18,14 +18,14 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
   UNPROTECT(1);
   return F;
 }
-SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
+SEXP do_theta_to_v (SEXP object, SEXP skel, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
   int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
-  SEXP cvec, pompfun;
-  SEXP fn, args, ans;
-  SEXP F, M;
+  SEXP cvec, pompfunthetatov;
+  SEXP fnthetatov, args, ans;
+  SEXP F;
   SEXP x;
   SEXP unitnames;
   int *dim;
@@ -38,7 +38,7 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   if (ntimes < 1) errorcall(R_NilValue,"length('times') = 0, no work to do.");
 
 
-  PROTECT(x = as_state_array(X)); nprotect++;
+  PROTECT(x = as_state_array(skel)); nprotect++;
   dim = INTEGER(GET_DIM(x));
   nvars = dim[0]; nrepsx = dim[1]; nguides = nrepsx/nparticles;
 
@@ -56,14 +56,16 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
 
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("emeasure"))); nprotect++;
+  PROTECT(pompfunthetatov = GET_SLOT(object,install("vmeasure"))); nprotect++;
+
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = (*gcn)(GET_SLOT(object,install("covar")))); nprotect++;
-  PROTECT(Onames = GET_SLOT(pompfun,install("obsnames"))); nprotect++;
+  PROTECT(Onames = GET_SLOT(pompfunthetatov,install("obsnames"))); nprotect++;
 
-  PROTECT(fn = (*pfh)(pompfun,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
+  PROTECT(fnthetatov = (*pfh)(pompfunthetatov,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
+
 
   // set up the covariate table
   covariate_table = (*mct)(GET_SLOT(object,install("covar")),&ncovars);
@@ -123,20 +125,20 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
 
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
-    spatPomp_unit_measure_mean *ff = NULL;
+    spatPomp_unit_measure_var *ffthetatov = NULL;
     double *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
     double *ft = REAL(F);
     double *xp, *pp;
     int i, j, k;
 
     // extract state, parameter, covariate, observable indices
-    sidx = INTEGER(GET_SLOT(pompfun,install("stateindex")));
-    pidx = INTEGER(GET_SLOT(pompfun,install("paramindex")));
-    oidx = INTEGER(GET_SLOT(pompfun,install("obsindex")));
-    cidx = INTEGER(GET_SLOT(pompfun,install("covarindex")));
+    sidx = INTEGER(GET_SLOT(pompfunthetatov,install("stateindex")));
+    pidx = INTEGER(GET_SLOT(pompfunthetatov,install("paramindex")));
+    oidx = INTEGER(GET_SLOT(pompfunthetatov,install("obsindex")));
+    cidx = INTEGER(GET_SLOT(pompfunthetatov,install("covarindex")));
 
     // address of native routine
-    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
+    *((void **) (&ffthetatov)) = R_ExternalPtrAddr(fnthetatov);
 
     (*spu)(args);
     for (k = 0; k < ntimes; k++, time++) { // loop over times
@@ -147,7 +149,7 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
         xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
         pp = &ps[npars*(j%nrepsp)];
         for(i = 0; i < nunits; i++, ft++){
-          (*ff)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
+          (*ffthetatov)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
         }
       }
 
@@ -175,30 +177,6 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
 
   }
   // create array to store variances for each combination of unit, particle and lookahead
-
-  PROTECT(M = ret_array(nunits, nparticles, ntimes)); nprotect++;
-  double *ft = REAL(F);
-  double *mt = REAL(M);
-  double psum, psumsqdev, pmean, pvar;
-  int u, l, j, k;
-  for(l = 0; l < ntimes; l++){
-    for(u = 0; u < nunits; u++){
-      for(j = 0; j < nparticles; j++){
-        psum = 0;
-        psumsqdev = 0;
-        for(k = 0; k < nguides; k++){
-          psum += ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)];
-        }
-        pmean = psum/nguides;
-        for(k = 0; k < nguides; k++){
-          psumsqdev += (ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)] - pmean)*(ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)] - pmean);
-        }
-        pvar = psumsqdev/(nguides-1);
-        mt[(u + nunits*j) + (nunits*nparticles*l)] = pvar;
-      }
-    }
-  }
-
   UNPROTECT(nprotect);
-  return M;
+  return F;
 }

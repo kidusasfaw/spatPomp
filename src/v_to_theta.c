@@ -9,23 +9,23 @@
 #include "spatPomp_defines.h"
 #include "pomp.h"
 
-static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
-  int dim[3] = {nunits, nreps, ntimes};
-  const char *dimnm[3] = {"unit","rep","time"};
+static R_INLINE SEXP ret_array (int npars, int nunits, int nreps, int ntimes) {
+  int dim[4] = {npars, nunits, nreps, ntimes};
+  const char *dimnm[4] = {"param", "unit","rep","time"};
   SEXP F;
-  PROTECT(F = makearray(3,dim));
-  fixdimnames(F,dimnm,3);
+  PROTECT(F = makearray(4,dim));
+  fixdimnames(F,dimnm,4);
   UNPROTECT(1);
   return F;
 }
-SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
+SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
   int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
   SEXP fn, args, ans;
-  SEXP F, M;
+  SEXP F, M, mparams;
   SEXP x;
   SEXP unitnames;
   int *dim;
@@ -45,18 +45,19 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   if (ntimes != dim[2])
     errorcall(R_NilValue,"length of 'times' and 3rd dimension of 'x' do not agree.");
 
-  PROTECT(params = as_matrix(params)); nprotect++;
+  PROTECT(params = duplicate(params)); nprotect++;
+  PROTECT(mparams = duplicate(params)); nprotect++;
   dim = INTEGER(GET_DIM(params));
-  npars = dim[0]; nrepsp = dim[1];
+  npars = dim[0]; nrepsp = dim[2];
 
-  nreps = (nrepsp > nrepsx) ? nrepsp : nrepsx;
+  nreps = (nrepsp > nparticles) ? nrepsp : nparticles;
 
-  if ((nreps % nrepsp != 0) || (nreps % nrepsx != 0))
+  if ((nreps % nrepsp != 0))
     errorcall(R_NilValue,"larger number of replicates is not a multiple of smaller.");
 
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("emeasure"))); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("mmeasure"))); nprotect++;
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -77,7 +78,7 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
 
   // create array to store results
-  PROTECT(F = ret_array(nunits, nreps, ntimes)); nprotect++;
+  // PROTECT(F = ret_array(npars, nunits, nreps, ntimes)); nprotect++;
   switch (mode) {
 
   case Rfun: {
@@ -123,11 +124,11 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
 
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
-    spatPomp_unit_measure_mean *ff = NULL;
-    double *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
-    double *ft = REAL(F);
+    spatPomp_unit_mmeasure *ff = NULL;
+    double *xs = REAL(x), *ps = REAL(params), *time = REAL(times), *v = REAL(vc);
+    double *ft = REAL(mparams);
     double *xp, *pp;
-    int i, j, k;
+    int i, j, k, l;
 
     // extract state, parameter, covariate, observable indices
     sidx = INTEGER(GET_SLOT(pompfun,install("stateindex")));
@@ -145,9 +146,9 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
       R_CheckUserInterrupt();	// check for user interrupt
       for (j = 0; j < nreps; j++) { // loop over replicates
         xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
-        pp = &ps[npars*(j%nrepsp)];
-        for(i = 0; i < nunits; i++, ft++){
-          (*ff)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
+        pp = &ps[npars*(j%nrepsp)+nrepsp*k];
+        for(i = 0; i < nunits; i++, ft+=npars, v++){
+          (*ff)(ft,xp,pp,v,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
         }
       }
 
@@ -176,29 +177,6 @@ SEXP do_h (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   }
   // create array to store variances for each combination of unit, particle and lookahead
 
-  PROTECT(M = ret_array(nunits, nparticles, ntimes)); nprotect++;
-  double *ft = REAL(F);
-  double *mt = REAL(M);
-  double psum, psumsqdev, pmean, pvar;
-  int u, l, j, k;
-  for(l = 0; l < ntimes; l++){
-    for(u = 0; u < nunits; u++){
-      for(j = 0; j < nparticles; j++){
-        psum = 0;
-        psumsqdev = 0;
-        for(k = 0; k < nguides; k++){
-          psum += ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)];
-        }
-        pmean = psum/nguides;
-        for(k = 0; k < nguides; k++){
-          psumsqdev += (ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)] - pmean)*(ft[(u + nunits*k) + (nunits*nguides*j) + (nunits*nguides*nparticles*l)] - pmean);
-        }
-        pvar = psumsqdev/(nguides-1);
-        mt[(u + nunits*j) + (nunits*nparticles*l)] = pvar;
-      }
-    }
-  }
-
   UNPROTECT(nprotect);
-  return M;
+  return mparams;
 }
