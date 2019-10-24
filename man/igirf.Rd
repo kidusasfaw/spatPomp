@@ -55,6 +55,17 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
+\item{theta.to.v}{A user-provided function taking two named arguments:
+\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
+and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+to the variance of the observed value given a latent state and parameter vector.
+For more information, see the examples section below.}
+
+\item{v.to.theta}{A user-provided function taking three named arguments:
+\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
+ (representing a parameter vector for the model). The function should return a parameter vector having observation
+  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
+
 \item{tol}{positive numeric scalar;
 particles with likelihood less than \code{tol} are considered to be incompatible with the data.
 See the section on \emph{Filtering Failures} for more information.}

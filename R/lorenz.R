@@ -99,6 +99,18 @@ lorenz_rmeasure <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
+lorenz_emeasure <- Csnippet("
+  ey = X;
+")
+
+lorenz_vmeasure <- Csnippet("
+  vc = tau*tau;
+")
+
+lorenz_mmeasure <- Csnippet("
+  M_tau = sqrt(vc);
+")
+
 lorenz_unit_dmeasure <- Csnippet("
   double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
@@ -117,6 +129,9 @@ lorenz <- spatPomp(lorenz_data,
                globals=lorenz_globals,
                rmeasure=lorenz_rmeasure,
                dmeasure=lorenz_dmeasure,
+               emeasure=lorenz_emeasure,
+               mmeasure=lorenz_mmeasure,
+               vmeasure=lorenz_vmeasure,
                unit_dmeasure=lorenz_unit_dmeasure,
                partrans = parameter_trans(log = c("F", "sigma", "tau")),
                rinit=lorenz_rinit
@@ -127,6 +142,62 @@ test_ivps <- c(rep(0,U-1),0.01)
 names(test_ivps) <- lorenz_IVPnames
 test_params <- c(F=8, sigma=1, tau=1, test_ivps)
 simulate(lorenz,params=test_params)
+}
+
+#' @export
+girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50){
+  l <- lorenz(U = U, N = N)
+  # girfd_spatPomp object creation requirements
+  lorenz_Ninter <- length(spat_units(l))
+  lorenz_lookahead <- 1
+  lorenz_Nguide <- Nguide
+  lorenz_Np <- Np
+  lorenz_tol <- 1e-300
+
+  # Output girfd_spatPomp object
+  new(
+    "girfd_spatPomp",
+    l,
+    Ninter=lorenz_Ninter,
+    Nguide=lorenz_Nguide,
+    lookahead=lorenz_lookahead,
+    cond.loglik = array(data=numeric(0),dim=c(0,0)),
+    Np = as.integer(lorenz_Np),
+    tol= lorenz_tol,
+    loglik=as.double(NA)
+  )
+}
+#' @export
+asifird_lorenz <- function(U=5,
+                       N = 10,
+                       islands = 50,
+                       nbhd = function(object, time, unit){
+                         nbhd_list = list()
+                         if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                         if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+                         return(nbhd_list)
+                       },
+                       Np = 10,
+                       Ninter = U){
+  l <- lorenz(U = U, N = N)
+  # asifird_spatPomp object creation requirements
+  lorenz_Np <- Np
+  lorenz_Ninter <- Ninter
+  lorenz_islands <- islands
+  lorenz_nbhd <- nbhd
+  lorenz_tol <- 1e-300
+
+  # Output girfd_spatPomp object
+  new(
+    "asifird_spatPomp",
+    l,
+    Np = as.integer(lorenz_Np),
+    Ninter = as.integer(lorenz_Ninter),
+    islands = as.integer(lorenz_islands),
+    nbhd = lorenz_nbhd,
+    tol= lorenz_tol,
+    loglik=as.double(NA)
+  )
 
 }
 

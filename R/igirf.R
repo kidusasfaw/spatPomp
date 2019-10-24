@@ -287,21 +287,41 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
     fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-    for (p in 1:Np[1]){
-      # find this particle's initialization and repeat in Nguide times
-      xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
-      tparamsp = matrix(tparams[,p], nrow = nrow(tparams), ncol = Nguide, dimnames = list(params = paramnames, ng = NULL))
-      # get all the guides for this particles
-      Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
-                           params=tparamsp,.gnsi=gnsi)
-      for(u in 1:length(object@units)){
-        snames = paste0(object@unit_statenames,u)
-        for(l in 1:lookahead_steps){
-          hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=tparams[,p])
-          fcst_samp_var[u, l, p] = var(hXg)
-        }
+    # test code
+    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
+    tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+                   params=tp_with_guides,.gnsi=gnsi)
+    xx <- tryCatch(
+      .Call('do_fcst_samp_var',
+            object=object,
+            X=Xg,
+            Np = as.integer(Np[1]),
+            times=times[(nt+2):(nt+1+lookahead_steps)],
+            params=tp_with_guides,
+            gnsi=TRUE),
+      error = function (e) {
+        stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
-    }
+    )
+    fcst_samp_var <- xx
+    dim(fcst_samp_var) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+    # end test code
+    # for (p in 1:Np[1]){
+    #   # find this particle's initialization and repeat in Nguide times
+    #   xp = matrix(x[,p], nrow = nrow(x), ncol = Nguide, dimnames = list(nvars = statenames, ng = NULL))
+    #   tparamsp = matrix(tparams[,p], nrow = nrow(tparams), ncol = Nguide, dimnames = list(params = paramnames, ng = NULL))
+    #   # get all the guides for this particles
+    #   Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+    #                        params=tparamsp,.gnsi=gnsi)
+    #   for(u in 1:length(object@units)){
+    #     snames = paste0(object@unit_statenames,u)
+    #     for(l in 1:lookahead_steps){
+    #       hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=tparams[,p])
+    #       fcst_samp_var[u, l, p] = var(hXg)
+    #     }
+    #   }
+    # }
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
@@ -315,28 +335,62 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       } else {
         skel <- X
       }
-      # create measurement variance at skeleton matrix
-      meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      for(u in 1:length(object@units)){
-        snames = paste0(object@unit_statenames,u)
-        for (l in 1:lookahead_steps){
-          hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams[,i]))
-          dim(hskel) <- c(1,Np[1],1)
-          meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],tparams[,i]))
+      meas_var_skel <- tryCatch(
+        .Call('do_theta_to_v',
+              object=object,
+              skel=skel,
+              Np = as.integer(Np[1]),
+              times=times[(nt+2):(nt+1+lookahead_steps)],
+              params=tparams,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
-      }
+      )
+      dim(meas_var_skel) <- c(length(spat_units(object)), lookahead_steps, Np[1])
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      for(u in 1:length(object@units)){
-        for(l in 1:lookahead_steps){
-          fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
-                                      FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
-        }
-      }
-      mom_match_param <- array(0, dim = c(dim(params)[1], length(object@units), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
+      for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      for(p in 1:Np[1]){
-        mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]
-      }
+      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(spat_units(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
+      for(i in 1:length(spat_units(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
+      mmp <- tryCatch(
+        .Call('do_v_to_theta',
+              object=object,
+              X=skel,
+              vc=inflated_var,
+              Np = as.integer(Np[1]),
+              times=times[(nt+2):(nt+1+lookahead_steps)],
+              params=array.tparams,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
+        }
+      )
+      mom_match_param <- mmp
+      dim(mom_match_param) <- c(dim(tparams)[1], length(spat_units(object)), lookahead_steps, Np[1])
+      dimnames(mom_match_param) <- list(tparam = rownames(tparams))
+      # create measurement variance at skeleton matrix
+      # meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      # for(u in 1:length(object@units)){
+      #   snames = paste0(object@unit_statenames,u)
+      #   for (l in 1:lookahead_steps){
+      #     hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams[,i]))
+      #     dim(hskel) <- c(1,Np[1],1)
+      #     meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],tparams[,i]))
+      #   }
+      # }
+      # fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      # for(u in 1:length(object@units)){
+      #   for(l in 1:lookahead_steps){
+      #     fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
+      #                                 FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
+      #   }
+      # }
+      # mom_match_param <- array(0, dim = c(dim(params)[1], length(object@units), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
+      # inflated_var <- meas_var_skel + fcst_var_upd
+      # for(p in 1:Np[1]){
+      #   mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]
+      # }
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
@@ -428,12 +482,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
     Ninter=Ninter,
     Nguide=Nguide,
     lookahead=lookahead,
-    h = h,
-    theta.to.v = theta.to.v,
-    v.to.theta = v.to.theta,
     paramMatrix=params,
-    eff.sample.size=eff.sample.size,
-    saved.states=x,
     Np=Np[1],
     tol=tol,
     loglik=sum(cond.loglik)

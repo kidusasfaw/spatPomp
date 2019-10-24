@@ -81,27 +81,24 @@ setClass(
   "asifird_spatPomp",
   contains="spatPomp",
   slots=c(
-    lookahead="numeric",
-    h = "function",
-    theta.to.v = "function",
-    v.to.theta = "function",
+    Ninter="integer",
     Np="integer",
+    islands="integer",
     tol="numeric",
-    loglik="numeric"
+    loglik="numeric",
+    nbhd="function"
   ),
   prototype=prototype(
+    Ninter=as.integer(NA),
     Np=as.integer(NA),
-    lookahead=as.double(NA),
-    h = function(){},
-    theta.to.v = function(){},
-    v.to.theta = function(){},
+    islands=as.integer(NA),
     tol=as.double(NA),
-    loglik=as.double(NA)
+    loglik=as.double(NA),
+    nbhd=function(){}
   )
 )
 asifir.internal <- function (object, params, Np, nbhd,
-      h, theta.to.v, v.to.theta, Ninter,
-      tol, .gnsi = TRUE,...) {
+      Ninter, tol, .gnsi = TRUE,...) {
   ep <- paste0("in ",sQuote("asifir"),": ")
   verbose <- FALSE
   if(missing(nbhd))
@@ -161,8 +158,26 @@ asifir.internal <- function (object, params, Np, nbhd,
       error = function (e) stop(ep,"process simulation error: ",
         conditionMessage(e),call.=FALSE)
     )
-
-    fcst_samp_var <- apply(xg,1,var)
+    xg_2dim <- xg[,,1]
+    # print(xg_2dim)
+    # print("xg_2dim done")
+    xg_with_rep <- do.call(cbind,replicate(Np, xg_2dim, simplify=FALSE))
+    dim(xg_with_rep) <- c(dim(xg_with_rep)[1],dim(xg_with_rep)[2],1)
+    dimnames(xg_with_rep) <- list(states = rownames(xg_2dim))
+    xx <- tryCatch(
+      .Call('do_fcst_samp_var',
+            object=object,
+            X=xg_with_rep,
+            Np = as.integer(Np),
+            times=times[n+1],
+            params=params,
+            gnsi=TRUE),
+      error = function (e) {
+        stop(ep,conditionMessage(e),call.=FALSE) # nocov
+      }
+    )
+    fcst_samp_var <- xx
+    dim(fcst_samp_var) <- c(length(spat_units(object)), Np)
 
     ## determine the weights
     weights <- tryCatch(
@@ -200,29 +215,70 @@ asifir.internal <- function (object, params, Np, nbhd,
       }
 
       # create measurement variance at skeleton matrix
-      meas_var_skel <- array(0, dim = c(U, Np))
-      for(u in 1:U){
-        snames = paste0(object@unit_statenames,u)
-        for(np in 1:Np){
-          hskel <- h(state.vec=skel[snames,np,1],param.vec=params)
-          meas_var_skel[u,np] <- theta.to.v(meas.mean=hskel,param.vec=params)
+      # meas_var_skel <- array(0, dim = c(U, Np))
+      # for(u in 1:U){
+      #   snames = paste0(object@unit_statenames,u)
+      #   for(np in 1:Np){
+      #     hskel <- h(state.vec=skel[snames,np,1],param.vec=params)
+      #     meas_var_skel[u,np] <- theta.to.v(meas.mean=hskel,param.vec=params)
+      #   }
+      # }
+      meas_var_skel <- tryCatch(
+        .Call('do_theta_to_v',
+              object=object,
+              skel=skel,
+              Np = as.integer(Np[1]),
+              times=times[n+1],
+              params=params,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
-      }
-      fcst_var_upd <- array(0, dim = c(U, Np))
-      for(u in 1:U){
-        fcst_var_upd[u,] <- fcst_samp_var[u] *
-          (times[n+1] - tt[s+1])/(times[n+1] - times[n])
-      }
-      mom_match_param <- array(0, dim = c(length(params), U, Np),
-        dimnames = list(params = names(params), unit = NULL, J = NULL))
+      )
+      meas_var_skel <- meas_var_skel[,,1]
+      fcst_var_upd <- fcst_samp_var*(times[n+1] - tt[s+1])/(times[n+1] - times[n])
+      # print(xg)
+      # print("done with xg")
+      # print(meas_var_skel)
+      # print("done with mvs")
+      # print(fcst_samp_var)
+      # print("done with fsv")
+      # print(fcst_var_upd)
+      # print("done with fvu")
+      # return(1)
+      # fcst_var_upd <- array(0, dim = c(U, Np))
+      # for(u in 1:U){
+      #   fcst_var_upd[u,] <- fcst_samp_var[u] *
+      #     (times[n+1] - tt[s+1])/(times[n+1] - times[n])
+      # }
       inflated_var <- meas_var_skel + fcst_var_upd
-      for(u in 1:U){
-        for(np in 1:Np){
-          snames = paste0(object@unit_statenames,u)
-          mom_match_param[,u,np] <- v.to.theta(var=inflated_var[u,np],
-	    param.vec=params, state.vec=skel[snames,np,1])
+      dim(inflated_var) <- c(U, Np, 1)
+      array.params <- array(params, dim = c(length(params), length(spat_units(object)), Np, 1), dimnames = list(params = names(params)))
+      mmp <- tryCatch(
+        .Call('do_v_to_theta',
+              object=object,
+              X=skel,
+              vc=inflated_var,
+              Np = as.integer(Np[1]),
+              times=times[n+1],
+              params=array.params,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
-      }
+      )
+      mom_match_param <- mmp[,,,1]
+
+#       mom_match_param <- array(0, dim = c(length(params), U, Np),
+#         dimnames = list(params = names(params), unit = NULL, J = NULL))
+#       inflated_var <- meas_var_skel + fcst_var_upd
+#       for(u in 1:U){
+#         for(np in 1:Np){
+#           snames = paste0(object@unit_statenames,u)
+#           mom_match_param[,u,np] <- v.to.theta(var=inflated_var[u,np],
+# 	    param.vec=params, state.vec=skel[snames,np,1])
+#         }
+#       }
 
       # U x Np x 1 matrix of skeleton prediction weights
       log_wp <- tryCatch(
@@ -308,11 +364,21 @@ setMethod(
   "asifir",
   signature=signature(object="spatPomp"),
   function (object, params, Np, islands, nbhd,
-           h, theta.to.v, v.to.theta, Ninter,
-           tol = (1e-18), ...) {
+            Ninter, tol = (1e-18), ...) {
   if (missing(params)) params <- coef(object)
     # set.seed(396658101,kind="L'Ecuyer")
-  if (missing(params)) params <- coef(object)
+  # begin single-core
+  # single_island_output <- spatPomp:::asifir.internal(
+  #   object=object,
+  #   params=params,
+  #   Np=Np,
+  #   nbhd=nbhd,
+  #   Ninter=Ninter,
+  #   tol=tol,
+  #   ...
+  # )
+  # return(single_island_output)
+  # end single-core
   mult_island_output <- foreach::foreach(i=1:islands,
      .packages=c("pomp","spatPomp"),
      .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::asifir.internal(
@@ -320,9 +386,6 @@ setMethod(
        params=params,
        Np=Np,
        nbhd=nbhd,
-       h=h,
-       theta.to.v=theta.to.v,
-       v.to.theta=v.to.theta,
        Ninter=Ninter,
        tol=tol,
        ...
@@ -349,8 +412,34 @@ setMethod(
       object,
       Np=as.integer(Np),
       tol=tol,
-      loglik=sum(cond.loglik)
-     )
+      loglik=sum(cond.loglik),
+      Ninter = Ninter,
+      islands = islands,
+      nbhd = nbhd
+      )
+  }
+)
+
+setMethod(
+  "asifir",
+  signature=signature(object="asifird_spatPomp"),
+  function (object, params, Np, islands, nbhd,
+            Ninter, tol = (1e-18), ...) {
+    if (missing(Np)) Np <- object@Np
+    if (missing(tol)) tol <- object@tol
+    if (missing(Ninter)) Ninter <- object@Ninter
+    if (missing(params)) params <- coef(object)
+    if (missing(islands)) islands <- object@islands
+    if (missing(nbhd)) nbhd <- object@nbhd
+
+    asifir(as(object,"spatPomp"),
+         Np=Np,
+         Ninter=Ninter,
+         islands=islands,
+         nbhd=nbhd,
+         params = params,
+         tol=tol,
+         ...)
   }
 )
 

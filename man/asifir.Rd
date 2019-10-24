@@ -7,8 +7,8 @@
 \alias{asifir,spatPomp-method}
 \title{Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)}
 \usage{
-\S4method{asifir}{spatPomp}(object, params, Np, islands, nbhd, h,
-  theta.to.v, v.to.theta, Ninter, tol = (1e-18), ...)
+\S4method{asifir}{spatPomp}(object, params, Np, islands, nbhd, Ninter,
+  tol = (1e-18), ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -21,22 +21,6 @@
 
 \item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
 \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
-
-\item{h}{A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the expected observed value given a latent state and parameter vector.
-For more information, see the examples section below.}
-
-\item{theta.to.v}{A user-provided function taking two named arguments:
-\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the variance of the observed value given a latent state and parameter vector.
-For more information, see the examples section below.}
-
-\item{v.to.theta}{A user-provided function taking three named arguments:
-\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
- (representing a parameter vector for the model). The function should return a parameter vector having observation
-  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
 
 \item{Ninter}{the number of intermediate resampling timepoints.}
 

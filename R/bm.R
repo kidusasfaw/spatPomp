@@ -90,6 +90,15 @@ bm_dmeasure <- Csnippet("
 bm_emeasure <- Csnippet("
   ey = X;
 ")
+
+bm_mmeasure <- Csnippet("
+  M_tau = sqrt(vc);
+")
+
+bm_vmeasure <- Csnippet("
+  vc = tau*tau;
+")
+
 bm_rmeasure <- Csnippet("
   const double *X = &X1;
   double *Y = &Y1;
@@ -124,6 +133,8 @@ bm_spatPomp <- spatPomp(bm_data,
                rmeasure=bm_rmeasure,
                dmeasure=bm_dmeasure,
                emeasure=bm_emeasure,
+               mmeasure=bm_mmeasure,
+               vmeasure=bm_vmeasure,
                unit_dmeasure=bm_unit_dmeasure,
                unit_rmeasure=bm_unit_rmeasure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),
@@ -147,17 +158,6 @@ girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50){
   bm_Nguide <- Nguide
   bm_Np <- Np
   bm_tol <- 1e-300
-  bm_h <- function(state.vec, param.vec){
-    ix<-grep("X",names(state.vec))
-    state.vec[ix]
-  }
-  bm_theta.to.v <- function(meas.mean, param.vec){
-    (param.vec["tau"])^2
-  }
-  bm_v.to.theta <- function(var, state.vec, param.vec){
-    param.vec['tau'] <- sqrt(var)
-    param.vec
-  }
 
   # Output girfd_spatPomp object
   new(
@@ -166,11 +166,40 @@ girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50){
     Ninter=bm_Ninter,
     Nguide=bm_Nguide,
     lookahead=bm_lookahead,
-    h = bm_h,
-    theta.to.v = bm_theta.to.v,
-    v.to.theta = bm_v.to.theta,
     cond.loglik = array(data=numeric(0),dim=c(0,0)),
     Np = as.integer(bm_Np),
+    tol= bm_tol,
+    loglik=as.double(NA)
+  )
+}
+#' @export
+asifird_bm <- function(U=5,
+                       N = 10,
+                       islands = 50,
+                       nbhd = function(object, time, unit){
+                         nbhd_list = list()
+                         if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                         if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+                         return(nbhd_list)
+                       },
+                       Np = 10,
+                       Ninter = U){
+  b <- bm(U = U, N = N)
+  # asifird_spatPomp object creation requirements
+  bm_Np <- Np
+  bm_Ninter <- Ninter
+  bm_islands <- islands
+  bm_nbhd <- nbhd
+  bm_tol <- 1e-300
+
+  # Output girfd_spatPomp object
+  new(
+    "asifird_spatPomp",
+    b,
+    Np = as.integer(bm_Np),
+    Ninter = as.integer(bm_Ninter),
+    islands = as.integer(bm_islands),
+    nbhd = bm_nbhd,
     tol= bm_tol,
     loglik=as.double(NA)
   )

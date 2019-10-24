@@ -5,10 +5,11 @@
 \title{Constructor of the basic spatPomp object}
 \usage{
 spatPomp(data, units, unit_index, times, covar, tcovar, t0, ..., emeasure,
-  unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames,
-  rprocess, rmeasure, dprocess, dmeasure, skeleton, rinit, cdir, cfile,
-  shlib.args, userdata, PACKAGE, globals, statenames, paramnames, obstypes,
-  accumvars, covarnames, partrans, verbose = getOption("verbose", FALSE))
+  mmeasure, vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames,
+  global_statenames, rprocess, rmeasure, dprocess, dmeasure, skeleton,
+  rinit, cdir, cfile, shlib.args, userdata, PACKAGE, globals, statenames,
+  paramnames, obstypes, accumvars, covarnames, partrans,
+  verbose = getOption("verbose", FALSE))
 }
 \arguments{
 \item{data}{either a data frame holding the spatiotemporal data,
@@ -113,10 +114,27 @@ For more information, see \link[=parameter_trans]{?parameter_trans}.
 Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+
+\item{theta.to.v}{A user-provided function taking two named arguments:
+\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
+and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+to the variance of the observed value given a latent state and parameter vector.
+For more information, see the examples section below.}
+
+\item{v.to.theta}{A user-provided function taking three named arguments:
+\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
+ (representing a parameter vector for the model). The function should return a parameter vector having observation
+  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
 }
 \description{
 This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
 Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.
 Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
+}
+\details{
+##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
+and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+to the expected observed value given a latent state and parameter vector.
+For more information, see the examples section below.
 }

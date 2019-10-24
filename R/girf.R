@@ -14,19 +14,6 @@
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP.
 ##' @param Np The number of Monte Carlo particles to be used.
-##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
-##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the expected observed value given a latent state and parameter vector.
-##' For more information, see the examples section below.
-##' @param theta.to.v A user-provided function taking two named arguments:
-##' \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
-##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the variance of the observed value given a latent state and parameter vector.
-##' For more information, see the examples section below.
-##' @param v.to.theta A user-provided function taking three named arguments:
-##' \code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
-##'  (representing a parameter vector for the model). The function should return a parameter vector having observation
-##'   noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.
 ##' @param Ninter the number of intermediate resampling timepoints.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
@@ -36,28 +23,12 @@
 ##' # Create a simulation of a BM using default parameter set
 ##' b <- bm(U=3, N=10)
 ##'
-##' # Specify the expected measurement, theta.to.v and v.to.theta
-##' girf.h <- function(state.vec, param.vec){
-##'   # find index matching unit_statename
-##'   ix<-grep('X',names(state.vec))
-##'   state.vec[ix]
-##' }
-##' girf.theta.to.v <- function(meas.mean, param.vec){
-##'   param.vec['tau']^2
-##' }
-##' girf.v.to.theta <- function(var, state.vec, param.vec){
-##'   param.vec['tau'] <- sqrt(var)
-##'   param.vec
-##' }
 ##' # Run GIRF
 ##' girfd.b <- girf(b,
 ##'                 Np = 100,
 ##'                 Ninter = length(spat_units(b)),
 ##'                 lookahead = 1,
-##'                 Nguide = 50,
-##'                 h = girf.h,
-##'                 theta.to.v = girf.theta.to.v,
-##'                 v.to.theta = girf.v.to.theta
+##'                 Nguide = 50
 ##' )
 ##' # Get the likelihood estimate from GIRF
 ##' logLik(girfd.b)
@@ -89,25 +60,21 @@ setClass(
     Ninter="numeric",
     Nguide="numeric",
     lookahead="numeric",
-    h = "function",
-    theta.to.v = "function",
-    v.to.theta = "function",
     cond.loglik="array",
     Np="integer",
     tol="numeric",
-    loglik="numeric"
+    loglik="numeric",
+    paramMatrix="array"
   ),
   prototype=prototype(
     Ninter=as.double(NA),
     Nguide=as.double(NA),
     lookahead=as.double(NA),
-    h = function(){},
-    theta.to.v = function(){},
-    v.to.theta = function(){},
     cond.loglik=array(data=numeric(0),dim=c(0,0)),
     Np=as.integer(NA),
     tol=as.double(NA),
-    loglik=as.double(NA)
+    loglik=as.double(NA),
+    paramMatrix=array(data=numeric(0),dim=c(0,0))
   )
 )
 
@@ -146,9 +113,6 @@ setMethod(
     Ninter,
     lookahead,
     Nguide,
-    h,
-    theta.to.v,
-    v.to.theta,
     params,
     tol,
     ...) {
@@ -163,9 +127,6 @@ setMethod(
         Ninter,
         lookahead,
         Nguide,
-        h,
-        theta.to.v,
-        v.to.theta,
         params,
         tol,
         ...
@@ -187,9 +148,6 @@ setMethod(
             Ninter,
             lookahead,
             Nguide,
-            h,
-            theta.to.v,
-            v.to.theta,
             params,
             tol,
             ...
@@ -199,9 +157,6 @@ setMethod(
     if (missing(Ninter)) Ninter <- object@Ninter
     if (missing(Nguide)) Nguide <- object@Nguide
     if (missing(lookahead)) lookahead <- object@lookahead
-    if (missing(h)) h <- object@h
-    if (missing(theta.to.v)) theta.to.v <- object@theta.to.v
-    if (missing(v.to.theta)) v.to.theta <- object@v.to.theta
     if (missing(params)) params <- coef(object)
 
     girf(as(object,"spatPomp"),
@@ -209,9 +164,6 @@ setMethod(
          Ninter=Ninter,
          lookahead=lookahead,
          Nguide=Nguide,
-         h=h,
-         theta.to.v=theta.to.v,
-         v.to.theta=v.to.theta,
          params = params,
          tol=tol,
          ...)
@@ -224,9 +176,6 @@ girf.internal <- function (object,
         Ninter,
         lookahead,
         Nguide,
-        h,
-        theta.to.v,
-        v.to.theta,
         params,
         tol,
         ...,
@@ -287,14 +236,6 @@ girf.internal <- function (object,
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
-  ## begin multi-thread code
-  #
-  # foreach now registered outside of girf
-  # doParallel::registerDoParallel(cores = NULL)
-  #
-  mcopts <- list(set.seed=TRUE)
-  acomb <- function(...) abind::abind(..., along=3)
-  acombb <- function(...) abind::abind(..., along=4)
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
@@ -304,7 +245,7 @@ girf.internal <- function (object,
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
                    params=params,.gnsi=gnsi)
     xx <- tryCatch(
-      .Call('do_h',
+      .Call('do_fcst_samp_var',
             object=object,
             X=Xg,
             Np = as.integer(Np[1]),
@@ -316,15 +257,13 @@ girf.internal <- function (object,
       }
     )
     fcst_samp_var <- xx
-    return(fcst_samp_var)
+    dim(fcst_samp_var) <- c(length(spat_units(object)), lookahead_steps, Np[1])
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
-      # print(paste0("X"))
-      # print(X)
       # X is now a nvars by nreps by 1 array
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
@@ -332,74 +271,41 @@ girf.internal <- function (object,
       } else {
         skel <- X
       }
-       #print(paste0("skel done"))
-       #print(skel)
-      # create measurement variance at skeleton matrix
-      meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-
-      for(u in 1:length(object@units)){
-        snames = paste0(object@unit_statenames,u)
-        for (l in 1:lookahead_steps){
-          hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = coef(object)))
-          dim(hskel) <- c(1,Np[1],1)
-          meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(meas.mean = hskel[1,i,1], param.vec = coef(object)))
+      meas_var_skel <- tryCatch(
+        .Call('do_theta_to_v',
+              object=object,
+              skel=skel,
+              Np = as.integer(Np[1]),
+              times=times[(nt+2):(nt+1+lookahead_steps)],
+              params=params,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
-      }
-      #
-      # CURRENT ASSUMPTIONS ARE THAT theta.to.v(state.vec, param.vec) has state.vec being a scalar
-      # on the measurement scale, produced by applying h() to the skeleton.
-      # This differs from the pseudocode, where state.vec would be the skeleton itself.
-      #
-      # h(state.vec, param.vec) should map a state vector to a scalar.
-      #
-      # v.to.theta(var, param.vec, state.vec) is scalar-valued.
-      # it should take a scalar "var",
-      # a parameter vector and a state vector -- unlike theta.to.v which wants
-      # the state.vec argument to be h(state).
-      #
-      # there is room for code improvements here.
-      #
+      )
+      dim(meas_var_skel) <- c(length(spat_units(object)), lookahead_steps, Np[1])
 
-      #
-      # print(paste0("meas_var_skel"))
-      # print(meas_var_skel)
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      for(u in 1:length(object@units)){
-        for(l in 1:lookahead_steps){
-          fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
-                                      FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
-        }
-      }
-      # print(paste0("fcst_var_upd"))
-      # print(fcst_var_upd)
-      mom_match_param <- array(0, dim = c(length(params), length(object@units), lookahead_steps, Np[1]), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL, J = NULL))
+      for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      # print(paste0("inflated_var"))
-      # print(inflated_var)
-      mom_match_param <- foreach::foreach(i=1:Np[1],
-           .packages=c("pomp","spatPomp"),
-           .combine = acombb, .multicombine = TRUE,
-           .options.multicore=mcopts) %dopar%  {
-        mmp <- array(0, dim = c(length(params), length(spat_units(object)), lookahead_steps), dimnames = list(params = names(params),unit = NULL ,lookahead = NULL))
-        for(u in 1:length(object@units)){
-          snames = paste0(object@unit_statenames,u)
-          for (l in 1:lookahead_steps){
-            mmp[,u,l] = v.to.theta(var = inflated_var[u,l,i], param.vec = coef(object), state.vec = skel[snames, i, l])
-          }
+      array.params <- array(params, dim = c(length(params), length(spat_units(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
+      mmp <- tryCatch(
+        .Call('do_v_to_theta',
+              object=object,
+              X=skel,
+              vc=inflated_var,
+              Np = as.integer(Np[1]),
+              times=times[(nt+2):(nt+1+lookahead_steps)],
+              params=array.params,
+              gnsi=TRUE),
+        error = function (e) {
+          stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
-        mmp
-      }
-      # for(u in 1:length(object@units)){
-      #   snames = paste0(object@unit_statenames,u)
-      #   for (l in 1:lookahead_steps){
-      #     for(p in 1:Np[1]){
-      #       mom_match_param[, u, l, p] = v.to.theta(inflated_var[u,l,p], coef(object), skel[snames, p, l])
-      #     }
-      #   }
-      # }
-      # print(paste0("mom_match_param"))
-      # print(mom_match_param)
-      #return(1)
+      )
+      mom_match_param <- mmp
+      dim(mom_match_param) <- c(length(params), length(spat_units(object)), lookahead_steps, Np[1])
+      dimnames(mom_match_param) <- list(param = names(params))
+
       # guide functions as product (so base case is 1)
       log_guide_fun = vector(mode = "numeric", length = Np[1])
 
@@ -422,11 +328,7 @@ girf.internal <- function (object,
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
-      #print("dmeas_weights")
-      #print(dmeas_weights)
       log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
-      #print(paste0("guide_fun"))
-      #print(guide_fun)
       log_s_not_1_weights <- log_guide_fun - log(filter_guide_fun)
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
@@ -486,9 +388,6 @@ girf.internal <- function (object,
     Ninter=Ninter,
     Nguide=Nguide,
     lookahead=lookahead,
-    h = h,
-    theta.to.v = theta.to.v,
-    v.to.theta = v.to.theta,
     cond.loglik=cond.loglik,
     Np=Np[1],
     tol=tol,
