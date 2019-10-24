@@ -9,11 +9,11 @@
 \alias{girf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF)}
 \usage{
-\S4method{girf}{spatPomp}(object, Np, Ninter, lookahead, Nguide, h,
-  theta.to.v, v.to.theta, params, tol, ...)
+\S4method{girf}{spatPomp}(object, Np, Ninter, lookahead, Nguide, params,
+  tol, ...)
 
-\S4method{girf}{girfd_spatPomp}(object, Np, Ninter, lookahead, Nguide, h,
-  theta.to.v, v.to.theta, params, tol, ...)
+\S4method{girf}{girfd_spatPomp}(object, Np, Ninter, lookahead, Nguide,
+  params, tol, ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -25,22 +25,6 @@
 \item{lookahead}{The number of future observations included in the guide function.}
 
 \item{Nguide}{The number of simulations used to estimate state process uncertainty for each particle.}
-
-\item{h}{A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the expected observed value given a latent state and parameter vector.
-For more information, see the examples section below.}
-
-\item{theta.to.v}{A user-provided function taking two named arguments:
-\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the variance of the observed value given a latent state and parameter vector.
-For more information, see the examples section below.}
-
-\item{v.to.theta}{A user-provided function taking three named arguments:
-\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
- (representing a parameter vector for the model). The function should return a parameter vector having observation
-  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
 
 \item{params}{A parameter set for the spatiotemporal POMP.}
 
@@ -73,28 +57,12 @@ The following methods are available for such an object:
 # Create a simulation of a BM using default parameter set
 b <- bm(U=3, N=10)
 
-# Specify the expected measurement, theta.to.v and v.to.theta
-girf.h <- function(state.vec, param.vec){
-  # find index matching unit_statename
-  ix<-grep('X',names(state.vec))
-  state.vec[ix]
-}
-girf.theta.to.v <- function(meas.mean, param.vec){
-  param.vec['tau']^2
-}
-girf.v.to.theta <- function(var, state.vec, param.vec){
-  param.vec['tau'] <- sqrt(var)
-  param.vec
-}
 # Run GIRF
 girfd.b <- girf(b,
                 Np = 100,
                 Ninter = length(spat_units(b)),
                 lookahead = 1,
-                Nguide = 50,
-                h = girf.h,
-                theta.to.v = girf.theta.to.v,
-                v.to.theta = girf.v.to.theta
+                Nguide = 50
 )
 # Get the likelihood estimate from GIRF
 logLik(girfd.b)

@@ -16,6 +16,16 @@ typedef void spatPomp_unit_measure_model_density (double *lik, const double *y, 
 typedef void spatPomp_unit_measure_model_simulator (double *y, const double *x, const double *p,
                                                   const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                                   int ncovars, const double *covars, double t, int u);
+typedef void spatPomp_unit_measure_mean (double *y, const double *x, const double *p,
+                                                    const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                                    int ncovars, const double *covars, double t, int u);
+typedef void spatPomp_unit_mmeasure (double *y, const double *x, const double *p, const double *v,
+                                     const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                     int ncovars, const double *covars, double t, int u);
+typedef void spatPomp_unit_measure_var (double *v, const double *x, const double *p,
+                                        const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+                                        int ncovars, const double *covars, double t, int u);
+
 
 
 load_stack_incr_t *lsi;
@@ -27,6 +37,7 @@ table_lookup_t *tl;
 make_covariate_table_t *mct;
 set_pomp_userdata_t *spu;
 unset_pomp_userdata_t *upu;
+pomp_onestep_sim *pos;
 
 //typedef SEXP(*psp_load_stack_incr)();
 //typedef SEXP(*psp_load_stack_decr)();
@@ -58,6 +69,16 @@ extern SEXP girf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, 
 
 //hippie.c
 extern SEXP hippie_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights);
+
+//propagate.c
+extern SEXP do_fcst_samp_var(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+
+//mmeasure.c
+extern SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+
+//thetatov.c
+extern SEXP do_theta_to_v(SEXP object, SEXP skel, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+
 
 //userdata.c
 //extern void set_pomp_userdata(SEXP userdata);

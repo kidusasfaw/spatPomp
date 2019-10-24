@@ -5,6 +5,19 @@
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 ##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
 ##'
+##'##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
+##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+##' to the expected observed value given a latent state and parameter vector.
+##' For more information, see the examples section below.
+##' @param theta.to.v A user-provided function taking two named arguments:
+##' \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
+##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
+##' to the variance of the observed value given a latent state and parameter vector.
+##' For more information, see the examples section below.
+##' @param v.to.theta A user-provided function taking three named arguments:
+##' \code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
+##'  (representing a parameter vector for the model). The function should return a parameter vector having observation
+##'   noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'
@@ -18,7 +31,7 @@
 ##'
 ##' @export
 spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
-  unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
+  emeasure, mmeasure, vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
@@ -53,6 +66,12 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     partrans <- parameter_trans()
   }
 
+  if (missing(emeasure) && !inherits(data,"spatPomp")) emeasure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("emeasure")," not specified")
+  if (missing(mmeasure) && !inherits(data,"spatPomp")) mmeasure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("mmeasure")," not specified")
+  if (missing(vmeasure) && !inherits(data,"spatPomp")) vmeasure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("vmeasure")," not specified")
   if (missing(unit_dmeasure) && !inherits(data,"spatPomp")) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
     stop(sQuote("unit_dmeasure")," not specified")
   if (missing(unit_rmeasure) && !inherits(data,"spatPomp")) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
@@ -212,7 +231,6 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                 return(sp)
               }
         }
-
       }
     }
   }
@@ -372,6 +390,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     if (missing(accumvars)) accumvars <- character(0)
     statenames <- as.character(statenames)
     paramnames <- as.character(paramnames)
+    mparamnames <- paste("M_", paramnames, sep = "")
     accumvars <- as.character(accumvars)
 
     ## check for duplicate names
@@ -396,6 +415,85 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
     }
     ## handle unit_dmeasure C Snippet
     ud_template <- list(
+      vmeasure=list(
+        slotname="vmeasure",
+        Cname="__spatPomp_vmeasure",
+        proto=quote(vmeasure(x,t,d,params,...)),
+        header="\nvoid __spatPomp_vmeasure (double *__vc, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        footer="\n}\n\n",
+        vars=list(
+          params=list(
+            names=quote(paramnames),
+            cref="__p[__parindex[{%v%}]]"
+          ),
+          covars=list(
+            names=quote(covarnames),
+            cref="__covars[__covindex[{%v%}]]"
+          ),
+          unit_states=list(
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit]"
+          ),
+          var=list(
+            names="vc",
+            cref="__vc[0]"
+          )
+        )
+      ),
+      mmeasure=list(
+        slotname="mmeasure",
+        Cname="__spatPomp_mmeasure",
+        proto=quote(mmeasure(x,t,d,params,...)),
+        header="\nvoid __spatPomp_mmeasure (double *__pm, const double *__x, const double *__p, const double *__vc, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        footer="\n}\n\n",
+        vars=list(
+          params=list(
+            names=quote(paramnames),
+            cref="__p[__parindex[{%v%}]]"
+          ),
+          mparams=list(
+            names=mparamnames,
+            cref="__pm[__parindex[{%v%}]]"
+          ),
+          covars=list(
+            names=quote(covarnames),
+            cref="__covars[__covindex[{%v%}]]"
+          ),
+          unit_states=list(
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit]"
+          ),
+          var=list(
+            names="vc",
+            cref="__vc[0]"
+          )
+        )
+      ),
+      emeasure=list(
+        slotname="emeasure",
+        Cname="__spatPomp_emeasure",
+        proto=quote(emeasure(y,x,t,d,params,log,...)),
+        header="\nvoid __spatPomp_emeasure (double *__ey, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+        footer="\n}\n\n",
+        vars=list(
+          params=list(
+            names=quote(paramnames),
+            cref="__p[__parindex[{%v%}]]"
+          ),
+          covars=list(
+            names=quote(covarnames),
+            cref="__covars[__covindex[{%v%}]]"
+          ),
+          unit_states=list(
+            names=unit_statenames,
+            cref="__x[__stateindex[{%v%}]+unit]"
+          ),
+          ey=list(
+            names="ey",
+            cref="__ey[0]"
+          )
+        )
+      ),
       unit_dmeasure=list(
         slotname="unit_dmeasure",
         Cname="__spatPomp_unit_dmeasure",
@@ -448,6 +546,9 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       )
     )
     hitches <- pomp::hitch(
+      emeasure=emeasure,
+      mmeasure=mmeasure,
+      vmeasure=vmeasure,
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=ud_template,
@@ -465,6 +566,9 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     pomp:::solibs(po) <- hitches$lib
     new("spatPomp",po,
+      emeasure=hitches$funs$emeasure,
+      mmeasure=hitches$funs$mmeasure,
+      vmeasure=hitches$funs$vmeasure,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,
