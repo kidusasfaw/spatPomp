@@ -198,12 +198,10 @@ asifir.internal <- function (object, params, Np, nbhd,
 
     weights[weights < tol] <- tol
     cond.densities[,,n] <- weights[,,1]
-
     ## adapted simulation via intermediate resampling
     # tt has S+1 (or Ninter+1) entries
     tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
     log_gf <- rep(0,Np) # filtered guide function
-
     for (s in 1:Ninter){
       xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
         params=params,.gnsi=gnsi) # an Nx by nreps by 1 array
@@ -254,6 +252,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       inflated_var <- meas_var_skel + fcst_var_upd
       dim(inflated_var) <- c(U, Np, 1)
       array.params <- array(params, dim = c(length(params), length(spat_units(object)), Np, 1), dimnames = list(params = names(params)))
+
       mmp <- tryCatch(
         .Call('do_v_to_theta',
               object=object,
@@ -413,8 +412,8 @@ setMethod(
       Np=as.integer(Np),
       tol=tol,
       loglik=sum(cond.loglik),
-      Ninter = Ninter,
-      islands = islands,
+      Ninter = as.integer(Ninter),
+      islands = as.integer(islands),
       nbhd = nbhd
       )
   }

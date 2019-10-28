@@ -30,8 +30,8 @@
 ##' @inheritParams pomp::pomp
 ##'
 ##' @export
-spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
-  emeasure, mmeasure, vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, global_statenames, rprocess, rmeasure,
+spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
+  emeasure, mmeasure, vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
   globals, statenames, paramnames, obstypes, accumvars, covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
@@ -79,11 +79,8 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
   if (missing(unit_statenames)) unit_statenames <- character(0)
 
-  if (missing(global_statenames)) global_statenames <- character(0)
-
   if (inherits(data, what = "spatPomp")){
-    if(!missing(units) && !missing(unit_index) && !missing(unit_statenames) &&
-       !missing(global_statenames) && !missing(obstypes))
+    if(!missing(units) && !missing(unit_statenames) && !missing(obstypes))
       stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure and unit_rmeasure",call.=FALSE)
     else{
       if(missing(unit_dmeasure) && missing(unit_rmeasure)){
@@ -114,9 +111,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                   unit_rmeasure = data@unit_rmeasure,
                   unit_dmeasure = data@unit_dmeasure,
                   units=data@units,
-                  unit_index=data@unit_index,
                   unit_statenames=data@unit_statenames,
-                  global_statenames=data@global_statenames,
                   obstypes = data@obstypes)
         return(sp)
       } else{
@@ -176,9 +171,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
           sp <- new("spatPomp",po,
               unit_dmeasure=hitches$funs$unit_dmeasure,
               units=data@units,
-              unit_index=data@unit_index,
               unit_statenames=data@unit_statenames,
-              global_statenames=data@global_statenames,
               obstypes = data@obstypes)
           return(sp)
           } else{
@@ -224,9 +217,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
                 sp <- new("spatPomp",po,
                     unit_rmeasure=hitches$funs$unit_rmeasure,
                     units=data@units,
-                    unit_index=data@unit_index,
                     unit_statenames=data@unit_statenames,
-                    global_statenames=data@global_statenames,
                     obstypes = data@obstypes)
                 return(sp)
               }
@@ -274,10 +265,8 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # units slot contains unique units. unit_index is an "ordering" of units
     units <- unique(data[[upos]])
-    if(missing(unit_index)){
-      unit_index <- units
-      names(unit_index) <- 1:length(units)
-    }
+    unit_index <- units
+    names(unit_index) <- 1:length(units)
 
     # make data into a dataframe that pomp would expect
     tmp <- names(unit_index)
@@ -331,8 +320,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
 
     # get all combinations of unit statenames and units. Concatenate global statenames
     if(!missing(unit_statenames)){
-      if(!missing(global_statenames)) pomp_statenames <- c(paste0(rep(unit_statenames,each=length(units)),1:length(units)),global_statenames)
-      else pomp_statenames <- paste0(rep(unit_statenames,each=length(units)),1:length(units))
+      pomp_statenames <- paste0(rep(unit_statenames,each=length(units)),1:length(units))
     } else pomp_statenames <- character(0)
 
     # get the observation names of the pomp dataframe.
@@ -572,9 +560,7 @@ spatPomp <- function (data, units, unit_index, times, covar, tcovar, t0, ...,
       unit_dmeasure=hitches$funs$unit_dmeasure,
       unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,
-      unit_index=unit_index,
       unit_statenames=unit_statenames,
-      global_statenames=global_statenames,
       obstypes = obstypes)
 
   }

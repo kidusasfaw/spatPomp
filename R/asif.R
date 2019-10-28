@@ -92,7 +92,6 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   object <- as(object,"spatPomp")
   pompLoad(object,verbose)
   gnsi <- as.logical(.gnsi)
-
   if (length(params)==0)
     stop(ep,sQuote("params")," must be specified",call.=FALSE)
 
@@ -241,7 +240,6 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   }
   wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
   wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
-
   pompUnload(object,verbose=verbose)
   new(
     "island.spatPomp",

@@ -15,9 +15,7 @@ setAs(
     new("spatPomp",from,
         unit_dmeasure=from@dmeasure,
         units="unit",
-        unit_index="unit",
         unit_statenames=character(0),
-        global_statenames=character(0),
         obstypes = rownames(from@data))
   }
 )
@@ -27,13 +25,6 @@ setMethod(
   "spat_units",
   signature=signature(x="spatPomp"),
   definition=function(x,...) x@units
-)
-
-##' @export
-setMethod(
-  "unit_ix",
-  signature=signature(x="spatPomp"),
-  definition=function(x,...) x@unit_index
 )
 
 
@@ -64,7 +55,7 @@ setMethod(
       to.arrange <- c(colnames(sims)[1], "unit", "stateobs")
       gathered <- sims %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
         dplyr::mutate(ui = stringr::str_extract(stateobs,"[0-9]+"))%>%
-        dplyr::mutate(unit = object@unit_index[ui])%>%
+        dplyr::mutate(unit = spat_units(object)[ui])%>%
         dplyr::select_(.dots = to.select) %>%
         dplyr::arrange_(.dots = to.arrange)
       stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_split(x,"[0-9]+")[[1]][1])
@@ -86,9 +77,7 @@ setMethod(
                     mmeasure = object@mmeasure,
                     vmeasure = object@vmeasure,
                     units=object@units,
-                    unit_index=object@unit_index,
                     unit_statenames=object@unit_statenames,
-                    global_statenames=object@global_statenames,
                     obstypes = object@obstypes)
           sp.list[[i]] <- sp
         }
@@ -101,9 +90,7 @@ setMethod(
                   mmeasure = object@mmeasure,
                   vmeasure = object@vmeasure,
                   units=object@units,
-                  unit_index=object@unit_index,
                   unit_statenames=object@unit_statenames,
-                  global_statenames=object@global_statenames,
                   obstypes = object@obstypes)
         return(sp)
       }

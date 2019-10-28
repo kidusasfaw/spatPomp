@@ -7,9 +7,6 @@ setGeneric("asifir",function(object,...)standardGeneric("asifir"))
 ## Extract units from spatPomp object
 setGeneric("spat_units", function(x,...)standardGeneric("spat_units"))
 
-## Extract the unit index from spatPomp object
-setGeneric("unit_ix", function(x,...)standardGeneric("unit_ix"))
-
 ## Evaluate unit_dmeasure over all units
 setGeneric("vec_dmeasure", function(object,...)standardGeneric("vec_dmeasure"))
 

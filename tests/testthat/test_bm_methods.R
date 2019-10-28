@@ -30,31 +30,12 @@ loglik.true <- pomp:::kalmanFilter(
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# h just extracts measured components
-girf.h <- function(state.vec, param.vec){
-  # find index matching unit_statename
-  ix<-grep('X',names(state.vec))
-  # no reporting ratio in model (equiv. to 1)
-  state.vec[ix]
-}
-
-girf.theta.to.v <- function(meas.mean, param.vec){
-  param.vec['tau']^2
-}
-
-girf.v.to.theta <- function(var, state.vec, param.vec){
-  param.vec['tau'] <- sqrt(var)
-  param.vec
-}
-
 girf.loglik <- replicate(10,logLik(girf(bm3,
                     Np = 100,
                     Ninter = length(spat_units(bm3)),
                     lookahead = 1,
-                    Nguide = 50,
-                    h = girf.h,
-                    theta.to.v = girf.theta.to.v,
-                    v.to.theta = girf.v.to.theta)))
+                    Nguide = 50
+                    )))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIF
@@ -78,10 +59,7 @@ asifir.loglik <- replicate(10,logLik(asifir(bm3,
                         islands = 50,
                         Np=20,
                         nbhd = asif.nbhd,
-                        Ninter = length(spat_units(bm3)),
-                        h = girf.h,
-                        theta.to.v = girf.theta.to.v,
-                        v.to.theta = girf.v.to.theta)))
+                        Ninter = length(spat_units(bm3)))))
 
 test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf.loglik) - loglik.true), 2)

@@ -4,12 +4,11 @@
 \alias{spatPomp}
 \title{Constructor of the basic spatPomp object}
 \usage{
-spatPomp(data, units, unit_index, times, covar, tcovar, t0, ..., emeasure,
-  mmeasure, vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames,
-  global_statenames, rprocess, rmeasure, dprocess, dmeasure, skeleton,
-  rinit, cdir, cfile, shlib.args, userdata, PACKAGE, globals, statenames,
-  paramnames, obstypes, accumvars, covarnames, partrans,
-  verbose = getOption("verbose", FALSE))
+spatPomp(data, units, times, covar, tcovar, t0, ..., emeasure, mmeasure,
+  vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, rprocess,
+  rmeasure, dprocess, dmeasure, skeleton, rinit, cdir, cfile, shlib.args,
+  userdata, PACKAGE, globals, statenames, paramnames, obstypes, accumvars,
+  covarnames, partrans, verbose = getOption("verbose", FALSE))
 }
 \arguments{
 \item{data}{either a data frame holding the spatiotemporal data,

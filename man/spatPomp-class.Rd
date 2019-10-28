@@ -12,12 +12,8 @@ An S4 class to represent a spatiotemporal POMP model and data.
 \describe{
 \item{\code{units}}{A vector containing the spatial units of a spatiotemporal POMP.}
 
-\item{\code{unit_index}}{A vector with the spatial units as values and the indices for the units as the names.}
-
 \item{\code{unit_statenames}}{A vector containing the state names such that appending the unit indices to the
 unit statenames will result in the each unit's corresponding states.}
-
-\item{\code{global_statenames}}{A vector containing the statenames shared by all spatial units.}
 
 \item{\code{obstypes}}{A vector of observation types for a spatial unit.}
 

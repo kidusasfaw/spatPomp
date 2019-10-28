@@ -38,9 +38,7 @@ setClass(
   contains="kalmand_pomp",
   slots=c(
     units = 'character',
-    unit_index = 'character',
     unit_statenames = 'character',
-    global_statenames = 'character',
     obstypes = 'character',
     unit_dmeasure = 'pomp_fun',
     unit_rmeasure = 'pomp_fun'
@@ -113,9 +111,7 @@ setMethod(
         unit_rmeasure = data@unit_rmeasure,
         unit_dmeasure = data@unit_dmeasure,
         units=data@units,
-        unit_index=data@unit_index,
         unit_statenames=data@unit_statenames,
-        global_statenames=data@global_statenames,
         obstypes = data@obstypes)
 
   }
