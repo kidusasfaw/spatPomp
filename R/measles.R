@@ -249,17 +249,17 @@ measles_unit_dmeasure <- Csnippet('
                        }
                        ')
 
-measles_emeasure <- Csnippet("
+measles_unit_emeasure <- Csnippet("
 ey = rho*C;
 ")
 
-measles_vmeasure <- Csnippet("
+measles_unit_vmeasure <- Csnippet("
 double m;
 m = rho*C;
 vc = m*(1.0-rho+psi*psi*m);
 ")
 
-measles_mmeasure <- Csnippet("
+measles_unit_mmeasure <- Csnippet("
 double binomial_var;
 double m;
 m = rho*C;
@@ -370,9 +370,9 @@ spatPomp(measles_cases,
         globals=measles_globals,
         rinit=measles_rinit,
         dmeasure=measles_dmeasure,
-        emeasure=measles_emeasure,
-        mmeasure=measles_mmeasure,
-        vmeasure=measles_vmeasure,
+        unit_emeasure=measles_unit_emeasure,
+        unit_mmeasure=measles_unit_mmeasure,
+        unit_vmeasure=measles_unit_vmeasure,
         rmeasure=measles_rmeasure,
         unit_dmeasure=measles_unit_dmeasure
 )

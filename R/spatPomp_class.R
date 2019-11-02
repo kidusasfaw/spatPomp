@@ -14,16 +14,16 @@ setClass(
     units = 'character',
     unit_statenames = 'character',
     obstypes = 'character',
-    emeasure = 'pomp_fun',
-    mmeasure = 'pomp_fun',
-    vmeasure = 'pomp_fun',
+    unit_emeasure = 'pomp_fun',
+    unit_mmeasure = 'pomp_fun',
+    unit_vmeasure = 'pomp_fun',
     unit_dmeasure = 'pomp_fun',
     unit_rmeasure = 'pomp_fun'
   ),
   prototype=prototype(
-    emeasure = pomp:::pomp_fun(slotname="emeasure"),
-    mmeasure = pomp:::pomp_fun(slotname="mmeasure"),
-    vmeasure = pomp:::pomp_fun(slotname="vmeasure"),
+    unit_emeasure = pomp:::pomp_fun(slotname="emeasure"),
+    unit_mmeasure = pomp:::pomp_fun(slotname="mmeasure"),
+    unit_vmeasure = pomp:::pomp_fun(slotname="vmeasure"),
     unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
     unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure")
   )

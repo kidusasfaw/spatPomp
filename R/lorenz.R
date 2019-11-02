@@ -99,15 +99,15 @@ lorenz_rmeasure <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
-lorenz_emeasure <- Csnippet("
+lorenz_unit_emeasure <- Csnippet("
   ey = X;
 ")
 
-lorenz_vmeasure <- Csnippet("
+lorenz_unit_vmeasure <- Csnippet("
   vc = tau*tau;
 ")
 
-lorenz_mmeasure <- Csnippet("
+lorenz_unit_mmeasure <- Csnippet("
   M_tau = sqrt(vc);
 ")
 
@@ -129,9 +129,9 @@ lorenz <- spatPomp(lorenz_data,
                globals=lorenz_globals,
                rmeasure=lorenz_rmeasure,
                dmeasure=lorenz_dmeasure,
-               emeasure=lorenz_emeasure,
-               mmeasure=lorenz_mmeasure,
-               vmeasure=lorenz_vmeasure,
+               unit_emeasure=lorenz_unit_emeasure,
+               unit_mmeasure=lorenz_unit_mmeasure,
+               unit_vmeasure=lorenz_unit_vmeasure,
                unit_dmeasure=lorenz_unit_dmeasure,
                partrans = parameter_trans(log = c("F", "sigma", "tau")),
                rinit=lorenz_rinit

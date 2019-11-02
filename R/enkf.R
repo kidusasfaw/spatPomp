@@ -41,11 +41,17 @@ setClass(
     unit_statenames = 'character',
     obstypes = 'character',
     unit_dmeasure = 'pomp_fun',
-    unit_rmeasure = 'pomp_fun'
+    unit_rmeasure = 'pomp_fun',
+    unit_emeasure = 'pomp_fun',
+    unit_vmeasure = 'pomp_fun',
+    unit_mmeasure = 'pomp_fun'
   ),
   prototype=prototype(
     unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure")
+    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure"),
+    unit_emeasure = pomp:::pomp_fun(slotname="unit_emeasure"),
+    unit_vmeasure = pomp:::pomp_fun(slotname="unit_vmeasure"),
+    unit_mmeasure = pomp:::pomp_fun(slotname="unit_mmeasure")
   )
 )
 
@@ -110,6 +116,9 @@ setMethod(
     new("kalmand_spatPomp", kp,
         unit_rmeasure = data@unit_rmeasure,
         unit_dmeasure = data@unit_dmeasure,
+        unit_emeasure = data@unit_emeasure,
+        unit_vmeasure = data@unit_vmeasure,
+        unit_mmeasure = data@unit_mmeasure,
         units=data@units,
         unit_statenames=data@unit_statenames,
         obstypes = data@obstypes)

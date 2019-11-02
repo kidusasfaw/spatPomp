@@ -87,15 +87,15 @@ bm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-bm_emeasure <- Csnippet("
+bm_unit_emeasure <- Csnippet("
   ey = X;
 ")
 
-bm_mmeasure <- Csnippet("
+bm_unit_mmeasure <- Csnippet("
   M_tau = sqrt(vc);
 ")
 
-bm_vmeasure <- Csnippet("
+bm_unit_vmeasure <- Csnippet("
   vc = tau*tau;
 ")
 
@@ -132,9 +132,9 @@ bm_spatPomp <- spatPomp(bm_data,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
                dmeasure=bm_dmeasure,
-               emeasure=bm_emeasure,
-               mmeasure=bm_mmeasure,
-               vmeasure=bm_vmeasure,
+               unit_emeasure=bm_unit_emeasure,
+               unit_mmeasure=bm_unit_mmeasure,
+               unit_vmeasure=bm_unit_vmeasure,
                unit_dmeasure=bm_unit_dmeasure,
                unit_rmeasure=bm_unit_rmeasure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),

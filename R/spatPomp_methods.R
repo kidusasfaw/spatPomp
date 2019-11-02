@@ -40,6 +40,15 @@ setMethod(
 
 ##' @export
 setMethod(
+  "plot",
+  signature=signature(x="spatPomp"),
+  definition=function (x, ...) {
+    plot(as.data.frame(x))
+  }
+)
+
+##' @export
+setMethod(
   "simulate",
   signature=signature(object="spatPomp"),
   definition=function(object, nsim = 1, seed = NULL,
@@ -73,9 +82,9 @@ setMethod(
           sp <- new("spatPomp",sims[[i]],
                     unit_rmeasure = object@unit_rmeasure,
                     unit_dmeasure = object@unit_dmeasure,
-                    emeasure = object@emeasure,
-                    mmeasure = object@mmeasure,
-                    vmeasure = object@vmeasure,
+                    unit_emeasure = object@unit_emeasure,
+                    unit_mmeasure = object@unit_mmeasure,
+                    unit_vmeasure = object@unit_vmeasure,
                     units=object@units,
                     unit_statenames=object@unit_statenames,
                     obstypes = object@obstypes)
@@ -86,9 +95,9 @@ setMethod(
         sp <- new("spatPomp",sims,
                   unit_dmeasure = object@unit_dmeasure,
                   unit_rmeasure = object@unit_rmeasure,
-                  emeasure = object@emeasure,
-                  mmeasure = object@mmeasure,
-                  vmeasure = object@vmeasure,
+                  unit_emeasure = object@unit_emeasure,
+                  unit_mmeasure = object@unit_mmeasure,
+                  unit_vmeasure = object@unit_vmeasure,
                   units=object@units,
                   unit_statenames=object@unit_statenames,
                   obstypes = object@obstypes)
@@ -138,6 +147,17 @@ setMethod(
 setMethod(
   "logLik",
   signature=signature(object="asifird_spatPomp"),
+  definition=function(object)object@loglik
+)
+
+##' @name logLik-igirfd_spatPomp
+##' @title loglik
+##' @aliases logLik,igirfd_spatPomp-method
+##' @rdname loglik
+##' @export
+setMethod(
+  "logLik",
+  signature=signature(object="igirfd_spatPomp"),
   definition=function(object)object@loglik
 )
 

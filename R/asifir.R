@@ -327,7 +327,7 @@ asifir.internal <- function (object, params, Np, nbhd,
   wp.avg = array(data = numeric(0), dim = c(U, N))
   for (n in seq_len(N)){
       for (u in seq_len(U)){
-          full_nbhd <- nbhd(object, n, u)
+          full_nbhd <- nbhd(object, time = n, unit = u)
           prod_cond_dens_nt  <- rep(1, Np)
           prod_cond_dens_not_nt <- matrix(1, Np, n-1)
           for (neighbor in full_nbhd){

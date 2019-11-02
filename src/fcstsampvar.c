@@ -56,7 +56,7 @@ SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
 
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("emeasure"))); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("unit_emeasure"))); nprotect++;
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;

@@ -57,7 +57,7 @@ SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP param
 
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("mmeasure"))); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("unit_mmeasure"))); nprotect++;
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;

@@ -224,7 +224,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   wp.avg = array(data = numeric(0), dim = c(nunits, ntimes))
   for (nt in seq_len(ntimes)){
       for (unit in seq_len(nunits)){
-          full_nbhd <- nbhd(object, nt, unit)
+          full_nbhd <- nbhd(object, time = nt, unit = unit)
           prod_cond_dens_nt  <- rep(1, Np[1])
           prod_cond_dens_not_nt <- matrix(1, Np[1], nt-1)
           for (neighbor in full_nbhd){
