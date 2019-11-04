@@ -335,6 +335,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       } else {
         skel <- X
       }
+      # begin test code
       meas_var_skel <- tryCatch(
         .Call('do_theta_to_v',
               object=object,
@@ -369,6 +370,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       mom_match_param <- mmp
       dim(mom_match_param) <- c(dim(tparams)[1], length(spat_units(object)), lookahead_steps, Np[1])
       dimnames(mom_match_param) <- list(tparam = rownames(tparams))
+      # end test code
       # create measurement variance at skeleton matrix
       # meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       # for(u in 1:length(object@units)){
@@ -475,7 +477,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       fcst_samp_var <- xx$newfsv
     }
   }
-  print(sum(cond.loglik))
+  # print(sum(cond.loglik))
   new(
     "girfd_spatPomp",
     object,

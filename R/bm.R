@@ -137,7 +137,7 @@ bm_spatPomp <- spatPomp(bm_data,
                unit_vmeasure=bm_unit_vmeasure,
                unit_dmeasure=bm_unit_dmeasure,
                unit_rmeasure=bm_unit_rmeasure,
-               partrans = parameter_trans(log = c("rho", "sigma", "tau")),
+               partrans = parameter_trans(log = c("rho","sigma", "tau")),
                rinit=bm_rinit
   )
 
