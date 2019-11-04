@@ -103,11 +103,11 @@ measles_globals <- Csnippet(
   paste0("const int U = ",U,"; \n ", v_by_g_C)
 )
 
-#measles_unit_statenames <- c('S','E','I','R','C','W')
-measles_unit_statenames <- c('S','E','I','R','Acc','C','W')
+measles_unit_statenames <- c('S','E','I','R','C','W')
+#measles_unit_statenames <- c('S','E','I','R','Acc','C','W')
 
 measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
-measles_IVPnames <- paste0(measles_statenames[1:(5*U)],"_0")
+measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
 measles_RPnames <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi","g")
 measles_paramnames <- c(measles_RPnames,measles_IVPnames)
 
@@ -120,16 +120,16 @@ measles_rprocess <- Csnippet('
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
-  double *Acc = &Acc1;
+  //double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
   int obstime = 0;
   int u,v;
   // obstime variable to be used later. See note on if(obstime) conditional
-  if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
-       obstime = 1;
+  //if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
+       //obstime = 1;
        //Rprintf("t=%f is an observation time\\n",t);
-  }
+  //}
   // term-time seasonality
   t = (t-floor(t))*365.25;
   if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
@@ -182,19 +182,19 @@ measles_rprocess <- Csnippet('
     I[u] += trans[2] - trans[4] - trans[5];
     R[u] = pop[u] - S[u] - E[u] - I[u];
     W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
-    //C[u] += trans[4];           // true incidence
+    C[u] += trans[4];           // true incidence
 
     // For girf, we want to override the default behavior of the rprocess
     // function, which sets accumulator variables (in this case C) to 0
     // at each call. We only want this if the call is during an observation
     // time.
-    if(obstime){
-       Acc[u] = trans[4];
-       C[u] = Acc[u];
-    } else{
-       Acc[u] += trans[4];
-       C[u] = Acc[u];
-    }
+    //if(obstime){
+       //Acc[u] = trans[4];
+       //C[u] = Acc[u];
+    //} else{
+       //Acc[u] += trans[4];
+       //C[u] = Acc[u];
+    //}
   }
 ')
 
@@ -274,12 +274,12 @@ measles_rinit <- Csnippet("
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
-  double *Acc = &Acc1;
+  //double *Acc = &Acc1;
   const double *S_0 = &S1_0;
   const double *E_0 = &E1_0;
   const double *I_0 = &I1_0;
   const double *R_0 = &R1_0;
-  const double *Acc_0 = &Acc1_0;
+  //const double *Acc_0 = &Acc1_0;
   const double *pop = &pop1;
   double m;
   int u;
@@ -291,7 +291,7 @@ measles_rinit <- Csnippet("
     R[u] = nearbyint(m*R_0[u]);
     W[u] = 0;
     C[u] = 0;
-    Acc[u] = Acc_0[u];
+    //Acc[u] = Acc_0[u];
   }
 ")
 
@@ -307,17 +307,17 @@ measles_skel <- Csnippet('
   double *DE = &DE1;
   double *DI = &DI1;
   double *DR = &DR1;
-  double *DAcc = &DAcc1;
+  //double *DAcc = &DAcc1;
   double *DC = &DC1;
   double *DW = &DW1;
-  double *Acc = &Acc1;
+  //double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
   int u,v;
   int obstime = 0;
-  if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
-       obstime = 1;
-  }
+  //if(fabs(((t-floor(t)) / (2.0/52.0)) - (float)(round((t-floor(t)) / (2.0/52.0)))) < 0.001){
+       //obstime = 1;
+  //}
 
   // term-time seasonality
    t = (t-floor(t))*365.25;
@@ -330,9 +330,9 @@ measles_skel <- Csnippet('
   beta = R0*(gamma+mu)*seas;
 
   for (u = 0 ; u < U ; u++) {
-    if(obstime != 1){
-       C[u] = Acc[u];
-    }
+    //if(obstime != 1){
+       //C[u] = Acc[u];
+    //}
     // cannot readily put the cohort effect into a vectorfield for the skeleton
     // therefore, we ignore it here.
     // this is okay as long as the skeleton is being used for short-term forecasts
@@ -350,7 +350,7 @@ measles_skel <- Csnippet('
     DR[u] = gamma*I[u] - mu*R[u];
     DW[u] = 0;
     DC[u] = gamma*I[u];
-    DAcc[u] = 0;
+    //DAcc[u] = 0;
   }
 ')
 
@@ -384,23 +384,23 @@ girfd_measles <- function(U=5, N = 10, Np = 100, Nguide = 50){
   measles_sim_U <- 40
   measles_uk <- measles(measles_sim_U)
   read.csv(text="
-,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,Acc_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0,0.0878
-BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0,0.0611
-LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0,0.0533
-MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0,0.0551
-LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0,0.0778
-SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0,0.0428
-BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0,0.0392
-NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0,0.038
-HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0,0.0636
-BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0,0.0451
+,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
+LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
+BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
+LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
+MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
+LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0.0778
+SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0.0428
+BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0.0392
+NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0.038
+HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0.0636
+BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0.0451
 ",stringsAsFactors=FALSE,row.names=1) -> he10_mles
 
   # Set the parameters for the simulation
-  measles_unit_statenames <- c('S','E','I','R','Acc', 'C','W')
+  measles_unit_statenames <- c('S','E','I','R', 'C','W')
   measles_statenames <- paste0(rep(measles_unit_statenames,each=measles_sim_U),1:measles_sim_U)
-  measles_IVPnames <- paste0(measles_statenames[1:(5*measles_sim_U)],"_0")
+  measles_IVPnames <- paste0(measles_statenames[1:(4*measles_sim_U)],"_0")
   measles_RPnames <- c("alpha","iota","R0","cohort","amplitude",
                        "gamma","sigma","mu","sigmaSE","rho","psi","g")
   measles_paramnames <- c(measles_RPnames,measles_IVPnames)
@@ -412,7 +412,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   measles_params[paste0("E",1:measles_sim_U,"_0")] <-city_params["E_0"]
   measles_params[paste0("I",1:measles_sim_U,"_0")] <-city_params["I_0"]
   measles_params[paste0("R",1:measles_sim_U,"_0")] <-city_params["R_0"]
-  measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
+  # measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
 
   # Perform a 40-city simulation which will then be subsetted
   measles_sim <- simulate(measles_uk,params=measles_params)
@@ -423,7 +423,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
     m@data <- measles_sim@data[1:m_U,1:m_N]
     time(m) <- measles_sim@times[1:m_N]
     m_statenames <- paste0(rep(measles_unit_statenames,each=m_U),1:m_U)
-    m_IVPnames <- paste0(m_statenames[1:(5*m_U)],"_0")
+    m_IVPnames <- paste0(m_statenames[1:(4*m_U)],"_0")
     m_paramnames <- c(measles_RPnames,m_IVPnames)
     m_params <- measles_params[names(measles_params)%in%m_paramnames]
     coef(m) <- m_params
@@ -439,22 +439,22 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   measles_Nguide <- Nguide
   measles_Np <- Np
   measles_tol <- 1e-300
-  measles_h <- function(state.vec, param.vec){
-    ix<-grep("C",names(state.vec))
-    param.vec["rho"]*state.vec[ix]
-  }
-  measles_theta.to.v <- function(meas.mean, param.vec){
-    meas.mean*(1-param.vec["rho"]) + (meas.mean*param.vec["psi"])^2
-  }
-  measles_v.to.theta <- function(var, state.vec, param.vec){
-    cases <- state.vec[grep("C",names(state.vec))]
-    binomial_var <- param.vec['rho']*(1-param.vec["rho"])*cases
-    param_fit <- param.vec
-    if(var > binomial_var) {
-      param_fit["psi"] <- sqrt(var - binomial_var) / (param.vec["rho"]*cases)
-    }
-    param_fit
-  }
+  # measles_h <- function(state.vec, param.vec){
+  #   ix<-grep("C",names(state.vec))
+  #   param.vec["rho"]*state.vec[ix]
+  # }
+  # measles_theta.to.v <- function(meas.mean, param.vec){
+  #   meas.mean*(1-param.vec["rho"]) + (meas.mean*param.vec["psi"])^2
+  # }
+  # measles_v.to.theta <- function(var, state.vec, param.vec){
+  #   cases <- state.vec[grep("C",names(state.vec))]
+  #   binomial_var <- param.vec['rho']*(1-param.vec["rho"])*cases
+  #   param_fit <- param.vec
+  #   if(var > binomial_var) {
+  #     param_fit["psi"] <- sqrt(var - binomial_var) / (param.vec["rho"]*cases)
+  #   }
+  #   param_fit
+  # }
 
   # Output girfd_spatPomp object
   new(
@@ -488,23 +488,23 @@ asifird_measles <- function(U=5,
   measles_sim_U <- 40
   measles_uk <- measles(measles_sim_U)
   read.csv(text="
-,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,Acc_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0,0.0878
-BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0,0.0611
-LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0,0.0533
-MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0,0.0551
-LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0,0.0778
-SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0,0.0428
-BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0,0.0392
-NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0,0.038
-HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0,0.0636
-BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0,0.0451
+,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
+LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
+BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
+LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
+MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
+LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0.0778
+SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0.0428
+BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0.0392
+NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0.038
+HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0.0636
+BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0.0451
 ",stringsAsFactors=FALSE,row.names=1) -> he10_mles
 
   # Set the parameters for the simulation
-  measles_unit_statenames <- c('S','E','I','R','Acc', 'C','W')
+  measles_unit_statenames <- c('S','E','I','R', 'C','W')
   measles_statenames <- paste0(rep(measles_unit_statenames,each=measles_sim_U),1:measles_sim_U)
-  measles_IVPnames <- paste0(measles_statenames[1:(5*measles_sim_U)],"_0")
+  measles_IVPnames <- paste0(measles_statenames[1:(4*measles_sim_U)],"_0")
   measles_RPnames <- c("alpha","iota","R0","cohort","amplitude",
                        "gamma","sigma","mu","sigmaSE","rho","psi","g")
   measles_paramnames <- c(measles_RPnames,measles_IVPnames)
@@ -516,7 +516,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   measles_params[paste0("E",1:measles_sim_U,"_0")] <-city_params["E_0"]
   measles_params[paste0("I",1:measles_sim_U,"_0")] <-city_params["I_0"]
   measles_params[paste0("R",1:measles_sim_U,"_0")] <-city_params["R_0"]
-  measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
+  # measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
 
   # Perform a 40-city simulation which will then be subsetted
   measles_sim <- simulate(measles_uk,params=measles_params)
@@ -527,7 +527,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
     m@data <- measles_sim@data[1:m_U,1:m_N]
     time(m) <- measles_sim@times[1:m_N]
     m_statenames <- paste0(rep(measles_unit_statenames,each=m_U),1:m_U)
-    m_IVPnames <- paste0(m_statenames[1:(5*m_U)],"_0")
+    m_IVPnames <- paste0(m_statenames[1:(4*m_U)],"_0")
     m_paramnames <- c(measles_RPnames,m_IVPnames)
     m_params <- measles_params[names(measles_params)%in%m_paramnames]
     coef(m) <- m_params

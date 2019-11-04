@@ -134,6 +134,7 @@ asifir.internal <- function (object, params, Np, nbhd,
   statenames <- rownames(x_init)
   Nx <- nrow(x_init)
   xas <- as.numeric(x_init) # adapted simulation state vector
+  znames <- object@accumvars
 
   loglik <- rep(NA,N)
   cond.densities <- array(data = numeric(0), dim=c(U,Np,N))
@@ -205,9 +206,18 @@ asifir.internal <- function (object, params, Np, nbhd,
     for (s in 1:Ninter){
       xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
         params=params,.gnsi=gnsi) # an Nx by nreps by 1 array
+      if(s>1 && length(znames)>0){
+        xf.znames <- xf[znames,,drop=FALSE]
+        xp[znames,,1] <- xp[znames,,1,drop=FALSE][,,1] + xf.znames
+      }
       if(s < Ninter){
         skel <- pomp::flow(object, x0=xp[,,1], t0=tt[s+1],
           params=param_matrix, times = times[n + 1],...)
+        if(s>1 && length(znames) > 0){
+          skel.lookahead1.znames <- skel[znames,,1,drop=FALSE]
+          xp.znames <- xp[znames,,1,drop=FALSE]
+          skel[znames,,] <- skel.lookahead1.znames + xp.znames
+        }
       } else {
         skel <- xp
       }

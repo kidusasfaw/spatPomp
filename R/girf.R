@@ -233,6 +233,7 @@ girf.internal <- function (object,
   statenames <- rownames(init.x)
   nvars <- nrow(init.x)
   x <- init.x
+  znames <- object@accumvars
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   # initialize filter guide function
   filter_guide_fun <- array(1, dim = Np[1])
@@ -265,9 +266,20 @@ girf.internal <- function (object,
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
       # X is now a nvars by nreps by 1 array
+      if(s>1 && length(znames)>0){
+        x.znames <- x[znames,]; dim(x.znames) <- c(dim(x.znames),1)
+        X[znames,,] <- X[znames,,,drop=FALSE] + x.znames
+      }
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
         skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
+        if(s>1 && length(znames) > 0){
+          skel.start <- skel[,,1]
+          X.start.znames <- X.start[znames,]
+          skel.start.znames <- skel.start[znames,]
+          skel.end.znames <- X.start.znames + skel.start.znames
+          skel[znames,,1] <- skel.end.znames
+        }
       } else {
         skel <- X
       }
