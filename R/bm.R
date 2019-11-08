@@ -27,7 +27,7 @@ for(u in 1:U) {
 to_C_array <- function(v)paste0("{",paste0(v,collapse=","),"}")
 dist_C_rows <- apply(dmat,1,to_C_array)
 dist_C_array <- to_C_array(dist_C_rows)
-dist_C <- paste0("const double dist[",U,"][",U,"] = ",dist_C_array,"; ")
+dist_C <- paste0("const int dist[",U,"][",U,"] = ",dist_C_array,"; ")
 bm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
 
 
@@ -43,14 +43,20 @@ bm_paramnames <- c(bm_RPnames,bm_IVPnames)
 
 bm_rprocess <- spatPomp_Csnippet("
   double dW[U];
+  double pow_rho[U];
   int u,v;
+
+  pow_rho[0] = 1;
+  for (u=1 ; u < U ; u++) {
+    pow_rho[u] = pow(rho,u);
+  }
 
   for (u = 0 ; u < U ; u++) {
     dW[u] = rnorm(0,sigma*sqrt(dt));
   }
   for (u = 0 ; u < U ; u++) {
     for (v=0; v < U ; v++) {
-      X[u] += dW[v]*pow(rho,dist[u][v]);
+      X[u] += dW[v]*pow_rho[dist[u][v]];
     }
   }
 ", unit_statenames = c("X"))
