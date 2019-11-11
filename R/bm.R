@@ -48,7 +48,7 @@ bm_rprocess <- spatPomp_Csnippet("
 
   pow_rho[0] = 1;
   for (u=1 ; u < U ; u++) {
-    pow_rho[u] = pow(rho,u);
+    pow_rho[u] = pow_rho[u-1]*rho;
   }
 
   for (u = 0 ; u < U ; u++) {
@@ -151,7 +151,7 @@ bm_spatPomp <- spatPomp(bm_data,
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
 names(test_ivps) <- bm_IVPnames
-test_params <- c(rho=0.4, sigma=1, tau=2, test_ivps)
+test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
 simulate(bm_spatPomp,params=test_params)
 }
 
