@@ -120,6 +120,7 @@ measles_rprocess <- Csnippet('
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
+  double powVec[U];
   //double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
@@ -140,6 +141,11 @@ measles_rprocess <- Csnippet('
   // transmission rate
   beta = R0*(gamma+mu)*seas;
 
+  // pre-computing this saves substantial time
+  for (u = 0 ; u < U ; u++) {
+    powVec[u] = pow(I[u]/pop[u],alpha);
+  }
+
   for (u = 0 ; u < U ; u++) {
 
     // cohort effect
@@ -155,7 +161,7 @@ measles_rprocess <- Csnippet('
 
     for (v=0; v < U ; v++) {
       if(v != u)
-        foi += g * v_by_g[u][v] * (pow(I[v]/pop[v],alpha) - pow(I[u]/pop[u],alpha)) / pop[u];
+        foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
     }
     // white noise (extrademographic stochasticity)
     dw = rgammawn(sigmaSE,dt);
@@ -310,6 +316,7 @@ measles_skel <- Csnippet('
   //double *DAcc = &DAcc1;
   double *DC = &DC1;
   double *DW = &DW1;
+  double powVec[U];
   //double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
@@ -329,6 +336,11 @@ measles_skel <- Csnippet('
   // transmission rate
   beta = R0*(gamma+mu)*seas;
 
+  // pre-computing this saves substantial time
+  for (u = 0 ; u < U ; u++) {
+    powVec[u] = pow(I[u]/pop[u],alpha);
+  }
+
   for (u = 0 ; u < U ; u++) {
     //if(obstime != 1){
        //C[u] = Acc[u];
@@ -341,7 +353,7 @@ measles_skel <- Csnippet('
     foi = pow( (I[u]+iota)/pop[u],alpha);
     for (v=0; v < U ; v++) {
       if(v != u)
-        foi += g * v_by_g[u][v] * (pow(I[v]/pop[v],alpha) - pow(I[u]/pop[u],alpha)) / pop[u];
+        foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
     }
 
     DS[u] = br - (beta*foi + mu)*S[u];
