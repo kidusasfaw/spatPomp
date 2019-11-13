@@ -290,8 +290,10 @@ asifir.internal <- function (object, params, Np, nbhd,
 #       }
 
       # U x Np x 1 matrix of skeleton prediction weights
+      discount_denom_init = times[n]
+      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
       log_wp <- tryCatch(
-        vec_dmeasure(
+        log(vec_dmeasure(
           object,
           y=object@data[,n,drop=FALSE],
           x=skel,
@@ -299,7 +301,7 @@ asifir.internal <- function (object, params, Np, nbhd,
           params=mom_match_param,
           log=TRUE,
           .gnsi=gnsi
-        ),
+        ))*discount_factor,
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )

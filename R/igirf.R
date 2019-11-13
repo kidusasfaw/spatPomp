@@ -410,8 +410,11 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
+        if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
+        else discount_denom_init = times[nt+1+l - lookahead_steps]
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
         dmeas_weights <- tryCatch(
-          vec_dmeasure(
+          (vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
@@ -419,7 +422,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
             params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
-          ),
+          ))^discount_factor,
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
