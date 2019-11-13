@@ -29,7 +29,7 @@ setMethod(
     to.gather <- colnames(plot.df)[2:length(colnames(plot.df))]
     to.plot <- plot.df %>% tidyr::gather_(key = "param", val = "value", to.gather) %>% .[-1,]
     ggplot2::ggplot(data = to.plot) +
-      geom_line(mapping = aes(x = iteration, y = value)) +
-      facet_wrap(~param, ncol = 3, scales = "free")
+      ggplot2::geom_line(mapping = ggplot2::aes(x = iteration, y = value)) +
+      ggplot2::facet_wrap(~param, ncol = 3, scales = "free")
   }
 )

@@ -145,11 +145,11 @@ simulate(lorenz,params=test_params)
 }
 
 #' @export
-girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50){
+girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   l <- lorenz(U = U, N = N)
   # girfd_spatPomp object creation requirements
   lorenz_Ninter <- length(spat_units(l))
-  lorenz_lookahead <- 1
+  lorenz_lookahead <- lookahead
   lorenz_Nguide <- Nguide
   lorenz_Np <- Np
   lorenz_tol <- 1e-300

@@ -1,8 +1,9 @@
 library(spatPomp)
 context("test methods on simple Brownian motion")
 
+doParallel::registerDoParallel(3)
 # create the BM object
-U = 3; N = 10
+U = 8; N = 10
 bm3 <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
@@ -31,11 +32,22 @@ loglik.true <- pomp:::kalmanFilter(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 girf.loglik <- replicate(10,logLik(girf(bm3,
-                    Np = 100,
+                    Np = 500,
                     Ninter = length(spat_units(bm3)),
                     lookahead = 1,
                     Nguide = 50
                     )))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   log-likelihood estimate from GIRF with lookahead > 1
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+girf.loglik.l2 <- replicate(10,logLik(girf(bm3,
+                                        Np = 500,
+                                        Ninter = length(spat_units(bm3)),
+                                        lookahead = 2,
+                                        Nguide = 50
+)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIF
@@ -66,6 +78,10 @@ test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates",
   expect_lt(abs(logmeanexp(asif.loglik) - loglik.true), 2)
   expect_lt(abs(logmeanexp(asifir.loglik) - loglik.true), 2)
 
+})
+
+test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimates", {
+  expect_lt(abs(logmeanexp(girf.loglik.l2) - loglik.true), 2)
 })
 
 

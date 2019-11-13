@@ -151,11 +151,11 @@ simulate(bm_spatPomp,params=test_params)
 
 #' @export
 
-girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50){
+girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
   bm_Ninter <- length(spat_units(b))
-  bm_lookahead <- 1
+  bm_lookahead <- lookahead
   bm_Nguide <- Nguide
   bm_Np <- Np
   bm_tol <- 1e-300

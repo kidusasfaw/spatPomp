@@ -270,9 +270,12 @@ girf.internal <- function (object,
         x.znames <- x[znames,]; dim(x.znames) <- c(dim(x.znames),1)
         X[znames,,] <- X[znames,,,drop=FALSE] + x.znames
       }
+
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
         skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
+        #print("skel before adjustment")
+        #print(skel)
         if(s>1 && length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
@@ -280,6 +283,9 @@ girf.internal <- function (object,
           skel.end.znames <- X.start.znames + skel.start.znames
           skel[znames,,1] <- skel.end.znames
         }
+        #print("skel after adjustment")
+        #print(skel)
+        #if(nt >= 3) return(1)
       } else {
         skel <- X
       }
@@ -322,8 +328,11 @@ girf.internal <- function (object,
       log_guide_fun = vector(mode = "numeric", length = Np[1])
 
       for(l in 1:lookahead_steps){
+        if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
+        else discount_denom_init = times[nt+1+l - lookahead_steps]
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
         log_dmeas_weights <- tryCatch(
-          log(vec_dmeasure(
+          log((vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
@@ -331,7 +340,7 @@ girf.internal <- function (object,
             params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
-          )),
+          ))^discount_factor),
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)

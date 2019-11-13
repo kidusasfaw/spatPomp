@@ -379,7 +379,7 @@ spatPomp(measles_cases,
 }
 
 #' @export
-girfd_measles <- function(U=5, N = 10, Np = 100, Nguide = 50){
+girfd_measles <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   # Get real data for U=40 so we can simulate using the resulting spatPomp
   measles_sim_U <- 40
   measles_uk <- measles(measles_sim_U)
@@ -435,7 +435,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
 
   # gird_spatPomp object creation requirements
   measles_Ninter <- length(spat_units(m))
-  measles_lookahead <- 1
+  measles_lookahead <- lookahead
   measles_Nguide <- Nguide
   measles_Np <- Np
   measles_tol <- 1e-300
