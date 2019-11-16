@@ -331,6 +331,7 @@ girf.internal <- function (object,
         if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead_steps]
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
+        # print(times[nt+1+l] - tt[s+1])
         log_dmeas_weights <- tryCatch(
           log(vec_dmeasure(
             object,
@@ -340,13 +341,14 @@ girf.internal <- function (object,
             params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
-          ))*discount_factor,
+          )),
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
-        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))
+        # print(log_dmeas_weights)
+        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
       log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
@@ -397,6 +399,14 @@ girf.internal <- function (object,
         }
       )
       cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
+      #if(cond.loglik[nt+1,s] < -1000){
+        # print("log guide fun")
+        # print(log_guide_fun)
+        # print("discount factor")
+        # print(discount_factor)
+        # print("filter guide fun")
+        # print(filter_guide_fun)
+      #}
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]

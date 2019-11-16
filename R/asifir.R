@@ -299,13 +299,13 @@ asifir.internal <- function (object, params, Np, nbhd,
           x=skel,
           times=times[n+1],
           params=mom_match_param,
-          log=TRUE,
+          log=FALSE,
           .gnsi=gnsi
-        ))*discount_factor,
+        )),
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )
-      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
+      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)*discount_factor
       log_gp <- log_gp - max(log_gp)
       log_gp[log_gp < log(tol)] <- log(tol)
       weights <- exp(log_gp - log_gf)

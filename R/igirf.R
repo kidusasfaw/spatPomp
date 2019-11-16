@@ -422,13 +422,13 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
             params=mom_match_param[,,l,],
             log=FALSE,
             .gnsi=gnsi
-          ))^discount_factor,
+          )),
           error = function (e) {
             stop(ep,"error in calculation of dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
-        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))
+        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))^discount_factor
         guide_fun = guide_fun*resamp_weights
       }
 
