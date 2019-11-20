@@ -332,8 +332,8 @@ girf.internal <- function (object,
         else discount_denom_init = times[nt+1+l - lookahead_steps]
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
         # print(times[nt+1+l] - tt[s+1])
-        log_dmeas_weights <- tryCatch(
-          log(vec_dmeasure(
+        dmeas_weights <- tryCatch(
+          (vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
@@ -347,7 +347,7 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        # print(log_dmeas_weights)
+        log_dmeas_weights <- log(dmeas_weights)
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
@@ -360,8 +360,8 @@ girf.internal <- function (object,
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        log_meas_weights <- tryCatch(
-          log(dmeasure(
+        meas_weights <- tryCatch(
+          (dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
@@ -375,6 +375,7 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
+        log_meas_weights = log(meas_weights)
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
@@ -399,14 +400,28 @@ girf.internal <- function (object,
         }
       )
       cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
-      #if(cond.loglik[nt+1,s] < -1000){
-        # print("log guide fun")
-        # print(log_guide_fun)
-        # print("discount factor")
-        # print(discount_factor)
-        # print("filter guide fun")
-        # print(filter_guide_fun)
-      #}
+      # if(nt > 7 & nt < 11 & s == 1){
+      # print("nt")
+      # print(nt)
+      # print("log guide fun")
+      # print(log_guide_fun)
+      # print("discount factor")
+      # print(discount_factor)
+      # print("filter guide fun")
+      # print(filter_guide_fun)
+      # print("log weights")
+      # print(log_weights)
+      # print("dmeas_weights")
+      # print(dmeas_weights)
+      # print("log_dmeas_weights")
+      # print(log_dmeas_weights)
+      # print("meas_weights")
+      # print(meas_weights)
+      # print("log_meas_weights")
+      # print(log_meas_weights)
+      # print("log_s_not_1_weights")
+      # print(log_s_not_1_weights)
+      # }
       x <- xx$states
       filter_guide_fun <- xx$filterguides
       params <- xx$params[,1]

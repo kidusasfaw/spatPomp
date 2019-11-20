@@ -74,6 +74,8 @@ setClass(
   "asifd.spatPomp",
   contains="spatPomp",
   slots=c(
+    islands="integer",
+    nbhd="function",
     Np="integer",
     tol="numeric",
     loglik="numeric"
@@ -154,7 +156,6 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   # create array to store weights across time
   cond.densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
   dimnames(cond.densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
-
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
     X <- tryCatch(
@@ -315,6 +316,28 @@ setMethod(
       tol=tol,
       loglik=sum(cond.loglik)
      )
+  }
+)
+
+setMethod(
+  "asif",
+  signature=signature(object="asifd.spatPomp"),
+  function (object, islands, Np, nbhd, params,
+            tol = (1e-18)^9,
+            ...) {
+    if (missing(Np)) Np <- object@Np
+    if (missing(tol)) tol <- object@tol
+    if (missing(params)) params <- coef(object)
+    if (missing(islands)) islands <- object@islands
+    if (missing(nbhd)) nbhd <- object@nbhd
+
+    asif(as(object,"spatPomp"),
+           Np=Np,
+           islands=islands,
+           nbhd=nbhd,
+           params = params,
+           tol=tol,
+           ...)
   }
 )
 
