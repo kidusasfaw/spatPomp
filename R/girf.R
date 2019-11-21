@@ -276,7 +276,8 @@ girf.internal <- function (object,
         skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=params.matrix, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
         #print("skel before adjustment")
         #print(skel)
-        if(s>1 && length(znames) > 0){
+        #if(s>1 && length(znames) > 0){
+        if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
           skel.start.znames <- skel.start[znames,]

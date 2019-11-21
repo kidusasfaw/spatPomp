@@ -213,7 +213,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       if(s < Ninter){
         skel <- pomp::flow(object, x0=xp[,,1], t0=tt[s+1],
           params=param_matrix, times = times[n + 1],...)
-        if(s>1 && length(znames) > 0){
+        if(length(znames) > 0){
           skel.lookahead1.znames <- skel[znames,,1,drop=FALSE]
           xp.znames <- xp[znames,,1,drop=FALSE]
           skel[znames,,] <- skel.lookahead1.znames + xp.znames
