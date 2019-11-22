@@ -245,6 +245,7 @@ measles_rmeasure <- Csnippet("
 ")
 
 measles_unit_dmeasure <- Csnippet('
+                       // consider adding 1 to the variance for the case C = 0
                        double m = rho*C;
                        double v = m*(1.0-rho+psi*psi*m);
                        double tol = pow(1e-300,1.0/U);
@@ -256,10 +257,11 @@ measles_unit_dmeasure <- Csnippet('
                        ')
 
 measles_unit_emeasure <- Csnippet("
-ey = 1.05*rho*C;
+ey = rho*C;
 ")
 
 measles_unit_vmeasure <- Csnippet("
+//consider adding 1 to the variance for the case C = 0
 double m;
 m = rho*C;
 vc = m*(1.0-rho+psi*psi*m);
@@ -376,7 +378,7 @@ spatPomp(measles_cases,
         unit_statenames = measles_unit_statenames,
         covar = measles_covar,
         tcovar = "year",
-        rprocess=euler(measles_rprocess, delta.t=2/365),
+        rprocess=euler(measles_rprocess, delta.t=(2/365)),
         skeleton=vectorfield(measles_skel),
         accumvars = c(paste0("C",1:U),paste0("W",1:U)),
         paramnames=measles_paramnames,
