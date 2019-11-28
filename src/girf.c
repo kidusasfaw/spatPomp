@@ -37,8 +37,8 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
   PROTECT(dimfsv = GET_DIM(fsv)); nprotect++;
-  dim = INTEGER(dimfsv);
-  nunits = dim[0]; nlookaheads = dim[1];
+  dim = INTEGER(dimfsv); 
+  nunits = dim[0]; nlookaheads = dim[1]; // todo: consider allowing multi-dimensional observations for each spatial unit.
   f = REAL(fsv);
 
   PROTECT(params = as_matrix(params)); nprotect++;
@@ -52,7 +52,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
 
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-  // Do we need to do parameter resampling?
+  // Do we need to do parameter resampling? // JP: in iGIRF (iterated GIRF), each particle has both state variable and parameter components, so I think the answer is yes.
   do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
 
   if (do_pr) {
@@ -77,7 +77,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
       nlost++;
     }
   }
-  if (nlost >= nreps) all_fail = 1; // all particles are lost
+  if (nlost >= nreps) all_fail = 1; // all particles are lost // JP: I assume this case doe not happen, because if all particles have log weights equal to -Inf, then after subtracting the max log weight, the log weight will become NaN. The all_fail check should be done before invoking girf_computations.
   if (all_fail) {
     *(REAL(loglik)) = log(toler); // minimum log-likelihood
     *(REAL(ess)) = 0;		  // zero effective sample size
