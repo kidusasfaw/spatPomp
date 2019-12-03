@@ -9,7 +9,7 @@
 #' measles(7)
 #' @export
 
-measles <- function(U=6){
+measles <- function(U=6,dt=2/365){
 
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
@@ -190,18 +190,7 @@ measles_rprocess <- Csnippet('
     W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
     C[u] += trans[4];           // true incidence
 
-    // For girf, we want to override the default behavior of the rprocess
-    // function, which sets accumulator variables (in this case C) to 0
-    // at each call. We only want this if the call is during an observation
-    // time.
-    //if(obstime){
-       //Acc[u] = trans[4];
-       //C[u] = Acc[u];
-    //} else{
-       //Acc[u] += trans[4];
-       //C[u] = Acc[u];
-    //}
-  }
+   }
 ')
 
 measles_dmeasure <- Csnippet("
@@ -220,35 +209,15 @@ measles_dmeasure <- Csnippet("
     } else {
         lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
     }
- }
- if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
- ")
-
-# measles_dmeasure <- Csnippet("
-#   const double *C = &C1;
-#   const double *cases = &cases1;
-#   double m,v;
-#   double tol = pow(1e-300,1.0/U);
-#   int u;
-#
-#   lik = 0;
-#   for (u = 0; u < U; u++) {
-#     m = rho*C[u];
-#     v = m*(1.0-rho+psi*psi*m);
-#     if (cases[u] > 0.0) {
-#       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
-#     } else {
-#       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
-#     }
-#   }
-#   if(!give_log) lik = exp(lik);
-# ")
+  }
+  if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
+")
 
 measles_rmeasure <- Csnippet("
   const double *C = &C1;
   double *cases = &cases1;
   double m,v;
-  double tol = pow(1.0e-18,U);
+  double tol = 1.0e-300;
   int u;
 
   for (u = 0; u < U; u++) {
@@ -266,10 +235,8 @@ measles_rmeasure <- Csnippet("
 measles_unit_dmeasure <- Csnippet('
                        // consider adding 1 to the variance for the case C = 0
                        double m = rho*C;
-                       //double v = m*(1.0-rho+psi*psi*m);
-                       double v = m*(1.0-rho+psi*psi*m) + 1;
-                       //double tol = pow(1e-300,1.0/U);
-                       double tol = 1e-50;
+                       double v = m*(1.0-rho+psi*psi*m);
+                       double tol = 1e-300;
                        if (cases > 0.0) {
                          lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
                        } else {
@@ -373,8 +340,9 @@ measles_skel <- Csnippet('
     // cannot readily put the cohort effect into a vectorfield for the skeleton
     // therefore, we ignore it here.
     // this is okay as long as the skeleton is being used for short-term forecasts
-    //br = lag_birthrate[u];
-    // cohort effect
+    //    br = lag_birthrate[u];
+
+    // cohort effect, added back in with cohort arriving over a time interval 0.05yr
     if (fabs(t-floor(t)-251.0/365.0) < 0.5*0.05)
       br = cohort*lag_birthrate[u]/0.05 + (1-cohort)*lag_birthrate[u];
     else
@@ -404,7 +372,7 @@ spatPomp(measles_cases,
         unit_statenames = measles_unit_statenames,
         covar = measles_covar,
         tcovar = "year",
-        rprocess=euler(measles_rprocess, delta.t=(2/365)),
+        rprocess=euler(measles_rprocess, delta.t=dt),
         skeleton=vectorfield(measles_skel),
         accumvars = c(paste0("C",1:U),paste0("W",1:U)),
         paramnames=measles_paramnames,

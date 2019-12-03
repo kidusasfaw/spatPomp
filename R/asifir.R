@@ -290,8 +290,9 @@ asifir.internal <- function (object, params, Np, nbhd,
 #       }
 
       # U x Np x 1 matrix of skeleton prediction weights
-      discount_denom_init = times[n]
-      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
+# TRY REMOVING DISCOUNT FOR ASIF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL 
+#      discount_denom_init = times[n]
+#      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
       log_wp <- tryCatch(
         log(vec_dmeasure(
           object,
@@ -305,7 +306,8 @@ asifir.internal <- function (object, params, Np, nbhd,
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )
-      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)*discount_factor
+#      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)*discount_factor
+      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
       log_gp <- log_gp - max(log_gp)
       log_gp[log_gp < log(tol)] <- log(tol)
       weights <- exp(log_gp - log_gf)
