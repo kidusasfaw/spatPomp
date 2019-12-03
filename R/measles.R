@@ -204,12 +204,11 @@ measles_rprocess <- Csnippet('
   }
 ')
 
-
 measles_dmeasure <- Csnippet("
   const double *C = &C1;
   const double *cases = &cases1;
   double m,v;
-  double tol = pow(1e-300,1.0/U);
+  double tol = 1e-300;
   int u;
 
   lik = 0;
@@ -219,11 +218,31 @@ measles_dmeasure <- Csnippet("
     if (cases[u] > 0.0) {
       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
     } else {
-      lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+        lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
     }
-  }
-  if(!give_log) lik = exp(lik);
-")
+ }
+ if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
+ ")
+
+# measles_dmeasure <- Csnippet("
+#   const double *C = &C1;
+#   const double *cases = &cases1;
+#   double m,v;
+#   double tol = pow(1e-300,1.0/U);
+#   int u;
+#
+#   lik = 0;
+#   for (u = 0; u < U; u++) {
+#     m = rho*C[u];
+#     v = m*(1.0-rho+psi*psi*m);
+#     if (cases[u] > 0.0) {
+#       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
+#     } else {
+#       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+#     }
+#   }
+#   if(!give_log) lik = exp(lik);
+# ")
 
 measles_rmeasure <- Csnippet("
   const double *C = &C1;
@@ -247,8 +266,10 @@ measles_rmeasure <- Csnippet("
 measles_unit_dmeasure <- Csnippet('
                        // consider adding 1 to the variance for the case C = 0
                        double m = rho*C;
-                       double v = m*(1.0-rho+psi*psi*m);
-                       double tol = pow(1e-300,1.0/U);
+                       //double v = m*(1.0-rho+psi*psi*m);
+                       double v = m*(1.0-rho+psi*psi*m) + 1;
+                       //double tol = pow(1e-300,1.0/U);
+                       double tol = 1e-50;
                        if (cases > 0.0) {
                          lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
                        } else {
@@ -352,7 +373,12 @@ measles_skel <- Csnippet('
     // cannot readily put the cohort effect into a vectorfield for the skeleton
     // therefore, we ignore it here.
     // this is okay as long as the skeleton is being used for short-term forecasts
-    br = lag_birthrate[u];
+    //br = lag_birthrate[u];
+    // cohort effect
+    if (fabs(t-floor(t)-251.0/365.0) < 0.5*0.05)
+      br = cohort*lag_birthrate[u]/0.05 + (1-cohort)*lag_birthrate[u];
+    else
+      br = (1.0-cohort)*lag_birthrate[u];
 
     foi = pow( (I[u]+iota)/pop[u],alpha);
     for (v=0; v < U ; v++) {
@@ -397,11 +423,12 @@ spatPomp(measles_cases,
 #' @export
 girfd_measles <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   # Get real data for U=40 so we can simulate using the resulting spatPomp
+  # COHORT EFFECT CHANGED FROM 0.557 to 0
   measles_sim_U <- 40
   measles_uk <- measles(measles_sim_U)
   read.csv(text="
 ,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
+LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.02
 BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
 LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
 MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
@@ -488,7 +515,7 @@ asifd_measles <- function(U=5,
   measles_uk <- measles(measles_sim_U)
   read.csv(text="
 ,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
+LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
 BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
 LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
 MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
@@ -574,7 +601,7 @@ asifird_measles <- function(U=5,
   measles_uk <- measles(measles_sim_U)
   read.csv(text="
 ,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0.557,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
+LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
 BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
 LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
 MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
