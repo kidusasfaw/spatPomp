@@ -13,15 +13,15 @@
 // returns all of the above in a named list.
 SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
                            SEXP trackancestry, SEXP doparRS,
-                           SEXP weights, SEXP gps, SEXP fsv, SEXP tol)
+                           SEXP weights, SEXP lgps, SEXP fsv, SEXP tol)
 {
   int nprotect = 0;
   SEXP anc = R_NilValue;
   SEXP ess, fail, loglik;
-  SEXP newstates = R_NilValue, newparams = R_NilValue, gfs = R_NilValue, newfsv = R_NilValue;
+  SEXP newstates = R_NilValue, newparams = R_NilValue, lgfs = R_NilValue, newfsv = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
-  double *xw = 0, *xx = 0, *xp = 0, *g = 0, *f = 0;
+  double *xw = 0, *xx = 0, *xp = 0, *lg = 0, *f = 0;
   int *xanc = 0;
   SEXP dimX, dimP, dimfsv, newdim, Xnames, Pnames;
   int *dim, np;
@@ -37,8 +37,8 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
   PROTECT(dimfsv = GET_DIM(fsv)); nprotect++;
-  dim = INTEGER(dimfsv);
-  nunits = dim[0]; nlookaheads = dim[1];
+  dim = INTEGER(dimfsv); 
+  nunits = dim[0]; nlookaheads = dim[1]; // todo: consider allowing multi-dimensional observations for each spatial unit.
   f = REAL(fsv);
 
   PROTECT(params = as_matrix(params)); nprotect++;
@@ -52,7 +52,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
 
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-  // Do we need to do parameter resampling?
+  // Do we need to do parameter resampling? // JP: in iGIRF (iterated GIRF), each particle has both state variable and parameter components, so I think the answer is yes.
   do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
 
   if (do_pr) {
@@ -77,7 +77,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
       nlost++;
     }
   }
-  if (nlost >= nreps) all_fail = 1; // all particles are lost
+  if (nlost >= nreps) all_fail = 1; // all particles are lost // JP: I assume this case doe not happen, because if all particles have log weights equal to -Inf, then after subtracting the max log weight, the log weight will become NaN. The all_fail check should be done before invoking girf_computations.
   if (all_fail) {
     *(REAL(loglik)) = log(toler); // minimum log-likelihood
     *(REAL(ess)) = 0;		  // zero effective sample size
@@ -99,7 +99,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
     int sample[np];
     int gdim[1];
     int newfsvdim[3];
-    double *ss = 0, *st = 0, *ps = 0, *pt = 0, *gp = 0, *gf = 0, *fold = 0, *fnew = 0;
+    double *ss = 0, *st = 0, *ps = 0, *pt = 0, *lgp = 0, *lgf = 0, *fold = 0, *fnew = 0;
 
     // create storage for new states
     xdim[0] = nvars; xdim[1] = np;
@@ -108,7 +108,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
     fixdimnames(newstates,dimnm,2);
     // create storage for filter guide functions
     gdim[0] = np;
-    PROTECT(gfs = makearray(1,gdim)); nprotect++;
+    PROTECT(lgfs = makearray(1,gdim)); nprotect++;
     //setrownames(newstates,Xnames,2);
     //fixdimnames(newstates,dimnm,2);
     // create storage for forecast sample variance of filter states
@@ -120,8 +120,8 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
 
     ss = REAL(x);
     st = REAL(newstates);
-    gp = REAL(gps);
-    gf = REAL(gfs);
+    lgp = REAL(lgps);
+    lgf = REAL(lgfs);
     fold = REAL(fsv);
     fnew = REAL(newfsv);
 
@@ -137,9 +137,9 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
 
     // resample
     nosort_resamp(nreps,REAL(weights),np,sample,0);
-    for (k = 0, g = gp + sample[k]; k < np; k++, gf++) { // copy the particles
-      g = gp + sample[k];
-      *gf = *g;
+    for (k = 0, lg = lgp + sample[k]; k < np; k++, lgf++) { // copy the particles
+      lg = lgp + sample[k];
+      *lgf = *lg;
       for (j = 0, xx = ss+nvars*sample[k]; j < nvars; j++, st++, xx++)
         *st = *xx;
       for (j = 0, f = fold+(nunits*nlookaheads)*sample[k]; j < nunits*nlookaheads; j++, fnew++, f++)
@@ -174,7 +174,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   SET_STRING_ELT(retvalnames,3,mkChar("states"));
   SET_STRING_ELT(retvalnames,4,mkChar("params"));
   SET_STRING_ELT(retvalnames,5,mkChar("ancestry"));
-  SET_STRING_ELT(retvalnames,6,mkChar("filterguides"));
+  SET_STRING_ELT(retvalnames,6,mkChar("logfilterguides"));
   SET_STRING_ELT(retvalnames,7,mkChar("newfsv"));
   SET_NAMES(retval,retvalnames);
 
@@ -198,9 +198,9 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
     SET_ELEMENT(retval,5,anc);
   }
   if (all_fail) {
-    SET_ELEMENT(retval,6,gps);
+    SET_ELEMENT(retval,6,lgps);
   } else {
-    SET_ELEMENT(retval,6,gfs);
+    SET_ELEMENT(retval,6,lgfs);
   }
   if (all_fail) {
     SET_ELEMENT(retval,7,fsv);

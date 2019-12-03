@@ -236,7 +236,7 @@ girf.internal <- function (object,
   znames <- object@accumvars
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   # initialize filter guide function
-  filter_guide_fun <- array(1, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np[1]) ##JP: guide function should be computed on the log scale (it will frequently equal zero on the natural scale)
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
@@ -331,16 +331,16 @@ girf.internal <- function (object,
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead_steps]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init) ##JP: rethink about the discount factor when lookahead_steps=1
         # print(times[nt+1+l] - tt[s+1])
-        dmeas_weights <- tryCatch(
+        log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
             params=mom_match_param[,,l,],
-            log=FALSE,
+            log=TRUE, ##JP: dmeasure should be evaluated on the log scale whenever possible, since it will be zero on the natural scale.
             .gnsi=gnsi
           )),
           error = function (e) {
@@ -348,12 +348,11 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        log_dmeas_weights <- log(dmeas_weights)
-        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
+        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
-      log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
-      log_s_not_1_weights <- log_guide_fun - log(filter_guide_fun)
+      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol) ##JP: tol = 1e-300 may not be small enough for large U? 
+      log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
       }
@@ -361,14 +360,14 @@ girf.internal <- function (object,
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        meas_weights <- tryCatch(
+        log_meas_weights <- tryCatch(
           (dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
             times=times[nt+1],
             params=params,
-            log=FALSE,
+            log=TRUE, ##JP: dmeasure should be evaluated on the log scale whenever possible, since it will be zero on the natural scale.
             .gnsi=gnsi
           )),
           error = function (e) {
@@ -376,29 +375,28 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        log_meas_weights = log(meas_weights)
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
       max_log_weights <- max(log_weights)
       log_weights <- log_weights - max_log_weights
       weights <- exp(log_weights)
-      guide_fun <- exp(log_guide_fun)
+      ##guide_fun <- exp(log_guide_fun)
       xx <- tryCatch(
-        .Call('girf_computations',
-              x=X,
-              params=params,
-              Np=Np[nt+1],
-              trackancestry=FALSE,
-              doparRS=FALSE,
-              weights=weights,
-              gps=guide_fun,
-              fsv=fcst_samp_var,
-              tol=tol
-              ),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
+          .Call('girf_computations',
+                x=X,
+                params=params,
+                Np=Np[nt+1],
+                trackancestry=FALSE,
+                doparRS=FALSE, ##JP: I think for iGIRF, doparRS has to be set to TRUE.
+                weights=weights,
+                lgps=log_guide_fun,
+                fsv=fcst_samp_var,
+                tol=tol
+                ),
+          error = function (e) {
+              stop(ep,conditionMessage(e),call.=FALSE) # nocov
+          }
       )
       cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
       # if(nt > 7 & nt < 11 & s == 1){
@@ -424,7 +422,7 @@ girf.internal <- function (object,
       # print(log_s_not_1_weights)
       # }
       x <- xx$states
-      filter_guide_fun <- xx$filterguides
+      log_filter_guide_fun <- xx$logfilterguides
       params <- xx$params[,1]
       fcst_samp_var <- xx$newfsv
     }

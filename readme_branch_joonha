@@ -1,0 +1,7 @@
+differences relative to the master branch:
+1. handles likelihood estimates differently. Specifically, dmeasure and the guide function are computed on the log scale except when resampling happens. Also, log likelihoods less than tol (default at 1e-300) are not coerced to log(tol).
+
+
+potential further changes:
+1. implement parallelization using the structure of the island particle filtering
+2. facilitate multi-dimensional observations on each spatial unit
