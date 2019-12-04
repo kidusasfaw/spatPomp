@@ -197,7 +197,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       }
     )
 
-    weights[weights < tol] <- tol
+    # weights[weights < tol] <- tol
     cond.densities[,,n] <- weights[,,1]
     ## adapted simulation via intermediate resampling
     # tt has S+1 (or Ninter+1) entries
@@ -290,19 +290,19 @@ asifir.internal <- function (object, params, Np, nbhd,
 #       }
 
       # U x Np x 1 matrix of skeleton prediction weights
-# TRY REMOVING DISCOUNT FOR ASIF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL 
+# TRY REMOVING DISCOUNT FOR ASIF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL
 #      discount_denom_init = times[n]
 #      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
       log_wp <- tryCatch(
-        log(vec_dmeasure(
+        vec_dmeasure(
           object,
           y=object@data[,n,drop=FALSE],
           x=skel,
           times=times[n+1],
           params=mom_match_param,
-          log=FALSE,
+          log=TRUE,
           .gnsi=gnsi
-        )),
+        ),
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )

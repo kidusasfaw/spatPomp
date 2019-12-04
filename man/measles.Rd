@@ -4,7 +4,7 @@
 \alias{measles}
 \title{Measles in UK spatPomp generator}
 \usage{
-measles(U = 6)
+measles(U = 6, dt = 2/365)
 }
 \arguments{
 \item{U}{A length-one numeric signifying the number of cities to be represented in the spatPomp object.}

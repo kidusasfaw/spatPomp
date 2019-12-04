@@ -263,7 +263,6 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
   ntimes <- length(times)-1
 
   loglik <- rep(NA,ntimes)
-  eff.sample.size <- array(0, dim = c(ntimes, Ninter))
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
 
   znames <- object@accumvars
@@ -407,94 +406,98 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       # for(p in 1:Np[1]){
       #   mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]
       # }
-      guide_fun = vector(mode = "numeric", length = Np[1]) + 1
+      log_guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead_steps]
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
-        dmeas_weights <- tryCatch(
+        log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
             params=mom_match_param[,,l,],
-            log=FALSE,
+            log=TRUE,
             .gnsi=gnsi
           )),
           error = function (e) {
-            stop(ep,"error in calculation of dmeas_weights: ",
+            stop(ep,"error in calculation of log_dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
-        resamp_weights <- apply(dmeas_weights[,,1,drop=FALSE], 2, function(x) prod(x))^discount_factor
-        guide_fun = guide_fun*resamp_weights
+        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
+        log_guide_fun = log_guide_fun + log_resamp_weights
       }
-
-      guide_fun[guide_fun < tol] <- tol
-      s_not_1_weights <- guide_fun/filter_guide_fun
+      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
+      log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
-        weights <- s_not_1_weights
+        log_weights <- log_s_not_1_weights
       }
       else {
         x_3d <- x
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
-        weights <- tryCatch(
+        log_meas_weights <- tryCatch(
           dmeasure(
             object,
             y=object@data[,nt,drop=FALSE],
             x=x_3d,
             times=times[nt+1],
             params=tparams,
-            log=FALSE,
+            log=TRUE,
             .gnsi=gnsi
           ),
           error = function (e) {
-            stop(ep,"error in calculation of dmeas_weights: ",
+            stop(ep,"error in calculation of log_meas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
         gnsi <- FALSE
-        weights <- as.numeric(weights)*s_not_1_weights
+        log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
       if (nt == ntimes-1 & s==Ninter) {
-        if (any(weights>0)) {
-          coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=weights)
+        if (any(log_weights>-Inf)) {
+          coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=exp(log_weights))
         } else {
           pomp:::pWarn("igirf","filtering failure at last filter iteration; using ",
                 "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
       }
-
-      xx <- tryCatch(
-        .Call('girf_computations',
-              x=X,
-              params=params,
-              Np=Np[nt+1],
-              trackancestry=FALSE,
-              doparRS=TRUE,
-              weights=weights,
-              gps=guide_fun,
-              fsv=fcst_samp_var,
-              tol=tol
-        ),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
-      )
-      all.fail <- xx$fail
-      eff.sample.size[nt+1, s] <- xx$ess
-      cond.loglik[nt+1, s] <- xx$loglik
-      x <- xx$states
-      filter_guide_fun <- xx$filterguides
-      params <- xx$params
-      fcst_samp_var <- xx$newfsv
+      max_log_weights <- max(log_weights)
+      if(max_log_weights > -Inf){
+        log_weights <- log_weights - max_log_weights
+        weights <- exp(log_weights)
+        xx <- tryCatch(
+          .Call('girf_computations',
+                x=X,
+                params=params,
+                Np=Np[nt+1],
+                trackancestry=FALSE,
+                doparRS=TRUE,
+                weights=weights,
+                lgps=log_guide_fun,
+                fsv=fcst_samp_var,
+                tol=tol
+          ),
+          error = function (e) {
+            stop(ep,conditionMessage(e),call.=FALSE) # nocov
+          }
+        )
+        cond.loglik[nt+1, s] <- xx$loglik
+        x <- xx$states
+        log_filter_guide_fun <- xx$logfilterguides
+        params <- xx$params
+        fcst_samp_var <- xx$newfsv
+      }
+      else{
+        cond.loglik[nt+1, s] <- log(tol)
+      }
     }
   }
-  # print(sum(cond.loglik))
+  print(sum(cond.loglik))
   new(
     "girfd_spatPomp",
     object,

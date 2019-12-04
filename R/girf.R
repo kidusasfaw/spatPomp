@@ -344,14 +344,14 @@ girf.internal <- function (object,
             .gnsi=gnsi
           )),
           error = function (e) {
-            stop(ep,"error in calculation of dmeas_weights: ",
+            stop(ep,"error in calculation of log_dmeas_weights: ",
                  conditionMessage(e),call.=FALSE)
           }
         )
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
-      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol) ##JP: tol = 1e-300 may not be small enough for large U? 
+      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol) ##JP: tol = 1e-300 may not be small enough for large U?
       log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
@@ -379,26 +379,35 @@ girf.internal <- function (object,
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
       max_log_weights <- max(log_weights)
-      log_weights <- log_weights - max_log_weights
-      weights <- exp(log_weights)
-      ##guide_fun <- exp(log_guide_fun)
-      xx <- tryCatch(
-          .Call('girf_computations',
-                x=X,
-                params=params,
-                Np=Np[nt+1],
-                trackancestry=FALSE,
-                doparRS=FALSE, ##JP: I think for iGIRF, doparRS has to be set to TRUE.
-                weights=weights,
-                lgps=log_guide_fun,
-                fsv=fcst_samp_var,
-                tol=tol
-                ),
-          error = function (e) {
-              stop(ep,conditionMessage(e),call.=FALSE) # nocov
-          }
-      )
-      cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
+      if(max_log_weights > -Inf){
+        log_weights <- log_weights - max_log_weights
+        weights <- exp(log_weights)
+        ##guide_fun <- exp(log_guide_fun)
+        xx <- tryCatch(
+            .Call('girf_computations',
+                  x=X,
+                  params=params,
+                  Np=Np[nt+1],
+                  trackancestry=FALSE,
+                  doparRS=FALSE, ##JP: I think for iGIRF, doparRS has to be set to TRUE.
+                  weights=weights,
+                  lgps=log_guide_fun,
+                  fsv=fcst_samp_var,
+                  tol=tol
+                  ),
+            error = function (e) {
+                stop(ep,conditionMessage(e),call.=FALSE) # nocov
+            }
+        )
+        cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
+        x <- xx$states
+        log_filter_guide_fun <- xx$logfilterguides
+        params <- xx$params[,1]
+        fcst_samp_var <- xx$newfsv
+      }
+      else{
+        cond.loglik[nt+1, s] <- log(tol)
+      }
       # if(nt > 7 & nt < 11 & s == 1){
       # print("nt")
       # print(nt)
@@ -421,10 +430,6 @@ girf.internal <- function (object,
       # print("log_s_not_1_weights")
       # print(log_s_not_1_weights)
       # }
-      x <- xx$states
-      log_filter_guide_fun <- xx$logfilterguides
-      params <- xx$params[,1]
-      fcst_samp_var <- xx$newfsv
     }
   }
   new(

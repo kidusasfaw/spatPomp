@@ -174,14 +174,14 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
     )
 
     ## determine the weights
-    weights <- tryCatch(
+    log_weights <- tryCatch(
       vec_dmeasure(
         object,
         y=object@data[,nt,drop=FALSE],
         x=X,
         times=times[nt+1],
         params=params,
-        log=FALSE,
+        log=TRUE,
         .gnsi=gnsi
       ),
       error = function (e) {
@@ -190,11 +190,15 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
       }
     )
 
-    weights[weights == 0] <- tol
-    cond.densities[,,nt] <- weights[,,1]
-    resamp_weights <- apply(weights[,,1,drop=FALSE], 2, function(x) prod(x))
+    #weights[weights == 0] <- tol
+    cond.densities[,,nt] <- exp(log_weights[,,1])
+    log_resamp_weights <- apply(log_weights[,,1,drop=FALSE], 2, function(x) sum(x))
+    max_log_resamp_weights <- max(log_resamp_weights)
     # if any particle's resampling weight is zero replace by tolerance
-    if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
+    if(all(is.infinite(log_resamp_weights))) log_resamp_weights <- rep(log(tol), Np[1L])
+    else log_resamp_weights <- log_resamp_weights - max_log_resamp_weights
+    resamp_weights <- exp(log_resamp_weights)
+    #if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
     gnsi <- FALSE
 
     ## do resampling if filtering has not failed

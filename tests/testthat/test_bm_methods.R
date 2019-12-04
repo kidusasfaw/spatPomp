@@ -60,23 +60,23 @@ asif.nbhd <- function(object, time, unit) {
 }
 
 asif.loglik <- replicate(10,logLik(asif(bm3,
-                           islands = 50,
-                           Np = 20,
+                           islands = 100,
+                           Np = 50,
                            nbhd = asif.nbhd)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 asifir.loglik <- replicate(10,logLik(asifir(bm3,
-                        islands = 50,
-                        Np=20,
+                        islands = 100,
+                        Np=50,
                         nbhd = asif.nbhd,
                         Ninter = length(spat_units(bm3)))))
 
 test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates", {
-  expect_lt(abs(logmeanexp(girf.loglik) - loglik.true), 2)
-  expect_lt(abs(logmeanexp(asif.loglik) - loglik.true), 2)
-  expect_lt(abs(logmeanexp(asifir.loglik) - loglik.true), 2)
+  expect_lt(abs(logmeanexp(girf.loglik) - loglik.true), 3)
+  expect_lt(abs(logmeanexp(asif.loglik) - loglik.true), 3)
+  expect_lt(abs(logmeanexp(asifir.loglik) - loglik.true), 3)
 
 })
 
