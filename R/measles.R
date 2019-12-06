@@ -242,6 +242,7 @@ measles_unit_dmeasure <- Csnippet('
                        } else {
                            lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
                        }
+                       if(give_log) lik = log(lik);
                        ')
 
 measles_unit_emeasure <- Csnippet("

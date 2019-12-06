@@ -264,7 +264,7 @@ setMethod(
   "asif",
   signature=signature(object="spatPomp"),
   function (object, islands, Np, nbhd, params,
-           tol = (1e-18)^9,
+           tol = (1e-300),
            ...) {
    if (missing(params)) params <- coef(object)
    ## single thread for testing
@@ -327,7 +327,7 @@ setMethod(
   "asif",
   signature=signature(object="asifd.spatPomp"),
   function (object, islands, Np, nbhd, params,
-            tol = (1e-18)^9,
+            tol,
             ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol

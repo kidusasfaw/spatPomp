@@ -76,7 +76,7 @@ setMethod(
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
                         Ninter,lookahead,Nguide,h,theta.to.v,v.to.theta,
-                        tol = 1e-17, max.fail = Inf,save.states = FALSE,
+                        tol = 1e-300, max.fail = Inf,save.states = FALSE,
                         ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
@@ -119,7 +119,7 @@ setMethod(
 
 igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
                             Ninter,lookahead,Nguide,h,theta.to.v, v.to.theta,
-                            tol = 1e-17, max.fail = Inf,save.states = FALSE,
+                            tol, max.fail = Inf,save.states = FALSE,
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
@@ -242,7 +242,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 }
 
 igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v, v.to.theta,
-                        Np, girfiter, rw.sd, cooling.fn, tol = 1e-17, max.fail = Inf,
+                        Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
                         verbose, .indices = integer(0), .gnsi = TRUE) {
 
   tol <- as.numeric(tol)
@@ -268,7 +268,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
   znames <- object@accumvars
 
   # initialize filter guide function
-  filter_guide_fun <- array(1, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) {
     ## perturb parameters
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]

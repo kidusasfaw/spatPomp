@@ -8,7 +8,7 @@
 \title{Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)}
 \usage{
 \S4method{asifir}{spatPomp}(object, params, Np, islands, nbhd, Ninter,
-  tol = (1e-18), ...)
+  tol = (1e-300), ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}

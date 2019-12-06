@@ -27,6 +27,22 @@ loglik.true <- pomp:::kalmanFilter(
   R=diag(coef(bm3)["tau"]^2, nrow=nrow(dmat))
 )$loglik
 
+fun_to_optim <- function(cf){
+  rootQ = cf["rho"]^dmat * cf["sigma"]
+  -pomp2:::kalmanFilter(
+    t=1:N,
+    y=obs(bm3),
+    X0=rinit(bm3),
+    A=diag(length(spat_units(bm3))),
+    Q=rootQ%*%rootQ,
+    C=diag(1,nrow=nrow(dmat)),
+    R=diag(cf["tau"]^2, nrow=nrow(dmat))
+  )$loglik
+}
+mle <- optim(coef(bm3), fun_to_optim)
+kfll_mle <- mle$value
+kfll_mle
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,5 +99,26 @@ test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates",
 test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf.loglik.l2) - loglik.true), 2)
 })
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   igirf starting from arbitrary parameter set
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+igirf.lookahead <- 1
+igirf.ninter <- length(spat_units(bm3))
+igirf.np <- 800
+igirf.nguide <- 40
+igirf.ngirf <- 50
+coef(bm3) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0)
+igirf.out <- igirf(bm3, Ngirf = igirf.ngirf,
+                   rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
+                                 X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+                                 X8_0=0.02),
+                   cooling.type = "geometric",
+                   cooling.fraction.50 = 0.5,
+                   Np=igirf.np,
+                   Ninter = igirf.ninter,
+                   lookahead = igirf.lookahead,
+                   Nguide = igirf.nguide)
 
 

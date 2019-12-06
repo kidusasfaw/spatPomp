@@ -377,7 +377,7 @@ setMethod(
   "asifir",
   signature=signature(object="spatPomp"),
   function (object, params, Np, islands, nbhd,
-            Ninter, tol = (1e-18), ...) {
+            Ninter, tol = (1e-300), ...) {
   if (missing(params)) params <- coef(object)
     # set.seed(396658101,kind="L'Ecuyer")
   # begin single-core
@@ -437,7 +437,7 @@ setMethod(
   "asifir",
   signature=signature(object="asifird_spatPomp"),
   function (object, params, Np, islands, nbhd,
-            Ninter, tol = (1e-18), ...) {
+            Ninter, tol, ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
     if (missing(Ninter)) Ninter <- object@Ninter
