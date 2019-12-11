@@ -34,28 +34,12 @@
 ##'   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
 ##'   return(nbhd_list)
 ##' }
-##' # Specify the expected measurement, theta.to.v and v.to.theta
-##' girf.h <- function(state.vec, param.vec){
-##'   # find index matching unit_statename
-##'   ix<-grep('X',names(state.vec))
-##'   state.vec[ix]
-##' }
-##' girf.theta.to.v <- function(meas.mean, param.vec){
-##'   param.vec['tau']^2
-##' }
-##' girf.v.to.theta <- function(var, state.vec, param.vec){
-##'   param.vec['tau'] <- sqrt(var)
-##'   param.vec
-##' }
 ##' # Run ASIFIR specified number of Monte Carlo islands and particles per island
 ##' asifird.b <- asifir(b,
 ##'                    islands = 50,
 ##'                    Np=20,
 ##'                    nbhd = bm_nbhd,
-##'                    Ninter = length(spat_units(bm3)),
-##'                    h = girf.h,
-##'                    theta.to.v = girf.theta.to.v,
-##'                    v.to.theta = girf.v.to.theta)
+##'                    Ninter = length(spat_units(bm3)))
 ##' # Get the likelihood estimate from ASIFIR
 ##' logLik(asifird.b)
 ##'
@@ -74,8 +58,6 @@
 ##' }
 ##'
 NULL
-
-#setGeneric("asifir",function(object,...)standardGeneric("asifir"))
 
 setClass(
   "asifird_spatPomp",

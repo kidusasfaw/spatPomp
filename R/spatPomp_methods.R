@@ -135,7 +135,7 @@ setMethod(
 ##' @export
 setMethod(
   "logLik",
-  signature=signature(object="asifd.spatPomp"),
+  signature=signature(object="asifd_spatPomp"),
   definition=function(object)object@loglik
 )
 

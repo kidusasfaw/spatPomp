@@ -27,7 +27,7 @@
 ##' # Create a simulation of a BM using default parameter set
 ##' b <- bm(U=3, N=10)
 ##'
-##' # Create a neighborhood function mapping a point in space-time to a list of ``neighboring points" in space-time
+##' # Create a neighborhood function mapping a point in space-time to a list of "neighboring points" in space-time
 ##' bm_nbhd <- function(object, time, unit) {
 ##'   nbhd_list = list()
 ##'   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
@@ -45,7 +45,7 @@
 ##' logLik(pfd.b)
 ##' @return
 ##' Upon successful completion, \code{asif} returns an object of class
-##' \sQuote{asifd.pomp}.
+##' \sQuote{asifd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -56,7 +56,7 @@
 NULL
 
 setClass(
-  "island.spatPomp",
+  "island_spatPomp",
   slots=c(
     wm.times.wp.avg="array",
     wp.avg="array",
@@ -71,7 +71,7 @@ setClass(
   )
 )
 setClass(
-  "asifd.spatPomp",
+  "asifd_spatPomp",
   contains="spatPomp",
   slots=c(
     islands="integer",
@@ -247,7 +247,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
   pompUnload(object,verbose=verbose)
   new(
-    "island.spatPomp",
+    "island_spatPomp",
     wm.times.wp.avg = wm.times.wp.avg,
     wp.avg = wp.avg,
     Np=as.integer(Np),
@@ -300,32 +300,38 @@ setMethod(
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
-   cond.loglik = array(data = numeric(0), dim=c(nunits, ntimes))
-   for (i in seq_len(nunits)){
-    for (j in seq_len(ntimes)){
-      mp_sum = 0
-      p_sum = 0
-      for (k in seq_len(islands)){
-        mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[i,j]
-        p_sum = p_sum + mult_island_output[[k]]@wp.avg[i,j]
-      }
-      cond.loglik[i,j] = log(mp_sum) - log(p_sum)
-    }
-   }
+   #cond_loglik = array(data = numeric(0), dim=c(nunits, ntimes))
+   cond_loglik <- foreach::foreach(i=seq_len(nunits),
+                    .combine = 'rbind',
+                    .packages=c("pomp", "spatPomp"),
+                    .options.multicore=mcopts) %dopar%
+                    {
+                      cond_loglik_i <- array(data = numeric(0), dim=c(ntimes))
+                      for (j in seq_len(ntimes)){
+                        mp_sum = 0
+                        p_sum = 0
+                        for (k in seq_len(islands)){
+                          mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[i,j]
+                          p_sum = p_sum + mult_island_output[[k]]@wp.avg[i,j]
+                        }
+                        cond_loglik_i[j] = log(mp_sum) - log(p_sum)
+                      }
+                      cond_loglik_i
+                    }
    # end multi-threaded code
    new(
-      "asifd.spatPomp",
+      "asifd_spatPomp",
       object,
       Np=as.integer(Np),
       tol=tol,
-      loglik=sum(cond.loglik)
+      loglik=sum(cond_loglik)
      )
   }
 )
 
 setMethod(
   "asif",
-  signature=signature(object="asifd.spatPomp"),
+  signature=signature(object="asifd_spatPomp"),
   function (object, islands, Np, nbhd, params,
             tol,
             ...) {

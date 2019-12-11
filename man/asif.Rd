@@ -33,7 +33,7 @@ See \link[=userdata]{?userdata} for information on how to use this facility.}
 }
 \value{
 Upon successful completion, \code{asif} returns an object of class
-\sQuote{asifd.pomp}.
+\sQuote{asifd_spatPomp}.
 }
 \description{
 An algorithm for estimating the filter distribution of a spatiotemporal partially-observed Markov process (SpatPOMP for short).
@@ -55,7 +55,7 @@ The following methods are available for such an object:
 # Create a simulation of a BM using default parameter set
 b <- bm(U=3, N=10)
 
-# Create a neighborhood function mapping a point in space-time to a list of ``neighboring points" in space-time
+# Create a neighborhood function mapping a point in space-time to a list of "neighboring points" in space-time
 bm_nbhd <- function(object, time, unit) {
   nbhd_list = list()
   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))

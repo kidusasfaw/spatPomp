@@ -14,7 +14,7 @@
 \usage{
 \S4method{logLik}{girfd_spatPomp}(object)
 
-\S4method{logLik}{asifd.spatPomp}(object)
+\S4method{logLik}{asifd_spatPomp}(object)
 
 \S4method{logLik}{asifird_spatPomp}(object)
 
