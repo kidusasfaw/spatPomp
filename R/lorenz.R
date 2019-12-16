@@ -39,6 +39,8 @@ lorenz_RPnames <- c("F","sigma","tau")
 ## all parameters
 lorenz_paramnames <- c(lorenz_RPnames,lorenz_IVPnames)
 
+
+## added a condition to prevent numerical instability when the gradient exceeds 1/dt  
 lorenz_rprocess <- Csnippet("
   double *X = &X1;
   double dXdt[U];
@@ -51,6 +53,8 @@ lorenz_rprocess <- Csnippet("
   dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
   dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
   for (u = 0 ; u < U ; u++) {
+    if(dXdt[u]> 1/dt) dXdt[u] = 1/dt;
+    if(dXdt[u]< -1/dt) dXdt[u] = -1/dt;
     X[u] += dXdt[u]*dt + rnorm(0,sigma*sqrt(dt));
   }
 ")
