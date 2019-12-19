@@ -40,7 +40,7 @@ observation.}
 An object of class \sQuote{kalmand_spatPomp}.
 }
 \description{
-The ensemble Kalman filter
+A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994)
 }
 \references{
 Evensen, G. (1994) Sequential data assimilation with a
@@ -55,9 +55,6 @@ Assimilation Monthly Weather Review 129:2884--2903
 }
 \seealso{
 Other \pkg{spatPomp} parameter estimation methods: \code{\link{hippie}}
-}
-\author{
-Kidus Asfaw
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filtering methods}

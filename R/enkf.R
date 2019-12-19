@@ -1,12 +1,11 @@
 ##' Ensemble Kalman filters
 ##'
-##' The ensemble Kalman filter
+##' A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994)
 ##'
 ##' @name senkf
 ##' @rdname senkf
 ##' @include spatPomp_class.R spatPomp.R
 ##' @aliases senkf  senkf,ANY-method senkf,missing-method
-##' @author Kidus Asfaw
 ##' @family particle filtering methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'

@@ -7,10 +7,12 @@
 #' times.
 #'
 #' @param U A length-one numeric signifying dimension of the process.
-#' @param N A length-one numeric signifying the number of time steps to evolve the process.
+#' @param N A length-one numeric signifying the number of observation time steps to evolve the process.
 #' @return A spatPomp object with the specified dimension and time steps.
 #' @examples
-#' bm(U=4, N=20)
+#' b <- bm(U=4, N=20)
+#' # See all the model specifications of the object
+#' spy(b)
 #' @export
 
 bm <- function(U=5,N=100,delta.t=0.1){
@@ -61,7 +63,7 @@ bm_rprocess <- spatPomp_Csnippet("
   }
 ", unit_statenames = c("X"))
 
-bm_skel2 <- Csnippet("
+bm_skel <- Csnippet("
   //double *X = &X1;
   double *DX = &DX1;
   int u;
@@ -131,9 +133,7 @@ bm_spatPomp <- spatPomp(bm_data,
                units="unit",
                unit_statenames = bm_unit_statenames,
                rprocess=euler(bm_rprocess,delta.t = delta.t),
-               #rprocess=discrete_time(bm_rprocess),
-               #skeleton=map(bm_skel, delta.t=delta.t),
-               skeleton=vectorfield(bm_skel2),
+               skeleton=vectorfield(bm_skel),
                paramnames=bm_paramnames,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
@@ -156,7 +156,6 @@ simulate(bm_spatPomp,params=test_params)
 }
 
 #' @export
-
 girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
@@ -179,6 +178,37 @@ girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
     loglik=as.double(NA)
   )
 }
+
+#' @export
+asifd_bm <- function(U=5,
+                     N = 10,
+                     islands = 50,
+                     Np = 10,
+                     nbhd = function(object, time, unit) {
+                       nbhd_list <- list()
+                       if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                       if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
+                       return(nbhd_list)
+                     }){
+  b <- bm(U = U, N = N)
+  # asifd_spatPomp object creation requirements
+  bm_Np <- Np
+  bm_islands <- islands
+  bm_nbhd <- nbhd
+  bm_tol <- 1e-300
+
+  # Output girfd_spatPomp object
+  new(
+    "asifd_spatPomp",
+    b,
+    Np = as.integer(bm_Np),
+    islands = as.integer(bm_islands),
+    nbhd = bm_nbhd,
+    tol= bm_tol,
+    loglik=as.double(NA)
+  )
+}
+
 #' @export
 asifird_bm <- function(U=5,
                        N = 10,

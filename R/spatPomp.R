@@ -5,19 +5,22 @@
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 ##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
 ##'
-##'##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
-##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the expected observed value given a latent state and parameter vector.
+##' @param unit_emeasure Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
 ##' For more information, see the examples section below.
-##' @param theta.to.v A user-provided function taking two named arguments:
-##' \code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
-##' and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-##' to the variance of the observed value given a latent state and parameter vector.
+##' @param unit_vmeasure Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
 ##' For more information, see the examples section below.
-##' @param v.to.theta A user-provided function taking three named arguments:
-##' \code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
-##'  (representing a parameter vector for the model). The function should return a parameter vector having observation
-##'   noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.
+##' @param unit_mmeasure Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
+##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance parameter to the pre-defined variable corresponding to that parameter, which has been predefined with a \code{M_} prefix. For instance, if the moment-matched parameter is \code{psi}, then the user should assign \code{M_psi} to the moment-matched value.
+##' For more information, see the examples section below.
+##' @param unit_dmeasure Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined variable \code{lik}. The user is encouraged to provide a logged density in an \code{if} condition that checks whether the predefined \code{give_log} variable is true.
+##' For more information, see the examples section below.
+##' @param unit_rmeasure Simulator of the unit measurement model given the latent states and the model parameters.
+##' The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
+##' For more information, see the examples section below.
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'
@@ -81,9 +84,9 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
 
   if (inherits(data, what = "spatPomp")){
     if(!missing(units) && !missing(unit_statenames) && !missing(obstypes))
-      stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure and unit_rmeasure",call.=FALSE)
+      stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure, unit_rmeasure, unit_emeasure or unit_mmeasure",call.=FALSE)
     else{
-      if(missing(unit_dmeasure) && missing(unit_rmeasure)){
+      if(missing(unit_dmeasure) && missing(unit_rmeasure) && missing(unit_emeasure) && missing(unit_mmeasure)){
         # only pomp components are changing
         print("here")
         print(names(data@params))
@@ -110,7 +113,9 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
         sp <- new("spatPomp",po,
                   unit_rmeasure = data@unit_rmeasure,
                   unit_dmeasure = data@unit_dmeasure,
-                  units=data@units,
+                  unit_emeasure = data@unit_emeasure,
+                  unit_mmeasure = data@unit_mmeasure,
+                  units=spat_units(data),
                   unit_statenames=data@unit_statenames,
                   obstypes = data@obstypes)
         return(sp)

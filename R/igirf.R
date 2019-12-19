@@ -497,7 +497,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       }
     }
   }
-  print(sum(cond.loglik))
+  #print(sum(cond.loglik))
   new(
     "girfd_spatPomp",
     object,

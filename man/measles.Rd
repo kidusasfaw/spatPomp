@@ -14,8 +14,11 @@ A spatPomp object.
 }
 \description{
 Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
-Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
+The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
+The data in the object is simulated using the process and measurement models of He et al. (2010).
 }
 \examples{
-measles(7)
+m <- measles(U = 7)
+# See all the model specifications of the object
+spy(m)
 }

@@ -37,6 +37,27 @@ When named arguments not recognized by \code{\link{pomp}} are provided, these ar
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[=userdata]{?userdata} for information on how to use this facility.}
 
+\item{unit_emeasure}{Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
+For more information, see the examples section below.}
+
+\item{unit_mmeasure}{Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
+Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance parameter to the pre-defined variable corresponding to that parameter, which has been predefined with a \code{M_} prefix. For instance, if the moment-matched parameter is \code{psi}, then the user should assign \code{M_psi} to the moment-matched value.
+For more information, see the examples section below.}
+
+\item{unit_vmeasure}{Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
+For more information, see the examples section below.}
+
+\item{unit_dmeasure}{Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined variable \code{lik}. The user is encouraged to provide a logged density in an \code{if} condition that checks whether the predefined \code{give_log} variable is true.
+For more information, see the examples section below.}
+
+\item{unit_rmeasure}{Simulator of the unit measurement model given the latent states and the model parameters.
+The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
+For more information, see the examples section below.}
+
 \item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
 For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
@@ -114,27 +135,10 @@ For more information, see \link[=parameter_trans]{?parameter_trans}.
 Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
-
-\item{theta.to.v}{A user-provided function taking two named arguments:
-\code{meas.mean} (representing the observation mean given a latent state - as computed using the \code{h} function above)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the variance of the observed value given a latent state and parameter vector.
-For more information, see the examples section below.}
-
-\item{v.to.theta}{A user-provided function taking three named arguments:
-\code{var} (representing an empirical variance), \code{state.vec} (representing a latent state) and \code{param.vec}
- (representing a parameter vector for the model). The function should return a parameter vector having observation
-  noise consistent with variance \code{var} at latent state \code{state.vec} with other parameters given by \code{param.vec}.}
 }
 \description{
 This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
 Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.
 Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
-}
-\details{
-##' @param h A user-provided function taking two named arguments: \code{state.vec} (representing the latent state)
-and \code{param.vec} (representing a parameter vector for the model). It should return a scalar approximation
-to the expected observed value given a latent state and parameter vector.
-For more information, see the examples section below.
 }

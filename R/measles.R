@@ -1,12 +1,15 @@
 #' Measles in UK spatPomp generator
 #'
 #' Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
-#' Model adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
+#' The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
+#' The data in the object is simulated using the process and measurement models of He et al. (2010).
 #'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
 #' @return A spatPomp object.
 #' @examples
-#' measles(7)
+#' m <- measles(U = 7)
+#' # See all the model specifications of the object
+#' spy(m)
 #' @export
 
 measles <- function(U=6,dt=2/365){
@@ -540,7 +543,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
 
   # Output asifd.spatPomp object
   new(
-    "asifd.spatPomp",
+    "asifd_spatPomp",
     m,
     Np = as.integer(measles_Np),
     islands=as.integer(measles_islands),

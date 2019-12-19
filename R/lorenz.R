@@ -1,8 +1,8 @@
 #' Lorenz 96 spatPomp generator
 #'
 #' Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
-#' \code{N} measurements made at times \eqn{t_n= n dt_{obs}}, simulated using an Euler method
-#' with time increment $dt$.
+#' \code{N} measurements made at times \eqn{t_n = n * dt_{obs}}, simulated using an Euler method
+#' with time increment \code{dt}.
 #'
 #' @param U A length-one numeric signifying the number of spatial units for the process.
 #' @param N A length-one numeric signifying the number of observations.
@@ -12,8 +12,9 @@
 #' @return A spatPomp object with the specified dimension and time steps.
 #'
 #' @examples
-#' lorenz(U=5, N=100, dt=0.01, dt_obs=1)
-#'
+#' l <- lorenz(U=5, N=100, dt=0.01, dt_obs=1)
+#' # See all the model specifications of the object
+#' spy(l)
 #' @export
 
 lorenz <- function(U=5,N=100,dt=0.01,dt_obs=0.5){
@@ -167,6 +168,37 @@ girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
     loglik=as.double(NA)
   )
 }
+
+#' @export
+asifd_lorenz <- function(U=5,
+                     N = 10,
+                     islands = 50,
+                     Np = 10,
+                     nbhd = function(object, time, unit){
+                       nbhd_list = list()
+                       if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                       if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+                       return(nbhd_list)
+                     }){
+  l <- lorenz(U = U, N = N)
+  # asifd_spatPomp object creation requirements
+  lorenz_Np <- Np
+  lorenz_islands <- islands
+  lorenz_nbhd <- nbhd
+  lorenz_tol <- 1e-300
+
+  # Output girfd_spatPomp object
+  new(
+    "asifd_spatPomp",
+    l,
+    Np = as.integer(lorenz_Np),
+    islands = as.integer(lorenz_islands),
+    nbhd = lorenz_nbhd,
+    tol= lorenz_tol,
+    loglik=as.double(NA)
+  )
+}
+
 #' @export
 asifird_lorenz <- function(U=5,
                        N = 10,

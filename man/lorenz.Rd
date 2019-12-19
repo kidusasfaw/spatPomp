@@ -20,10 +20,11 @@ A spatPomp object with the specified dimension and time steps.
 }
 \description{
 Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
-\code{N} measurements made at times \eqn{t_n= n dt_{obs}}, simulated using an Euler method
-with time increment $dt$.
+\code{N} measurements made at times \eqn{t_n = n * dt_{obs}}, simulated using an Euler method
+with time increment \code{dt}.
 }
 \examples{
-lorenz(U=5, N=100, dt=0.01, dt_obs=1)
-
+l <- lorenz(U=5, N=100, dt=0.01, dt_obs=1)
+# See all the model specifications of the object
+spy(l)
 }

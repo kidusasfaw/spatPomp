@@ -342,7 +342,7 @@ asifir.internal <- function (object, params, Np, nbhd,
 
   pompUnload(object,verbose=verbose)
   new(
-    "island.spatPomp",
+    "island_spatPomp",
     wm.times.wp.avg = wm.times.wp.avg,
     wp.avg = wp.avg,
     Np=as.integer(Np),
@@ -361,6 +361,7 @@ setMethod(
   function (object, params, Np, islands, nbhd,
             Ninter, tol = (1e-300), ...) {
   if (missing(params)) params <- coef(object)
+  if (missing(Ninter)) Ninter <- length(spat_units(object))
     # set.seed(396658101,kind="L'Ecuyer")
   # begin single-core
   # single_island_output <- spatPomp:::asifir.internal(

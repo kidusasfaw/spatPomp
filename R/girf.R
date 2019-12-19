@@ -119,6 +119,7 @@ setMethod(
 
     if (missing(params)) params <- coef(object)
     if (missing(tol)) tol <- 1e-300
+    if (missing(Ninter)) Ninter <- length(spat_units(object))
 
     tryCatch(
       girf.internal(

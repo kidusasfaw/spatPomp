@@ -9,7 +9,7 @@ bm(U = 5, N = 100, delta.t = 0.1)
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}
 
-\item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
+\item{N}{A length-one numeric signifying the number of observation time steps to evolve the process.}
 }
 \value{
 A spatPomp object with the specified dimension and time steps.
@@ -22,5 +22,7 @@ though in this case an Euler approximation is exact at the evaluation
 times.
 }
 \examples{
-bm(U=4, N=20)
+b <- bm(U=4, N=20)
+# See all the model specifications of the object
+spy(b)
 }
