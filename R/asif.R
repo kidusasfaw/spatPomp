@@ -308,8 +308,8 @@ setMethod(
                     {
                       cond_loglik_i <- array(data = numeric(0), dim=c(ntimes))
                       for (j in seq_len(ntimes)){
-                        mp_sum = 0
-                        p_sum = 0
+                        mp_sum = tol
+                        p_sum = sqrt(tol)
                         for (k in seq_len(islands)){
                           mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[i,j]
                           p_sum = p_sum + mult_island_output[[k]]@wp.avg[i,j]
