@@ -403,11 +403,13 @@ girf.internal <- function (object,
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
         log_filter_guide_fun <- xx$logfilterguides
-        params <- xx$params[,1]
+        # params <- xx$params[,1]
         fcst_samp_var <- xx$newfsv
       }
       else{
-        cond.loglik[nt+1, s] <- log(tol)
+        cond.loglik[nt+1, s] <- -Inf
+        x <- X
+        log_filter_guide_fun <- log(tol)
       }
       # if(nt > 7 & nt < 11 & s == 1){
       # print("nt")

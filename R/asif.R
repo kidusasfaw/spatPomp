@@ -58,14 +58,14 @@ NULL
 setClass(
   "island_spatPomp",
   slots=c(
-    wm.times.wp.avg="array",
-    wp.avg="array",
+    log_wm_times_wp_avg="array",
+    log_wp_avg="array",
     Np="integer",
     tol="numeric"
   ),
   prototype=prototype(
-    wm.times.wp.avg=array(data=numeric(0),dim=c(0,0)),
-    wp.avg=array(data=numeric(0),dim=c(0,0)),
+    log_wm_times_wp_avg=array(data=numeric(0),dim=c(0,0)),
+    log_wp_avg=array(data=numeric(0),dim=c(0,0)),
     Np=as.integer(NA),
     tol=as.double(NA)
   )
@@ -154,8 +154,8 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   loglik <- rep(NA,ntimes)
 
   # create array to store weights across time
-  cond.densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
-  dimnames(cond.densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
+  log_cond_densities <- array(data = numeric(0), dim=c(nunits,Np[1L],ntimes))
+  dimnames(log_cond_densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
     X <- tryCatch(
@@ -191,7 +191,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
     )
 
     #weights[weights == 0] <- tol
-    cond.densities[,,nt] <- exp(log_weights[,,1])
+    log_cond_densities[,,nt] <- log_weights[,,1]
     log_resamp_weights <- apply(log_weights[,,1,drop=FALSE], 2, function(x) sum(x))
     max_log_resamp_weights <- max(log_resamp_weights)
     # if any particle's resampling weight is zero replace by tolerance
@@ -224,32 +224,32 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   } ## end of main loop
 
   # compute locally combined pred. weights for each time, unit and particle
-  loc.comb.pred.weights = array(data = numeric(0), dim=c(nunits,Np[1L], ntimes))
-  wm.times.wp.avg = array(data = numeric(0), dim = c(nunits, ntimes))
-  wp.avg = array(data = numeric(0), dim = c(nunits, ntimes))
+  log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits,Np[1L], ntimes))
+  log_wm_times_wp_avg = array(data = numeric(0), dim = c(nunits, ntimes))
+  log_wp_avg = array(data = numeric(0), dim = c(nunits, ntimes))
   for (nt in seq_len(ntimes)){
       for (unit in seq_len(nunits)){
           full_nbhd <- nbhd(object, time = nt, unit = unit)
-          prod_cond_dens_nt  <- rep(1, Np[1])
-          prod_cond_dens_not_nt <- matrix(1, Np[1], nt-1)
+          log_prod_cond_dens_nt  <- rep(0, Np[1])
+          log_prod_cond_dens_not_nt <- matrix(0, Np[1], nt-1)
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
               if (neighbor_n == nt)
-                  prod_cond_dens_nt  <- prod_cond_dens_nt * cond.densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
               else
-                  prod_cond_dens_not_nt[, neighbor_n] <- prod_cond_dens_not_nt[, neighbor_n] * cond.densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_not_nt[, neighbor_n] <- log_prod_cond_dens_not_nt[, neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
           }
-          loc.comb.pred.weights[unit, ,nt]  <- prod(apply(prod_cond_dens_not_nt, 2, mean))*prod_cond_dens_nt
+          log_loc_comb_pred_weights[unit, ,nt]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
       }
   }
-  wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
-  wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
+  log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities, c(1,3), FUN = logmeanexp)
+  log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
   pompUnload(object,verbose=verbose)
   new(
     "island_spatPomp",
-    wm.times.wp.avg = wm.times.wp.avg,
-    wp.avg = wp.avg,
+    log_wm_times_wp_avg = log_wm_times_wp_avg,
+    log_wp_avg = log_wp_avg,
     Np=as.integer(Np),
     tol=tol
   )
@@ -301,22 +301,30 @@ setMethod(
    island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
    #cond_loglik = array(data = numeric(0), dim=c(nunits, ntimes))
-   cond_loglik <- foreach::foreach(i=seq_len(nunits),
+   cond_loglik <- foreach::foreach(u=seq_len(nunits),
                     .combine = 'rbind',
                     .packages=c("pomp", "spatPomp"),
                     .options.multicore=mcopts) %dopar%
                     {
-                      cond_loglik_i <- array(data = numeric(0), dim=c(ntimes))
-                      for (j in seq_len(ntimes)){
-                        mp_sum = tol
-                        p_sum = sqrt(tol)
-                        for (k in seq_len(islands)){
-                          mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[i,j]
-                          p_sum = p_sum + mult_island_output[[k]]@wp.avg[i,j]
-                        }
-                        cond_loglik_i[j] = log(mp_sum) - log(p_sum)
+                      cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
+                      for (n in seq_len(ntimes)){
+                        log_mp_sum = logmeanexp(vapply(mult_island_output,
+                                                       FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+                                                       FUN.VALUE = 1.0))
+                        log_p_sum = logmeanexp(vapply(mult_island_output,
+                                                      FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+                                                      FUN.VALUE = 1.0))
+                        cond_loglik_u[n] = log_mp_sum - log_p_sum
+                        # OLD CODE. Remove by 1/15/2020
+                        # mp_sum = tol
+                        # p_sum = sqrt(tol)
+                        # for (k in seq_len(islands)){
+                        #   mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,j]
+                        #   p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,j]
+                        # }
+                        # cond_loglik_u[j] = log(mp_sum) - log(p_sum)
                       }
-                      cond_loglik_i
+                      cond_loglik_u
                     }
    # end multi-threaded code
    new(

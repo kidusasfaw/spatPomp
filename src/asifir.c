@@ -16,16 +16,16 @@ SEXP asifir_resample (SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol) {
   dim = INTEGER(dimX);
   nvars = dim[0]; nreps = dim[1];
   PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-  np = *(INTEGER(AS_INTEGER(Np))); 
+  np = *(INTEGER(AS_INTEGER(Np)));
 
   // identify lost particles (weights less than toler)
   double *xw = REAL(weights);
-  toler = *(REAL(tol));		
-  for (k = 0, nlost = 0; k < nreps; k++) { 
+  toler = *(REAL(tol));
+  for (k = 0, nlost = 0; k < nreps; k++) {
     if (xw[k] < toler) nlost++;
   }
   if (nlost >= nreps) all_fail = 1; // all particles are lost
-  PROTECT(fail = NEW_LOGICAL(1)); nprotect++;  
+  PROTECT(fail = NEW_LOGICAL(1)); nprotect++;
   *(LOGICAL(fail)) = all_fail;
 
   GetRNGstate();
@@ -34,20 +34,20 @@ SEXP asifir_resample (SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol) {
     int xdim[2], sample[np];
     double *g, *xx, *xf, *xp, *gp, *gf;
 
-    // create storage for resampled states and guide function 
+    // create storage for resampled states and guide function
     xdim[0] = nvars; xdim[1] = np;
     PROTECT(newstates = makearray(2,xdim)); nprotect++;
     setrownames(newstates,Xnames,2);
     fixdimnames(newstates,dimnm,2);
     PROTECT(gfs = NEW_NUMERIC(np)); nprotect++;
-    xp = REAL(x); 
+    xp = REAL(x);
     xf = REAL(newstates);
     gp = REAL(gps);
     gf = REAL(gfs);
 
     // resample
     nosort_resamp(nreps,REAL(weights),np,sample,0);
-    for (k = 0, g = gp + sample[k]; k < np; k++, gf++) { 
+    for (k = 0, g = gp + sample[k]; k < np; k++, gf++) {
       g = gp + sample[k];
       *gf = *g;
       for (j = 0, xx = xp+nvars*sample[k]; j < nvars; j++, xf++, xx++)
@@ -55,6 +55,7 @@ SEXP asifir_resample (SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol) {
     }
 
   } else { // don't resample: just drop 3rd dimension in x prior to return
+    // this would never get triggered since we subtract out the max log weight
     PROTECT(newdim = NEW_INTEGER(2)); nprotect++;
     dim = INTEGER(newdim);
     dim[0] = nvars; dim[1] = nreps;

@@ -51,7 +51,7 @@ pfilter_loglik <- replicate(10,logLik(pfilter(lorenz5,
 
 test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - logmeanexp(pfilter_loglik)), 10)
-  expect_lt(abs(logmeanexp(asif_loglik) - logmeanexp(pfilter_loglik)), 30)
+  expect_lt(abs(logmeanexp(asif_loglik) - logmeanexp(pfilter_loglik)), 50)
   expect_lt(abs(logmeanexp(asifir_loglik) - logmeanexp(pfilter_loglik)), 30)
 
 })

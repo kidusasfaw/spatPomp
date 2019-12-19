@@ -119,8 +119,8 @@ asifir.internal <- function (object, params, Np, nbhd,
   znames <- object@accumvars
 
   loglik <- rep(NA,N)
-  cond.densities <- array(data = numeric(0), dim=c(U,Np,N))
-  dimnames(cond.densities) <- list(unit = 1:U, rep = 1:Np, time = 1:N)
+  log_cond_densities <- array(data = numeric(0), dim=c(U,Np,N))
+  dimnames(log_cond_densities) <- list(unit = 1:U, rep = 1:Np, time = 1:N)
 
   for (n in seq_len(N)) {
     ## assimilate observation n given filter at n-1
@@ -163,14 +163,14 @@ asifir.internal <- function (object, params, Np, nbhd,
     dim(fcst_samp_var) <- c(length(spat_units(object)), Np)
 
     ## determine the weights
-    weights <- tryCatch(
+    log_weights <- tryCatch(
       vec_dmeasure(
         object,
         y=object@data[,n,drop=FALSE],
         x=xg,
         times=times[n+1],
         params=param_matrix,
-        log=FALSE,
+        log=TRUE,
         .gnsi=gnsi
       ),
       error = function (e) {
@@ -180,7 +180,7 @@ asifir.internal <- function (object, params, Np, nbhd,
     )
 
     # weights[weights < tol] <- tol
-    cond.densities[,,n] <- weights[,,1]
+    log_cond_densities[,,n] <- log_weights[,,1]
     ## adapted simulation via intermediate resampling
     # tt has S+1 (or Ninter+1) entries
     tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
@@ -290,18 +290,24 @@ asifir.internal <- function (object, params, Np, nbhd,
       )
 #      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)*discount_factor
       log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
-      log_gp <- log_gp - max(log_gp)
-      log_gp[log_gp < log(tol)] <- log(tol)
-      weights <- exp(log_gp - log_gf)
-
-      gnsi <- FALSE
-
-      xx <- tryCatch(
+      max_log_gp <- max(log_gp)
+      #log_gp[log_gp < log(tol)] <- log(tol)
+      if(max_log_gp > -Inf){
+        log_gp <- log_gp - max_log_gp
+        weights <- exp(log_gp - log_gf)
+        gnsi <- FALSE
+        xx <- tryCatch(
           .Call('asifir_resample', xp, Np, weights, log_gp, tol),
           error = function (e) stop(ep,conditionMessage(e),call.=FALSE)
-      )
-      xf <- xx$states
-      log_gf <- xx$filterguides
+        )
+        xf <- xx$states
+        log_gf <- xx$filterguides
+      }
+      else{
+        xf <- xp
+        log_gf <- log(tol)
+      }
+
     } ## end of intermediate resampling loop s = 1:Ninter
 
     # resample down to one particle, making Np copies of, say, particle #1.
@@ -318,33 +324,33 @@ asifir.internal <- function (object, params, Np, nbhd,
   #   Np is assumed scalar
   #   ntimes -> N , nt -> n
   #   nunits -> U , unit -> u
-  loc.comb.pred.weights = array(data = numeric(0), dim=c(U,Np, N))
-  wm.times.wp.avg = array(data = numeric(0), dim = c(U, N))
-  wp.avg = array(data = numeric(0), dim = c(U, N))
+  log_loc_comb_pred_weights = array(data = numeric(0), dim=c(U,Np, N))
+  log_wm_times_wp_avg = array(data = numeric(0), dim = c(U, N))
+  log_wp_avg = array(data = numeric(0), dim = c(U, N))
   for (n in seq_len(N)){
       for (u in seq_len(U)){
           full_nbhd <- nbhd(object, time = n, unit = u)
-          prod_cond_dens_nt  <- rep(1, Np)
-          prod_cond_dens_not_nt <- matrix(1, Np, n-1)
+          log_prod_cond_dens_nt  <- rep(0, Np)
+          log_prod_cond_dens_not_nt <- matrix(0, Np, n-1)
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
               if (neighbor_n == n)
-                  prod_cond_dens_nt  <- prod_cond_dens_nt * cond.densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
               else
-                  prod_cond_dens_not_nt[, neighbor_n] <- prod_cond_dens_not_nt[, neighbor_n] * cond.densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_not_nt[, neighbor_n] <- log_prod_cond_dens_not_nt[, neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
           }
-          loc.comb.pred.weights[u,,n]  <- prod(apply(prod_cond_dens_not_nt, 2, mean))*prod_cond_dens_nt
+          log_loc_comb_pred_weights[u,,n]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
       }
   }
-  wm.times.wp.avg = apply(loc.comb.pred.weights * cond.densities, c(1,3), FUN = mean)
-  wp.avg = apply(loc.comb.pred.weights, c(1,3), FUN = mean)
+  log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities, c(1,3), FUN = logmeanexp)
+  log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
 
   pompUnload(object,verbose=verbose)
   new(
     "island_spatPomp",
-    wm.times.wp.avg = wm.times.wp.avg,
-    wp.avg = wp.avg,
+    log_wm_times_wp_avg = log_wm_times_wp_avg,
+    log_wp_avg = log_wp_avg,
     Np=as.integer(Np),
     tol=tol
   )
@@ -375,6 +381,7 @@ setMethod(
   # )
   # return(single_island_output)
   # end single-core
+  mcopts <- list(set.seed=TRUE)
   mult_island_output <- foreach::foreach(i=1:islands,
      .packages=c("pomp","spatPomp"),
      .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::asifir.internal(
@@ -389,26 +396,49 @@ setMethod(
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
    U <- length(object@units)
-   island_mp_sums = array(data = numeric(0), dim = c(U,N))
-   island_p_sums = array(data = numeric(0), dim = c(U, N))
-   cond.loglik = array(data = numeric(0), dim=c(U, N))
-   for (u in seq_len(U)){
-     for (n in seq_len(N)){
-       mp_sum = 0
-       p_sum = 0
-       for (k in seq_len(islands)){
-         mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,n]
-         p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,n]
-       }
-       cond.loglik[u,n] = log(mp_sum) - log(p_sum)
-     }
-   }
+   #island_mp_sums = array(data = numeric(0), dim = c(U,N))
+   #island_p_sums = array(data = numeric(0), dim = c(U, N))
+   cond_loglik <- foreach::foreach(u=seq_len(U),
+                                   .combine = 'rbind',
+                                   .packages=c("pomp", "spatPomp"),
+                                   .options.multicore=mcopts) %dopar%
+                                   {
+                                     cond_loglik_u <- array(data = numeric(0), dim=c(N))
+                                     for (n in seq_len(N)){
+                                       log_mp_sum = logmeanexp(vapply(mult_island_output,
+                                                                      FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+                                                                      FUN.VALUE = 1.0))
+                                       log_p_sum = logmeanexp(vapply(mult_island_output,
+                                                                     FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+                                                                     FUN.VALUE = 1.0))
+                                       cond_loglik_u[n] = log_mp_sum - log_p_sum
+                                     }
+                                     cond_loglik_u
+                                   }
+   # OLD CODE. Remove by 1/15/2020
+   # cond_loglik = array(data = numeric(0), dim=c(U, N))
+   # for (u in seq_len(U)){
+   #   for (n in seq_len(N)){
+   #     log_mp_sum = logmeanexp(vapply(mult_island_output,
+   #                                FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+   #                                FUN.VALUE = 1.0))
+   #     log_p_sum = logmeanexp(vapply(mult_island_output,
+   #                               FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+   #                               FUN.VALUE = 1.0))
+   #     cond_loglik[u,n] = log_mp_sum - log_p_sum
+   #     # for (k in seq_len(islands)){
+   #     #   mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,n]
+   #     #   p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,n]
+   #     # }
+   #     # cond.loglik[u,n] = log(mp_sum) - log(p_sum)
+   #   }
+   # }
    new(
       "asifird_spatPomp",
       object,
       Np=as.integer(Np),
       tol=tol,
-      loglik=sum(cond.loglik),
+      loglik=sum(cond_loglik),
       Ninter = as.integer(Ninter),
       islands = as.integer(islands),
       nbhd = nbhd
