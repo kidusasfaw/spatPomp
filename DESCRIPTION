@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: pomp (>= 2.0)
 LinkingTo: pomp
-Suggests: scales, geosphere, ggplot2, magrittr,
+Suggests: scales, geosphere, magrittr,
   plyr, reshape2,
     testthat
 Collate:
@@ -42,4 +42,4 @@ Imports: doParallel (>= 1.0.11),
     dplyr,
     tidyr,
     stringr,
-    abind
+    ggplot2
