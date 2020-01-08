@@ -22,3 +22,10 @@ setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter
 ## HIPPIE
 setGeneric("hippie", function(object,...)standardGeneric("hippie"))
 
+## construct_spatPomp
+setGeneric(
+  "construct_spatPomp",
+  function (data, times, units, ...)
+    standardGeneric("construct_spatPomp")
+)
+

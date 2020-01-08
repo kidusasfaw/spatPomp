@@ -1,0 +1,136 @@
+## default templates for pomp's own C snippets.
+## This is used in 'spatPomp.R'.
+spatPomp_workhorse_templates <- quote(list(
+  unit_vmeasure=list(
+    slotname="unit_vmeasure",
+    Cname="__spatPomp_unit_vmeasure",
+    proto=quote(unit_vmeasure(x,t,d,params,...)),
+    header="\nvoid __spatPomp_unit_vmeasure (double *__vc, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+    footer="\n}\n\n",
+    vars=list(
+      params=list(
+        names=quote(paramnames),
+        cref="__p[__parindex[{%v%}]]"
+      ),
+      covars=list(
+        names=quote(covarnames),
+        cref="__covars[__covindex[{%v%}]]"
+      ),
+      unit_states=list(
+        names=unit_statenames,
+        cref="__x[__stateindex[{%v%}]+unit]"
+      ),
+      var=list(
+        names="vc",
+        cref="__vc[0]"
+      )
+    )
+  ),
+  unit_mmeasure=list(
+    slotname="unit_mmeasure",
+    Cname="__spatPomp_unit_mmeasure",
+    proto=quote(unit_mmeasure(x,t,d,params,...)),
+    header="\nvoid __spatPomp_unit_mmeasure (double *__pm, const double *__x, const double *__p, const double *__vc, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+    footer="\n}\n\n",
+    vars=list(
+      params=list(
+        names=quote(paramnames),
+        cref="__p[__parindex[{%v%}]]"
+      ),
+      mparams=list(
+        names=mparamnames,
+        cref="__pm[__parindex[{%v%}]]"
+      ),
+      covars=list(
+        names=quote(covarnames),
+        cref="__covars[__covindex[{%v%}]]"
+      ),
+      unit_states=list(
+        names=unit_statenames,
+        cref="__x[__stateindex[{%v%}]+unit]"
+      ),
+      var=list(
+        names="vc",
+        cref="__vc[0]"
+      )
+    )
+  ),
+  unit_emeasure=list(
+    slotname="unit_emeasure",
+    Cname="__spatPomp_unit_emeasure",
+    proto=quote(unit_emeasure(y,x,t,d,params,log,...)),
+    header="\nvoid __spatPomp_unit_emeasure (double *__ey, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+    footer="\n}\n\n",
+    vars=list(
+      params=list(
+        names=quote(paramnames),
+        cref="__p[__parindex[{%v%}]]"
+      ),
+      covars=list(
+        names=quote(covarnames),
+        cref="__covars[__covindex[{%v%}]]"
+      ),
+      unit_states=list(
+        names=unit_statenames,
+        cref="__x[__stateindex[{%v%}]+unit]"
+      ),
+      ey=list(
+        names="ey",
+        cref="__ey[0]"
+      )
+    )
+  ),
+  unit_dmeasure=list(
+    slotname="unit_dmeasure",
+    Cname="__spatPomp_unit_dmeasure",
+    proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
+    header="\nvoid __spatPomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+    footer="\n}\n\n",
+    vars=list(
+      params=list(
+        names=quote(paramnames),
+        cref="__p[__parindex[{%v%}]]"
+      ),
+      covars=list(
+        names=quote(covarnames),
+        cref="__covars[__covindex[{%v%}]]"
+      ),
+      unit_states=list(
+        names=unit_statenames,
+        cref="__x[__stateindex[{%v%}]+unit-1]"
+      ),
+      obstyp=list(
+        names=obstypes,
+        cref="__y[__obsindex[{%v%}]+unit-1]"
+      ),
+      lik=list(
+        names="lik",
+        cref="__lik[0]"
+      )
+    )
+  ),
+  unit_rmeasure=list(
+    slotname="unit_rmeasure",
+    Cname="__spatPomp_unit_rmeasure",
+    proto=quote(unit_rmeasure(x,t,d,params,log,...)),
+    header="\nvoid __spatPomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+    footer="\n}\n\n",
+    vars=list(
+      params=list(
+        names=quote(paramnames),
+        cref="__p[__parindex[{%v%}]]"
+      ),
+      covars=list(
+        names=quote(covarnames),
+        cref="__covars[__covindex[{%v%}]]"
+      ),
+      unit_states=list(
+        names=unit_statenames,
+        cref="__x[__stateindex[{%v%}]+unit-1]"
+      )
+    )
+  )
+))
+
+# spatPomp_workhorse_templates <- list(pomp:::workhorse_templates, new_workhorse_templates)
+# spatPomp_workhorse_templates <- new_workhorse_templates
