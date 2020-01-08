@@ -332,7 +332,7 @@ girf.internal <- function (object,
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead_steps]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init) ##JP: rethink about the discount factor when lookahead_steps=1
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/max(times[nt+1+l] - discount_denom_init, 2*(times[nt+2]-times[nt+1])) ## the denominator is at least twice the observation interval, to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function.
         # print(times[nt+1+l] - tt[s+1])
         log_dmeas_weights <- tryCatch(
           (vec_dmeasure(

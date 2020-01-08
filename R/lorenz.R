@@ -17,7 +17,7 @@
 #' spy(l)
 #' @export
 
-lorenz <- function(U=5,N=100,dt=0.01,dt_obs=0.5){
+lorenz <- function(U=5,N=100,dt=0.01,dt_obs=0.5,regular_params=c(F=8, sigma=1, tau=1)){
 
 if(U<3.5)stop("Please use U >= 4")
 
@@ -142,10 +142,11 @@ lorenz <- spatPomp(lorenz_data,
                rinit=lorenz_rinit
   )
 
-## We need a parameter vector. For now, we initialize the process at zero.
+## We need a parameter vector. For now, we initialize the process at zero,
+## with a small perturbation for state U.
 test_ivps <- c(rep(0,U-1),0.01)
 names(test_ivps) <- lorenz_IVPnames
-test_params <- c(F=8, sigma=1, tau=1, test_ivps)
+test_params <- c(regular_params, test_ivps)
 simulate(lorenz,params=test_params)
 }
 
