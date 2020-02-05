@@ -4,7 +4,8 @@
 \alias{lorenz}
 \title{Lorenz 96 spatPomp generator}
 \usage{
-lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 0.5)
+lorenz(U = 5, N = 100, dt = 0.01, dt_obs = 0.5,
+  regular_params = c(F = 8, sigma = 1, tau = 1))
 }
 \arguments{
 \item{U}{A length-one numeric signifying the number of spatial units for the process.}

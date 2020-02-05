@@ -75,13 +75,13 @@ setMethod(
   "igirf",
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
-                        Ninter,lookahead,Nguide,h,theta.to.v,v.to.theta,
+                        Ninter,lookahead,Nguide,
                         tol = 1e-300, max.fail = Inf,save.states = FALSE,
                         ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
-        Ninter,lookahead,Nguide,h,theta.to.v,v.to.theta,tol = tol,
+        Ninter,lookahead,Nguide,tol = tol,
         max.fail = Inf, save.states = FALSE,...,verbose=verbose),
       error = function (e) pomp:::pStop("igirf",conditionMessage(e))
     )
@@ -118,8 +118,8 @@ setMethod(
 )
 
 igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
-                            Ninter,lookahead,Nguide,h,theta.to.v, v.to.theta,
-                            tol, max.fail = Inf,save.states = FALSE,
+                            Ninter,lookahead,Nguide,
+                            tol, max.fail = Inf,save.states = FALSE,...,
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
@@ -212,7 +212,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   ## iterate the filtering
   for (n in seq_len(Ngirf)) {
     g <- igirf.girf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
-      h = h,theta.to.v = theta.to.v,v.to.theta = v.to.theta,params=paramMatrix,
+      params=paramMatrix,
       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
       verbose=verbose,.indices=.indices,.gnsi=gnsi)
 
@@ -241,7 +241,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   )
 }
 
-igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v, v.to.theta,
+igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
                         Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
                         verbose, .indices = integer(0), .gnsi = TRUE) {
 
@@ -337,7 +337,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide, h, theta.to.v
       }
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)])
+        skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
         #if(s>1 && length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
