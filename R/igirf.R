@@ -214,7 +214,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     g <- igirf.girf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
       params=paramMatrix,
       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
-      verbose=verbose,.indices=.indices,.gnsi=gnsi)
+      verbose=verbose,.indices=.indices,...,.gnsi=gnsi)
 
     gnsi <- FALSE
 
@@ -243,7 +243,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
 igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
                         Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
-                        verbose, .indices = integer(0), .gnsi = TRUE) {
+                        verbose, .indices = integer(0), ...,.gnsi = TRUE) {
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)

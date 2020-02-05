@@ -10,8 +10,8 @@
 \title{Iterated guided intermediate resampling filter (iGIRF)}
 \usage{
 \S4method{igirf}{spatPomp}(data, Ngirf, Np, rw.sd, cooling.type,
-  cooling.fraction.50, Ninter, lookahead, Nguide, h, theta.to.v,
-  v.to.theta, tol = 1e-300, max.fail = Inf, save.states = FALSE, ...,
+  cooling.fraction.50, Ninter, lookahead, Nguide, tol = 1e-300,
+  max.fail = Inf, save.states = FALSE, ...,
   verbose = getOption("verbose", FALSE))
 
 \S4method{igirf}{igirfd_spatPomp}(data, Ngirf, Np, rw.sd, cooling.type,
