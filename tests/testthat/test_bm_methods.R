@@ -22,7 +22,7 @@ loglik_true <- pomp:::kalmanFilter(
   t=1:N,
   y=obs(bm3),
   X0=rinit(bm3),
-  A= diag(length(spat_units(bm3))),
+  A= diag(length(spat_units(bm3))), 
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
   R=diag(coef(bm3)["tau"]^2, nrow=nrow(dmat))
@@ -38,11 +38,11 @@ fun_to_optim <- function(cf){
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
-  )$loglik
+  )$loglik 
 }
 mle <- optim(coef(bm3), fun_to_optim)
 kfll_mle <- mle$value
-kfll_mle
+kfll_mle ////////
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from GIRF

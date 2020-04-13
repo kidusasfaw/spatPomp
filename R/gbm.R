@@ -91,8 +91,6 @@ gbm_dmeasure <- Csnippet("
   double tol = pow(1.0e-18,U);
   int u;
   lik=0;
-  // Jacobian to get Y|logX since we know logY|logX is Normal(0,tau-squred)
-  for (u=0; u<U; u++)lik += (dnorm(log(Y[u]),log(X[u]),tau,1) + log(1/Y[u]));
   if(!give_log) lik = exp(lik) + tol;
 ")
 
@@ -101,7 +99,6 @@ gbm_rmeasure <- Csnippet("
   double *Y = &Y1;
   double tol = pow(1.0e-18,U);
   int u;
-  // Y|X = X*exp(eta) where eta is Normal(0, tau-squared)
   for (u=0; u<U; u++) Y[u] = X[u]*exp(rnorm(0,tau+tol));
 ")
 

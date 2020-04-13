@@ -19,19 +19,20 @@ bm <- function(U=5,N=100,delta.t=0.1){
 
 U <- U; N <- N; delta.t <- delta.t
 
-dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
-dmat <- matrix(0,U,U)
+dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U)) # dis how few browin motion spread around a ciricle bm1 and bm2 1.
+dmat <- matrix(0,U,U) #computing the distance in the matrix
 for(u in 1:U) {
   for(v in 1:U) {
     dmat[u,v] <- dist(u,v)
   }
 }
+########
 to_C_array <- function(v)paste0("{",paste0(v,collapse=","),"}")
 dist_C_rows <- apply(dmat,1,to_C_array)
 dist_C_array <- to_C_array(dist_C_rows)
 dist_C <- paste0("const int dist[",U,"][",U,"] = ",dist_C_array,"; ")
 bm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
-
+########
 
 obs_names <- paste0("Y",1:U)
 bm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
@@ -43,34 +44,38 @@ bm_IVPnames <- paste0(bm_statenames,"_0")
 bm_RPnames <- c("rho","sigma","tau")
 bm_paramnames <- c(bm_RPnames,bm_IVPnames)
 
+##simulate rho correlation between browmin motion for unit u and unit v understand this part
+##rho is the correlation between different BM along the circile. The distance between points. estiblish the array show the rho
 bm_rprocess <- spatPomp_Csnippet("
   double dW[U];
   double pow_rho[U];
   int u,v;
 
-  pow_rho[0] = 1;
+  pow_rho[0] = 1; //
   for (u=1 ; u < U ; u++) {
-    pow_rho[u] = pow_rho[u-1]*rho;
+    pow_rho[u] = pow_rho[u-1]*rho; //
   }
 
   for (u = 0 ; u < U ; u++) {
-    dW[u] = rnorm(0,sigma*sqrt(dt));
+    dW[u] = rnorm(0,sigma*sqrt(dt)); //sigma tau tol parameter each unit has one BM. Simluate noise in the rpocess. GBM
   }
   for (u = 0 ; u < U ; u++) {
     for (v=0; v < U ; v++) {
       X[u] += dW[v]*pow_rho[dist[u][v]];
+      //times the correlaiton the part. If iid, dw is the only thing add to the process. If correlates, should consider other GM noise either.
     }
   }
 ", unit_statenames = c("X"))
 
-bm_skel <- Csnippet("
+#dx/dt
+bm_skel <- Csnippet(" //exp growth take out the noise it should be exp growth
   //double *X = &X1;
   double *DX = &DX1;
   int u;
   //double dW[U];
   //int u,v;
   for (u = 0 ; u < U ; u++) {
-    DX[u] = 0;
+    DX[u] = 0; ## the derivative is zero //determinsitc from brownian motion X[t] for GBM
   }
 ")
 
@@ -85,7 +90,7 @@ bm_rinit <- Csnippet("
 ")
 
 
-bm_dmeasure <- Csnippet("
+bm_dmeasure <- Csnippet(" //probability density functon of y given x
   const double *X = &X1;
   const double *Y = &Y1;
   double tol = pow(1.0e-18,U);
@@ -95,15 +100,15 @@ bm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-bm_unit_emeasure <- Csnippet("
+bm_unit_emeasure <- Csnippet(" //expect y given x, y is normal given x. For BM scale, mark
   ey = X;
 ")
 
-bm_unit_mmeasure <- Csnippet("
+bm_unit_mmeasure <- Csnippet(" //moment matching parameter. vc emprical variance. given emprical variance, infer the measruemnt variance. tau for BM. mark
   M_tau = sqrt(vc);
 ")
 
-bm_unit_vmeasure <- Csnippet("
+bm_unit_vmeasure <- Csnippet(" //variance of y given x log(Y) ~ N(log(x),tau^2). Var(Y|X)
   vc = tau*tau;
 ")
 
@@ -112,16 +117,16 @@ bm_rmeasure <- Csnippet("
   double *Y = &Y1;
   double tol = pow(1.0e-18,U);
   int u;
-  for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
+  for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol); // each observation generating data given tau measurment standard deviation
 ")
 
-bm_unit_dmeasure <- Csnippet("
+bm_unit_dmeasure <- Csnippet(" //only give dmeasure one unit
   //double tol = 1.0e-18;
-  lik = dnorm(Y,X,tau,1);
+  lik = dnorm(Y,X,tau,1); //the desnity of y given x is normal, tau is the obs masurment variance.
   if(!give_log) lik = exp(lik);
 ")
 
-bm_unit_rmeasure <- Csnippet("
+bm_unit_rmeasure <- Csnippet(" //mark
   double tol = pow(1.0e-18,U);
   double Y;
   Y = rnorm(X,tau+tol);
@@ -147,6 +152,7 @@ bm_spatPomp <- spatPomp(bm_data,
                rinit=bm_rinit
   )
 
+###########################
 
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
