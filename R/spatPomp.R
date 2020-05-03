@@ -297,10 +297,12 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
       } else covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
       tmp <- names(unit_index)
       names(tmp) <- unit_index
-      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
-      pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
-      pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-      pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      if(length(covariate_names) >0 ){
+        pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
+        pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      } else pomp_covar <- covar
       cov_col_order <- c()
       for(cn in covariate_names){
         for(i in 1:length(units)){
@@ -337,7 +339,6 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     if(missing(globals)) globals <- Csnippet(paste0("const int nunits = ",length(units),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int nunits = ",length(units),";\n"),globals@text))
     # create the pomp object
-
     po <- pomp(data = pomp_data,
              times=times,
              t0 = t0,

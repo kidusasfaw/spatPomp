@@ -67,7 +67,8 @@ Other particle filter methods: \code{\link{asifir}},
   \code{\link{asif}}, \code{\link{girf}},
   \code{\link{igirf}}
 
-Other \pkg{spatPomp} parameter estimation methods: \code{\link{senkf}}
+Other \pkg{spatPomp} parameter estimation methods: \code{\link{senkf2}},
+  \code{\link{senkf}}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}

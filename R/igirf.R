@@ -352,7 +352,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       meas_var_skel <- tryCatch(
         .Call('do_theta_to_v',
               object=object,
-              skel=skel,
+              X=skel,
               Np = as.integer(Np[1]),
               times=times[(nt+2):(nt+1+lookahead_steps)],
               params=tparams,

@@ -32,6 +32,7 @@ Collate:
     'ou.R'
     'package.R'
     'plot.R'
+    'senkf2.R'
     'spatPomp2.R'
     'spatPomp_methods.R'
     'spatPomp_workhorses.R'

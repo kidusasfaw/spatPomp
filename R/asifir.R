@@ -216,7 +216,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       meas_var_skel <- tryCatch(
         .Call('do_theta_to_v',
               object=object,
-              skel=skel,
+              X=skel,
               Np = as.integer(Np[1]),
               times=times[n+1],
               params=params,

@@ -5,7 +5,7 @@ doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(1)
 U = 8; N = 10
-bm3 <- bm(U = U, N = N)
+bm8 <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
@@ -17,30 +17,30 @@ for(u in 1:U) {
 }
 
 # compute the true log-likelihood
-rootQ = coef(bm3)["rho"]^dmat * coef(bm3)["sigma"]
+rootQ = coef(bm8)["rho"]^dmat * coef(bm8)["sigma"]
 loglik_true <- pomp:::kalmanFilter(
   t=1:N,
-  y=obs(bm3),
-  X0=rinit(bm3),
-  A= diag(length(spat_units(bm3))),
+  y=obs(bm8),
+  X0=rinit(bm8),
+  A= diag(length(spat_units(bm8))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(bm3)["tau"]^2, nrow=nrow(dmat))
+  R=diag(coef(bm8)["tau"]^2, nrow=nrow(dmat))
 )$loglik
 
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
   -pomp2:::kalmanFilter(
     t=1:N,
-    y=obs(bm3),
-    X0=rinit(bm3),
-    A=diag(length(spat_units(bm3))),
+    y=obs(bm8),
+    X0=rinit(bm8),
+    A=diag(length(spat_units(bm8))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
   )$loglik
 }
-mle <- optim(coef(bm3), fun_to_optim)
+mle <- optim(coef(bm8), fun_to_optim)
 kfll_mle <- mle$value
 kfll_mle
 
