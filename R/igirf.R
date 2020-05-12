@@ -325,6 +325,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     # }
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
+      #cat(paste0("nt = ", nt, ", s = ", s, "\n"))
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
       # get prediction simulations
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
@@ -337,6 +338,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       }
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
+        #print(X.start)
         skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
         #if(s>1 && length(znames) > 0){
           skel.start <- skel[,,1]
