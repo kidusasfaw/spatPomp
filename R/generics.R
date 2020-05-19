@@ -23,7 +23,7 @@ setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter
 setGeneric("hippie", function(object,...)standardGeneric("hippie"))
 
 ## EnKF
-setGeneric("senkf2",  function (data, ...)standardGeneric("senkf2"))
+setGeneric("genkf",  function (data, ...)standardGeneric("genkf"))
 
 
 

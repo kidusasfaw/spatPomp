@@ -1,11 +1,13 @@
-##' Ensemble Kalman filters
+##' Generalized Ensemble Kalman filter
 ##'
-##' A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994)
+##' A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994).
+##' This function is generalized to allow for an R matrix that varies over time.
+##' This is useful if the measurement model varies with the state.
 ##'
-##' @name senkf2
-##' @rdname senkf2
+##' @name genkf
+##' @rdname genkf
 ##' @include spatPomp_class.R spatPomp.R
-##' @aliases senkf2  senkf2,ANY-method senkf2,missing-method
+##' @aliases genkf  genkf,ANY-method genkf,missing-method
 ##' @family particle filtering methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'
@@ -13,7 +15,7 @@
 ##' @param Np the number of particles to use.
 ##'
 ##' @return
-##' An object of class \sQuote{senkfd_spatPomp}.
+##' An object of class \sQuote{genkfd_spatPomp}.
 ##'
 ##' @references
 ##' Evensen, G. (1994) Sequential data assimilation with a
@@ -28,7 +30,7 @@
 NULL
 
 setClass(
-  "senkfd_spatPomp",
+  "genkfd_spatPomp",
   contains="kalmand_pomp",
   slots=c(
     units = 'character',
@@ -50,22 +52,22 @@ setClass(
 )
 
 setMethod(
-  "senkf2",
+  "genkf",
   signature=signature(data="missing"),
   definition=function (...) {
-    pomp:::reqd_arg("senkf2","data")
+    pomp:::reqd_arg("genkf","data")
   }
 )
 
 setMethod(
-  "senkf2",
+  "genkf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    undef_method("senkf2",data)
+    undef_method("genkf",data)
   }
 )
 
-## ENSEMBLE KALMAN FILTER (ENKF)
+## GENERALIZED ENSEMBLE KALMAN FILTER (GENKF)
 
 ## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
 ## Prediction mean: $M_t=\langle X \rangle$
@@ -76,32 +78,32 @@ setMethod(
 ## State/forecast covariance: $W_t=\langle\langle X,Y\rangle\rangle$
 ## Kalman gain: $K_t = W_t\,S_t^{-1}$
 ## New observation: $y_t\in \mathbb{R}^{n\times 1}$
-## Updated ensemble: $X^u_{t}=X_t + K_t\,(O_t - Y_t)$
+## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
-##' @name senkf-spatPomp
-##' @aliases senkf,spatPomp-method
-##' @rdname senkf
+##' @name genkf-spatPomp
+##' @aliases genkf,spatPomp-method
+##' @rdname genkf
 ##' @export
 setMethod(
-  "senkf2",
+  "genkf",
   signature=signature(data="spatPomp"),
   function (data,
             Np,
             ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
-      sp <- senkf.internal(
+      sp <- genkf.internal(
         data,
         Np=Np,
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp:::pStop("senkf2",conditionMessage(e))
+      error = function (e) pomp:::pStop("genkf",conditionMessage(e))
     )
   }
 )
 
-senkf.internal <- function (object,
+genkf.internal <- function (object,
                            Np,
                            ..., verbose) {
 
@@ -159,6 +161,7 @@ senkf.internal <- function (object,
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
+    # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
       .Call('do_theta_to_v',
             object=object,
@@ -181,9 +184,7 @@ senkf.internal <- function (object,
     )
     X <- X[,,1]
     predMeans[,k] <- pm <- rowMeans(X) # prediction mean
-
     dim(Y) <- c(length(spat_units(object)), Np[1])
-
 
     # forecast mean
     ym <- rowMeans(Y)
@@ -200,11 +201,11 @@ senkf.internal <- function (object,
 
     X <- X+pm+crossprod(Kt,resid-Y+Ek)
 
-    condlogLik[k] <- sum(dnorm(x=crossprod(svdS$u,resid2),mean=0,sd=sqrt(svdS$d),log=TRUE))
+    condlogLik[k] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
     filterMeans[,k] <- rowMeans(X)  # filter mean
     forecast[,k] <- ym
   }
-  new("senkfd_spatPomp", object, Np=Np,
+  new("genkfd_spatPomp", object, Np=Np,
       filter.mean=filterMeans,
       pred.mean=predMeans,
       forecast=forecast,
