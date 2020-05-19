@@ -159,18 +159,32 @@ senkf.internal <- function (object,
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    X <- X[,,1]
-    predMeans[,k] <- pm <- rowMeans(X) # prediction mean
-
-    dim(Y) <- c(length(spat_units(object)), Np[1])
-    resid1 <- yk - Y
-    R <- tcrossprod(resid1)
+    meas_var <- tryCatch(
+      .Call('do_theta_to_v',
+            object=object,
+            X=X,
+            Np = as.integer(Np[1]),
+            times=tt[k+1],
+            params=params,
+            gnsi=TRUE),
+      error = function (e) {
+        stop(ep,conditionMessage(e),call.=FALSE) # nocov
+      }
+    )
+    dim(meas_var) <- c(length(spat_units(object)),  Np[1])
+    R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
       error = function (e) {
         pStop_("degenerate ",sQuote("R"), "at time ", squote(k), ": ",conditionMessage(e))
       }
     )
+    X <- X[,,1]
+    predMeans[,k] <- pm <- rowMeans(X) # prediction mean
+
+    dim(Y) <- c(length(spat_units(object)), Np[1])
+
+
     # forecast mean
     ym <- rowMeans(Y)
     X <- X-pm
@@ -182,9 +196,9 @@ senkf.internal <- function (object,
     svdS <- svd(fv,nv=0)            # singular value decomposition
     Kt <- svdS$u%*%(crossprod(svdS$u,vyx)/svdS$d) # transpose of Kalman gain
     Ek <- sqrtR%*%matrix(rnorm(n=nobs*Np),nobs,Np) # artificial noise
-    resid2 <- y[,k]-ym
+    resid <- y[,k]-ym
 
-    X <- X+pm+crossprod(Kt,resid2-Y+Ek)
+    X <- X+pm+crossprod(Kt,resid-Y+Ek)
 
     condlogLik[k] <- sum(dnorm(x=crossprod(svdS$u,resid2),mean=0,sd=sqrt(svdS$d),log=TRUE))
     filterMeans[,k] <- rowMeans(X)  # filter mean
