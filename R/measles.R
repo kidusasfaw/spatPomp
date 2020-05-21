@@ -144,8 +144,16 @@ measles_rprocess <- Csnippet('
   // transmission rate
   beta = R0*(gamma+mu)*seas;
 
-  // pre-computing this saves substantial time
   for (u = 0 ; u < U ; u++) {
+    // needed for the Ensemble Kalman filter
+    // or other methods making real-valued perturbations to the state
+    // reulermultinom requires integer-valued double type for states
+    S[u] = S[u]>0 ? floor(S[u]) : 0;
+    E[u] = E[u]>0 ? floor(E[u]) : 0;
+    I[u] = I[u]>0 ? floor(I[u]) : 0;
+    R[u] = R[u]>0 ? floor(R[u]) : 0;
+
+    // pre-computing this saves substantial time
     powVec[u] = pow(I[u]/pop[u],alpha);
   }
 
@@ -180,6 +188,7 @@ measles_rprocess <- Csnippet('
 
     // Poisson births
     births = rpois(br*dt);
+
 
     // transitions between classes
     reulermultinom(2,S[u],&rate[0],dt,&trans[0]);

@@ -112,11 +112,11 @@ genkf.internal <- function (object,
   # object <- pomp(object,...,verbose=verbose)
 
   if (pomp:::undefined(object@rprocess))
-    pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
+    pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
   if (pomp:::undefined(object@unit_emeasure))
-    pStop_(paste(sQuote(c("unit_emeasure")),collapse=", ")," is a needed basic component.")
+    pomp:::pStop_(paste(sQuote(c("unit_emeasure")),collapse=", ")," is a needed basic component.")
   if (pomp:::undefined(object@unit_vmeasure))
-    pStop_(paste(sQuote(c("unit_vmeasure")),collapse=", ")," is a needed basic component.")
+    pomp:::pStop_(paste(sQuote(c("unit_vmeasure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
   #R <- as.matrix(R)
@@ -179,7 +179,7 @@ genkf.internal <- function (object,
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
       error = function (e) {
-        pStop_("degenerate ",sQuote("R"), "at time ", squote(k), ": ",conditionMessage(e))
+        pomp:::pStop_("degenerate ",sQuote("R"), "at time ", sQuote(k), ": ",conditionMessage(e))
       }
     )
     X <- X[,,1]
