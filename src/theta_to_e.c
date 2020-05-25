@@ -18,13 +18,13 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
   UNPROTECT(1);
   return F;
 }
-SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
+SEXP do_theta_to_e (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
   int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
-  SEXP cvec, pompfunthetatov;
-  SEXP fnthetatov, args, ans;
+  SEXP cvec, pompfunthetatoe;
+  SEXP fnthetatoe, args, ans;
   SEXP F;
   SEXP x;
   SEXP unitnames;
@@ -56,15 +56,15 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
 
 
   // extract the user-defined function
-  PROTECT(pompfunthetatov = GET_SLOT(object,install("unit_vmeasure"))); nprotect++;
+  PROTECT(pompfunthetatoe = GET_SLOT(object,install("unit_emeasure"))); nprotect++;
 
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = (*gcn)(GET_SLOT(object,install("covar")))); nprotect++;
-  PROTECT(Onames = GET_SLOT(pompfunthetatov,install("obsnames"))); nprotect++;
+  PROTECT(Onames = GET_SLOT(pompfunthetatoe,install("obsnames"))); nprotect++;
 
-  PROTECT(fnthetatov = (*pfh)(pompfunthetatov,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
+  PROTECT(fnthetatoe = (*pfh)(pompfunthetatoe,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
 
 
   // set up the covariate table
@@ -125,20 +125,20 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
 
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
-    spatPomp_unit_measure_var *ffthetatov = NULL;
+    spatPomp_unit_measure_var *ffthetatoe = NULL;
     double *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
     double *ft = REAL(F);
     double *xp, *pp;
     int i, j, k;
 
     // extract state, parameter, covariate, observable indices
-    sidx = INTEGER(GET_SLOT(pompfunthetatov,install("stateindex")));
-    pidx = INTEGER(GET_SLOT(pompfunthetatov,install("paramindex")));
-    oidx = INTEGER(GET_SLOT(pompfunthetatov,install("obsindex")));
-    cidx = INTEGER(GET_SLOT(pompfunthetatov,install("covarindex")));
+    sidx = INTEGER(GET_SLOT(pompfunthetatoe,install("stateindex")));
+    pidx = INTEGER(GET_SLOT(pompfunthetatoe,install("paramindex")));
+    oidx = INTEGER(GET_SLOT(pompfunthetatoe,install("obsindex")));
+    cidx = INTEGER(GET_SLOT(pompfunthetatoe,install("covarindex")));
 
     // address of native routine
-    *((void **) (&ffthetatov)) = R_ExternalPtrAddr(fnthetatov);
+    *((void **) (&ffthetatoe)) = R_ExternalPtrAddr(fnthetatoe);
 
     (*spu)(args);
     for (k = 0; k < ntimes; k++, time++) { // loop over times
@@ -149,7 +149,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
         xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
         pp = &ps[npars*(j%nrepsp)];
         for(i = 0; i < nunits; i++, ft++){
-          (*ffthetatov)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
+          (*ffthetatoe)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
         }
       }
 

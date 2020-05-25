@@ -3,7 +3,6 @@ context("test methods on simple Brownian motion")
 
 doParallel::registerDoParallel(3)
 # create the BM object
-# Do them parallel and do work at same time
 set.seed(1)
 U = 8; N = 10
 bm8 <- bm(U = U, N = N)
@@ -28,12 +27,10 @@ loglik_true <- pomp:::kalmanFilter(
   C=diag(1,nrow=nrow(dmat)),
   R=diag(coef(bm8)["tau"]^2, nrow=nrow(dmat))
 )$loglik
-#extract only loglik from kalman filter run
 
-#Computing MLE
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp:::kalmanFilter(
+  -pomp2:::kalmanFilter(
     t=1:N,
     y=obs(bm8),
     X0=rinit(bm8),
@@ -44,8 +41,6 @@ fun_to_optim <- function(cf){
   )$loglik
 }
 mle <- optim(coef(bm8), fun_to_optim)
-#Maximize over coefficients
-#Puts in various coefficient values and finds which combination of parameters gives MLE
 kfll_mle <- mle$value
 kfll_mle
 
@@ -53,7 +48,7 @@ kfll_mle
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik <- replicate(10,logLik(girf(bm8,
+girf_loglik <- replicate(10,logLik(girf(bm3,
                     Np = 500,
                     lookahead = 1,
                     Nguide = 50
@@ -63,7 +58,7 @@ girf_loglik <- replicate(10,logLik(girf(bm8,
 #   log-likelihood estimate from GIRF with lookahead > 1
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik_l2 <- replicate(10,logLik(girf(bm8,
+girf_loglik_l2 <- replicate(10,logLik(girf(bm3,
                                         Np = 500,
                                         lookahead = 2,
                                         Nguide = 50
@@ -79,7 +74,7 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm8,
+asif_loglik <- replicate(10,logLik(asif(bm3,
                            islands = 100,
                            Np = 50,
                            nbhd = asif_nbhd)))
@@ -87,7 +82,7 @@ asif_loglik <- replicate(10,logLik(asif(bm8,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asifir_loglik <- replicate(10,logLik(asifir(bm8,
+asifir_loglik <- replicate(10,logLik(asifir(bm3,
                         islands = 100,
                         Np=50,
                         nbhd = asif_nbhd)))
@@ -107,13 +102,13 @@ test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimate
 #   igirf starting from arbitrary parameter set
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 igirf_lookahead <- 1
-igirf_ninter <- length(spat_units(bm8))
+igirf_ninter <- length(spat_units(bm3))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30
-coef(bm8) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+coef(bm3) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
                 "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0)
-igirf_out1 <- igirf(bm8, Ngirf = igirf_ngirf,
+igirf_out1 <- igirf(bm3, Ngirf = igirf_ngirf,
                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
                                  X8_0=0.02),
@@ -123,7 +118,7 @@ igirf_out1 <- igirf(bm8, Ngirf = igirf_ngirf,
                    Ninter = igirf_ninter,
                    lookahead = igirf_lookahead,
                    Nguide = igirf_nguide)
-igirf_out2 <- igirf(bm8, Ngirf = igirf_ngirf,
+igirf_out2 <- igirf(bm3, Ngirf = igirf_ngirf,
                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
                                  X8_0=0.02),
@@ -141,4 +136,3 @@ test_that("IGIRF produces estimates that are not far from the MLE", {
   expect_lt(abs(logLik(igirf_out2) - (-kfll_mle)), 20)
 
 })
-

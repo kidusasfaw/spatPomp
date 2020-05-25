@@ -77,8 +77,10 @@ extern SEXP do_fcst_samp_var(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP para
 extern SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
 
 //thetatov.c
-extern SEXP do_theta_to_v(SEXP object, SEXP skel, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+extern SEXP do_theta_to_v(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
 
+//thetatov.c
+extern SEXP do_theta_to_e(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
 
 //userdata.c
 //extern void set_pomp_userdata(SEXP userdata);

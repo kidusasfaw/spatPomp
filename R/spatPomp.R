@@ -36,7 +36,7 @@
 spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
   unit_emeasure, unit_mmeasure, unit_vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, rprocess, rmeasure,
   dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
-  globals, statenames, paramnames, obstypes, accumvars, covarnames,
+  globals, statenames, paramnames, obstypes, accumvars, covarnames, shared_covarnames,
   partrans, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatPomp"),": ")
@@ -291,20 +291,26 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     if(!missing(covar) && !missing(tcovar)){
       upos_cov <- match(upos_name, names(covar))
       tpos_cov <- match(tpos_name, names(covar))
-      covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
+      if(!missing(shared_covarnames)){
+        spos_cov <- match(shared_covarnames, names(covar))
+        covariate_names <- names(covar)[-c(upos_cov, tpos_cov, spos_cov)]
+      } else covariate_names <- names(covar)[-c(upos_cov, tpos_cov)]
       tmp <- names(unit_index)
       names(tmp) <- unit_index
-      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
-      pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
-      pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-      pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      if(length(covariate_names) >0 ){
+        pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,upos_name], names(tmp)))
+        pomp_covar <- pomp_covar %>% tidyr::gather(covariate_names, key = 'covname', value = 'val')
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+      } else pomp_covar <- covar
       cov_col_order <- c()
       for(cn in covariate_names){
         for(i in 1:length(units)){
           cov_col_order = c(cov_col_order, paste0(cn, i))
         }
       }
-      pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order)]
+      if(!missing(shared_covarnames)) pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order, shared_covarnames)]
+      else pomp_covar <- pomp_covar[, c(tpos_name, cov_col_order)]
       # construct call of covariate_table function
       call_to_covar = list()
       call_to_covar[[1]] <- as.symbol("covariate_table")
@@ -333,7 +339,6 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     if(missing(globals)) globals <- Csnippet(paste0("const int nunits = ",length(units),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int nunits = ",length(units),";\n"),globals@text))
     # create the pomp object
-
     po <- pomp(data = pomp_data,
              times=times,
              t0 = t0,
