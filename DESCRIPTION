@@ -23,7 +23,7 @@ Collate:
     'bm.R'
     'spatPomp.R'
     'enkf.R'
-    'gbm.R'
+    'gbm2.R'
     'girf.R'
     'hippie.R'
     'igirf.R'

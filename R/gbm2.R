@@ -101,9 +101,13 @@ gbm_skel <- spatPomp_Csnippet(" //Process without noise
 gbm_rinit <- Csnippet("
   double *X = &X1;
   const double *X_0 =&X1_0;
+  double *X_bm = &X_bm1;
+  const double *X_bm_0 = &X_bm1_0;
+
   int u;
   for (u = 0; u < U; u++) {
     X[u]=X_0[u];
+    X_bm[u] = X_bm_0[u];
   }
 ")
 
@@ -140,7 +144,7 @@ gbm_unit_mmeasure <- Csnippet("
 gbm_unit_vmeasure <- Csnippet("
 //Variance of y | x
 //Variance estimated based on parameters
-  vc = (X*X) * (exp(2*(tau*tau)) - exp((tau*tau)));
+  vc = (X*X) * (exp(2*(tau*tau)) - exp(tau*tau));
   //https://en.wikipedia.org/wiki/Variance
 ")
 
