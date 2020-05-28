@@ -186,7 +186,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
     #cat("\nnew x \n")
     #print(x)
     log_weights = max_log_d + log(weights)
-    loglik[nt] = logmeanexp(apply(log_weights,2,sum))
+    loglik[nt] = sum(apply(log_weights,1,logmeanexp))
   } ## end of main loop
   new(
     "bpfilterd_spatPomp",
