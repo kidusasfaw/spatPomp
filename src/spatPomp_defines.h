@@ -64,6 +64,9 @@ extern SEXP do_unit_rmeasure(SEXP object, SEXP x, SEXP times, SEXP units, SEXP p
 //iif.c
 extern SEXP asif_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP weights);
 
+//iif.c
+extern SEXP bpfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP resamp_weights);
+
 //girf.c
 extern SEXP girf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP doparRS, SEXP weights, SEXP gps, SEXP fsv, SEXP tol);
 

@@ -22,9 +22,8 @@ setGeneric("hippie_pfilter", function(object,...)standardGeneric("hippie_pfilter
 ## HIPPIE
 setGeneric("hippie", function(object,...)standardGeneric("hippie"))
 
-## EnKF
-setGeneric("genkf",  function (data, ...)standardGeneric("genkf"))
-
+## Block Particle Filter
+setGeneric("bpfilter",  function (object, ...)standardGeneric("bpfilter"))
 
 
 ## construct_spatPomp

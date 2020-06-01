@@ -4,10 +4,10 @@
 ##' This function is generalized to allow for an R matrix that varies over time.
 ##' This is useful if the measurement model varies with the state.
 ##'
-##' @name genkf
-##' @rdname genkf
+##' @name enkf
+##' @rdname enkf
 ##' @include spatPomp_class.R spatPomp.R
-##' @aliases genkf  genkf,ANY-method genkf,missing-method
+##' @aliases enkf  enkf,ANY-method enkf,missing-method
 ##' @family particle filtering methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'
@@ -15,7 +15,7 @@
 ##' @param Np the number of particles to use.
 ##'
 ##' @return
-##' An object of class \sQuote{genkfd_spatPomp}.
+##' An object of class \sQuote{enkfd_spatPomp}.
 ##'
 ##' @references
 ##' Evensen, G. (1994) Sequential data assimilation with a
@@ -30,7 +30,7 @@
 NULL
 
 setClass(
-  "genkfd_spatPomp",
+  "enkfd_spatPomp",
   contains="kalmand_pomp",
   slots=c(
     units = 'character',
@@ -52,22 +52,22 @@ setClass(
 )
 
 setMethod(
-  "genkf",
+  "enkf",
   signature=signature(data="missing"),
   definition=function (...) {
-    pomp:::reqd_arg("genkf","data")
+    pomp:::reqd_arg("enkf","data")
   }
 )
 
 setMethod(
-  "genkf",
+  "enkf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    undef_method("genkf",data)
+    undef_method("enkf",data)
   }
 )
 
-## GENERALIZED ENSEMBLE KALMAN FILTER (GENKF)
+## GENERALIZED ENSEMBLE KALMAN FILTER (enkf)
 
 ## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
 ## Prediction mean: $M_t=\langle X \rangle$
@@ -81,29 +81,29 @@ setMethod(
 ## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
-##' @name genkf-spatPomp
-##' @aliases genkf,spatPomp-method
-##' @rdname genkf
+##' @name enkf-spatPomp
+##' @aliases enkf,spatPomp-method
+##' @rdname enkf
 ##' @export
 setMethod(
-  "genkf",
+  "enkf",
   signature=signature(data="spatPomp"),
   function (data,
             Np,
             ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
-      sp <- genkf.internal(
+      sp <- enkf.internal(
         data,
         Np=Np,
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp:::pStop("genkf",conditionMessage(e))
+      error = function (e) pomp:::pStop("enkf",conditionMessage(e))
     )
   }
 )
 
-genkf.internal <- function (object,
+enkf.internal <- function (object,
                            Np,
                            ..., verbose) {
 
@@ -205,7 +205,7 @@ genkf.internal <- function (object,
     filterMeans[,k] <- rowMeans(X)  # filter mean
     forecast[,k] <- ym
   }
-  new("genkfd_spatPomp", object, Np=Np,
+  new("enkfd_spatPomp", object, Np=Np,
       filter.mean=filterMeans,
       pred.mean=predMeans,
       forecast=forecast,

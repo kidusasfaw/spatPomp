@@ -1,12 +1,12 @@
 library(spatPomp)
-context("test genkf on Lorenz")
+context("test enkf on Lorenz")
 doParallel::registerDoParallel(3)
 
 # create the Lorenz object
 set.seed(1)
 lorenz5 <- lorenz(U=5, N=20, dt=0.01, dt_obs=1)
-# output from genkf
-gl <- genkf(lorenz5, Np = 1000)
+# output from enkf
+gl <- enkf(lorenz5, Np = 1000)
 
 # recreate the same Lorenz object
 set.seed(1)
@@ -24,6 +24,6 @@ el <- pomp::enkf(lorenz5,
       R = diag((coef(lorenz5)["tau"])^2,
                nrow = length(spat_units(lorenz5))))
 
-test_that("enkf and genkf yield equal log likelihoods when vmeasure is independent of X", {
+test_that("pomp::enkf and spatPomp::enkf yield equal log likelihoods when vmeasure is independent of X", {
   expect_equal(logLik(el), logLik(gl))
 })

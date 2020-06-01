@@ -6,7 +6,8 @@ doParallel::registerDoParallel(3)
 set.seed(1)
 U = 8; N = 10
 bm8 <- bm(U = U, N = N)
-
+bpfilter_loglik <- replicate(10, bpfilter(bm8, Np = 1000, num_partitions = 4)@loglik)
+pfilter_loglik <- replicate(10, pfilter(bm8, Np = 100)@loglik)
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -48,7 +49,7 @@ kfll_mle
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik <- replicate(10,logLik(girf(bm3,
+girf_loglik <- replicate(10,logLik(girf(bm8,
                     Np = 500,
                     lookahead = 1,
                     Nguide = 50
@@ -74,7 +75,7 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm3,
+asif_loglik <- replicate(10,logLik(asif(bm8,
                            islands = 100,
                            Np = 50,
                            nbhd = asif_nbhd)))
@@ -87,10 +88,25 @@ asifir_loglik <- replicate(10,logLik(asifir(bm3,
                         Np=50,
                         nbhd = asif_nbhd)))
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   log-likelihood estimate from EnKF
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+genkf_loglik <- replicate(10,logLik(genkf(bm8, Np = 1000)))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   log-likelihood estimate from bpfilter
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
 test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asif_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(genkf_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
+
 
 })
 
