@@ -91,7 +91,7 @@ asifir_loglik <- replicate(10,logLik(asifir(bm3,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-genkf_loglik <- replicate(10,logLik(genkf(bm8, Np = 1000)))
+enkf_loglik <- replicate(10,logLik(enkf(bm8, Np = 1000)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,7 +104,7 @@ test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates",
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asif_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(genkf_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
 
 
