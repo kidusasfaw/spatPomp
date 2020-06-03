@@ -6,8 +6,7 @@ doParallel::registerDoParallel(3)
 set.seed(1)
 U = 8; N = 10
 bm8 <- bm(U = U, N = N)
-bpfilter_loglik <- replicate(10, bpfilter(bm8, Np = 1000, num_partitions = 4)@loglik)
-pfilter_loglik <- replicate(10, pfilter(bm8, Np = 100)@loglik)
+
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -97,6 +96,7 @@ enkf_loglik <- replicate(10,logLik(enkf(bm8, Np = 1000)))
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from bpfilter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm8, Np = 10, num_partitions = 3)))
 
 
 
@@ -106,8 +106,7 @@ test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates",
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
-
-
+  expect_lt(abs(logmeanexp(bpfilter_loglik) - loglik_true), 3)
 })
 
 test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimates", {

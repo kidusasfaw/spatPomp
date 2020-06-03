@@ -95,7 +95,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
 
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
-    #cat("time \n", nt, "\n")
+    # cat("time \n", nt, "\n")
     max_log_d <- vector(mode = "numeric", length = num_partitions)
     X <- tryCatch(
       rprocess(
@@ -112,8 +112,8 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
       }
     )
 
-    #cat(" \n X \n")
-    #print(X)
+    # cat(" \n X \n")
+    # print(X)
 
 
     # For each  partition, get each particle's weight
@@ -137,7 +137,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
         }
       )
       # print("done with for loop")
-      # print(dim(log_vd))
+      # cat(" \n log_vd \n")
       # print(log_vd)
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
       max_log_d[i] <- max(log_d)
