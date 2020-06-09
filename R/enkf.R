@@ -33,6 +33,8 @@ setClass(
   "enkfd_spatPomp",
   contains="kalmand_pomp",
   slots=c(
+    paramMatrix = 'array',
+    indices = 'vector',
     units = 'character',
     unit_statenames = 'character',
     obstypes = 'character',
@@ -43,6 +45,8 @@ setClass(
     unit_mmeasure = 'pomp_fun'
   ),
   prototype=prototype(
+    paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    indices=integer(0),
     unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
     unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure"),
     unit_emeasure = pomp:::pomp_fun(slotname="unit_emeasure"),
@@ -146,7 +150,7 @@ enkf.internal <- function (object,
     ## advance ensemble according to state process
     X <- rprocess(object,x0=X,t0=tt[k],times=tt[k+1],params=params)
 
-    # ensemble of data
+    # data
     yk <- y[,k]
     # ensemble of forecasts
     Y <- tryCatch(
@@ -205,7 +209,9 @@ enkf.internal <- function (object,
     filterMeans[,k] <- rowMeans(X)  # filter mean
     forecast[,k] <- ym
   }
-  new("enkfd_spatPomp", object, Np=Np,
+  new("enkfd_spatPomp", object,
+      paramMatrix=array(data=numeric(0),dim=c(0,0)),
+      Np=Np,
       filter.mean=filterMeans,
       pred.mean=predMeans,
       forecast=forecast,

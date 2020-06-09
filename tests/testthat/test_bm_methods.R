@@ -30,7 +30,7 @@ loglik_true <- pomp:::kalmanFilter(
 
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp2:::kalmanFilter(
+  -pomp:::kalmanFilter(
     t=1:N,
     y=obs(bm8),
     X0=rinit(bm8),
@@ -41,8 +41,35 @@ fun_to_optim <- function(cf){
   )$loglik
 }
 mle <- optim(coef(bm8), fun_to_optim)
-kfll_mle <- mle$value
+kfll_mle <- -mle$value
 kfll_mle
+
+print(coef(bm8))
+
+# test ienkf
+ienkf_np <- 1000
+ienkf_Nenkf <- 50
+coef(bm8) <- c("rho" = 1, "sigma"=0.2, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0)
+ienkf_out <- ienkf(bm8,
+                   Nenkf = ienkf_Nenkf,
+                   rw.sd = rw.sd(
+                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02, X2_0=0.02,
+                     X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+                     X8_0=0.02),
+                   cooling.type = "geometric",
+                   cooling.fraction.50 = 0.5,
+                   Np=ienkf_np)
+
+mif2_out <- mif2(bm8,
+                 Nmif = 50,
+                 rw.sd = rw.sd(rho=0.05, sigma=0.05, tau=0.05, X1_0=0.02, X2_0=0.02,
+                               X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+                               X8_0=0.02),
+                 cooling.type = 'geometric',
+                 cooling.fraction.50 = 0.5,
+                 Np = 1000)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from GIRF
@@ -151,4 +178,5 @@ test_that("IGIRF produces estimates that are not far from the MLE", {
   expect_lt(abs(logLik(igirf_out2) - (-kfll_mle)), 20)
 
 })
+
 

@@ -22,11 +22,12 @@ Collate:
     'asifir.R'
     'bm.R'
     'bpfilter.R'
-    'enkf.R'
     'spatPomp.R'
+    'enkf.R'
     'gbm.R'
     'girf.R'
     'hippie.R'
+    'ienkf.R'
     'igirf.R'
     'lorenz.R'
     'measles.R'
@@ -38,7 +39,7 @@ Collate:
     'spatPomp_workhorses.R'
     'vec_dmeasure.R'
     'vec_rmeasure.R'
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 Imports: doParallel (>= 1.0.11),
     parallel,
     foreach,

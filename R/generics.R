@@ -25,6 +25,8 @@ setGeneric("hippie", function(object,...)standardGeneric("hippie"))
 ## Block Particle Filter
 setGeneric("bpfilter",  function (object, ...)standardGeneric("bpfilter"))
 
+## Iterated ENKF
+setGeneric("ienkf",  function (data, ...)standardGeneric("ienkf"))
 
 ## construct_spatPomp
 setGeneric(
