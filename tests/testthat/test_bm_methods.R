@@ -4,8 +4,8 @@ context("test methods on simple Brownian motion")
 doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(1)
-U = 8; N = 10
-bm8 <- bm(U = U, N = N)
+U = 3; N = 10
+bm_obj <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
@@ -17,55 +17,53 @@ for(u in 1:U) {
 }
 
 # compute the true log-likelihood
-rootQ = coef(bm8)["rho"]^dmat * coef(bm8)["sigma"]
+rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
 loglik_true <- pomp:::kalmanFilter(
   t=1:N,
-  y=obs(bm8),
-  X0=rinit(bm8),
-  A= diag(length(spat_units(bm8))),
+  y=obs(bm_obj),
+  X0=rinit(bm_obj),
+  A= diag(length(spat_units(bm_obj))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(bm8)["tau"]^2, nrow=nrow(dmat))
+  R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
 )$loglik
 
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
   -pomp:::kalmanFilter(
     t=1:N,
-    y=obs(bm8),
-    X0=rinit(bm8),
-    A=diag(length(spat_units(bm8))),
+    y=obs(bm_obj),
+    X0=rinit(bm_obj),
+    A=diag(length(spat_units(bm_obj))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
   )$loglik
 }
-mle <- optim(coef(bm8), fun_to_optim)
+mle <- optim(coef(bm_obj), fun_to_optim)
 kfll_mle <- -mle$value
 kfll_mle
 
-print(coef(bm8))
+print(coef(bm_obj))
 
 # test ienkf
 ienkf_np <- 1000
-ienkf_Nenkf <- 50
-coef(bm8) <- c("rho" = 1, "sigma"=0.2, "tau"=0.2, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0)
-ienkf_out <- ienkf(bm8,
+ienkf_Nenkf <- 100
+coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0)
+ienkf_out <- ienkf(bm_obj,
                    Nenkf = ienkf_Nenkf,
                    rw.sd = rw.sd(
-                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02, X2_0=0.02,
-                     X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                     X8_0=0.02),
+                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
+                     X3_0=0.0),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
 
-mif2_out <- mif2(bm8,
-                 Nmif = 50,
-                 rw.sd = rw.sd(rho=0.05, sigma=0.05, tau=0.05, X1_0=0.02, X2_0=0.02,
-                               X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                               X8_0=0.02),
+mif2_out <- mif2(bm_obj,
+                 Nmif = 100,
+                 rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
+                               X3_0=0),
                  cooling.type = 'geometric',
                  cooling.fraction.50 = 0.5,
                  Np = 1000)
@@ -75,7 +73,7 @@ mif2_out <- mif2(bm8,
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik <- replicate(10,logLik(girf(bm8,
+girf_loglik <- replicate(10,logLik(girf(bm_obj,
                     Np = 500,
                     lookahead = 1,
                     Nguide = 50
@@ -101,7 +99,7 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm8,
+asif_loglik <- replicate(10,logLik(asif(bm_obj,
                            islands = 100,
                            Np = 50,
                            nbhd = asif_nbhd)))
@@ -117,13 +115,13 @@ asifir_loglik <- replicate(10,logLik(asifir(bm3,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-enkf_loglik <- replicate(10,logLik(enkf(bm8, Np = 1000)))
+enkf_loglik <- replicate(10,logLik(enkf(bm_obj, Np = 1000)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from bpfilter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bpfilter_loglik <- replicate(10,logLik(bpfilter(bm8, Np = 10, num_partitions = 3)))
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, num_partitions = 3)))
 
 
 
