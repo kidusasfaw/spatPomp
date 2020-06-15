@@ -15,6 +15,8 @@
 
 \newcommand{\park2019}{Park, J. and Ionides, E. L. (2019) A guided intermediate resampling particle filter for inference on high dimensional systems. \emph{Arxiv 1708.08543v2}}
 
+\newcommand{\rebeschini2015}{Rebeschini, P., & Van Handel, R. (2015). Can local particle filters beat the curse of dimensionality?. \emph{The Annals of Applied Probability}, \bold{25(5)}, 2809-2866.}
+
 \newcommand{\sisson2007}{Sisson, S. A., Fan, Y. and Tanaka, M. M. (2007) Sequential Monte Carlo without likelihoods. \emph{Proceedings of the National Academy of Sciences}, \bold{104(6)}, 1760--1765. \acronym{DOI}: 10.1073/pnas.0607208104}
 
 \newcommand{\sisson2009}{Sisson, S. A., Fan, Y. and Tanaka, M. M. (2009) Correction for Sisson et al., Sequential Monte Carlo without likelihoods. \emph{Proceedings of the National Academy of Sciences}, \bold{106(39)}, 16889. \acronym{DOI}: 10.1073/pnas.0908847106}

@@ -14,8 +14,6 @@
 ##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams spatPomp
-##' @inheritParams pomp::pfilter
 ##' @param object A \code{spatPomp} object.
 ##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}
 ##' @param Np The number of particles used within each island for the adapted simulations.

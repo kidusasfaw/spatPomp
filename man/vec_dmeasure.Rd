@@ -4,8 +4,17 @@
 \alias{vec_dmeasure.internal}
 \title{Evaluate the unit measurement model density function for each unit}
 \usage{
-vec_dmeasure.internal(object, y, x, times, params, log = FALSE,
-  .gnsi = TRUE, ...)
+vec_dmeasure.internal(
+  object,
+  y,
+  x,
+  units,
+  times,
+  params,
+  log = FALSE,
+  .gnsi = TRUE,
+  ...
+)
 }
 \description{
 Evaluate the unit measurement model density function for each unit
