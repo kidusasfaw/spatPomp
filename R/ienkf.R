@@ -141,7 +141,6 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
     )
 
     gnsi <- FALSE
-
     paramMatrix <- es@paramMatrix
     traces[n+1,-1L] <- coef(es)
     traces[n,1L] <- es@loglik
@@ -188,8 +187,6 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   y <- obs(object)
   nobs <- nrow(y)
 
-  Y <- array(dim=c(nobs,Np),dimnames=list(variable=rownames(y),rep=NULL))
-
   loglik <- rep(NA,ntimes)
   eff.sample.size <- numeric(ntimes)
   nfail <- 0
@@ -217,16 +214,11 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     # data
     yk <- y[,nt]
 
-    # expand the state space
-    XT <- rbind(X[,,1],params); rn <- rownames(XT)
-    dim(XT) <- c(length(xnames) + length(pnames), Np, 1)
-    dimnames(XT) <- list(vars = rn, nrep = NULL, ntimes = NULL)
-
     # ensemble of forecasts
     Y <- tryCatch(
       .Call('do_theta_to_e',
             object=object,
-            X=XT,
+            X=X,
             Np = as.integer(Np),
             times=times[nt+1],
             params=tparams,
@@ -235,11 +227,13 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
+    Y <- Y[,,1]
+
     # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
       .Call('do_theta_to_v',
             object=object,
-            X=XT,
+            X=X,
             Np = Np,
             times=times[nt+1],
             params=tparams,
@@ -256,12 +250,15 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
         pomp:::pStop_("degenerate ",sQuote("R"), "at time ", sQuote(nt), ": ",conditionMessage(e))
       }
     )
-    XT <- XT[,,1]
+
+    # expand the state space
+    XT <- rbind(X[,,1],params)
     pm <- rowMeans(XT) # prediction mean
-    dim(Y) <- c(length(spat_units(object)), Np)
 
     # forecast mean
     ym <- rowMeans(Y)
+
+    # center prediction and forecast ensembles
     XT <- XT-pm
     Y <- Y-ym
 
@@ -275,11 +272,14 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
 
     XT <- XT+pm+crossprod(Kt,resid-Y+Ek)
     params <- XT[pnames,,drop = FALSE]
-    # params <- partrans(object,tparams,dir="toEst",.gnsi=gnsi)
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
+    print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
+
     ## compute mean at last timestep
-    if (nt == ntimes) coef(object,transform=TRUE) <- apply(params,1,mean)
+    if (nt == ntimes) {
+      coef(object,transform=TRUE) <- apply(params,1,mean)
+    }
   }
   new("enkfd_spatPomp",
       object,

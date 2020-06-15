@@ -3,8 +3,8 @@ context("test methods on simple Brownian motion")
 
 doParallel::registerDoParallel(3)
 # create the BM object
-set.seed(1)
-U = 3; N = 10
+set.seed(2)
+U = 10; N = 10
 bm_obj <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
@@ -48,17 +48,20 @@ print(coef(bm_obj))
 
 # test ienkf
 ienkf_np <- 1000
-ienkf_Nenkf <- 100
+ienkf_Nenkf <- 50
 coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0)
+                "X3_0"=0, "X4_0"=0, "X5_0"=0, "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0)
 ienkf_out <- ienkf(bm_obj,
                    Nenkf = ienkf_Nenkf,
                    rw.sd = rw.sd(
-                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
-                     X3_0=0.0),
+                     rho=0.1, sigma=0.1, tau=0.1, X1_0=0.0, X2_0=0.0,
+                     X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
+
+enkf_out <- enkf(bm_obj,
+                 Np = ienkf_np)
 
 mif2_out <- mif2(bm_obj,
                  Nmif = 100,
