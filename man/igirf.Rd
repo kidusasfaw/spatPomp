@@ -124,14 +124,20 @@ The following methods are available for such an object:
 Other particle filter methods: 
 \code{\link{asifir}()},
 \code{\link{asif}()},
+<<<<<<< HEAD
 \code{\link{bpfilter-spatPomp}},
+=======
+>>>>>>> 3e36b41c9599107ffcfcf9edbf4e9dab97d067d7
 \code{\link{girf}()},
 \code{\link{hippie}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{asifir}()},
 \code{\link{asif}()},
+<<<<<<< HEAD
 \code{\link{bpfilter-spatPomp}},
+=======
+>>>>>>> 3e36b41c9599107ffcfcf9edbf4e9dab97d067d7
 \code{\link{girf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

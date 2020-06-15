@@ -3,11 +3,10 @@ context("test methods on simple Brownian motion")
 
 doParallel::registerDoParallel(3)
 # create the BM object
-set.seed(1)
-U = 8; N = 10
-bm8 <- bm(U = U, N = N)
-bpfilter_loglik <- replicate(10, bpfilter(bm8, Np = 1000, num_partitions = 4)@loglik)
-pfilter_loglik <- replicate(10, pfilter(bm8, Np = 100)@loglik)
+set.seed(2)
+U = 10; N = 10
+bm_obj <- bm(U = U, N = N)
+
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -18,38 +17,66 @@ for(u in 1:U) {
 }
 
 # compute the true log-likelihood
-rootQ = coef(bm8)["rho"]^dmat * coef(bm8)["sigma"]
+rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
 loglik_true <- pomp:::kalmanFilter(
   t=1:N,
-  y=obs(bm8),
-  X0=rinit(bm8),
-  A= diag(length(spat_units(bm8))),
+  y=obs(bm_obj),
+  X0=rinit(bm_obj),
+  A= diag(length(spat_units(bm_obj))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(bm8)["tau"]^2, nrow=nrow(dmat))
+  R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
 )$loglik
 
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp2:::kalmanFilter(
+  -pomp:::kalmanFilter(
     t=1:N,
-    y=obs(bm8),
-    X0=rinit(bm8),
-    A=diag(length(spat_units(bm8))),
+    y=obs(bm_obj),
+    X0=rinit(bm_obj),
+    A=diag(length(spat_units(bm_obj))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
   )$loglik
 }
-mle <- optim(coef(bm8), fun_to_optim)
-kfll_mle <- mle$value
+mle <- optim(coef(bm_obj), fun_to_optim)
+kfll_mle <- -mle$value
 kfll_mle
+
+print(coef(bm_obj))
+
+# test ienkf
+ienkf_np <- 1000
+ienkf_Nenkf <- 50
+coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0, "X4_0"=0, "X5_0"=0, "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0)
+ienkf_out <- ienkf(bm_obj,
+                   Nenkf = ienkf_Nenkf,
+                   rw.sd = rw.sd(
+                     rho=0.1, sigma=0.1, tau=0.1, X1_0=0.0, X2_0=0.0,
+                     X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
+                   cooling.type = "geometric",
+                   cooling.fraction.50 = 0.5,
+                   Np=ienkf_np)
+
+enkf_out <- enkf(bm_obj,
+                 Np = ienkf_np)
+
+mif2_out <- mif2(bm_obj,
+                 Nmif = 100,
+                 rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
+                               X3_0=0),
+                 cooling.type = 'geometric',
+                 cooling.fraction.50 = 0.5,
+                 Np = 1000)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from GIRF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik <- replicate(10,logLik(girf(bm8,
+girf_loglik <- replicate(10,logLik(girf(bm_obj,
                     Np = 500,
                     lookahead = 1,
                     Nguide = 50
@@ -75,7 +102,7 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm8,
+asif_loglik <- replicate(10,logLik(asif(bm_obj,
                            islands = 100,
                            Np = 50,
                            nbhd = asif_nbhd)))
@@ -91,12 +118,13 @@ asifir_loglik <- replicate(10,logLik(asifir(bm3,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-genkf_loglik <- replicate(10,logLik(genkf(bm8, Np = 1000)))
+enkf_loglik <- replicate(10,logLik(enkf(bm_obj, Np = 1000)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from bpfilter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, num_partitions = 3)))
 
 
 
@@ -104,10 +132,9 @@ test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates",
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asif_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(genkf_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
-
-
+  expect_lt(abs(logmeanexp(bpfilter_loglik) - loglik_true), 3)
 })
 
 test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimates", {
