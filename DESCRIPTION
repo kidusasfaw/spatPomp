@@ -21,6 +21,7 @@ Collate:
     'asif.R'
     'asifir.R'
     'bm.R'
+    'bm_extended.R'
     'bpfilter.R'
     'spatPomp.R'
     'enkf.R'

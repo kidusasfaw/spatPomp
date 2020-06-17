@@ -3,9 +3,9 @@ context("test methods on simple Brownian motion")
 
 doParallel::registerDoParallel(3)
 # create the BM object
-set.seed(2)
+set.seed(3)
 U = 3; N = 20
-bm_obj <- bm(U = U, N = N)
+gbm_obj <- gbm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
@@ -16,42 +16,12 @@ for(u in 1:U) {
   }
 }
 
-# compute the true log-likelihood
-rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
-loglik_true <- pomp:::kalmanFilter(
-  t=1:N,
-  y=obs(bm_obj),
-  X0=rinit(bm_obj),
-  A= diag(length(spat_units(bm_obj))),
-  Q=rootQ%*%rootQ,
-  C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
-)$loglik
-
-fun_to_optim <- function(cf){
-  rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp:::kalmanFilter(
-    t=1:N,
-    y=obs(bm_obj),
-    X0=rinit(bm_obj),
-    A=diag(length(spat_units(bm_obj))),
-    Q=rootQ%*%rootQ,
-    C=diag(1,nrow=nrow(dmat)),
-    R=diag(cf["tau"]^2, nrow=nrow(dmat))
-  )$loglik
-}
-mle <- optim(coef(bm_obj), fun_to_optim)
-kfll_mle <- -mle$value
-kfll_mle
-
-print(coef(bm_obj))
-
 # test ienkf
-ienkf_np <- 1000
+ienkf_np <- 10
 ienkf_Nenkf <- 100
-coef(bm_obj) <- c("rho" = 0.7, "sigma"=1, "tau"=1, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0)
-ienkf_out <- ienkf(bm_obj,
+coef(gbm_obj) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=1, "X2_0"=1,
+                "X3_0"=1)
+ienkf_out <- ienkf(gbm_obj,
                    Nenkf = ienkf_Nenkf,
                    rw.sd = rw.sd(
                      rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
@@ -60,10 +30,8 @@ ienkf_out <- ienkf(bm_obj,
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
 
-# enkf_out <- enkf(bm_obj,
-#                  Np = ienkf_np)
 
-mif2_out <- mif2(bm_obj,
+mif2_out <- mif2(gbm_obj,
                  Nmif = 100,
                  rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
                                X3_0=0),

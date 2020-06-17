@@ -188,11 +188,8 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   nobs <- nrow(y)
 
   loglik <- rep(NA,ntimes)
-  eff.sample.size <- numeric(ntimes)
-  nfail <- 0
 
   for (nt in seq_len(ntimes)) {
-
     ## perturb parameters
     pmag <- cooling.fn(nt,enkfiter)$alpha*rw.sd[,nt]
     params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
@@ -274,7 +271,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
-    print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
+    # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
 
     ## compute mean at last timestep
     if (nt == ntimes) {

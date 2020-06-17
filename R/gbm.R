@@ -116,6 +116,18 @@ gbm_unit_rmeasure <- Csnippet("
   Y = X*exp(rnorm(0,tau+tol));
 ")
 
+gbm_unit_emeasure <- Csnippet("
+  ey = X*exp(tau*tau/2);
+")
+
+gbm_unit_mmeasure <- Csnippet("
+  M_tau = sqrt(log(0.5 + 0.5*sqrt(1 + (4*vc/(X*X)))));
+")
+
+gbm_unit_vmeasure <- Csnippet("
+  vc = X*X*(exp(2*tau*tau) - exp(tau*tau));
+")
+
 gbm_spatPomp <- spatPomp(gbm_data,
                times="time",
                t0=0,
@@ -129,7 +141,10 @@ gbm_spatPomp <- spatPomp(gbm_data,
                dmeasure=gbm_dmeasure,
                unit_dmeasure=gbm_unit_dmeasure,
                unit_rmeasure=gbm_unit_rmeasure,
-               partrans = parameter_trans(log = c("rho", "sigma", "tau")),
+               unit_emeasure=gbm_unit_emeasure,
+               unit_mmeasure=gbm_unit_mmeasure,
+               unit_vmeasure=gbm_unit_vmeasure,
+               partrans = parameter_trans(logit = c("rho"), log = c("sigma", "tau")),
                rinit=gbm_rinit
   )
 
@@ -137,7 +152,7 @@ gbm_spatPomp <- spatPomp(gbm_data,
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(1,U)
 names(test_ivps) <- gbm_IVPnames
-test_params <- c(rho=0.1, sigma=0.1, tau=0.1, test_ivps)
+test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
 simulate(gbm_spatPomp,params=test_params)
 
 }
