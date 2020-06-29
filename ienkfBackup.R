@@ -6,7 +6,7 @@ setClass(
           cooling.type = 'character',
           cooling.fraction.50 = 'numeric',
           traces = 'matrix'
-      )
+  )
 )
 
 
@@ -54,11 +54,11 @@ setMethod(
 )
 
 ienkf.internal <- function (object, Nenkf, rw.sd,
-                           cooling.type, cooling.fraction.50,
-                           Np, max.fail = Inf,
-                           ..., verbose,
-                           .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
-                           .gnsi = TRUE) {
+                            cooling.type, cooling.fraction.50,
+                            Np, max.fail = Inf,
+                            ..., verbose,
+                            .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
+                            .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
 
@@ -83,8 +83,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
     pomp:::pStop_(sQuote("Np")," must be specified.")
   }  else if (!is.numeric(Np)) {
     pomp:::pStop_(sQuote("Np"),
-           " must be a number, a vector of numbers, or a fun
-           ction.")
+                  " must be a number, a vector of numbers, or a function.")
   }
 
   Np <- as.integer(Np)
@@ -152,7 +151,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   }
 
   es@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",
-                              .gnsi=gnsi)
+                             .gnsi=gnsi)
 
   new(
     "ienkfd_spatPomp",
@@ -169,8 +168,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
 ###################ienkf.filter()##################################
 ###################################################################
 ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
-                 max.fail = Inf, verbose, .indices = integer(0),
-                 .gnsi = TRUE) {
+                          max.fail = Inf, verbose, .indices = integer(0),
+                          .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
   gnsi <- as.logical(.gnsi)
@@ -273,6 +272,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
+    print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
 
     # XT <- XT+pm+crossprod(Kt,resid-Y+Ek)
     # params <- XT[pnames,,drop = FALSE]
@@ -302,6 +302,4 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       unit_statenames=object@unit_statenames,
       obstypes = object@obstypes)
 }
-
-
 

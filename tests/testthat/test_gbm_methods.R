@@ -5,8 +5,8 @@ doParallel::registerDoParallel(3)
 # create the GBM object
 # Do them parallel and do work at same time
 set.seed(1)
-U = 8; N = 10
-gbm8 <- gbm(U = U, N = N)
+U = 10; N = 30
+gbm8 <- gbm(U = U, N = N, IVP_values = 35, delta.t = .0001, delta.obs = .001)
 
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
@@ -18,36 +18,65 @@ for(u in 1:U) {
 }
 
 # compute the true log-likelihood
-rootQ = coef(gbm8)["rho"]^dmat * coef(gbm8)["sigma"]
-loglik_true <- pomp:::kalmanFilter(
-  t=1:N,
-  y= log(obs(gbm8)),
-  X0=log(rinit(gbm8)),
-  A= diag(length(spat_units(gbm8))),
-  Q=rootQ%*%rootQ,
-  C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(gbm8)["tau"]^2, nrow=nrow(dmat))
-)$loglik
+# rootQ = coef(gbm8)["rho"]^dmat * coef(gbm8)["sigma"]
+# loglik_true <- pomp:::kalmanFilter(
+#   t=1:N,
+#   y= log(obs(gbm8)),
+#   X0=log(rinit(gbm8)),
+#   A= diag(length(spat_units(gbm8))),
+#   Q=rootQ%*%rootQ,
+#   C=diag(1,nrow=nrow(dmat)),
+#   R=diag(coef(gbm8)["tau"]^2, nrow=nrow(dmat))
+# )$loglik
 #extract only loglik from kalman filter run
 
 #Computing MLE
-fun_to_optim <- function(cf){
-  rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp:::kalmanFilter(
-    t=1:N,
-    y=log(obs(gbm8)),
-    X0=log(rinit(gbm8)),
-    A=diag(length(spat_units(gbm8))),
-    Q=rootQ%*%rootQ,
-    C=diag(1,nrow=nrow(dmat)),
-    R=diag(cf(gbm8)["tau"]^2, nrow=nrow(dmat))
-  )$loglik
-}
-mle <- optim(coef(gbm8), fun_to_optim)
+#fun_to_optim <- function(cf){
+#  rootQ = cf["rho"]^dmat * cf["sigma"]
+#  -pomp:::kalmanFilter(
+#    t=1:N,
+#    y=obs(bm_obj),
+#   X0=rinit(bm_obj),
+#    A=diag(length(spat_units(bm_obj))),
+#    Q=rootQ%*%rootQ,
+#    C=diag(1,nrow=nrow(dmat)),
+#    R=diag(cf["tau"]^2, nrow=nrow(dmat))
+#  )$loglik
+#}
+#mle <- optim(coef(gbm8), fun_to_optim)
 #Maximize over coefficients
 #Puts in various coefficient values and finds which combination of parameters gives MLE
-kfll_mle <- mle$value
-kfll_mle
+#kfll_mle <- mle$value
+#kfll_mle
+
+#print(coef(gbm_obj))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   Testing ienkf compared to MIF2
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ienkf_np <- 10000
+ienkf_Nenkf <- 50
+coef(gbm8) <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=35, "X2_0"=35,
+                  "X3_0"=35, "X4_0"=35, "X5_0"=35, "X6_0"=35, "X7_0"=35, "X8_0"=35, "X9_0"=35, "X10_0"=35)
+ienkf_out <- ienkf(gbm8,
+                   Nenkf = ienkf_Nenkf,
+                   rw.sd = rw.sd(
+                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
+                     X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
+                   cooling.type = "geometric",
+                   cooling.fraction.50 = 0.5,
+                   Np=ienkf_np)
+
+# enkf_out <- enkf(gbm8,
+#                  Np = ienkf_np)
+#
+# mif2_out <- mif2(gbm8,
+#                  Nmif = 100,
+#                  rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=35, X2_0=35,
+#                                X3_0=35),
+#                  cooling.type = 'geometric',
+#                  cooling.fraction.50 = 0.5,
+#                  Np = 1000)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from GIRF
