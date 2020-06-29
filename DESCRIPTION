@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Package: spatPomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
@@ -47,3 +48,55 @@ Imports: doParallel (>= 1.0.11),
     tidyr,
     stringr,
     ggplot2
+=======
+Package: spatPomp
+Type: Package
+Title: Methods for Spatiotemporal POMPs
+Version: 0.1.2
+Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
+             person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
+             person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Depends: pomp (>= 2.0)
+LinkingTo: pomp
+Suggests: scales, geosphere, magrittr,
+  plyr, reshape2,
+    testthat
+Collate:
+    'generics.R'
+    'spatPomp_class.R'
+    'asif.R'
+    'asifir.R'
+    'bm.R'
+    'bm_extended.R'
+    'bpfilter.R'
+    'spatPomp.R'
+    'enkf.R'
+    'gbm.R'
+    'girf.R'
+    'hippie.R'
+    'ienkf.R'
+    'igirf.R'
+    'lorenz.R'
+    'measles.R'
+    'ou.R'
+    'package.R'
+    'plot.R'
+    'spatPomp2.R'
+    'spatPomp_methods.R'
+    'spatPomp_workhorses.R'
+    'vec_dmeasure.R'
+    'vec_rmeasure.R'
+RoxygenNote: 7.1.0
+Imports: doParallel (>= 1.0.11),
+    parallel,
+    foreach,
+    dplyr,
+    tidyr,
+    stringr,
+    ggplot2
+>>>>>>> 2238a338d1bd1dbc029826b2b69775beb2807c74
