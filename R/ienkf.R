@@ -274,13 +274,6 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
 
-    # XT <- XT+pm+crossprod(Kt,resid-Y+Ek)
-    # params <- XT[pnames,,drop = FALSE]
-    # params <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
-    # X <- XT[xnames,,drop = FALSE]
-    # loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
-    # print(rowMeans(params))
-
     ## compute mean at last timestep
     if (nt == ntimes) {
       coef(object,transform=TRUE) <- apply(params,1,mean)
