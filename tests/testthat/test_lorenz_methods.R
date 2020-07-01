@@ -5,22 +5,22 @@ doParallel::registerDoParallel(3)
 # create the Lorenz object
 set.seed(1)
 lorenz5 <- lorenz(U=5, N=20, dt=0.01, dt_obs=1)
-print(coef(lorenz5))
-coef(lorenz5) <- c('F' = 7, 'sigma' = 1, 'tau' = 1, "X1_0"=0, "X2_0"=0,
+lorenz5_test <- lorenz5
+coef(lorenz5_test) <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
                    "X3_0"=0, "X4_0"=0, "X5_0"=0)
-ienkf_Nenkf = 100
+ienkf_Nenkf = 50
 ienkf_np = 1000
-ienkf_out <- ienkf(lorenz5,
+ienkf_out <- ienkf(lorenz5_test,
                    Nenkf = ienkf_Nenkf,
                    rw.sd = rw.sd(
-                     F=0.02, sigma=0.0, tau=0.0, X1_0=0.0, X2_0=0.0,
+                     F=1, sigma=1, tau=1, X1_0=0.0, X2_0=0.0,
                      X3_0=0.0,X4_0=0.0,X5_0=0.0),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
-mif2_out <- mif2(lorenz5,
+mif2_out <- mif2(lorenz5_test,
                  Nmif = 100,
-                 rw.sd = rw.sd(F=0.02, sigma=0.0, tau=0.0, X1_0=0, X2_0=0,
+                 rw.sd = rw.sd(F=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
                                X3_0=0, X4_0=0, X5_0=0),
                  cooling.type = 'geometric',
                  cooling.fraction.50 = 0.5,

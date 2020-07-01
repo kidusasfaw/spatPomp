@@ -4,7 +4,7 @@ context("test methods on simple Brownian motion")
 doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(2)
-U = 3; N = 20
+U = 5; N = 50
 bm_obj <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
@@ -17,59 +17,72 @@ for(u in 1:U) {
 }
 
 # compute the true log-likelihood
-rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
-loglik_true <- pomp:::kalmanFilter(
-  t=1:N,
-  y=obs(bm_obj),
-  X0=rinit(bm_obj),
-  A= diag(length(spat_units(bm_obj))),
-  Q=rootQ%*%rootQ,
-  C=diag(1,nrow=nrow(dmat)),
-  R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
-)$loglik
+# rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
+# loglik_true <- pomp:::kalmanFilter(
+#   t=1:N,
+#   y=obs(bm_obj),
+#   X0=rinit(bm_obj),
+#   A= diag(length(spat_units(bm_obj))),
+#   Q=rootQ%*%rootQ,
+#   C=diag(1,nrow=nrow(dmat)),
+#   R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
+# )$loglik
+#
+# fun_to_optim <- function(cf){
+#   rootQ = cf["rho"]^dmat * cf["sigma"]
+#   -pomp:::kalmanFilter(
+#     t=1:N,
+#     y=obs(bm_obj),
+#     X0=rinit(bm_obj),
+#     A=diag(length(spat_units(bm_obj))),
+#     Q=rootQ%*%rootQ,
+#     C=diag(1,nrow=nrow(dmat)),
+#     R=diag(cf["tau"]^2, nrow=nrow(dmat))
+#   )$loglik
+# }
+# mle <- optim(coef(bm_obj), fun_to_optim)
+# kfll_mle <- -mle$value
+# kfll_mle
 
-fun_to_optim <- function(cf){
-  rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp:::kalmanFilter(
-    t=1:N,
-    y=obs(bm_obj),
-    X0=rinit(bm_obj),
-    A=diag(length(spat_units(bm_obj))),
-    Q=rootQ%*%rootQ,
-    C=diag(1,nrow=nrow(dmat)),
-    R=diag(cf["tau"]^2, nrow=nrow(dmat))
-  )$loglik
-}
-mle <- optim(coef(bm_obj), fun_to_optim)
-kfll_mle <- -mle$value
-kfll_mle
-
-print(coef(bm_obj))
 
 # test ienkf
 ienkf_np <- 1000
-ienkf_Nenkf <- 100
-coef(bm_obj) <- c("rho" = 0.7, "sigma"=1, "tau"=1, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0)
-ienkf_out <- ienkf(bm_obj,
+ienkf_Nenkf <- 50
+start_bm_obj <- bm_obj
+start_params <- c("rho" = 0.7, "sigma"=1, "tau"=1, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0,"X4_0"=0, "X5_0"=0,
+                "X6_0"=0,"X7_0"=0, "X8_0"=0,
+                "X9_0"=0,"X10_0"=0)
+coef(start_bm_obj) <- start_params
+
+ienkf_out <- ienkf(start_bm_obj,
                    Nenkf = ienkf_Nenkf,
                    rw.sd = rw.sd(
-                     rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
-                     X3_0=0.0),
+                     rho=0.02, sigma=0.0, tau=0.0, X1_0=0.0, X2_0=0.0,
+                     X3_0=0.0,X4_0=0.0, X5_0=0.0,
+                     X6_0=0.0,X7_0=0.0, X8_0=0.0,
+                     X9_0=0.0,X10_0=0.0),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
 
 # enkf_out <- enkf(bm_obj,
 #                  Np = ienkf_np)
-
-mif2_out <- mif2(bm_obj,
+#do.call!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+mif2_out <- mif2(start_bm_obj,
                  Nmif = 100,
-                 rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
-                               X3_0=0),
+                 rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.0, X1_0=0.0, X2_0=0.0,
+                               X3_0=0.0,X4_0=0.0, X5_0=0.0,
+                               X6_0=0.0,X7_0=0.0, X8_0=0.0,
+                               X9_0=0.0,X10_0=0.0),
                  cooling.type = 'geometric',
                  cooling.fraction.50 = 0.5,
-                 Np = 1000)
+                 Np = 5000)
+pf <- replicate(5, pfilter(bm_obj, Np = 20000)@loglik) # truth
+pf2 <- replicate(5, pfilter(mif2_out, Np = 20000)@loglik)
+pf3 <- replicate(5, pfilter(ienkf_out, Np = 20000)@loglik)
+pf4 <- replicate(5, pfilter(bm_obj, Np = 20000, params = start_params)@loglik) # starting value
+
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

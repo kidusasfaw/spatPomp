@@ -139,7 +139,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       .indices=.indices,
       .gnsi=gnsi
     )
-
+    # print(n)
+    # print(es@paramMatrix)
     gnsi <- FALSE
     paramMatrix <- es@paramMatrix
     traces[n+1,-1L] <- coef(es)
@@ -251,17 +252,14 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     # expand the state space
     XT <- rbind(X[,,1],params)
     pm <- rowMeans(XT) # prediction mean
-
     # forecast mean
     ym <- rowMeans(Y)
 
     # center prediction and forecast ensembles
     XT <- XT-pm
     Y <- Y-ym
-
     fv <- tcrossprod(Y)/(Np-1)+R  # forecast variance
     vyx <- tcrossprod(Y,XT)/(Np-1)   # forecast/state covariance
-
     svdS <- svd(fv,nv=0)            # singular value decomposition
     Kt <- svdS$u%*%(crossprod(svdS$u,vyx)/svdS$d) # transpose of Kalman gain
     Ek <- sqrtR%*%matrix(rnorm(n=nobs*Np),nobs,Np) # artificial noise
@@ -271,7 +269,6 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
-    # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
 
     ## compute mean at last timestep
     if (nt == ntimes) {
@@ -281,7 +278,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   new("enkfd_spatPomp",
       object,
       Np=Np,
-      cond.loglik=loglik,
+      cond.logLik=loglik,
       loglik=sum(loglik),
       indices=.indices,
       paramMatrix=params,
