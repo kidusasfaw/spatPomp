@@ -258,7 +258,6 @@ measles_unit_dmeasure <- Csnippet('
                        // consider adding 1 to the variance for the case C = 0
                        double m = rho*(C+tol);
                        double v = m*(1.0-rho+psi*psi*m);
-                       double tol = 1e-300;
                        if (cases > 0.0) {
                          lik = pnorm(cases+0.5,m,sqrt(v),1,0)-pnorm(cases-0.5,m,sqrt(v),1,0);
                        } else {
