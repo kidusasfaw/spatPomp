@@ -12,10 +12,10 @@
 
 \item{Np}{The number of particles used for the simulations. If missing, \code{bpfilter} will attempt to run using \code{ncol(params)}}
 
-\item{num_partitions}{The number of partitions the spatial units are split into}
+\item{num_partitions}{The number of partitions the spatial units are split into.}
 
-\item{partitions_list}{List parameter that can specify which spatial units are grouped into the same partitions. The values are vectors of integers for the spatial
-units that should be grouped}
+\item{partitions_list}{List parameter that can specify which spatial units are grouped into the same partitions.
+The values are vectors of integers for the spatial units that should be grouped together}
 
 \item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}}
 }
@@ -26,12 +26,12 @@ Upon successful completion, \code{bpfilter} returns an object of class
 \description{
 An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp)
 Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
-unit belongs to one partition. When the particles are propogated, resampling of the particles occurs
+unit belongs to one partition. After the particles are propagated, resampling of the particles occurs
 within each partition independently based on sampled weights within the partition. Each partition samples only the spatial
 components within the partition which allows for cross-pollination of particles where the highest weighted
-components of each particle are more likely to be resampled and get combined with components of other particles.
-By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality (COD) so that
-the resampling does not result in particle depletion with one particle representing the complex filter distribution
+components of each particle are more likely to be resampled and get combined with resampled components of other particles.
+By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
+the resampling does not result in particle depletion with one particle representing the complex filter distribution.
 }
 \section{Methods}{
 
@@ -66,6 +66,7 @@ Other particle filter methods:
 \code{\link{asif}()},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 

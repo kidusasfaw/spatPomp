@@ -9,19 +9,6 @@ setClass(
       )
 )
 
-
-## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
-## Prediction mean: $M_t=\langle X \rangle$
-## Prediction variance: $V_t=\langle\langle X \rangle\rangle$
-## Forecast: $Y_t=h(X_t)$
-## Forecast mean: $N_t=\langle Y \rangle$.
-## Forecast variance: $S_t=\langle\langle Y \rangle\rangle$
-## State/forecast covariance: $W_t=\langle\langle X,Y\rangle\rangle$
-## Kalman gain: $K_t = W_t\,S_t^{-1}$
-## New observation: $y_t\in \mathbb{R}^{n\times 1}$
-## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
-## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
-
 ##' Iterative Ensemble Kalman Filter (IENKF)
 ##'
 ##' An implementation of a parameter estimation algorithm combining
@@ -41,14 +28,15 @@ setClass(
 ##'
 ##' @examples
 ##' # Create a simulation of a GBM using a default parameter set
-##' gbm8 <- gbm(U = 10, N = 30, IVP_values = 35, delta.t = .0001, delta.obs = .001)
+##' gbm10 <- gbm(U = 10, N = 30, IVP_values = 35, delta.t = .0001, delta.obs = .001)
+##' gbm10_2 <- gbm10
 ##'
 ##' # Set the initial estimates for the unknown parameters
-##' coef(gbm8) <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=35, "X2_0"=35,
+##'  coef(gbm10_2) <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=35, "X2_0"=35,
 ##' "X3_0"=35, "X4_0"=35, "X5_0"=35, "X6_0"=35, "X7_0"=35, "X8_0"=35, "X9_0"=35, "X10_0"=35)
 ##'
 ##' # Run IENKF with the specified parameters
-##' ienkf_out <- ienkf(gbm8,
+##' ienkf_out <- ienkf(gbm10_2,
 ##' Nenkf = ienkf_Nenkf,
 ##' rw.sd = rw.sd(
 ##'   rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
@@ -62,7 +50,7 @@ setClass(
 ##'
 ##' @return
 ##' Upon successful completion, \code{ienkf} returns an object of class
-##' \sQuote{enkfd_spatPomp}.
+##' \sQuote{ienkfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -81,6 +69,19 @@ setClass(
 ##' Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
 ##' Assimilation Monthly Weather Review 129:2884--2903
 ##' @export
+
+
+## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
+## Prediction mean: $M_t=\langle X \rangle$
+## Prediction variance: $V_t=\langle\langle X \rangle\rangle$
+## Forecast: $Y_t=h(X_t)$
+## Forecast mean: $N_t=\langle Y \rangle$.
+## Forecast variance: $S_t=\langle\langle Y \rangle\rangle$
+## State/forecast covariance: $W_t=\langle\langle X,Y\rangle\rangle$
+## Kalman gain: $K_t = W_t\,S_t^{-1}$
+## New observation: $y_t\in \mathbb{R}^{n\times 1}$
+## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
+## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
 setMethod(
   "ienkf",
