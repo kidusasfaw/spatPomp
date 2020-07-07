@@ -2,9 +2,9 @@ library(spatPomp)
 context("test enkf on Lorenz")
 doParallel::registerDoParallel(3)
 set.seed(1)
-U = 3; N = 70
+U = 5; N = 50
 e <- ebm(U=U,N=N)
-test_ivps <- c(rep(0,U),rep(0.7,U),rep(0.5,U),rep(0.5,U)) #X,rho,sigma,tau
+test_ivps <- c(rep(0,U),rep(0.7,U),rep(1,U),rep(1,U)) #X,rho,sigma,tau
 names(test_ivps) <- names(coef(e))
 coef(e) <- test_ivps
 enkfd_e <- enkf(e, Np = 75)

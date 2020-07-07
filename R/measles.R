@@ -210,11 +210,12 @@ measles_dmeasure <- Csnippet("
   const double *cases = &cases1;
   double m,v;
   double tol = 1e-300;
+  double mytol = 1e-5;
   int u;
 
   lik = 0;
   for (u = 0; u < U; u++) {
-    m = rho*C[u];
+    m = rho*(C[u]+mytol);
     v = m*(1.0-rho+psi*psi*m);
     if (cases[u] > 0.0) {
       lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
@@ -233,7 +234,7 @@ measles_rmeasure <- Csnippet("
   int u;
 
   for (u = 0; u < U; u++) {
-    m = rho*C[u];
+    m = rho*(C[u]+tol);
     v = m*(1.0-rho+psi*psi*m);
     cases[u] = rnorm(m,sqrt(v)+tol);
     if (cases[u] > 0.0) {
@@ -246,7 +247,8 @@ measles_rmeasure <- Csnippet("
 
 measles_unit_dmeasure <- Csnippet('
                        // consider adding 1 to the variance for the case C = 0
-                       double m = rho*C;
+                       double mytol = 1e-5;
+                       double m = rho*(C+mytol);
                        double v = m*(1.0-rho+psi*psi*m);
                        double tol = 1e-300;
                        if (cases > 0.0) {
@@ -263,16 +265,18 @@ ey = rho*C;
 
 measles_unit_vmeasure <- Csnippet("
 //consider adding 1 to the variance for the case C = 0
+double mytol = 1e-5;
 double m;
-m = rho*C;
+m = rho*(C+mytol);
 vc = m*(1.0-rho+psi*psi*m);
 ")
 
 measles_unit_mmeasure <- Csnippet("
 double binomial_var;
 double m;
-m = rho*C;
-binomial_var = rho*(1-rho)*C;
+double mytol = 1e-5;
+m = rho*(C+mytol);
+binomial_var = rho*(1-rho)*C;	
 if(vc > binomial_var) {
   M_psi = sqrt(vc - binomial_var)/m;
 }

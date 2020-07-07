@@ -351,4 +351,3 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
 }
 
 
-
