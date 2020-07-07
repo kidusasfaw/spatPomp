@@ -15,9 +15,63 @@ setClass(
   )
 )
 
+##' Block Particle Filter (bpfilter)
+##'
+##' An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp)
+##' Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
+##' unit belongs to one partition. After the particles are propagated, resampling of the particles occurs
+##' within each partition independently based on sampled weights within the partition. Each partition samples only the spatial
+##' components within the partition which allows for cross-pollination of particles where the highest weighted
+##' components of each particle are more likely to be resampled and get combined with resampled components of other particles.
+##' By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
+##' the resampling does not result in particle depletion with one particle representing the complex filter distribution.
+##'
 ##' @name bpfilter-spatPomp
 ##' @aliases bpfilter,spatPomp-method
 ##' @rdname bpfilter
+##' @include spatPomp_class.R generics.R
+##' @family particle filter methods
+##' @family \pkg{spatPomp} filtering methods
+##'
+##'
+##' @param object A \code{spatPomp} object
+##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}
+##' @param Np The number of particles used for the simulations. If missing, \code{bpfilter} will attempt to run using \code{ncol(params)}
+##' @param num_partitions The number of partitions the spatial units are split into.
+##' @param partitions_list List parameter that can specify which spatial units are grouped into the same partitions.
+##'    The values are vectors of integers for the spatial units that should be grouped together
+##'
+##' @examples
+##' # Create a simulation of a BM using default parameter set
+##' b <- bm(U=6, N=10)
+##'
+##' #Run BP Filter with the specified number of particles and number of partitions
+##' bpfilterd.b <- bpfilter(b, Np = 20, num_partitions = 3)
+##'
+##' #Run BP filter with the specified number of particles and specified groupings of partitions
+##' #Equivalent to above
+##' bpfilterd.bm <- bpfilter(b, Np = 20, partitions_list = list(c(1,2), c(3,4), c(5,6)))
+##'
+##' #Get the likelihood estimate from BP Filter
+##' logLik(bpfilterd.b)
+##'
+##' #Compare with the likelihood estimate from the particle filter
+##' pfd.b <- pfilter(b, Np= 500)
+##' logLik(pfd.b)
+##'
+##' @return
+##' Upon successful completion, \code{bpfilter} returns an object of class
+##' \sQuote{bpfilterd_spatPomp}.
+##'
+##' @section Details
+##' Only one of num_partitions or partitions_list needs to be specified and the other can be left unspecified as \code{bpfilter} will try to calculate it.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' }
+##'
 ##' @export
 setMethod(
   "bpfilter",
@@ -95,7 +149,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
 
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
-    # cat("time \n", nt, "\n")
+    #cat("time \n", nt, "\n")
     max_log_d <- vector(mode = "numeric", length = num_partitions)
     X <- tryCatch(
       rprocess(
@@ -112,8 +166,8 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
       }
     )
 
-    # cat(" \n X \n")
-    # print(X)
+    #cat(" \n X \n")
+    #print(X)
 
 
     # For each  partition, get each particle's weight
@@ -137,7 +191,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
         }
       )
       # print("done with for loop")
-      # cat(" \n log_vd \n")
+      # print(dim(log_vd))
       # print(log_vd)
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
       max_log_d[i] <- max(log_d)
@@ -161,7 +215,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
       # print(weights)
       # paste0("weights \n", weights, "\n")
 
-      xx <- tryCatch(
+      xx <- tryCatch( #resampling with cross pollination
         .Call(
           "bpfilter_computations",
           x=tempX,

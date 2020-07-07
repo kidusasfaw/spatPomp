@@ -21,13 +21,6 @@
 \item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}}
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
-
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
 }
 \value{
 Upon successful completion, \code{asif} returns an object of class
@@ -73,12 +66,15 @@ logLik(pfd.b)
 \seealso{
 Other particle filter methods: 
 \code{\link{asifir}()},
+\code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{asifir}()},
+\code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 }
