@@ -14,6 +14,23 @@
 ##' @inheritParams spatPomp
 ##' @param Np the number of particles to use.
 ##'
+##' @examples
+##' # Create a BM object with the specified parameters
+##' U = 10; N = 10
+##' bm_obj <- bm(U = U, N = N)
+##' bm_obg2 <- bm_obj
+##'
+##' # Set the initial estimates for the unknown parameters
+##' coef(bm_obj2) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=0, "X2_0"=0,
+##' "X3_0"=0, "X4_0"=0, "X5_0"=0, "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0)
+##'
+##' # Run ENKF with the specified parameters
+##' enkf_np <- 1000
+##' enkf_out <- enkf(bm_obj2, Np = enkf_np)
+##'
+##' # Get the parameter estimates from the ENKF object
+##' coef(enkf_out)
+##'
 ##' @return
 ##' An object of class \sQuote{enkfd_spatPomp}.
 ##'

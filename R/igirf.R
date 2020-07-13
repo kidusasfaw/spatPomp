@@ -15,6 +15,50 @@
 ##'
 ##' @param Ngirf the number of iterations of perturbed GIRF.
 ##'
+##' @examples
+##' # Create a simulation of a BM object with the specified parameters
+##' U = 10; N = 10
+##' bm_obj <- bm(U = U, N = N)
+##' bm_obj2 <- bm_obj
+##'
+##' # Set the initial parameter estimates for the unknown parameters
+##' coef(bm_obj2) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+##' "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0" = 0, "X10_0" = 0)
+##'
+##' # Run IGIRF with the specified parameters
+##' igirf_lookahead <- 1
+##' igirf_ninter <- length(spat_units(bm3))
+##' igirf_np <- 800
+##' igirf_nguide <- 40
+##' igirf_ngirf <- 30
+##'
+##' igirf_out1 <- igirf(bm_obj2, Ngirf = igirf_ngirf,
+##' rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
+##'               X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+##'               X8_0=0.02, X9_0=.02, X10_0 = .02),
+##' cooling.type = "geometric",
+##' cooling.fraction.50 = 0.5,
+##' Np=igirf_np,
+##' Ninter = igirf_ninter,
+##' lookahead = igirf_lookahead,
+##' Nguide = igirf_nguide)
+##'
+##' igirf_out2 <- igirf(bm_obj2, Ngirf = igirf_ngirf,
+##'                     rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
+##'                                   X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+##'                                   X8_0=0.02, X9_0=.02, X10_0 = .02),
+##'                     cooling.type = "geometric",
+##'                     cooling.fraction.50 = 0.5,
+##'                     Np=igirf_np,
+##'                     Ninter = igirf_ninter,
+##'                     lookahead = igirf_lookahead,
+##'                     Nguide = igirf_nguide,
+##'                     method = 'adams')
+##'
+##' # Get the parameter estimates from the IGIRF objects
+##' coef(igirf_out1)
+##' coef(igirf_out2)
+##'
 ##' @return
 ##' Upon successful completion, \code{igirf} returns an object of class
 ##' \sQuote{igirfd.spatPomp}.
