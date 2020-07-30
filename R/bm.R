@@ -95,7 +95,6 @@ bm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-bm_unit_emeasure <- Csnippet("
   ey = X;
 ")
 

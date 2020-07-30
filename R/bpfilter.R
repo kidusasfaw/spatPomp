@@ -21,7 +21,7 @@ setClass(
 ##' Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
 ##' unit belongs to one partition. After the particles are propagated, resampling of the particles occurs
 ##' within each partition independently based on sampled weights within the partition. Each partition samples only the spatial
-##' components within the partition which allows for cross-pollination of particles where the highest weighted
+##' components within the partition which allows for hybrid particles to form where the highest weighted
 ##' components of each particle are more likely to be resampled and get combined with resampled components of other particles.
 ##' By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
 ##' the resampling does not result in particle depletion with one particle representing the complex filter distribution.
