@@ -9,8 +9,67 @@ setClass(
       )
 )
 
+##' Iterative Ensemble Kalman Filter (IENKF)
+##'
+##' An implementation of a parameter estimation algorithm combining
+##' ENKF with IF2.
+##'
+##' @name ienkf-spatPomp
+##' @aliases ienkf,spatPomp-method
+##' @rdname ienkf
+##' @include spatPomp_class.R generics.R
+##' @family particle filter methods
+##' @family \pkg{spatPomp} parameter estimation methods
+##'
+##' @inheritParams spatPomp
+##' @inheritParams pomp::mif2
+##'
+##' @param Nenkf number of iterations of perturbed ENKF.
+##'
+##' @examples
+##' # Create a simulation of a GBM using a default parameter set
+##' gbm10 <- gbm(U = 10, N = 30, IVP_values = 35, delta.t = .0001, delta.obs = .001)
+##' gbm10_2 <- gbm10
+##'
+##' # Set the initial estimates for the unknown parameters
+##'  coef(gbm10_2) <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=35, "X2_0"=35,
+##' "X3_0"=35, "X4_0"=35, "X5_0"=35, "X6_0"=35, "X7_0"=35, "X8_0"=35, "X9_0"=35, "X10_0"=35)
+##'
+##' # Run IENKF with the specified parameters
+##' ienkf_out <- ienkf(gbm10_2,
+##' Nenkf = ienkf_Nenkf,
+##' rw.sd = rw.sd(
+##'   rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
+##'   X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
+##' cooling.type = "geometric",
+##' cooling.fraction.50 = 0.5,
+##' Np=ienkf_np)
+##'
+##' # Get the parameter estimates from the IENKF object
+##' coef(ienkf_out)
+##'
+##' @return
+##' Upon successful completion, \code{ienkf} returns an object of class
+##' \sQuote{ienkfd_spatPomp}.
+##'
+##' @section Methods:
+##' The following methods are available for such an object:
+##' \describe{
+##' \item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
+##' }
+##'
+##' @references
+##' Evensen, G. (1994) Sequential data assimilation with a
+##' nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
+##' error statistics Journal of Geophysical Research: Oceans 99:10143--10162
+##'
+##' Evensen, G. (2009) Data assimilation: the ensemble Kalman filter
+##' Springer-Verlag.
+##'
+##' Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
+##' Assimilation Monthly Weather Review 129:2884--2903
+##' @export
 
-## ITERATIVE ENSEMBLE KALMAN FILTER (ienkf)
 
 ## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
 ## Prediction mean: $M_t=\langle X \rangle$
@@ -24,10 +83,6 @@ setClass(
 ## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
-##' @name ienkf-spatPomp
-##' @aliases ienkf,spatPomp-method
-##' @rdname ienkf
-##' @export
 setMethod(
   "ienkf",
   signature=signature(data="spatPomp"),
@@ -139,8 +194,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       .indices=.indices,
       .gnsi=gnsi
     )
-    # print(n)
-    # print(es@paramMatrix)
+
     gnsi <- FALSE
     paramMatrix <- es@paramMatrix
     traces[n+1,-1L] <- coef(es)
@@ -252,14 +306,17 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     # expand the state space
     XT <- rbind(X[,,1],params)
     pm <- rowMeans(XT) # prediction mean
+
     # forecast mean
     ym <- rowMeans(Y)
 
     # center prediction and forecast ensembles
     XT <- XT-pm
     Y <- Y-ym
+
     fv <- tcrossprod(Y)/(Np-1)+R  # forecast variance
     vyx <- tcrossprod(Y,XT)/(Np-1)   # forecast/state covariance
+
     svdS <- svd(fv,nv=0)            # singular value decomposition
     Kt <- svdS$u%*%(crossprod(svdS$u,vyx)/svdS$d) # transpose of Kalman gain
     Ek <- sqrtR%*%matrix(rnorm(n=nobs*Np),nobs,Np) # artificial noise
@@ -269,6 +326,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
+    # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
 
     ## compute mean at last timestep
     if (nt == ntimes) {
@@ -278,7 +336,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   new("enkfd_spatPomp",
       object,
       Np=Np,
-      cond.logLik=loglik,
+      cond.loglik=loglik,
       loglik=sum(loglik),
       indices=.indices,
       paramMatrix=params,
@@ -291,6 +349,5 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       unit_statenames=object@unit_statenames,
       obstypes = object@obstypes)
 }
-
 
 

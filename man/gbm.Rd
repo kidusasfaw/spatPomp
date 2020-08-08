@@ -4,7 +4,7 @@
 \alias{gbm}
 \title{Geometric Brownian motion spatPomp generator}
 \usage{
-gbm(U = 5, N = 100, delta.t = 0.1)
+gbm(U = 5, N = 100, delta.t = 0.1, IVP_values = 1, delta.obs = 1)
 }
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}

@@ -66,11 +66,14 @@ Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a
 Other particle filter methods: 
 \code{\link{asifir}()},
 \code{\link{asif}()},
+\code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
+\code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{enkf}()}
+\code{\link{enkf}()},
+\code{\link{ienkf-spatPomp}}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}

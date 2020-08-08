@@ -210,39 +210,34 @@ measles_dmeasure <- Csnippet("
   const double *C = &C1;
   const double *cases = &cases1;
   double m,v;
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
+  double tol = 1e-300;
+  double mytol = 1e-5;
   int u;
 
   lik = 0;
   for (u = 0; u < U; u++) {
-    m = rho*(C[u]+tol);
+    m = rho*(C[u]+mytol);
     v = m*(1.0-rho+psi*psi*m);
     if (cases[u] > 0.0) {
-      lik += log(pnorm(cases[u]+0.5,m,sqrt(v),1,0)-pnorm(cases[u]-0.5,m,sqrt(v),1,0));
+      lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
     } else {
-        lik += log(pnorm(cases[u]+0.5,m,sqrt(v),1,0));
+        lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
     }
   }
-  if(!give_log) lik = exp(lik);
+  if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
 ")
 
 measles_rmeasure <- Csnippet("
   const double *C = &C1;
   double *cases = &cases1;
   double m,v;
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
+  double tol = 1.0e-300;
   int u;
 
   for (u = 0; u < U; u++) {
     m = rho*(C[u]+tol);
     v = m*(1.0-rho+psi*psi*m);
-    cases[u] = rnorm(m,sqrt(v));
+    cases[u] = rnorm(m,sqrt(v)+tol);
     if (cases[u] > 0.0) {
       cases[u] = nearbyint(cases[u]);
     } else {
@@ -252,48 +247,37 @@ measles_rmeasure <- Csnippet("
 ")
 
 measles_unit_dmeasure <- Csnippet('
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
                        // consider adding 1 to the variance for the case C = 0
-                       double m = rho*(C+tol);
+                       double mytol = 1e-5;
+                       double m = rho*(C+mytol);
                        double v = m*(1.0-rho+psi*psi*m);
+                       double tol = 1e-300;
                        if (cases > 0.0) {
-                         lik = pnorm(cases+0.5,m,sqrt(v),1,0)-pnorm(cases-0.5,m,sqrt(v),1,0);
+                         lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
                        } else {
-                           lik = pnorm(cases+0.5,m,sqrt(v),1,0);
+                           lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
                        }
                        if(give_log) lik = log(lik);
                        ')
 
 measles_unit_emeasure <- Csnippet("
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
-  ey = rho*(C+tol);
+ey = rho*C;
 ")
 
 measles_unit_vmeasure <- Csnippet("
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
+//consider adding 1 to the variance for the case C = 0
+double mytol = 1e-5;
 double m;
-m = rho*(C+tol);
+m = rho*(C+mytol);
 vc = m*(1.0-rho+psi*psi*m);
 ")
 
 measles_unit_mmeasure <- Csnippet("
 double binomial_var;
 double m;
-  double tol = 1e-5;
-  // here, the tolerance is added to C, so any tolerance << 1
-  // cuts in only when cases=0
-  // changing from 1e-300 to see if that stops asifir crashing
-m = rho*(C+tol);
-binomial_var = rho*(1-rho)*C;
+double mytol = 1e-5;
+m = rho*(C+mytol);
+binomial_var = rho*(1-rho)*C;	
 if(vc > binomial_var) {
   M_psi = sqrt(vc - binomial_var)/m;
 }

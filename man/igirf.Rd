@@ -114,12 +114,15 @@ The following methods are available for such an object:
 Other particle filter methods: 
 \code{\link{asifir}()},
 \code{\link{asif}()},
+\code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
-\code{\link{hippie}()}
+\code{\link{hippie}()},
+\code{\link{ienkf-spatPomp}}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{asifir}()},
 \code{\link{asif}()},
+\code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}
