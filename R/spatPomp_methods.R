@@ -58,16 +58,23 @@ setMethod(
     if(format == 'spatPomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
+      unit_stateobs <- c(object@obstypes, object@unit_statenames)
+      unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
+      get_unit_index_from_statename <- function(statename){
+        stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
+      }
+      get_unit_index_from_statename_v <- Vectorize(get_unit_index_from_statename)
       # convert to long format and output
-      to.gather <- colnames(sims)[3:length(colnames(sims))] # all columns except time and .id
-      to.select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
-      to.arrange <- c(colnames(sims)[1], "unit", "stateobs")
-      gathered <- sims %>% tidyr::gather_(key="stateobs", val="val", to.gather) %>%
-        dplyr::mutate(ui = stringr::str_extract(stateobs,"[0-9]+"))%>%
-        dplyr::mutate(unit = spat_units(object)[ui])%>%
-        dplyr::select_(.dots = to.select) %>%
-        dplyr::arrange_(.dots = to.arrange)
-      stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_split(x,"[0-9]+")[[1]][1])
+      to_gather <- colnames(sims)[3:length(colnames(sims))][!c(colnames(sims)[3:length(colnames(sims))]%in%object@shared_covarnames)] # all columns except time and .id
+      to_select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
+      to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
+      gathered <- sims %>%
+        tidyr::gather_(key="stateobs", val="val", to_gather) %>%
+        dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs))%>%
+        dplyr::mutate(unit = spat_units(object)[as.integer(ui)]) %>%
+        dplyr::select_(.dots = to_select) %>%
+        dplyr::arrange_(.dots = to_arrange)
+      stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
       gathered$stateobstype <- stateobstype
       gathered <- gathered %>%
         dplyr::select(-stateobs) %>%
@@ -80,6 +87,8 @@ setMethod(
         sp.list <- vector(mode="list", length = nsim)
         for(i in 1:length(sims)){
           sp <- new("spatPomp",sims[[i]],
+                    unit_covarnames = object@unit_covarnames,
+                    shared_covarnames = object@shared_covarnames,
                     unit_rmeasure = object@unit_rmeasure,
                     unit_dmeasure = object@unit_dmeasure,
                     unit_emeasure = object@unit_emeasure,
@@ -93,6 +102,8 @@ setMethod(
         return(sp.list)
       } else{
         sp <- new("spatPomp",sims,
+                  unit_covarnames = object@unit_covarnames,
+                  shared_covarnames = object@shared_covarnames,
                   unit_dmeasure = object@unit_dmeasure,
                   unit_rmeasure = object@unit_rmeasure,
                   unit_emeasure = object@unit_emeasure,

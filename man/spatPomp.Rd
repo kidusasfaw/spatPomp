@@ -36,6 +36,7 @@ spatPomp(
   accumvars,
   covarnames,
   shared_covarnames,
+  unit_covarnames,
   partrans,
   verbose = getOption("verbose", FALSE)
 )

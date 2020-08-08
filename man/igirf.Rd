@@ -50,14 +50,14 @@ i.e., the output of another \pkg{spatPomp} calculation.}
 
 \item{Ngirf}{the number of iterations of perturbed GIRF.}
 
-\item{Np}{the number of particles to use in filtering.
+\item{Np}{the number of particles to use.
 This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-Alternatively, if one wishes the number of particles to vary across timestep, one may specify \code{Np} either as a vector of positive integers (of length \code{length(time(object))}) or as a function taking a positive integer argument.
-In the latter case, \code{Np(n)} must be a single positive integer,
-representing the number of particles to be used at the \code{n}-th timestep:
-\code{Np(1)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-\code{Np(2)}, from \code{time(object)[1]} to \code{time(object)[2]},
-and so on.}
+Alternatively, if one wishes the number of particles to vary across timesteps, one may specify \code{Np} either as a vector of positive integers of length \preformatted{length(time(object,t0=TRUE))} or as a function taking a positive integer argument.
+In the latter case, \code{Np(k)} must be a single positive integer, representing the number of particles to be used at the \code{k}-th timestep:
+\code{Np(0)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
+\code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
+and so on,
+while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
 
 \item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 Parameters that are to be estimated should have positive perturbations specified here.
@@ -79,16 +79,6 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
-
-\item{tol}{non-negative numeric scalar;
-particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-See the section on \emph{Filtering Failures} for more information.
-In a future release, this argument will be removed.}
-
-\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
-If the number of filtering failures exceeds this number, execution will terminate with an error.
-By default, \code{max.fail} is set to infinity, so no error can be triggered.
-In a future release, this argument will be removed.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
