@@ -43,7 +43,15 @@ setMethod(
   "plot",
   signature=signature(x="spatPomp"),
   definition=function (x, ...) {
-    plot(as.data.frame(x))
+    df <- as.data.frame(x)
+    ggplot(data = df) +
+      geom_tile(aes(
+        x = !!rlang::sym(x@unitname),
+        y = !!rlang::sym(x@timename),
+        fill = !!rlang::sym(x@obstypes))) +
+      scale_x_discrete() +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+      scale_fill_gradientn(colours = terrain.colors(10))
   }
 )
 
