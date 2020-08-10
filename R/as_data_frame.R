@@ -21,50 +21,72 @@ setAs(
   from="spatPomp",
   to="data.frame",
   def = function (from) {
-    dat_cov <- obs(from)
+    # get all names
     cnames <- pomp:::get_covariate_names(from@covar)
-    if (length(cnames) > 0) {
-      nm <- c(rownames(dat_cov),cnames)  # perhaps not strictly necessary (but see issue #56)
-      y <- .Call('lookup_in_table',from@covar,from@times,PACKAGE = 'pomp')
-      dat_cov <- cbind(t(dat_cov),t(y))
-      colnames(dat_cov) <- nm
-    }
+    unitname <- from@unitname
+    timename <- from@timename
+
+    # set up unit names for obs, states and covars
+    unit_stateobscovars <- c(from@obstypes)
+
+    # get the observation, covars (if any) and states (if any)
+    dat <- t(obs(from))
     if (length(from@states)>0) {
-      nm <- colnames(dat_cov)
-      dat_cov <- cbind(dat_cov,t(from@states))
-      colnames(dat_cov) <- c(nm,rownames(from@states))
+      nm <- colnames(dat)
+      dat <- cbind(dat,t(from@states))
+      colnames(dat) <- c(nm,rownames(from@states))
+      unit_stateobscovars <- c(unit_stateobscovars, from@unit_statenames)
     }
-    dat_cov <- as.data.frame(dat_cov)
-    dat_cov <- cbind(from@times,dat_cov)
-    colnames(dat_cov)[1] <- from@timename
-
-    unit_stateobs <- c(from@obstypes, from@unit_statenames, from@unit_covarnames)
-    unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
-    get_unit_index_from_statename <- function(statename){
-      stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
+    if (length(cnames) > 0) {
+      nm <- c(colnames(dat),cnames)
+      y <- .Call('lookup_in_table',from@covar,from@times,PACKAGE = 'pomp')
+      dat <- cbind(dat,t(y))
+      colnames(dat) <- nm
+      unit_stateobscovars <- c(unit_stateobscovars, from@unit_covarnames)
     }
-    get_unit_index_from_statename_v <- Vectorize(get_unit_index_from_statename)
 
-    # convert to long format and output
-    to_gather <- colnames(dat_cov)[2:length(colnames(dat_cov))][!c(colnames(dat_cov)[2:length(colnames(dat_cov))]%in%from@shared_covarnames)]
-    to_select <- c(from@timename, "unit", "stateobs", "val")
-    to_arrange <- rlang::syms(c(from@timename, "unit", "stateobs"))
-    to_final_select <- c(from@timename,"unit",unit_stateobs)
-    gathered <- dat_cov %>%
-      tidyr::gather_(key="stateobs", val="val", to_gather) %>%
-      dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs)) %>%
-      dplyr::mutate(unit = spat_units(from)[as.integer(ui)]) %>%
-      dplyr::select(to_select) %>%
+    # function to split unit name and unit index
+    unit_stateobscovars_pat <- paste0(paste("^",unit_stateobscovars,sep=""), collapse = "|")
+    get_unit_index_from_name <- function(name){
+      stringr::str_split(name,unit_stateobscovars_pat)[[1]][2]
+    }
+    get_unit_index_from_name_v <- Vectorize(get_unit_index_from_name)
+
+    # turn into data.frame (from matrix) and complete with time name
+    dat <- as.data.frame(dat)
+    dat <- cbind(from@times,dat)
+    colnames(dat)[1] <- timename
+
+    # convert to long format with column for stateobscovars
+    no_time_colnames <- colnames(dat)[-1]
+    shared_covnames_ix <- which(no_time_colnames %in% from@shared_covarnames)
+    if(length(shared_covnames_ix) > 0)
+      to_gather <- no_time_colnames[-shared_covnames_ix]
+    else
+      to_gather <- no_time_colnames
+    to_select <- c(timename, unitname, "stateobscovars", "val")
+    to_arrange <- rlang::syms(c(timename, unitname, "stateobscovars"))
+    to_final_select <- c(timename, unitname, unit_stateobscovars)
+    gathered <- dat %>%
+      tidyr::gather_(key="stateobscovars", val="val", to_gather) %>%
+      dplyr::mutate(ui = get_unit_index_from_name_v(stateobscovars)) %>%
+      dplyr::mutate(!!unitname := spat_units(from)[as.integer(ui)]) %>%
+      dplyr::select(-ui) %>%
       dplyr::arrange(!!!to_arrange)
 
-    stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
-    gathered$stateobstype <- stateobstype
+    # get the type of stateobscovars from the stateobscovars column
+    stateobscovarstype <- sapply(gathered$stateobscovars,
+                           FUN=function(x) stringr::str_extract(
+                             x,unit_stateobscovars_pat))
+    gathered$stateobscovarstype <- stateobscovarstype
 
+    # spread stateobscovartype column to get columns for all unitnames
     gathered <- gathered %>%
-      dplyr::select(-stateobs) %>%
-      tidyr::spread(key = stateobstype, value = val)%>%
+      dplyr::select(-stateobscovars) %>%
+      tidyr::spread(key = stateobscovarstype, value = val)%>%
       dplyr::select(to_final_select) %>%
-      dplyr::arrange(!!rlang::sym(from@timename), match(unit,spat_units(from)))
+      dplyr::arrange(!!rlang::sym(timename),
+                     match(!!rlang::sym(unitname), spat_units(from)))
     gathered
   }
 )

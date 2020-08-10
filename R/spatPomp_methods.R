@@ -58,6 +58,7 @@ setMethod(
     if(format == 'spatPomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
+      unitname <- object@unitname
       unit_stateobs <- c(object@obstypes, object@unit_statenames)
       unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
       get_unit_index_from_statename <- function(statename){
@@ -72,13 +73,14 @@ setMethod(
         tidyr::gather_(key="stateobs", val="val", to_gather) %>%
         dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs))%>%
         dplyr::mutate(unit = spat_units(object)[as.integer(ui)]) %>%
-        dplyr::select_(.dots = to_select) %>%
+        dplyr::select(to_select) %>%
         dplyr::arrange_(.dots = to_arrange)
       stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
       gathered$stateobstype <- stateobstype
       gathered <- gathered %>%
         dplyr::select(-stateobs) %>%
-        tidyr::spread(key = stateobstype, value = val)
+        tidyr::spread(key = stateobstype, value = val) %>%
+        dplyr::rename(unitname = unit)
       return(gathered)
     }
     if(format=="spatPomps"){
@@ -95,6 +97,7 @@ setMethod(
                     unit_mmeasure = object@unit_mmeasure,
                     unit_vmeasure = object@unit_vmeasure,
                     units=object@units,
+                    unitname=object@unitname,
                     unit_statenames=object@unit_statenames,
                     obstypes = object@obstypes)
           sp.list[[i]] <- sp
@@ -110,6 +113,7 @@ setMethod(
                   unit_mmeasure = object@unit_mmeasure,
                   unit_vmeasure = object@unit_vmeasure,
                   units=object@units,
+                  unitname=object@unitname,
                   unit_statenames=object@unit_statenames,
                   obstypes = object@obstypes)
         return(sp)

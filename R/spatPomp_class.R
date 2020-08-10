@@ -14,6 +14,7 @@ setClass(
     units = 'character',
     unit_statenames = 'character',
     obstypes = 'character',
+    unitname = 'character',
     unit_covarnames = 'character',
     shared_covarnames = 'character',
     unit_emeasure = 'pomp_fun',
@@ -23,6 +24,7 @@ setClass(
     unit_rmeasure = 'pomp_fun'
   ),
   prototype=prototype(
+    unitname = as.character(NA),
     unit_covarnames = as.character(NA),
     shared_covarnames = as.character(NA),
     unit_emeasure = pomp:::pomp_fun(slotname="emeasure"),

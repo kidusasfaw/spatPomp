@@ -56,6 +56,8 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     rprocess <- pomp:::rproc_plugin()
   }
 
+  if (missing(units) && inherits(data,"spatPomp")) unitname <- data@unitname
+  else unitname <- units
   if (missing(dprocess)) dprocess <- NULL
   if (missing(rmeasure)) rmeasure <- NULL
   if (missing(dmeasure)) dmeasure <- NULL
@@ -113,6 +115,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                    ...,
                    verbose=verbose
         )
+        # inherit from spatPomp (swapping out pomp slots)
         sp <- new("spatPomp",po,
                   unit_covarnames = data@unit_covarnames,
                   shared_covarnames = data@shared_covarnames,
@@ -121,6 +124,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                   unit_emeasure = data@unit_emeasure,
                   unit_mmeasure = data@unit_mmeasure,
                   units=spat_units(data),
+                  unitname=data@unitname,
                   unit_statenames=data@unit_statenames,
                   obstypes = data@obstypes)
         return(sp)
@@ -178,9 +182,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
           # construct new spatpomp object
           pomp:::solibs(po) <- hitches$lib
+          # inherit from spatPomp (swapping out spatPomp slots - unit_dmeasure)
           sp <- new("spatPomp",po,
                     unit_dmeasure=hitches$funs$unit_dmeasure,
                     units=data@units,
+                    unitname=data@unitname,
                     unit_statenames=data@unit_statenames,
                     obstypes = data@obstypes)
           return(sp)
@@ -224,9 +230,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
             )
             # construct new spatpomp object
             pomp:::solibs(po) <- hitches$lib
+            # inherit from spatPomp (swapping out spatPomp slots - unit_rmeasure)
             sp <- new("spatPomp",po,
                       unit_rmeasure=hitches$funs$unit_rmeasure,
                       units=data@units,
+                      unitname=data@unitname,
                       unit_statenames=data@unit_statenames,
                       obstypes = data@obstypes)
             return(sp)
@@ -568,6 +576,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     )
 
     pomp:::solibs(po) <- hitches$lib
+    # data.frame -> spatPomp
     new("spatPomp",po,
         unit_emeasure=hitches$funs$unit_emeasure,
         unit_mmeasure=hitches$funs$unit_mmeasure,
@@ -575,6 +584,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
         unit_dmeasure=hitches$funs$unit_dmeasure,
         unit_rmeasure=hitches$funs$unit_rmeasure,
         units=units,
+        unitname=unitname,
         unit_statenames=unit_statenames,
         obstypes = obstypes,
         unit_covarnames=unit_covarnames,
