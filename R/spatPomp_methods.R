@@ -50,7 +50,10 @@ setMethod(
         y = !!rlang::sym(x@timename),
         fill = !!rlang::sym(x@obstypes))) +
       scale_x_discrete() +
-      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       size = 11-(2*floor(length(spat_units(x))/10)),
+                                       vjust = 0.5,
+                                       hjust=1)) +
       scale_fill_gradientn(colours = terrain.colors(10))
   }
 )
