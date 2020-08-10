@@ -44,16 +44,18 @@ setAs(
       stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
     }
     get_unit_index_from_statename_v <- Vectorize(get_unit_index_from_statename)
+
     # convert to long format and output
     to_gather <- colnames(dat_cov)[2:length(colnames(dat_cov))][!c(colnames(dat_cov)[2:length(colnames(dat_cov))]%in%from@shared_covarnames)]
-    to_select <- c(colnames(dat_cov)[1], "unit", "stateobs", "val")
-    to_arrange <- c(colnames(dat_cov)[1], "unit", "stateobs")
+    to_select <- c(from@timename, "unit", "stateobs", "val")
+    to_arrange <- rlang::syms(c(from@timename, "unit", "stateobs"))
+    to_final_select <- c(from@timename,"unit",unit_stateobs)
     gathered <- dat_cov %>%
       tidyr::gather_(key="stateobs", val="val", to_gather) %>%
       dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs)) %>%
       dplyr::mutate(unit = spat_units(from)[as.integer(ui)]) %>%
-      dplyr::select_(.dots = to_select) %>%
-      dplyr::arrange_(.dots = to_arrange)
+      dplyr::select(to_select) %>%
+      dplyr::arrange(!!!to_arrange)
 
     stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
     gathered$stateobstype <- stateobstype
@@ -61,7 +63,8 @@ setAs(
     gathered <- gathered %>%
       dplyr::select(-stateobs) %>%
       tidyr::spread(key = stateobstype, value = val)%>%
-      dplyr::arrange_(.dots = )
+      dplyr::select(to_final_select) %>%
+      dplyr::arrange(!!rlang::sym(from@timename), match(unit,spat_units(from)))
     gathered
   }
 )
