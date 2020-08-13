@@ -38,9 +38,12 @@ setMethod(
   }
 )
 
-##' @name plot-as.data.frame-spatpomp
+##' @name plot_spatpomp
 ##' @title plot
-##' @aliases as.data.frame
+##' @aliases plot, plot_spatpomp-method
+##' @details
+##' Creates a two-dimensional heat map with spatial units on the x-axis and time on the y-axis.
+##' The gradient of the points represent the log-likelihood of the data at the intersection of the spatial units and time.
 ##' @export
 setMethod(
   "plot",
