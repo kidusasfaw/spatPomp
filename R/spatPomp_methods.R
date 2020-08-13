@@ -38,6 +38,9 @@ setMethod(
   }
 )
 
+##' @name plot-as.data.frame-spatpomp
+##' @title plot
+##' @aliases as.data.frame
 ##' @export
 setMethod(
   "plot",
