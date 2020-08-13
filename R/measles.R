@@ -60,6 +60,7 @@ v <- sapply(u,function(x){c(rep(NA,birth_lag),x[1:(length(x)-birth_lag)])})
 measles_covar$lag_birthrate <- as.vector(v[,cities])*26
 measles_covar$births<- NULL
 measles_covarnames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
+measles_unit_covarnames <- c("pop","lag_birthrate")
 
 data(city_data_UK)
 # Distance between two points on a sphere radius R
@@ -394,6 +395,7 @@ spatPomp(measles_cases,
         accumvars = c(paste0("C",1:U),paste0("W",1:U)),
         paramnames=measles_paramnames,
         covarnames=measles_covarnames,
+        unit_covarnames=measles_unit_covarnames,
         globals=measles_globals,
         rinit=measles_rinit,
         dmeasure=measles_dmeasure,

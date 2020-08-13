@@ -16,8 +16,9 @@ Suggests: scales, geosphere, magrittr,
   plyr, reshape2,
     testthat
 Collate:
-    'generics.R'
     'spatPomp_class.R'
+    'as_data_frame.R'
+    'generics.R'
     'asif.R'
     'asifir.R'
     'bm.R'
