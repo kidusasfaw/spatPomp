@@ -464,7 +464,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   m <- measles_subset(m_U=U, m_N=N)
 
   # gird_spatPomp object creation requirements
-  measles_Ninter <- length(spat_units(m))
+  measles_Ninter <- length(unit_names(m))
   measles_lookahead <- lookahead
   measles_Nguide <- Nguide
   measles_Np <- Np

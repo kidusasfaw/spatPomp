@@ -33,7 +33,7 @@ dist_C <- paste0("const int dist[",U,"][",U,"] = ",dist_C_array,"; ")
 bm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
 
 
-obs_names <- paste0("Y",1:U)
+obs_names <- paste0("U",1:U)
 bm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
 
 bm_unit_statenames <- c("X")
@@ -159,7 +159,7 @@ simulate(bm_spatPomp,params=test_params)
 girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
-  bm_Ninter <- length(spat_units(b))
+  bm_Ninter <- length(unit_names(b))
   bm_lookahead <- lookahead
   bm_Nguide <- Nguide
   bm_Np <- Np

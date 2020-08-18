@@ -294,7 +294,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    dim(meas_var) <- c(length(spat_units(object)),  Np)
+    dim(meas_var) <- c(length(unit_names(object)),  Np)
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R

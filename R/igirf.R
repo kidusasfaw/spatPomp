@@ -306,7 +306,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
     # end test code
     # for (p in 1:Np[1]){
     #   # find this particle's initialization and repeat in Nguide times
@@ -363,12 +363,12 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      dim(meas_var_skel) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
       fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(spat_units(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
-      for(i in 1:length(spat_units(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
+      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
+      for(i in 1:length(unit_names(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
       mmp <- tryCatch(
         .Call('do_v_to_theta',
               object=object,
@@ -383,7 +383,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
         }
       )
       mom_match_param <- mmp
-      dim(mom_match_param) <- c(dim(tparams)[1], length(spat_units(object)), lookahead_steps, Np[1])
+      dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np[1])
       dimnames(mom_match_param) <- list(tparam = rownames(tparams))
       # end test code
       # create measurement variance at skeleton matrix

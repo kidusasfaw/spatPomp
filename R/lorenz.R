@@ -25,7 +25,7 @@ lorenz_globals <- Csnippet(paste0("#define U ", U, "\n"))
 
 lorenz_unit_statenames <- "X"
 
-lorenz_obs_names <- paste0("Y",1:U)
+lorenz_obs_names <- paste0("U",1:U)
 lorenz_data <- data.frame(time=rep((1:N)*dt_obs,U),
   unit=rep(lorenz_obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
 
@@ -41,7 +41,7 @@ lorenz_RPnames <- c("F","sigma","tau")
 lorenz_paramnames <- c(lorenz_RPnames,lorenz_IVPnames)
 
 
-## added a condition to prevent numerical instability when the gradient exceeds 1/dt  
+## added a condition to prevent numerical instability when the gradient exceeds 1/dt
 lorenz_rprocess <- Csnippet("
   double *X = &X1;
   double dXdt[U];
@@ -154,7 +154,7 @@ simulate(lorenz,params=test_params)
 girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   l <- lorenz(U = U, N = N)
   # girfd_spatPomp object creation requirements
-  lorenz_Ninter <- length(spat_units(l))
+  lorenz_Ninter <- length(unit_names(l))
   lorenz_lookahead <- lookahead
   lorenz_Nguide <- Nguide
   lorenz_Np <- Np

@@ -123,7 +123,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                   unit_dmeasure = data@unit_dmeasure,
                   unit_emeasure = data@unit_emeasure,
                   unit_mmeasure = data@unit_mmeasure,
-                  units=spat_units(data),
+                  units=unit_names(data),
                   unitname=data@unitname,
                   unit_statenames=data@unit_statenames,
                   obstypes = data@obstypes)

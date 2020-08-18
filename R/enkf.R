@@ -178,7 +178,7 @@ enkf.internal <- function (object,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    dim(meas_var) <- c(length(spat_units(object)),  Np[1])
+    dim(meas_var) <- c(length(unit_names(object)),  Np[1])
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
@@ -188,7 +188,7 @@ enkf.internal <- function (object,
     )
     X <- X[,,1]
     predMeans[,k] <- pm <- rowMeans(X) # prediction mean
-    dim(Y) <- c(length(spat_units(object)), Np[1])
+    dim(Y) <- c(length(unit_names(object)), Np[1])
 
     # forecast mean
     ym <- rowMeans(Y)

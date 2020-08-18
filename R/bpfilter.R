@@ -15,7 +15,7 @@ setClass(
   )
 )
 
-##' Block Particle Filter (bpfilter)
+##' Block Particle Filter (BPF)
 ##'
 ##' An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp)
 ##' Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
@@ -63,7 +63,7 @@ setClass(
 ##' Upon successful completion, \code{bpfilter} returns an object of class
 ##' \sQuote{bpfilterd_spatPomp}.
 ##'
-##' @section Details
+##' @section Details:
 ##' Only one of num_partitions or partitions_list needs to be specified and the other can be left unspecified as \code{bpfilter} will try to calculate it.
 ##'
 ##' @section Methods:
@@ -89,11 +89,11 @@ setMethod(
       }
     }
     if (missing(partitions_list)){
-      if(num_partitions > length(spat_units(object))){
+      if(num_partitions > length(unit_names(object))){
         stop(ep,sQuote("num_partitions"), " cannot be greater than the number of spatial units",call.=FALSE)
       }
-      partition_size = floor(length(spat_units(object))/num_partitions)
-      partitions_list = split(spat_units(object), ceiling(seq_along(spat_units(object))/partition_size))
+      partition_size = floor(length(unit_names(object))/num_partitions)
+      partitions_list = split(unit_names(object), ceiling(seq_along(unit_names(object))/partition_size))
     }
     bpfilter.internal(
      object=object,
@@ -110,7 +110,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
-  nunits <- length(spat_units(object))
+  nunits <- length(unit_names(object))
 
   num_partitions <- length(partitions_list)
 
@@ -179,7 +179,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
           object,
           y=object@data[,nt,drop=FALSE],
           x=X,
-          units=match(partition, spat_units(object)),
+          units=match(partition, unit_names(object)),
           times=times[nt+1],
           params=params,
           log=TRUE,
@@ -205,7 +205,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
     ## resample for each partition
     for(i in seq(num_partitions)){
       partition = partitions_list[[i]]
-      statenames = paste0(paste0(rep(object@unit_statenames, each = length(partition))), match(partition, spat_units(object)))
+      statenames = paste0(paste0(rep(object@unit_statenames, each = length(partition))), match(partition, unit_names(object)))
       # cat("statenames \n", statenames, "\n")
       # cat("dim(X) \n", dim(X))
       tempX = X[statenames,,,drop = FALSE]

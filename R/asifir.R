@@ -39,7 +39,7 @@
 ##'                    islands = 50,
 ##'                    Np=20,
 ##'                    nbhd = bm_nbhd,
-##'                    Ninter = length(spat_units(bm3)))
+##'                    Ninter = length(unit_names(bm3)))
 ##' # Get the likelihood estimate from ASIFIR
 ##' logLik(asifird.b)
 ##'
@@ -160,7 +160,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(spat_units(object)), Np)
+    dim(fcst_samp_var) <- c(length(unit_names(object)), Np)
 
     ## determine the weights
     log_weights <- tryCatch(
@@ -243,7 +243,7 @@ asifir.internal <- function (object, params, Np, nbhd,
       # }
       inflated_var <- meas_var_skel + fcst_var_upd
       dim(inflated_var) <- c(U, Np, 1)
-      array.params <- array(params, dim = c(length(params), length(spat_units(object)), Np, 1), dimnames = list(params = names(params)))
+      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np, 1), dimnames = list(params = names(params)))
 
       mmp <- tryCatch(
         .Call('do_v_to_theta',
@@ -367,7 +367,7 @@ setMethod(
   function (object, params, Np, islands, nbhd,
             Ninter, tol = (1e-300), ...) {
   if (missing(params)) params <- coef(object)
-  if (missing(Ninter)) Ninter <- length(spat_units(object))
+  if (missing(Ninter)) Ninter <- length(unit_names(object))
     # set.seed(396658101,kind="L'Ecuyer")
   # begin single-core
   # single_island_output <- spatPomp:::asifir.internal(

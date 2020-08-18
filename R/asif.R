@@ -229,7 +229,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
       for (unit in seq_len(nunits)){
           full_nbhd <- nbhd(object, time = nt, unit = unit)
           log_prod_cond_dens_nt  <- rep(0, Np[1])
-          log_prod_cond_dens_not_nt <- matrix(0, Np[1], nt-1)
+          log_prod_cond_dens_not_nt <- matrix(0, Np[1], nt-min(sapply(nbhd_list,'[[',1)))
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
@@ -294,7 +294,7 @@ setMethod(
      ...
      )
    ntimes = length(time(object))
-   nunits = length(spat_units(object))
+   nunits = length(unit_names(object))
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))

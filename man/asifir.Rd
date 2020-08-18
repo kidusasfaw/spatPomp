@@ -71,7 +71,7 @@ asifird.b <- asifir(b,
                    islands = 50,
                    Np=20,
                    nbhd = bm_nbhd,
-                   Ninter = length(spat_units(bm3)))
+                   Ninter = length(unit_names(bm3)))
 # Get the likelihood estimate from ASIFIR
 logLik(asifird.b)
 

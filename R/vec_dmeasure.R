@@ -28,7 +28,7 @@ setMethod(
   "vec_dmeasure",
   signature=signature(object="spatPomp"),
   definition=function (object, y, x, units, times, params, log = FALSE, ...){
-    if(missing(units)) units <- seq(spat_units(object))
+    if(missing(units)) units <- seq(unit_names(object))
     vec_dmeasure.internal(object=object,y=y,x=x,units=units,times=times,params=params,log=log,...)
   }
 )

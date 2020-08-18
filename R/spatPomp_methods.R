@@ -22,7 +22,7 @@ setAs(
 
 ##' @export
 setMethod(
-  "spat_units",
+  "unit_names",
   signature=signature(x="spatPomp"),
   definition=function(x,...) x@units
 )
@@ -35,26 +35,6 @@ setMethod(
   definition=function (x, ...) {
     cat("<object of class ",sQuote("spatPomp"),">\n",sep="")
     invisible(x)
-  }
-)
-
-##' @export
-setMethod(
-  "plot",
-  signature=signature(x="spatPomp"),
-  definition=function (x, ...) {
-    df <- as.data.frame(x)
-    ggplot(data = df) +
-      geom_tile(aes(
-        x = !!rlang::sym(x@unitname),
-        y = !!rlang::sym(x@timename),
-        fill = !!rlang::sym(x@obstypes))) +
-      scale_x_discrete() +
-      theme(axis.text.x = element_text(angle = 90,
-                                       size = 11-(2*floor(length(spat_units(x))/10)),
-                                       vjust = 0.5,
-                                       hjust=1)) +
-      scale_fill_gradientn(colours = terrain.colors(10))
   }
 )
 
@@ -83,7 +63,7 @@ setMethod(
       gathered <- sims %>%
         tidyr::gather_(key="stateobs", val="val", to_gather) %>%
         dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs))%>%
-        dplyr::mutate(unit = spat_units(object)[as.integer(ui)]) %>%
+        dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
         dplyr::select(to_select) %>%
         dplyr::arrange_(.dots = to_arrange)
       stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
