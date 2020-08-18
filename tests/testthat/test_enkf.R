@@ -33,7 +33,7 @@ el <- pomp::enkf(lorenz5,
       Np = 1000,
       h = lorenz_h,
       R = diag((coef(lorenz5)["tau"])^2,
-               nrow = length(spat_units(lorenz5))))
+               nrow = length(unit_names(lorenz5))))
 
 test_that("pomp::enkf and spatPomp::enkf yield equal log likelihoods when vmeasure is independent of X", {
   expect_equal(logLik(el), logLik(gl))

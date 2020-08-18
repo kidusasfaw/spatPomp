@@ -229,14 +229,15 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
       for (unit in seq_len(nunits)){
           full_nbhd <- nbhd(object, time = nt, unit = unit)
           log_prod_cond_dens_nt  <- rep(0, Np[1])
-          log_prod_cond_dens_not_nt <- matrix(0, Np[1], nt-min(sapply(nbhd_list,'[[',1)))
+          if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0, Np[1], max(1,nt-min(sapply(full_nbhd,'[[',1))))
+          else log_prod_cond_dens_not_nt <- matrix(0,Np[1],0)
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
               if (neighbor_n == nt)
                   log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
               else
-                  log_prod_cond_dens_not_nt[, neighbor_n] <- log_prod_cond_dens_not_nt[, neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_not_nt[, nt-neighbor_n] <- log_prod_cond_dens_not_nt[, nt-neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
           }
           log_loc_comb_pred_weights[unit, ,nt]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
       }
@@ -275,14 +276,8 @@ setMethod(
    #  ...)
    # return(single_island_output)
    ## end single thread for testing
-   ## cores <- parallel:::detectCores() - 1
-   #
-   ## foreach now registered outside asif
-   ## doParallel::registerDoParallel(cores = NULL)
-   #
    ## begin multi-thread code
    mcopts <- list(set.seed=TRUE)
-   # set.seed(396658101,kind="L'Ecuyer")
    mult_island_output <- foreach::foreach(i=1:islands,
        .packages=c("pomp","spatPomp"),
        .options.multicore=mcopts) %dopar%  spatPomp:::asif.internal(
@@ -295,10 +290,8 @@ setMethod(
      )
    ntimes = length(time(object))
    nunits = length(unit_names(object))
-   # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
-   #cond_loglik = array(data = numeric(0), dim=c(nunits, ntimes))
    cond_loglik <- foreach::foreach(u=seq_len(nunits),
                     .combine = 'rbind',
                     .packages=c("pomp", "spatPomp"),
@@ -313,14 +306,6 @@ setMethod(
                                                       FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
                                                       FUN.VALUE = 1.0))
                         cond_loglik_u[n] = log_mp_sum - log_p_sum
-                        # OLD CODE. Remove by 1/15/2020
-                        # mp_sum = tol
-                        # p_sum = sqrt(tol)
-                        # for (k in seq_len(islands)){
-                        #   mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,j]
-                        #   p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,j]
-                        # }
-                        # cond_loglik_u[j] = log(mp_sum) - log(p_sum)
                       }
                       cond_loglik_u
                     }

@@ -22,7 +22,7 @@ loglik_true <- pomp:::kalmanFilter(
   t=1:N,
   y=obs(bm_obj),
   X0=rinit(bm_obj),
-  A= diag(length(spat_units(bm_obj))),
+  A= diag(length(unit_names(bm_obj))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
   R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
@@ -34,7 +34,7 @@ fun_to_optim <- function(cf){
     t=1:N,
     y=obs(bm_obj),
     X0=rinit(bm_obj),
-    A=diag(length(spat_units(bm_obj))),
+    A=diag(length(unit_names(bm_obj))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
@@ -102,18 +102,20 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm_obj,
-                           islands = 100,
-                           Np = 50,
-                           nbhd = asif_nbhd)))
+asif_loglik <- replicate(n=10,
+                         expr = logLik(asif(bm_obj,
+                                            islands = 100,
+                                            Np = 50,
+                                            nbhd = asif_nbhd)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asifir_loglik <- replicate(10,logLik(asifir(bm3,
-                        islands = 100,
-                        Np=50,
-                        nbhd = asif_nbhd)))
+asifir_loglik <- replicate(n=10,
+                           expr = logLik(asifir(bm_obj,
+                                                islands = 100,
+                                                Np=50,
+                                                nbhd = asif_nbhd)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
@@ -145,7 +147,7 @@ test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimate
 #   igirf starting from arbitrary parameter set
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 igirf_lookahead <- 1
-igirf_ninter <- length(spat_units(bm3))
+igirf_ninter <- length(unit_names(bm3))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30

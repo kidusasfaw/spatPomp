@@ -331,14 +331,15 @@ asifir.internal <- function (object, params, Np, nbhd,
       for (u in seq_len(U)){
           full_nbhd <- nbhd(object, time = n, unit = u)
           log_prod_cond_dens_nt  <- rep(0, Np)
-          log_prod_cond_dens_not_nt <- matrix(0, Np, n-1)
+          if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0, Np[1], max(1,n-min(sapply(full_nbhd,'[[',1))))
+          else log_prod_cond_dens_not_nt <- matrix(0,Np[1],0)
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
               if (neighbor_n == n)
                   log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
               else
-                  log_prod_cond_dens_not_nt[, neighbor_n] <- log_prod_cond_dens_not_nt[, neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
+                  log_prod_cond_dens_not_nt[, n-neighbor_n] <- log_prod_cond_dens_not_nt[, n-neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
           }
           log_loc_comb_pred_weights[u,,n]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
       }
