@@ -4,7 +4,7 @@ context("test methods on simple Brownian motion")
 doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(2)
-U = 10; N = 10
+U = 10; N = 5
 bm_obj <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
@@ -102,10 +102,11 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- asif(bm_obj,
-                    islands = 100,
-                    Np = 50,
-                    nbhd = asif_nbhd)
+asif_loglik <- replicate(n=10,
+                         expr=asif(bm_obj,
+                                   islands = 100,
+                                   Np = 50,
+                                   nbhd = asif_nbhd))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR
