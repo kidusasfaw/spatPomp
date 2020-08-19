@@ -102,11 +102,10 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(n=10,
-                         expr = logLik(asif(bm_obj,
-                                            islands = 100,
-                                            Np = 50,
-                                            nbhd = asif_nbhd)))
+asif_loglik <- asif(bm_obj,
+                    islands = 100,
+                    Np = 50,
+                    nbhd = asif_nbhd)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR

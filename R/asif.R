@@ -227,13 +227,16 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   log_wp_avg = array(data = numeric(0), dim = c(nunits, ntimes))
   for (nt in seq_len(ntimes)){
       for (unit in seq_len(nunits)){
+        cat("\nnt=",nt,"unit=",unit,"\n")
           full_nbhd <- nbhd(object, time = nt, unit = unit)
           log_prod_cond_dens_nt  <- rep(0, Np[1])
-          if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0, Np[1], max(1,nt-min(sapply(full_nbhd,'[[',1))))
+          if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0, Np[1], max(1,nt-min(sapply(full_nbhd,'[[',2))))
           else log_prod_cond_dens_not_nt <- matrix(0,Np[1],0)
+          cat("dim(log_prod_cond_dens_not_nt)=",dim(log_prod_cond_dens_not_nt),"\n")
           for (neighbor in full_nbhd){
               neighbor_u <- neighbor[1]
               neighbor_n <- neighbor[2]
+              cat("neighbor=",neighbor,"\n")
               if (neighbor_n == nt)
                   log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
               else
