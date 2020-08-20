@@ -56,7 +56,7 @@ SEXP do_theta_to_e (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
 
 
   // extract the user-defined function
-  PROTECT(pompfunthetatoe = GET_SLOT(object,install("unit_emeasure"))); nprotect++;
+  PROTECT(pompfunthetatoe = GET_SLOT(object,install("eunit_measure"))); nprotect++;
 
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
@@ -171,7 +171,7 @@ SEXP do_theta_to_e (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
       }
     }
 
-    warningcall(R_NilValue,"'unit_dmeasure' unspecified: likelihood undefined.");
+    warningcall(R_NilValue,"'eunit_measure' unspecified.");
 
   }
 

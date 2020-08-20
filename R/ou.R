@@ -82,7 +82,7 @@ ou_rmeasure <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
-ou_unit_dmeasure <- Csnippet("
+ou_dunit_measure <- Csnippet("
   double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
@@ -98,7 +98,7 @@ ou <- spatPomp(ou_data,
                globals=ou_globals,
                rmeasure=ou_rmeasure,
                dmeasure=ou_dmeasure,
-               unit_dmeasure=ou_unit_dmeasure,
+               dunit_measure=ou_dunit_measure,
                partrans = parameter_trans(log = c("rho", "sigma", "tau")),
                rinit=ou_rinit
   )

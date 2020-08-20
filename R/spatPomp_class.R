@@ -4,9 +4,9 @@
 #' @slot unit_statenames A vector containing the state names such that appending the unit indices to the
 #' unit statenames will result in the each unit's corresponding states.
 #' @slot unit_obsnames A vector of observation types for a spatial unit.
-#' @slot unit_emeasure A pomp_fun representing the expected measurement for each spatial unit given its states.
-#' @slot unit_dmeasure A pomp_fun representing the unit measurement density for each spatial unit.
-#' @slot unit_rmeasure A pomp_fun representing the unit observation simulator.
+#' @slot eunit_measure A pomp_fun representing the expected measurement for each spatial unit given its states.
+#' @slot dunit_measure A pomp_fun representing the unit measurement density for each spatial unit.
+#' @slot runit_measure A pomp_fun representing the unit observation simulator.
 setClass(
   'spatPomp',
   contains="pomp",
@@ -17,11 +17,11 @@ setClass(
     unitname = 'character',
     unit_covarnames = 'character',
     shared_covarnames = 'character',
-    unit_emeasure = 'pomp_fun',
-    unit_mmeasure = 'pomp_fun',
-    unit_vmeasure = 'pomp_fun',
-    unit_dmeasure = 'pomp_fun',
-    unit_rmeasure = 'pomp_fun'
+    eunit_measure = 'pomp_fun',
+    munit_measure = 'pomp_fun',
+    vunit_measure = 'pomp_fun',
+    dunit_measure = 'pomp_fun',
+    runit_measure = 'pomp_fun'
   ),
   prototype=prototype(
     unit_names = as.character(NA),
@@ -30,10 +30,10 @@ setClass(
     unitname = as.character(NA),
     unit_covarnames = as.character(NA),
     shared_covarnames = as.character(NA),
-    unit_emeasure = pomp:::pomp_fun(slotname="unit_emeasure"),
-    unit_mmeasure = pomp:::pomp_fun(slotname="unit_mmeasure"),
-    unit_vmeasure = pomp:::pomp_fun(slotname="unit_vmeasure"),
-    unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure")
+    eunit_measure = pomp:::pomp_fun(slotname="eunit_measure"),
+    munit_measure = pomp:::pomp_fun(slotname="munit_measure"),
+    vunit_measure = pomp:::pomp_fun(slotname="vunit_measure"),
+    dunit_measure = pomp:::pomp_fun(slotname="dunit_measure"),
+    runit_measure = pomp:::pomp_fun(slotname="runit_measure")
   )
 )

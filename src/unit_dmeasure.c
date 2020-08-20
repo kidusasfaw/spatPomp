@@ -104,7 +104,7 @@ static R_INLINE SEXP ret_array (int nreps, int ntimes) {
   return F;
 }
 
-SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi)
+SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi)
 {
   int nprotect = 0;
   pompfunmode mode = undef;
@@ -154,7 +154,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   cov = REAL(cvec);
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("unit_dmeasure"))); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("dunit_measure"))); nprotect++;
   PROTECT(fn = (*pfh)(pompfun,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
 
   // extract 'userdata' as pairlist
@@ -261,7 +261,7 @@ SEXP do_unit_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
       }
     }
 
-    warningcall(R_NilValue,"'unit_dmeasure' unspecified: likelihood undefined.");
+    warningcall(R_NilValue,"'dunit_measure' unspecified: likelihood undefined.");
 
   }
 

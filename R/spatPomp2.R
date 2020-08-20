@@ -1,6 +1,6 @@
 ##' @export
 spatPomp2 <- function (data, units, times, covar, tcovar, t0, ...,
-                      unit_emeasure, unit_mmeasure, unit_vmeasure, unit_dmeasure, unit_rmeasure,
+                      eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure,
                       unit_statenames, rprocess, rmeasure,
                       dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, PACKAGE,
                       globals, statenames, paramnames, params, unit_obsnames, accumvars, covarnames,
@@ -17,9 +17,9 @@ spatPomp2 <- function (data, units, times, covar, tcovar, t0, ...,
 
   ## return as quickly as possible if no work is to be done
   if (is(data,"spatPomp") && missing(times) && missing(t0) &&
-      missing(unit_dmeasure) && missing(unit_emeasure) &&
-      missing(unit_vmeasure) && missing(unit_mmeasure) &&
-      missing(unit_rmeasure) &&
+      missing(dunit_measure) && missing(eunit_measure) &&
+      missing(vunit_measure) && missing(munit_measure) &&
+      missing(runit_measure) &&
       missing(rinit) && missing(rprocess) && missing(dprocess) &&
       missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
       missing(rprior) && missing(dprior) && missing(partrans) &&
@@ -36,9 +36,9 @@ spatPomp2 <- function (data, units, times, covar, tcovar, t0, ...,
       rmeasure=rmeasure,dmeasure=dmeasure,
       skeleton=skeleton,rprior=rprior,dprior=dprior,partrans=partrans,
       params=params,covar=covar,tcovar=tcovar,accumvars=accumvars,
-      unit_dmeasure=unit_dmeasure,unit_emeasure=unit_emeasure,
-      unit_vmeasure=unit_vmeasure,unit_mmeasure=unit_mmeasure,
-      unit_rmeasure=unit_rmeasure,unit_statenames=unit_statenames,
+      dunit_measure=dunit_measure,eunit_measure=eunit_measure,
+      vunit_measure=vunit_measure,munit_measure=munit_measure,
+      runit_measure=runit_measure,unit_statenames=unit_statenames,
       obsnames=obsnames,statenames=statenames,paramnames=paramnames,
       covarnames=covarnames,PACKAGE=PACKAGE,
       globals=globals,cdir=cdir,cfile=cfile,shlib.args=shlib.args,
@@ -53,8 +53,8 @@ setMethod(
   signature=signature(data="data.frame", times="character", units="character"),
   definition = function (data, times, units, t0, ...,
                          rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
-                         partrans, params, covar, tcovar, accumvars, unit_dmeasure, unit_emeasure,
-                         unit_vmeasure, unit_mmeasure, unit_rmeasure, unit_statenames, obsnames,
+                         partrans, params, covar, tcovar, accumvars, dunit_measure, eunit_measure,
+                         vunit_measure, munit_measure, runit_measure, unit_statenames, obsnames,
                          statenames, paramnames, covarnames, PACKAGE, globals,
                          cdir, cfile, shlib.args, compile, verbose) {
 
@@ -94,11 +94,11 @@ setMethod(
     if (missing(dprocess)) dprocess <- NULL
     if (missing(rmeasure)) rmeasure <- NULL
     if (missing(dmeasure)) dmeasure <- NULL
-    if (missing(unit_dmeasure)) unit_dmeasure <- NULL
-    if (missing(unit_emeasure)) unit_emeasure <- NULL
-    if (missing(unit_vmeasure)) unit_vmeasure <- NULL
-    if (missing(unit_mmeasure)) unit_mmeasure <- NULL
-    if (missing(unit_rmeasure)) unit_rmeasure <- NULL
+    if (missing(dunit_measure)) dunit_measure <- NULL
+    if (missing(eunit_measure)) eunit_measure <- NULL
+    if (missing(vunit_measure)) vunit_measure <- NULL
+    if (missing(munit_measure)) munit_measure <- NULL
+    if (missing(runit_measure)) runit_measure <- NULL
 
     if (missing(skeleton) || is.null(skeleton)) {
       skeleton <- pomp:::skel_plugin()
@@ -208,11 +208,11 @@ setMethod(
     if (!missing(paramnames)) mparamnames <- paste("M_", paramnames, sep = "")
 
     hitches <- pomp::hitch(
-      unit_emeasure=unit_emeasure,
-      unit_mmeasure=unit_mmeasure,
-      unit_vmeasure=unit_vmeasure,
-      unit_dmeasure=unit_dmeasure,
-      unit_rmeasure=unit_rmeasure,
+      eunit_measure=eunit_measure,
+      munit_measure=munit_measure,
+      vunit_measure=vunit_measure,
+      dunit_measure=dunit_measure,
+      runit_measure=runit_measure,
       templates=eval(spatPomp_workhorse_templates),
       obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
@@ -228,11 +228,11 @@ setMethod(
 
   pomp:::solibs(po) <- hitches$lib
   new("spatPomp",po,
-      unit_emeasure=hitches$funs$unit_emeasure,
-      unit_mmeasure=hitches$funs$unit_mmeasure,
-      unit_vmeasure=hitches$funs$unit_vmeasure,
-      unit_dmeasure=hitches$funs$unit_dmeasure,
-      unit_rmeasure=hitches$funs$unit_rmeasure,
+      eunit_measure=hitches$funs$eunit_measure,
+      munit_measure=hitches$funs$munit_measure,
+      vunit_measure=hitches$funs$vunit_measure,
+      dunit_measure=hitches$funs$dunit_measure,
+      runit_measure=hitches$funs$runit_measure,
       units=units,
       unit_statenames=unit_statenames,
       unit_obsnames = unit_obsnames)
@@ -245,8 +245,8 @@ setMethod(
   signature=signature(data="spatPomp", times="NULL", units="NULL"),
   definition = function (data, times, units, t0, timename, ...,
                          rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
-                         partrans, params, covar, tcovar, accumvars, unit_dmeasure, unit_emeasure,
-                         unit_vmeasure, unit_mmeasure, unit_rmeasure, unit_statenames, obsnames,
+                         partrans, params, covar, tcovar, accumvars, dunit_measure, eunit_measure,
+                         vunit_measure, munit_measure, runit_measure, unit_statenames, obsnames,
                          statenames, paramnames, covarnames, PACKAGE, globals,
                          cdir, cfile, shlib.args, compile,.userdata, .solibs, verbose) {
     times <- data@times
@@ -258,9 +258,9 @@ setMethod(
     else
       timename <- as.character(timename)
     ## defaults for names of parameters, and accumulator variables
-    if (!missing(unit_mmeasure) && missing(paramnames)){
+    if (!missing(munit_measure) && missing(paramnames)){
       stop("Replacing  ",
-           sQuote("unit_mmeasure"),
+           sQuote("munit_measure"),
            " requires supplying ",sQuote("paramnames"),call.=FALSE)
     }
     if (missing(paramnames)) paramnames <- NULL
@@ -291,11 +291,11 @@ setMethod(
     if (missing(dprocess)) dprocess <- data@dprocess
     if (missing(rmeasure)) rmeasure <- data@rmeasure
     if (missing(dmeasure)) dmeasure <- data@dmeasure
-    if (missing(unit_dmeasure)) unit_dmeasure <- data@unit_dmeasure
-    if (missing(unit_mmeasure)) unit_mmeasure <- data@unit_mmeasure
-    if (missing(unit_vmeasure)) unit_vmeasure <- data@unit_vmeasure
-    if (missing(unit_emeasure)) unit_emeasure <- data@unit_emeasure
-    if (missing(unit_rmeasure)) unit_rmeasure <- data@unit_rmeasure
+    if (missing(dunit_measure)) dunit_measure <- data@dunit_measure
+    if (missing(munit_measure)) munit_measure <- data@munit_measure
+    if (missing(vunit_measure)) vunit_measure <- data@vunit_measure
+    if (missing(eunit_measure)) eunit_measure <- data@eunit_measure
+    if (missing(runit_measure)) runit_measure <- data@runit_measure
     if (missing(skeleton)) skeleton <- data@skeleton
     else if (is.null(skeleton)) skeleton <- skel_plugin()
 
@@ -321,11 +321,11 @@ setMethod(
       toEst=partrans@to,
       fromEst=partrans@from,
       skeleton=skeleton@skel.fn,
-      unit_emeasure=unit_emeasure,
-      unit_mmeasure=unit_mmeasure,
-      unit_vmeasure=unit_vmeasure,
-      unit_dmeasure=unit_dmeasure,
-      unit_rmeasure=unit_rmeasure,
+      eunit_measure=eunit_measure,
+      munit_measure=munit_measure,
+      vunit_measure=vunit_measure,
+      dunit_measure=dunit_measure,
+      runit_measure=runit_measure,
       templates=eval(spatPomp_workhorse_templates),
       obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
@@ -376,11 +376,11 @@ setMethod(
         c(list(hitches$lib),.solibs)
       },
       userdata = .userdata,
-      unit_emeasure=hitches$funs$unit_emeasure,
-      unit_mmeasure=hitches$funs$unit_mmeasure,
-      unit_vmeasure=hitches$funs$unit_vmeasure,
-      unit_dmeasure=hitches$funs$unit_dmeasure,
-      unit_rmeasure=hitches$funs$unit_rmeasure
+      eunit_measure=hitches$funs$eunit_measure,
+      munit_measure=hitches$funs$munit_measure,
+      vunit_measure=hitches$funs$vunit_measure,
+      dunit_measure=hitches$funs$dunit_measure,
+      runit_measure=hitches$funs$runit_measure
     )
   }
 )

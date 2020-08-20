@@ -105,26 +105,26 @@ gbm <- function(U=5,N=100,delta.t=0.1, IVP_values = 1, delta.obs = 1){
   for (u=0; u<U; u++) Y[u] = X[u]*exp(rnorm(0,tau+tol));
 ")
 
-  gbm_unit_dmeasure <- Csnippet("
+  gbm_dunit_measure <- Csnippet("
   lik = dnorm(log(Y),log(X),tau,1) + log(1/Y);
   if(!give_log) lik = exp(lik);
 ")
 
-  gbm_unit_rmeasure <- Csnippet("
+  gbm_runit_measure <- Csnippet("
   double tol = pow(1.0e-18,U);
   double Y;
   Y = X*exp(rnorm(0,tau+tol));
 ")
 
-  gbm_unit_emeasure <- Csnippet("
+  gbm_eunit_measure <- Csnippet("
   ey = X*exp(tau*tau/2);
 ")
 
-  gbm_unit_mmeasure <- Csnippet("
+  gbm_munit_measure <- Csnippet("
   M_tau = sqrt(log(0.5 + 0.5*sqrt(1 + (4*vc/(X*X)))));
 ")
 
-  gbm_unit_vmeasure <- Csnippet("
+  gbm_vunit_measure <- Csnippet("
   vc = X*X*(exp(2*tau*tau) - exp(tau*tau));
 ")
 
@@ -139,11 +139,11 @@ gbm <- function(U=5,N=100,delta.t=0.1, IVP_values = 1, delta.obs = 1){
                            globals=gbm_globals,
                            rmeasure=gbm_rmeasure,
                            dmeasure=gbm_dmeasure,
-                           unit_dmeasure=gbm_unit_dmeasure,
-                           unit_rmeasure=gbm_unit_rmeasure,
-                           unit_emeasure=gbm_unit_emeasure,
-                           unit_mmeasure=gbm_unit_mmeasure,
-                           unit_vmeasure=gbm_unit_vmeasure,
+                           dunit_measure=gbm_dunit_measure,
+                           runit_measure=gbm_runit_measure,
+                           eunit_measure=gbm_eunit_measure,
+                           munit_measure=gbm_munit_measure,
+                           vunit_measure=gbm_vunit_measure,
                            partrans = parameter_trans(logit = c("rho"), log = c("sigma", "tau")),
                            rinit=gbm_rinit
   )

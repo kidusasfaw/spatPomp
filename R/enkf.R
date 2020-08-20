@@ -35,23 +35,23 @@ setClass(
   slots=c(
     paramMatrix = 'array',
     indices = 'vector',
-    units = 'character',
+    unit_names = 'character',
     unit_statenames = 'character',
     unit_obsnames = 'character',
-    unit_dmeasure = 'pomp_fun',
-    unit_rmeasure = 'pomp_fun',
-    unit_emeasure = 'pomp_fun',
-    unit_vmeasure = 'pomp_fun',
-    unit_mmeasure = 'pomp_fun'
+    dunit_measure = 'pomp_fun',
+    runit_measure = 'pomp_fun',
+    eunit_measure = 'pomp_fun',
+    vunit_measure = 'pomp_fun',
+    munit_measure = 'pomp_fun'
   ),
   prototype=prototype(
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
     indices=integer(0),
-    unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure"),
-    unit_emeasure = pomp:::pomp_fun(slotname="unit_emeasure"),
-    unit_vmeasure = pomp:::pomp_fun(slotname="unit_vmeasure"),
-    unit_mmeasure = pomp:::pomp_fun(slotname="unit_mmeasure")
+    dunit_measure = pomp:::pomp_fun(slotname="dunit_measure"),
+    runit_measure = pomp:::pomp_fun(slotname="runit_measure"),
+    eunit_measure = pomp:::pomp_fun(slotname="eunit_measure"),
+    vunit_measure = pomp:::pomp_fun(slotname="vunit_measure"),
+    munit_measure = pomp:::pomp_fun(slotname="munit_measure")
   )
 )
 
@@ -117,10 +117,10 @@ enkf.internal <- function (object,
 
   if (pomp:::undefined(object@rprocess))
     pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@unit_emeasure))
-    pomp:::pStop_(paste(sQuote(c("unit_emeasure")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@unit_vmeasure))
-    pomp:::pStop_(paste(sQuote(c("unit_vmeasure")),collapse=", ")," is a needed basic component.")
+  if (pomp:::undefined(object@eunit_measure))
+    pomp:::pStop_(paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
+  if (pomp:::undefined(object@vunit_measure))
+    pomp:::pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
   #R <- as.matrix(R)
@@ -217,12 +217,12 @@ enkf.internal <- function (object,
       forecast=forecast,
       cond.logLik=condlogLik,
       loglik=sum(condlogLik),
-      unit_rmeasure = object@unit_rmeasure,
-      unit_dmeasure = object@unit_dmeasure,
-      unit_emeasure = object@unit_emeasure,
-      unit_vmeasure = object@unit_vmeasure,
-      unit_mmeasure = object@unit_mmeasure,
-      units=object@unit_names,
+      runit_measure = object@runit_measure,
+      dunit_measure = object@dunit_measure,
+      eunit_measure = object@eunit_measure,
+      vunit_measure = object@vunit_measure,
+      munit_measure = object@munit_measure,
+      unit_names=object@unit_names,
       unit_statenames=object@unit_statenames,
       unit_obsnames = object@unit_obsnames)
 }

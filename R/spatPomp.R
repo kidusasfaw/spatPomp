@@ -5,19 +5,19 @@
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 ##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
 ##'
-##' @param unit_emeasure Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' @param eunit_measure Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
 ##' For more information, see the examples section below.
-##' @param unit_vmeasure Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' @param vunit_measure Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
 ##' For more information, see the examples section below.
-##' @param unit_mmeasure Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
+##' @param munit_measure Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance parameter to the pre-defined variable corresponding to that parameter, which has been predefined with a \code{M_} prefix. For instance, if the moment-matched parameter is \code{psi}, then the user should assign \code{M_psi} to the moment-matched value.
 ##' For more information, see the examples section below.
-##' @param unit_dmeasure Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+##' @param dunit_measure Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined variable \code{lik}. The user is encouraged to provide a logged density in an \code{if} condition that checks whether the predefined \code{give_log} variable is true.
 ##' For more information, see the examples section below.
-##' @param unit_rmeasure Simulator of the unit measurement model given the latent states and the model parameters.
+##' @param runit_measure Simulator of the unit measurement model given the latent states and the model parameters.
 ##' The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
 ##' For more information, see the examples section below.
@@ -34,7 +34,7 @@
 ##'
 ##' @export
 spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
-                      unit_emeasure, unit_mmeasure, unit_vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, rprocess, rmeasure,
+                      eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, unit_statenames, rprocess, rmeasure,
                       dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
                       globals, statenames, paramnames, unit_obsnames, accumvars, covarnames, shared_covarnames, unit_covarnames,
                       partrans, verbose = getOption("verbose",FALSE)) {
@@ -71,16 +71,16 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     partrans <- parameter_trans()
   }
 
-  if (missing(unit_emeasure) && !inherits(data,"spatPomp")) unit_emeasure <- function(x,t,params,log=FALSE,d,...)
-    stop(sQuote("unit_emeasure")," not specified")
-  if (missing(unit_mmeasure) && !inherits(data,"spatPomp")) unit_mmeasure <- function(x,t,params,log=FALSE,d,...)
-    stop(sQuote("unit_mmeasure")," not specified")
-  if (missing(unit_vmeasure) && !inherits(data,"spatPomp")) unit_vmeasure <- function(x,t,params,log=FALSE,d,...)
-    stop(sQuote("unit_vmeasure")," not specified")
-  if (missing(unit_dmeasure) && !inherits(data,"spatPomp")) unit_dmeasure <- function(y,x,t,params,log=FALSE,d,...)
-    stop(sQuote("unit_dmeasure")," not specified")
-  if (missing(unit_rmeasure) && !inherits(data,"spatPomp")) unit_rmeasure <- function(x,t,params,log=FALSE,d,...)
-    stop(sQuote("unit_rmeasure")," not specified")
+  if (missing(eunit_measure) && !inherits(data,"spatPomp")) eunit_measure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("eunit_measure")," not specified")
+  if (missing(munit_measure) && !inherits(data,"spatPomp")) munit_measure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("munit_measure")," not specified")
+  if (missing(vunit_measure) && !inherits(data,"spatPomp")) vunit_measure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("vunit_measure")," not specified")
+  if (missing(dunit_measure) && !inherits(data,"spatPomp")) dunit_measure <- function(y,x,t,params,log=FALSE,d,...)
+    stop(sQuote("dunit_measure")," not specified")
+  if (missing(runit_measure) && !inherits(data,"spatPomp")) runit_measure <- function(x,t,params,log=FALSE,d,...)
+    stop(sQuote("runit_measure")," not specified")
 
   if (missing(unit_statenames)) unit_statenames <- character(0)
   if (missing(unit_covarnames)) unit_covarnames <- character(0)
@@ -89,9 +89,9 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
 
   if (inherits(data, what = "spatPomp")){
     if(!missing(units) && !missing(unit_statenames) && !missing(unit_obsnames))
-      stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure, unit_rmeasure, unit_emeasure or unit_mmeasure",call.=FALSE)
+      stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap dunit_measure, runit_measure, eunit_measure or munit_measure",call.=FALSE)
     else{
-      if(missing(unit_dmeasure) && missing(unit_rmeasure) && missing(unit_emeasure) && missing(unit_mmeasure)){
+      if(missing(dunit_measure) && missing(runit_measure) && missing(eunit_measure) && missing(munit_measure)){
         # only pomp components are changing
         print("here")
         print(names(data@params))
@@ -119,11 +119,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
         sp <- new("spatPomp",po,
                   unit_covarnames = data@unit_covarnames,
                   shared_covarnames = data@shared_covarnames,
-                  unit_rmeasure = data@unit_rmeasure,
-                  unit_dmeasure = data@unit_dmeasure,
-                  unit_emeasure = data@unit_emeasure,
-                  unit_mmeasure = data@unit_mmeasure,
-                  units=unit_names(data),
+                  runit_measure = data@runit_measure,
+                  dunit_measure = data@dunit_measure,
+                  eunit_measure = data@eunit_measure,
+                  munit_measure = data@munit_measure,
+                  unit_names=unit_names(data),
                   unitname=data@unitname,
                   unit_statenames=data@unit_statenames,
                   unit_obsnames = data@unit_obsnames)
@@ -134,14 +134,14 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
         unit_statenames = data@unit_statenames
         unit_obsnames = data@unit_obsnames
         paramnames = names(data@params)
-        if(!missing(unit_dmeasure)){
-          ## handle unit_dmeasure C Snippet
+        if(!missing(dunit_measure)){
+          ## handle dunit_measure C Snippet
           ud_template <- list(
-            unit_dmeasure=list(
-              slotname="unit_dmeasure",
-              Cname="__spatPomp_unit_dmeasure",
-              proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-              header="\nvoid __spatPomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+            dunit_measure=list(
+              slotname="dunit_measure",
+              Cname="__spatPomp_dunit_measure",
+              proto=quote(dunit_measure(y,x,t,d,params,log,...)),
+              header="\nvoid __spatPomp_dunit_measure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
               footer="\n}\n\n",
               vars=list(
                 params=list(
@@ -167,7 +167,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
               )
             ))
           hitches <- pomp::hitch(
-            unit_dmeasure=unit_dmeasure,
+            dunit_measure=dunit_measure,
             templates=ud_template,
             obsnames = paste0(unit_obsnames,"1"),
             statenames = paste0(unit_statenames,"1"),
@@ -182,22 +182,22 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
           # construct new spatpomp object
           pomp:::solibs(po) <- hitches$lib
-          # inherit from spatPomp (swapping out spatPomp slots - unit_dmeasure)
+          # inherit from spatPomp (swapping out spatPomp slots - dunit_measure)
           sp <- new("spatPomp",po,
-                    unit_dmeasure=hitches$funs$unit_dmeasure,
-                    units=data@unit_names,
+                    dunit_measure=hitches$funs$dunit_measure,
+                    unit_names=data@unit_names,
                     unitname=data@unitname,
                     unit_statenames=data@unit_statenames,
                     unit_obsnames = data@unit_obsnames)
           return(sp)
         } else{
-          if(!missing(unit_rmeasure)){
+          if(!missing(runit_measure)){
             ur_template <- list(
-              unit_rmeasure=list(
-                slotname="unit_rmeasure",
-                Cname="__spatPomp_unit_rmeasure",
-                proto=quote(unit_rmeasure(x,t,d,params,log,...)),
-                header="\nvoid __spatPomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+              runit_measure=list(
+                slotname="runit_measure",
+                Cname="__spatPomp_runit_measure",
+                proto=quote(runit_measure(x,t,d,params,log,...)),
+                header="\nvoid __spatPomp_runit_measure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
                 footer="\n}\n\n",
                 vars=list(
                   params=list(
@@ -215,7 +215,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                 )
               ))
             hitches <- pomp::hitch(
-              unit_rmeasure=unit_rmeasure,
+              runit_measure=runit_measure,
               templates=ur_template,
               obsnames = paste0(unit_obsnames,"1"),
               statenames = paste0(unit_statenames,"1"),
@@ -230,10 +230,10 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
             )
             # construct new spatpomp object
             pomp:::solibs(po) <- hitches$lib
-            # inherit from spatPomp (swapping out spatPomp slots - unit_rmeasure)
+            # inherit from spatPomp (swapping out spatPomp slots - runit_measure)
             sp <- new("spatPomp",po,
-                      unit_rmeasure=hitches$funs$unit_rmeasure,
-                      units=data@unit_names,
+                      runit_measure=hitches$funs$runit_measure,
+                      unit_names=data@unit_names,
                       unitname=data@unitname,
                       unit_statenames=data@unit_statenames,
                       unit_obsnames = data@unit_obsnames)
@@ -424,13 +424,13 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
            paste(sapply(missing,sQuote),collapse=","),
            " are not among the columns of ",sQuote("covar"),call.=FALSE)
     }
-    ## handle unit_dmeasure C Snippet
+    ## handle dunit_measure C Snippet
     ud_template <- list(
-      unit_vmeasure=list(
-        slotname="unit_vmeasure",
-        Cname="__spatPomp_unit_vmeasure",
-        proto=quote(unit_vmeasure(x,t,d,params,...)),
-        header="\nvoid __spatPomp_unit_vmeasure (double *__vc, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+      vunit_measure=list(
+        slotname="vunit_measure",
+        Cname="__spatPomp_vunit_measure",
+        proto=quote(vunit_measure(x,t,d,params,...)),
+        header="\nvoid __spatPomp_vunit_measure (double *__vc, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -451,11 +451,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
         )
       ),
-      unit_mmeasure=list(
-        slotname="unit_mmeasure",
-        Cname="__spatPomp_unit_mmeasure",
-        proto=quote(unit_mmeasure(x,t,d,params,...)),
-        header="\nvoid __spatPomp_unit_mmeasure (double *__pm, const double *__x, const double *__p, const double *__vc, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+      munit_measure=list(
+        slotname="munit_measure",
+        Cname="__spatPomp_munit_measure",
+        proto=quote(munit_measure(x,t,d,params,...)),
+        header="\nvoid __spatPomp_munit_measure (double *__pm, const double *__x, const double *__p, const double *__vc, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -480,11 +480,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
         )
       ),
-      unit_emeasure=list(
-        slotname="unit_emeasure",
-        Cname="__spatPomp_unit_emeasure",
-        proto=quote(unit_emeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __spatPomp_unit_emeasure (double *__ey, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+      eunit_measure=list(
+        slotname="eunit_measure",
+        Cname="__spatPomp_eunit_measure",
+        proto=quote(eunit_measure(y,x,t,d,params,log,...)),
+        header="\nvoid __spatPomp_eunit_measure (double *__ey, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -505,11 +505,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
         )
       ),
-      unit_dmeasure=list(
-        slotname="unit_dmeasure",
-        Cname="__spatPomp_unit_dmeasure",
-        proto=quote(unit_dmeasure(y,x,t,d,params,log,...)),
-        header="\nvoid __spatPomp_unit_dmeasure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+      dunit_measure=list(
+        slotname="dunit_measure",
+        Cname="__spatPomp_dunit_measure",
+        proto=quote(dunit_measure(y,x,t,d,params,log,...)),
+        header="\nvoid __spatPomp_dunit_measure (double *__lik, const double *__y, const double *__x, const double *__p, int give_log, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -534,11 +534,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           )
         )
       ),
-      unit_rmeasure=list(
-        slotname="unit_rmeasure",
-        Cname="__spatPomp_unit_rmeasure",
-        proto=quote(unit_rmeasure(x,t,d,params,log,...)),
-        header="\nvoid __spatPomp_unit_rmeasure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
+      runit_measure=list(
+        slotname="runit_measure",
+        Cname="__spatPomp_runit_measure",
+        proto=quote(runit_measure(x,t,d,params,log,...)),
+        header="\nvoid __spatPomp_runit_measure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int unit)\n{\n",
         footer="\n}\n\n",
         vars=list(
           params=list(
@@ -557,11 +557,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
       )
     )
     hitches <- pomp::hitch(
-      unit_emeasure=unit_emeasure,
-      unit_mmeasure=unit_mmeasure,
-      unit_vmeasure=unit_vmeasure,
-      unit_dmeasure=unit_dmeasure,
-      unit_rmeasure=unit_rmeasure,
+      eunit_measure=eunit_measure,
+      munit_measure=munit_measure,
+      vunit_measure=vunit_measure,
+      dunit_measure=dunit_measure,
+      runit_measure=runit_measure,
       templates=ud_template,
       obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
@@ -578,12 +578,12 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     pomp:::solibs(po) <- hitches$lib
     # data.frame -> spatPomp
     new("spatPomp",po,
-        unit_emeasure=hitches$funs$unit_emeasure,
-        unit_mmeasure=hitches$funs$unit_mmeasure,
-        unit_vmeasure=hitches$funs$unit_vmeasure,
-        unit_dmeasure=hitches$funs$unit_dmeasure,
-        unit_rmeasure=hitches$funs$unit_rmeasure,
-        units=units,
+        eunit_measure=hitches$funs$eunit_measure,
+        munit_measure=hitches$funs$munit_measure,
+        vunit_measure=hitches$funs$vunit_measure,
+        dunit_measure=hitches$funs$dunit_measure,
+        runit_measure=hitches$funs$runit_measure,
+        unit_names=units,
         unitname=unitname,
         unit_statenames=unit_statenames,
         unit_obsnames = unit_obsnames,

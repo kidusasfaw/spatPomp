@@ -246,7 +246,7 @@ measles_rmeasure <- Csnippet("
   }
 ")
 
-measles_unit_dmeasure <- Csnippet('
+measles_dunit_measure <- Csnippet('
                        // consider adding 1 to the variance for the case C = 0
                        double mytol = 1e-5;
                        double m = rho*(C+mytol);
@@ -260,11 +260,11 @@ measles_unit_dmeasure <- Csnippet('
                        if(give_log) lik = log(lik);
                        ')
 
-measles_unit_emeasure <- Csnippet("
+measles_eunit_measure <- Csnippet("
 ey = rho*C;
 ")
 
-measles_unit_vmeasure <- Csnippet("
+measles_vunit_measure <- Csnippet("
 //consider adding 1 to the variance for the case C = 0
 double mytol = 1e-5;
 double m;
@@ -272,7 +272,7 @@ m = rho*(C+mytol);
 vc = m*(1.0-rho+psi*psi*m);
 ")
 
-measles_unit_mmeasure <- Csnippet("
+measles_munit_measure <- Csnippet("
 double binomial_var;
 double m;
 double mytol = 1e-5;
@@ -399,11 +399,11 @@ spatPomp(measles_cases,
         globals=measles_globals,
         rinit=measles_rinit,
         dmeasure=measles_dmeasure,
-        unit_emeasure=measles_unit_emeasure,
-        unit_mmeasure=measles_unit_mmeasure,
-        unit_vmeasure=measles_unit_vmeasure,
+        eunit_measure=measles_eunit_measure,
+        munit_measure=measles_munit_measure,
+        vunit_measure=measles_vunit_measure,
         rmeasure=measles_rmeasure,
-        unit_dmeasure=measles_unit_dmeasure
+        dunit_measure=measles_dunit_measure
 )
 }
 

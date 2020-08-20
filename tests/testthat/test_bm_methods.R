@@ -86,7 +86,7 @@ girf_loglik <- replicate(10,logLik(girf(bm_obj,
 #   log-likelihood estimate from GIRF with lookahead > 1
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik_l2 <- replicate(10,logLik(girf(bm3,
+girf_loglik_l2 <- replicate(10,logLik(girf(bm_obj,
                                         Np = 500,
                                         lookahead = 2,
                                         Nguide = 50
@@ -147,23 +147,25 @@ test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimate
 #   igirf starting from arbitrary parameter set
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 igirf_lookahead <- 1
-igirf_ninter <- length(unit_names(bm3))
+igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30
-coef(bm3) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0)
-igirf_out1 <- igirf(bm3, Ngirf = igirf_ngirf,
+coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0,
+                "X9_0"=0, "X10_0"=0)
+igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                                 X8_0=0.02),
+                                 X8_0=0.02, X9_0=0.02, X10_0=0.02),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=igirf_np,
                    Ninter = igirf_ninter,
                    lookahead = igirf_lookahead,
                    Nguide = igirf_nguide)
-igirf_out2 <- igirf(bm3, Ngirf = igirf_ngirf,
+
+igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
                                  X8_0=0.02),

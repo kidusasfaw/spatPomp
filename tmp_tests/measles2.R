@@ -303,7 +303,7 @@ vec_dmeas <- function(y, x, t, params, log = FALSE, ...){
   else  return(lik)
 }
 
-## ----unit_dmeasure-------------------------------------------------------
+## ----dunit_measure-------------------------------------------------------
 unit_dmeas <- Csnippet("
                        double m = rho*C;
                        double v = m*(1.0-rho+psi*psi*m);
@@ -327,7 +327,7 @@ measles <- spatPomp(measles_long,
   paramnames=param_names,globals=v_by_g_C,
   initializer=measles_initializer,
   dmeasure=measles_dmeas,
-  unit_dmeasure=unit_dmeas,
+  dunit_measure=unit_dmeas,
   rmeasure=measles_rmeas)
 
 ## ----naive_pfilter3, eval = T--------------------------------------------

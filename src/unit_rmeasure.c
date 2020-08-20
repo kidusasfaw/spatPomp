@@ -93,7 +93,7 @@ static R_INLINE SEXP ret_array (int n, int nreps, int ntimes, SEXP names) {
 
 }
 
-SEXP do_unit_rmeasure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params, SEXP gnsi)
+SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params, SEXP gnsi)
 {
   int nprotect = 0;
   pompfunmode mode = undef;
@@ -284,7 +284,7 @@ SEXP do_unit_rmeasure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
 
     for (i = 0, yt = REAL(Y); i < n; i++, yt++) *yt = R_NaReal;
 
-    warningcall(R_NilValue,"'rmeasure' unspecified: NAs generated.");
+    warningcall(R_NilValue,"'runit_measure' unspecified: NAs generated.");
   }
 
   }
