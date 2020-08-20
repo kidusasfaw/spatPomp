@@ -287,7 +287,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+    fcst_samp_var <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
     # test code
     x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
     tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
@@ -315,7 +315,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     #   # get all the guides for this particles
     #   Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
     #                        params=tparamsp,.gnsi=gnsi)
-    #   for(u in 1:length(object@units)){
+    #   for(u in 1:length(unit_names(object))){
     #     snames = paste0(object@unit_statenames,u)
     #     for(l in 1:lookahead_steps){
     #       hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=tparams[,p])
@@ -364,7 +364,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
         }
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
-      fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
       array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
@@ -387,8 +387,8 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       dimnames(mom_match_param) <- list(tparam = rownames(tparams))
       # end test code
       # create measurement variance at skeleton matrix
-      # meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      # for(u in 1:length(object@units)){
+      # meas_var_skel <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      # for(u in 1:length(unit_names(object))){
       #   snames = paste0(object@unit_statenames,u)
       #   for (l in 1:lookahead_steps){
       #     hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams[,i]))
@@ -396,14 +396,14 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       #     meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],tparams[,i]))
       #   }
       # }
-      # fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      # for(u in 1:length(object@units)){
+      # fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      # for(u in 1:length(unit_names(object))){
       #   for(l in 1:lookahead_steps){
       #     fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
       #                                 FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
       #   }
       # }
-      # mom_match_param <- array(0, dim = c(dim(params)[1], length(object@units), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
+      # mom_match_param <- array(0, dim = c(dim(params)[1], length(unit_names(object)), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
       # inflated_var <- meas_var_skel + fcst_var_upd
       # for(p in 1:Np[1]){
       #   mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]

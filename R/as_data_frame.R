@@ -27,7 +27,7 @@ setAs(
     timename <- from@timename
 
     # set up unit names for obs, states and covars
-    unit_stateobscovars <- c(from@obstypes)
+    unit_stateobscovars <- c(from@unit_obsnames)
 
     # get the observation, covars (if any) and states (if any)
     dat <- t(obs(from))

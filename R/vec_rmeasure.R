@@ -3,7 +3,7 @@
 
 vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) {
   pompLoad(object)
-  nunits <- length(object@units)
+  nunits <- length(unit_names(object))
   nparticles <- ncol(x)
   ntimes <- length(times)
   storage.mode(x) <- "double"

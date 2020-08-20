@@ -37,7 +37,7 @@ setClass(
     indices = 'vector',
     units = 'character',
     unit_statenames = 'character',
-    obstypes = 'character',
+    unit_obsnames = 'character',
     unit_dmeasure = 'pomp_fun',
     unit_rmeasure = 'pomp_fun',
     unit_emeasure = 'pomp_fun',
@@ -222,9 +222,9 @@ enkf.internal <- function (object,
       unit_emeasure = object@unit_emeasure,
       unit_vmeasure = object@unit_vmeasure,
       unit_mmeasure = object@unit_mmeasure,
-      units=object@units,
+      units=object@unit_names,
       unit_statenames=object@unit_statenames,
-      obstypes = object@obstypes)
+      unit_obsnames = object@unit_obsnames)
 }
 
 

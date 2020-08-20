@@ -94,7 +94,7 @@ asifir.internal <- function (object, params, Np, nbhd,
 
   times <- time(object,t0=TRUE)
   N <- length(times)-1
-  U <- length(object@units)
+  U <- length(unit_names(object))
 
   if (missing(Np)) stop(ep,sQuote("Np")," must be specified",call.=FALSE)
   if (is.function(Np)) stop(ep,"Functions for Np not supported by asifir",call.=FALSE)
@@ -396,7 +396,7 @@ setMethod(
      )
    # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
-   U <- length(object@units)
+   U <- length(unit_names(object))
    #island_mp_sums = array(data = numeric(0), dim = c(U,N))
    #island_p_sums = array(data = numeric(0), dim = c(U, N))
    cond_loglik <- foreach::foreach(u=seq_len(U),

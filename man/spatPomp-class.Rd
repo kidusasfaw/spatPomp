@@ -15,7 +15,7 @@ An S4 class to represent a spatiotemporal POMP model and data.
 \item{\code{unit_statenames}}{A vector containing the state names such that appending the unit indices to the
 unit statenames will result in the each unit's corresponding states.}
 
-\item{\code{obstypes}}{A vector of observation types for a spatial unit.}
+\item{\code{unit_obsnames}}{A vector of observation types for a spatial unit.}
 
 \item{\code{emeasure}}{A pomp_fun representing the expected measurement for each spatial unit given its states.}
 

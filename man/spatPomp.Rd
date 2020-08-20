@@ -32,7 +32,7 @@ spatPomp(
   globals,
   statenames,
   paramnames,
-  obstypes,
+  unit_obsnames,
   accumvars,
   covarnames,
   shared_covarnames,

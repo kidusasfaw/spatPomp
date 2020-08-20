@@ -100,7 +100,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
-  nunits <- length(object@units)
+  nunits <- length(unit_names(object))
 
   if (missing(Np)) {
     if (is.matrix(params)) {

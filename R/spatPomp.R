@@ -36,7 +36,7 @@
 spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                       unit_emeasure, unit_mmeasure, unit_vmeasure, unit_dmeasure, unit_rmeasure, unit_statenames, rprocess, rmeasure,
                       dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, userdata, PACKAGE,
-                      globals, statenames, paramnames, obstypes, accumvars, covarnames, shared_covarnames, unit_covarnames,
+                      globals, statenames, paramnames, unit_obsnames, accumvars, covarnames, shared_covarnames, unit_covarnames,
                       partrans, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatPomp"),": ")
@@ -88,7 +88,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
 
 
   if (inherits(data, what = "spatPomp")){
-    if(!missing(units) && !missing(unit_statenames) && !missing(obstypes))
+    if(!missing(units) && !missing(unit_statenames) && !missing(unit_obsnames))
       stop(ep,sQuote("spatPomp"), "on an existing object can only be used to swap unit_dmeasure, unit_rmeasure, unit_emeasure or unit_mmeasure",call.=FALSE)
     else{
       if(missing(unit_dmeasure) && missing(unit_rmeasure) && missing(unit_emeasure) && missing(unit_mmeasure)){
@@ -126,13 +126,13 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                   units=unit_names(data),
                   unitname=data@unitname,
                   unit_statenames=data@unit_statenames,
-                  obstypes = data@obstypes)
+                  unit_obsnames = data@unit_obsnames)
         return(sp)
       } else{
         po <- pomp(data)
         covarnames = rownames(data@covar@table)
         unit_statenames = data@unit_statenames
-        obstypes = data@obstypes
+        unit_obsnames = data@unit_obsnames
         paramnames = names(data@params)
         if(!missing(unit_dmeasure)){
           ## handle unit_dmeasure C Snippet
@@ -157,7 +157,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
                   cref="__x[__stateindex[{%v%}]+unit-1]"
                 ),
                 obstyp=list(
-                  names=obstypes,
+                  names=unit_obsnames,
                   cref="__y[__obsindex[{%v%}]+unit-1]"
                 ),
                 lik=list(
@@ -169,7 +169,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           hitches <- pomp::hitch(
             unit_dmeasure=unit_dmeasure,
             templates=ud_template,
-            obsnames = paste0(obstypes,"1"),
+            obsnames = paste0(unit_obsnames,"1"),
             statenames = paste0(unit_statenames,"1"),
             paramnames=paramnames,
             covarnames=covarnames,
@@ -185,10 +185,10 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
           # inherit from spatPomp (swapping out spatPomp slots - unit_dmeasure)
           sp <- new("spatPomp",po,
                     unit_dmeasure=hitches$funs$unit_dmeasure,
-                    units=data@units,
+                    units=data@unit_names,
                     unitname=data@unitname,
                     unit_statenames=data@unit_statenames,
-                    obstypes = data@obstypes)
+                    unit_obsnames = data@unit_obsnames)
           return(sp)
         } else{
           if(!missing(unit_rmeasure)){
@@ -217,7 +217,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
             hitches <- pomp::hitch(
               unit_rmeasure=unit_rmeasure,
               templates=ur_template,
-              obsnames = paste0(obstypes,"1"),
+              obsnames = paste0(unit_obsnames,"1"),
               statenames = paste0(unit_statenames,"1"),
               paramnames=paramnames,
               covarnames=covarnames,
@@ -233,10 +233,10 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
             # inherit from spatPomp (swapping out spatPomp slots - unit_rmeasure)
             sp <- new("spatPomp",po,
                       unit_rmeasure=hitches$funs$unit_rmeasure,
-                      units=data@units,
+                      units=data@unit_names,
                       unitname=data@unitname,
                       unit_statenames=data@unit_statenames,
-                      obstypes = data@obstypes)
+                      unit_obsnames = data@unit_obsnames)
             return(sp)
           }
         }
@@ -279,7 +279,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     tpos_name <- names(data)[tpos]
 
     # get observation types
-    obstypes <- names(data)[-c(upos,tpos)]
+    unit_obsnames <- names(data)[-c(upos,tpos)]
 
     # units slot contains unique units. unit_index is an "ordering" of units
     units <- unique(data[[upos]])
@@ -290,11 +290,11 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
     tmp <- names(unit_index)
     names(tmp) <- unit_index
     pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,upos_name], names(tmp))])
-    pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,tpos_name], obsname, ui)
+    pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,tpos_name], obsname, ui)
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
-    dat_col_order <- vector(length = length(units)*length(obstypes))
-    for(ot in obstypes){
+    dat_col_order <- vector(length = length(units)*length(unit_obsnames))
+    for(ot in unit_obsnames){
       for(i in 1:length(units)){
         dat_col_order[i] = paste0(ot, i)
       }
@@ -525,7 +525,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
             cref="__x[__stateindex[{%v%}]+unit-1]"
           ),
           obstyp=list(
-            names=obstypes,
+            names=unit_obsnames,
             cref="__y[__obsindex[{%v%}]+unit-1]"
           ),
           lik=list(
@@ -563,7 +563,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=ud_template,
-      obsnames = paste0(obstypes,"1"),
+      obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
       paramnames=paramnames,
       covarnames=covarnames,
@@ -586,7 +586,7 @@ spatPomp <- function (data, units, times, covar, tcovar, t0, ...,
         units=units,
         unitname=unitname,
         unit_statenames=unit_statenames,
-        obstypes = obstypes,
+        unit_obsnames = unit_obsnames,
         unit_covarnames=unit_covarnames,
         shared_covarnames=shared_covarnames)
 

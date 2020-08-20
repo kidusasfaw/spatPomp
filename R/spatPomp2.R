@@ -3,7 +3,7 @@ spatPomp2 <- function (data, units, times, covar, tcovar, t0, ...,
                       unit_emeasure, unit_mmeasure, unit_vmeasure, unit_dmeasure, unit_rmeasure,
                       unit_statenames, rprocess, rmeasure,
                       dprocess, dmeasure, skeleton, rinit, cdir,cfile, shlib.args, PACKAGE,
-                      globals, statenames, paramnames, params, obstypes, accumvars, covarnames,
+                      globals, statenames, paramnames, params, unit_obsnames, accumvars, covarnames,
                       partrans, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatPomp"),": ")
@@ -82,7 +82,7 @@ setMethod(
     names(unit_index) <- 1:length(units)
 
     # get observation types
-    obstypes <- names(data)[-c(upos,tpos)]
+    unit_obsnames <- names(data)[-c(upos,tpos)]
 
     # if missing workhorses, set to default
     if (missing(rinit)) rinit <- NULL
@@ -120,11 +120,11 @@ setMethod(
     tmp <- names(unit_index)
     names(tmp) <- unit_index
     pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,unitname], names(tmp))])
-    pomp_data <- pomp_data %>% tidyr::gather(obstypes, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,timename], obsname, ui)
+    pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,timename], obsname, ui)
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
-    dat_col_order <- vector(length = length(units)*length(obstypes))
-    for(ot in obstypes){
+    dat_col_order <- vector(length = length(units)*length(unit_obsnames))
+    for(ot in unit_obsnames){
       for(i in 1:length(units)){
         dat_col_order[i] = paste0(ot, i)
       }
@@ -214,7 +214,7 @@ setMethod(
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=eval(spatPomp_workhorse_templates),
-      obsnames = paste0(obstypes,"1"),
+      obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
       paramnames=paramnames,
       covarnames=covarnames,
@@ -235,7 +235,7 @@ setMethod(
       unit_rmeasure=hitches$funs$unit_rmeasure,
       units=units,
       unit_statenames=unit_statenames,
-      obstypes = obstypes)
+      unit_obsnames = unit_obsnames)
 
   }
 )
@@ -250,9 +250,9 @@ setMethod(
                          statenames, paramnames, covarnames, PACKAGE, globals,
                          cdir, cfile, shlib.args, compile,.userdata, .solibs, verbose) {
     times <- data@times
-    units <- data@units
+    units <- data@unit_names
     unit_statenames <- data@unit_statenames
-    obstypes <- data@obstypes
+    unit_obsnames <- data@unit_obsnames
     if (missing(timename) || is.null(timename))
       timename <- "time"
     else
@@ -327,7 +327,7 @@ setMethod(
       unit_dmeasure=unit_dmeasure,
       unit_rmeasure=unit_rmeasure,
       templates=eval(spatPomp_workhorse_templates),
-      obsnames = paste0(obstypes,"1"),
+      obsnames = paste0(unit_obsnames,"1"),
       statenames = paste0(unit_statenames,"1"),
       paramnames=paramnames,
       covarnames=covarnames,
@@ -345,7 +345,7 @@ setMethod(
       times = times,
       units = units,
       unit_statenames = unit_statenames,
-      obstypes = obstypes,
+      unit_obsnames = unit_obsnames,
       t0 = t0,
       timename = timename,
       rinit = hitches$funs$rinit,

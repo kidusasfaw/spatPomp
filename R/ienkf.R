@@ -345,9 +345,9 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       unit_emeasure = object@unit_emeasure,
       unit_vmeasure = object@unit_vmeasure,
       unit_mmeasure = object@unit_mmeasure,
-      units=object@units,
+      units=object@unit_names,
       unit_statenames=object@unit_statenames,
-      obstypes = object@obstypes)
+      unit_obsnames = object@unit_obsnames)
 }
 
 

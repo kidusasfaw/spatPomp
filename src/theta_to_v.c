@@ -72,7 +72,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
   cov = REAL(cvec);
 
-  PROTECT(unitnames = GET_SLOT(object,install("units"))); nprotect++;
+  PROTECT(unitnames = GET_SLOT(object,install("unit_names"))); nprotect++;
   nunits = length(unitnames);
 
   // extract 'userdata' as pairlist

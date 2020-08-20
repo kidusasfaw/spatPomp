@@ -40,12 +40,12 @@ setMethod(
   signature=signature(x="spatPomp"),
   definition=function (x, log=F, ...) {
     df <- as.data.frame(x)
-    if(log) df[x@obstypes] <- log(df[x@obstypes])
+    if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames])
     ggplot(data = df) +
       geom_tile(aes(
         x = !!rlang::sym(x@unitname),
         y = !!rlang::sym(x@timename),
-        fill = !!rlang::sym(x@obstypes))) +
+        fill = !!rlang::sym(x@unit_obsnames))) +
       scale_x_discrete() +
       theme(axis.text.x = element_text(angle = 90,
                                        size = 11-(2*floor(length(unit_names(x))/10)),

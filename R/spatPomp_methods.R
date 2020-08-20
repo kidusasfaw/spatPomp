@@ -16,7 +16,7 @@ setAs(
         unit_dmeasure=from@dmeasure,
         units="unit",
         unit_statenames=character(0),
-        obstypes = rownames(from@data))
+        unit_obsnames = rownames(from@data))
   }
 )
 
@@ -24,7 +24,7 @@ setAs(
 setMethod(
   "unit_names",
   signature=signature(x="spatPomp"),
-  definition=function(x,...) x@units
+  definition=function(x,...) x@unit_names
 )
 
 
@@ -50,7 +50,7 @@ setMethod(
     if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
       unitname <- object@unitname
-      unit_stateobs <- c(object@obstypes, object@unit_statenames)
+      unit_stateobs <- c(object@unit_obsnames, object@unit_statenames)
       unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
       get_unit_index_from_statename <- function(statename){
         stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
@@ -87,10 +87,10 @@ setMethod(
                     unit_emeasure = object@unit_emeasure,
                     unit_mmeasure = object@unit_mmeasure,
                     unit_vmeasure = object@unit_vmeasure,
-                    units=object@units,
+                    units=object@unit_names,
                     unitname=object@unitname,
                     unit_statenames=object@unit_statenames,
-                    obstypes = object@obstypes)
+                    unit_obsnames = object@unit_obsnames)
           sp.list[[i]] <- sp
         }
         return(sp.list)
@@ -103,10 +103,10 @@ setMethod(
                   unit_emeasure = object@unit_emeasure,
                   unit_mmeasure = object@unit_mmeasure,
                   unit_vmeasure = object@unit_vmeasure,
-                  units=object@units,
+                  units=object@unit_names,
                   unitname=object@unitname,
                   unit_statenames=object@unit_statenames,
-                  obstypes = object@obstypes)
+                  unit_obsnames = object@unit_obsnames)
         return(sp)
       }
     }

@@ -305,7 +305,7 @@ girf.internal <- function (object,
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
 
-      fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
       array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))

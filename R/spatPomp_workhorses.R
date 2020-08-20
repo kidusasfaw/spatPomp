@@ -100,7 +100,7 @@ spatPomp_workhorse_templates <- quote(list(
         cref="__x[__stateindex[{%v%}]+unit-1]"
       ),
       obstyp=list(
-        names=obstypes,
+        names=unit_obsnames,
         cref="__y[__obsindex[{%v%}]+unit-1]"
       ),
       lik=list(
