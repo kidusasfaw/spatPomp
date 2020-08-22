@@ -46,7 +46,8 @@ setMethod(
         x = !!rlang::sym(x@unitname),
         y = !!rlang::sym(x@timename),
         fill = !!rlang::sym(x@unit_obsnames))) +
-      scale_x_discrete() +
+      scale_x_discrete(expand=c(0,0)) +
+      scale_y_continuous(expand=c(0,0)) +
       theme(axis.text.x = element_text(angle = 90,
                                        size = 11-(2*floor(length(unit_names(x))/10)),
                                        vjust = 0.5,
