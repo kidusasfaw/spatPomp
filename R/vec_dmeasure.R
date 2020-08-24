@@ -17,7 +17,7 @@ vec_dmeasure.internal <- function (object, y, x, units, times, params, log = FAL
     if(length(dim(params)) > 2){
       params <- params[,i,]
     }
-    weights[i,,] <- .Call(do_unit_dmeasure,object,y,x,times,units[i],params,log,.gnsi)
+    weights[i,,] <- .Call(do_dunit_measure,object,y,x,times,units[i],params,log,.gnsi)
   }
   pompUnload(object)
   return(weights)
@@ -28,7 +28,7 @@ setMethod(
   "vec_dmeasure",
   signature=signature(object="spatPomp"),
   definition=function (object, y, x, units, times, params, log = FALSE, ...){
-    if(missing(units)) units <- seq(spat_units(object))
+    if(missing(units)) units <- seq(unit_names(object))
     vec_dmeasure.internal(object=object,y=y,x=x,units=units,times=times,params=params,log=log,...)
   }
 )

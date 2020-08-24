@@ -121,11 +121,11 @@ ebm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
-ebm_unit_emeasure <- Csnippet("
+ebm_eunit_measure <- Csnippet("
   ey = X;
 ")
 
-ebm_unit_vmeasure <- Csnippet("
+ebm_vunit_measure <- Csnippet("
   vc = tau*tau;
 ")
 
@@ -139,13 +139,13 @@ ebm_rmeasure <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau[u]+tol);
 ")
 
-ebm_unit_dmeasure <- Csnippet("
+ebm_dunit_measure <- Csnippet("
   //double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
 ")
 
-ebm_unit_rmeasure <- Csnippet("
+ebm_runit_measure <- Csnippet("
   double tol = pow(1.0e-18,U);
   double Y;
   Y = rnorm(X,tau+tol);
@@ -161,10 +161,10 @@ ebm_spatPomp <- spatPomp(ebm_data,
                globals=ebm_globals,
                rmeasure=ebm_rmeasure,
                dmeasure=ebm_dmeasure,
-               unit_emeasure=ebm_unit_emeasure,
-               unit_vmeasure=ebm_unit_vmeasure,
-               unit_dmeasure=ebm_unit_dmeasure,
-               unit_rmeasure=ebm_unit_rmeasure,
+               eunit_measure=ebm_eunit_measure,
+               vunit_measure=ebm_vunit_measure,
+               dunit_measure=ebm_dunit_measure,
+               runit_measure=ebm_runit_measure,
                rinit=ebm_rinit
   )
 

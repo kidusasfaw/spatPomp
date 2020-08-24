@@ -46,24 +46,14 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{Np}{the number of particles to use in filtering.
+\item{Np}{the number of particles to use.
 This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-Alternatively, if one wishes the number of particles to vary across timestep, one may specify \code{Np} either as a vector of positive integers (of length \code{length(time(object))}) or as a function taking a positive integer argument.
-In the latter case, \code{Np(n)} must be a single positive integer,
-representing the number of particles to be used at the \code{n}-th timestep:
-\code{Np(1)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-\code{Np(2)}, from \code{time(object)[1]} to \code{time(object)[2]},
-and so on.}
-
-\item{tol}{non-negative numeric scalar;
-particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-See the section on \emph{Filtering Failures} for more information.
-In a future release, this argument will be removed.}
-
-\item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
-If the number of filtering failures exceeds this number, execution will terminate with an error.
-By default, \code{max.fail} is set to infinity, so no error can be triggered.
-In a future release, this argument will be removed.}
+Alternatively, if one wishes the number of particles to vary across timesteps, one may specify \code{Np} either as a vector of positive integers of length \preformatted{length(time(object,t0=TRUE))} or as a function taking a positive integer argument.
+In the latter case, \code{Np(k)} must be a single positive integer, representing the number of particles to be used at the \code{k}-th timestep:
+\code{Np(0)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
+\code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
+and so on,
+while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
@@ -76,7 +66,7 @@ See \link[pomp:userdata]{?userdata} for information on how to use this facility.
 }
 \value{
 Upon successful completion, \code{ienkf} returns an object of class
-\sQuote{enkfd_spatPomp}.
+\sQuote{ienkfd_spatPomp}.
 }
 \description{
 An implementation of a parameter estimation algorithm combining

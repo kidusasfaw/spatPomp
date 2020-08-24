@@ -33,3 +33,26 @@ setMethod(
       ggplot2::facet_wrap(~param, ncol = 3, scales = "free")
   }
 )
+
+##' @export
+setMethod(
+  "plot",
+  signature=signature(x="spatPomp"),
+  definition=function (x, log=F, ...) {
+    df <- as.data.frame(x)
+    if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames])
+    ggplot(data = df,
+           mapping = aes(x = factor(!!rlang::sym(x@unitname), level = unit_names(x)),
+                         y = !!rlang::sym(x@timename))) +
+      geom_tile(mapping = aes(fill = !!rlang::sym(x@unit_obsnames))) +
+      scale_x_discrete(expand=c(0,0)) +
+      scale_y_continuous(expand=c(0,0)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       size = 11-(2*floor(length(unit_names(x))/10)),
+                                       vjust = 0.5,
+                                       hjust=1)) +
+      scale_fill_gradientn(colours = terrain.colors(10)) +
+      labs(x = "unit", y = "time")
+  }
+)
+

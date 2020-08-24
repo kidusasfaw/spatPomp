@@ -27,7 +27,7 @@ setAs(
     timename <- from@timename
 
     # set up unit names for obs, states and covars
-    unit_stateobscovars <- c(from@obstypes)
+    unit_stateobscovars <- c(from@unit_obsnames)
 
     # get the observation, covars (if any) and states (if any)
     dat <- t(obs(from))
@@ -70,7 +70,7 @@ setAs(
     gathered <- dat %>%
       tidyr::gather_(key="stateobscovars", val="val", to_gather) %>%
       dplyr::mutate(ui = get_unit_index_from_name_v(stateobscovars)) %>%
-      dplyr::mutate(!!unitname := spat_units(from)[as.integer(ui)]) %>%
+      dplyr::mutate(!!unitname := unit_names(from)[as.integer(ui)]) %>%
       dplyr::select(-ui) %>%
       dplyr::arrange(!!!to_arrange)
 
@@ -86,7 +86,7 @@ setAs(
       tidyr::spread(key = stateobscovarstype, value = val)%>%
       dplyr::select(to_final_select) %>%
       dplyr::arrange(!!rlang::sym(timename),
-                     match(!!rlang::sym(unitname), spat_units(from)))
+                     match(!!rlang::sym(unitname), unit_names(from)))
     gathered
   }
 )

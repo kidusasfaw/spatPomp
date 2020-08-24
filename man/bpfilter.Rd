@@ -3,7 +3,7 @@
 \name{bpfilter-spatPomp}
 \alias{bpfilter-spatPomp}
 \alias{bpfilter,spatPomp-method}
-\title{Block Particle Filter (bpfilter)}
+\title{Block Particle Filter (BPF)}
 \usage{
 \S4method{bpfilter}{spatPomp}(object, Np, num_partitions, partitions_list, params)
 }
@@ -33,6 +33,11 @@ components of each particle are more likely to be resampled and get combined wit
 By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
 the resampling does not result in particle depletion with one particle representing the complex filter distribution.
 }
+\section{Details}{
+
+Only one of num_partitions or partitions_list needs to be specified and the other can be left unspecified as \code{bpfilter} will try to calculate it.
+}
+
 \section{Methods}{
 
 The following methods are available for such an object:

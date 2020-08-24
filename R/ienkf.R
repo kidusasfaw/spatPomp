@@ -120,8 +120,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
 
   verbose <- as.logical(verbose)
 
-  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@unit_emeasure) || pomp:::undefined(object@unit_vmeasure))
-    pomp:::pStop_(paste(sQuote(c("rprocess","unit_emeasure","unit_vmeasure")),collapse=", ")," are needed basic components.")
+  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@eunit_measure) || pomp:::undefined(object@vunit_measure))
+    pomp:::pStop_(paste(sQuote(c("rprocess","eunit_measure","vunit_measure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
 
@@ -297,7 +297,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    dim(meas_var) <- c(length(spat_units(object)),  Np)
+    dim(meas_var) <- c(length(unit_names(object)),  Np)
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
@@ -339,18 +339,17 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   new("enkfd_spatPomp",
       object,
       Np=Np,
-      cond.loglik=loglik,
+      cond.logLik=loglik,
       loglik=sum(loglik),
       indices=.indices,
       paramMatrix=params,
-      unit_rmeasure = object@unit_rmeasure,
-      unit_dmeasure = object@unit_dmeasure,
-      unit_emeasure = object@unit_emeasure,
-      unit_vmeasure = object@unit_vmeasure,
-      unit_mmeasure = object@unit_mmeasure,
-      units=object@units,
+      runit_measure = object@runit_measure,
+      dunit_measure = object@dunit_measure,
+      eunit_measure = object@eunit_measure,
+      vunit_measure = object@vunit_measure,
+      munit_measure = object@munit_measure,
+      unit_names=object@unit_names,
       unit_statenames=object@unit_statenames,
-      obstypes = object@obstypes)
+      unit_obsnames = object@unit_obsnames)
 }
-
 

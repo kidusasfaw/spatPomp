@@ -12,11 +12,11 @@ spatPomp(
   tcovar,
   t0,
   ...,
-  unit_emeasure,
-  unit_mmeasure,
-  unit_vmeasure,
-  unit_dmeasure,
-  unit_rmeasure,
+  eunit_measure,
+  munit_measure,
+  vunit_measure,
+  dunit_measure,
+  runit_measure,
   unit_statenames,
   rprocess,
   rmeasure,
@@ -32,7 +32,7 @@ spatPomp(
   globals,
   statenames,
   paramnames,
-  obstypes,
+  unit_obsnames,
   accumvars,
   covarnames,
   shared_covarnames,
@@ -67,23 +67,23 @@ When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, th
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
 
-\item{unit_emeasure}{Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+\item{eunit_measure}{Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
 For more information, see the examples section below.}
 
-\item{unit_mmeasure}{Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
+\item{munit_measure}{Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
 Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance parameter to the pre-defined variable corresponding to that parameter, which has been predefined with a \code{M_} prefix. For instance, if the moment-matched parameter is \code{psi}, then the user should assign \code{M_psi} to the moment-matched value.
 For more information, see the examples section below.}
 
-\item{unit_vmeasure}{Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+\item{vunit_measure}{Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
 For more information, see the examples section below.}
 
-\item{unit_dmeasure}{Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
+\item{dunit_measure}{Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined variable \code{lik}. The user is encouraged to provide a logged density in an \code{if} condition that checks whether the predefined \code{give_log} variable is true.
 For more information, see the examples section below.}
 
-\item{unit_rmeasure}{Simulator of the unit measurement model given the latent states and the model parameters.
+\item{runit_measure}{Simulator of the unit measurement model given the latent states and the model parameters.
 The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
 For more information, see the examples section below.}

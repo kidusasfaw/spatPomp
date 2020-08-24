@@ -26,7 +26,7 @@
 ##' # Run GIRF
 ##' girfd.b <- girf(b,
 ##'                 Np = 100,
-##'                 Ninter = length(spat_units(b)),
+##'                 Ninter = length(unit_names(b)),
 ##'                 lookahead = 1,
 ##'                 Nguide = 50
 ##' )
@@ -119,7 +119,7 @@ setMethod(
 
     if (missing(params)) params <- coef(object)
     if (missing(tol)) tol <- 1e-300
-    if (missing(Ninter)) Ninter <- length(spat_units(object))
+    if (missing(Ninter)) Ninter <- length(unit_names(object))
 
     tryCatch(
       girf.internal(
@@ -259,7 +259,7 @@ girf.internal <- function (object,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
@@ -303,12 +303,12 @@ girf.internal <- function (object,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      dim(meas_var_skel) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
 
-      fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      array.params <- array(params, dim = c(length(params), length(spat_units(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
+      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
       mmp <- tryCatch(
         .Call('do_v_to_theta',
               object=object,
@@ -323,7 +323,7 @@ girf.internal <- function (object,
         }
       )
       mom_match_param <- mmp
-      dim(mom_match_param) <- c(length(params), length(spat_units(object)), lookahead_steps, Np[1])
+      dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np[1])
       dimnames(mom_match_param) <- list(param = names(params))
 
       # guide functions as product (so base case is 1)

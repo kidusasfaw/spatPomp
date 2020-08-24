@@ -56,7 +56,7 @@ SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
 
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("unit_emeasure"))); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("eunit_measure"))); nprotect++;
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -70,7 +70,7 @@ SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
   cov = REAL(cvec);
 
-  PROTECT(unitnames = GET_SLOT(object,install("units"))); nprotect++;
+  PROTECT(unitnames = GET_SLOT(object,install("unit_names"))); nprotect++;
   nunits = length(unitnames);
 
   // extract 'userdata' as pairlist
@@ -169,7 +169,7 @@ SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
       }
     }
 
-    warningcall(R_NilValue,"'unit_dmeasure' unspecified: likelihood undefined.");
+    warningcall(R_NilValue,"'eunit_measure' unspecified.");
 
   }
 

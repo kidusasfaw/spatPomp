@@ -4,7 +4,7 @@ context("test methods on simple Brownian motion")
 doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(2)
-U = 10; N = 10
+U = 10; N = 5
 bm_obj <- bm(U = U, N = N)
 
 # compute distance matrix to compute true log-likelihood
@@ -22,7 +22,7 @@ loglik_true <- pomp:::kalmanFilter(
   t=1:N,
   y=obs(bm_obj),
   X0=rinit(bm_obj),
-  A= diag(length(spat_units(bm_obj))),
+  A= diag(length(unit_names(bm_obj))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
   R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
@@ -34,7 +34,7 @@ fun_to_optim <- function(cf){
     t=1:N,
     y=obs(bm_obj),
     X0=rinit(bm_obj),
-    A=diag(length(spat_units(bm_obj))),
+    A=diag(length(unit_names(bm_obj))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
@@ -86,7 +86,7 @@ girf_loglik <- replicate(10,logLik(girf(bm_obj,
 #   log-likelihood estimate from GIRF with lookahead > 1
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-girf_loglik_l2 <- replicate(10,logLik(girf(bm3,
+girf_loglik_l2 <- replicate(10,logLik(girf(bm_obj,
                                         Np = 500,
                                         lookahead = 2,
                                         Nguide = 50
@@ -102,18 +102,20 @@ asif_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-asif_loglik <- replicate(10,logLik(asif(bm_obj,
-                           islands = 100,
-                           Np = 50,
-                           nbhd = asif_nbhd)))
+asif_loglik <- replicate(n=10,
+                         expr=asif(bm_obj,
+                                   islands = 100,
+                                   Np = 50,
+                                   nbhd = asif_nbhd))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from ASIFIR
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asifir_loglik <- replicate(10,logLik(asifir(bm3,
-                        islands = 100,
-                        Np=50,
-                        nbhd = asif_nbhd)))
+asifir_loglik <- replicate(n=10,
+                           expr = logLik(asifir(bm_obj,
+                                                islands = 100,
+                                                Np=50,
+                                                nbhd = asif_nbhd)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
@@ -145,26 +147,28 @@ test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimate
 #   igirf starting from arbitrary parameter set
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 igirf_lookahead <- 1
-igirf_ninter <- length(spat_units(bm3))
+igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30
 coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0,"X9_0"=0, "X10_0"=0)
+                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0,
+                "X9_0"=0, "X10_0"=0)
 igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                                 X8_0=0.02, X9_0=.02, X10_0 = .02),
+                                 X8_0=0.02, X9_0=0.02, X10_0=0.02),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=igirf_np,
                    Ninter = igirf_ninter,
                    lookahead = igirf_lookahead,
                    Nguide = igirf_nguide)
+
 igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
-                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
-                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                                  X8_0=0.02, X9_0=.02, X10_0 = .02),
+                   rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
+                                 X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
+                                 X8_0=0.02),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=igirf_np,

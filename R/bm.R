@@ -33,7 +33,7 @@ dist_C <- paste0("const int dist[",U,"][",U,"] = ",dist_C_array,"; ")
 bm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
 
 
-obs_names <- paste0("Y",1:U)
+obs_names <- paste0("U",1:U)
 bm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
 
 bm_unit_statenames <- c("X")
@@ -95,14 +95,15 @@ bm_dmeasure <- Csnippet("
   if(!give_log) lik = exp(lik) + tol;
 ")
 
+bm_eunit_measure <- Csnippet("
   ey = X;
 ")
 
-bm_unit_mmeasure <- Csnippet("
+bm_munit_measure <- Csnippet("
   M_tau = sqrt(vc);
 ")
 
-bm_unit_vmeasure <- Csnippet("
+bm_vunit_measure <- Csnippet("
   vc = tau*tau;
 ")
 
@@ -114,13 +115,13 @@ bm_rmeasure <- Csnippet("
   for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
 ")
 
-bm_unit_dmeasure <- Csnippet("
+bm_dunit_measure <- Csnippet("
   //double tol = 1.0e-18;
   lik = dnorm(Y,X,tau,1);
   if(!give_log) lik = exp(lik);
 ")
 
-bm_unit_rmeasure <- Csnippet("
+bm_runit_measure <- Csnippet("
   double tol = pow(1.0e-18,U);
   double Y;
   Y = rnorm(X,tau+tol);
@@ -137,11 +138,11 @@ bm_spatPomp <- spatPomp(bm_data,
                globals=bm_globals,
                rmeasure=bm_rmeasure,
                dmeasure=bm_dmeasure,
-               unit_emeasure=bm_unit_emeasure,
-               unit_mmeasure=bm_unit_mmeasure,
-               unit_vmeasure=bm_unit_vmeasure,
-               unit_dmeasure=bm_unit_dmeasure,
-               unit_rmeasure=bm_unit_rmeasure,
+               eunit_measure=bm_eunit_measure,
+               munit_measure=bm_munit_measure,
+               vunit_measure=bm_vunit_measure,
+               dunit_measure=bm_dunit_measure,
+               runit_measure=bm_runit_measure,
                partrans = parameter_trans(log = c("sigma", "tau"), logit = c("rho")),
                rinit=bm_rinit
   )
@@ -158,7 +159,7 @@ simulate(bm_spatPomp,params=test_params)
 girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
   b <- bm(U = U, N = N)
   # girfd_spatPomp object creation requirements
-  bm_Ninter <- length(spat_units(b))
+  bm_Ninter <- length(unit_names(b))
   bm_lookahead <- lookahead
   bm_Nguide <- Nguide
   bm_Np <- Np

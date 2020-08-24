@@ -3,7 +3,7 @@
 
 vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) {
   pompLoad(object)
-  nunits <- length(object@units)
+  nunits <- length(unit_names(object))
   nparticles <- ncol(x)
   ntimes <- length(times)
   storage.mode(x) <- "double"
@@ -15,7 +15,7 @@ vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) 
     if(length(dim(params)) > 2){
       params <- params[,i,]
     }
-    weights[i,,] <- .Call(do_unit_rmeasure,object,x,times,i,params,.gnsi)
+    weights[i,,] <- .Call(do_runit_measure,object,x,times,i,params,.gnsi)
   }
   pompUnload(object)
   return(weights)

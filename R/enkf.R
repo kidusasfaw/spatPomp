@@ -14,23 +14,6 @@
 ##' @inheritParams spatPomp
 ##' @param Np the number of particles to use.
 ##'
-##' @examples
-##' # Create a BM object with the specified parameters
-##' U = 10; N = 10
-##' bm_obj <- bm(U = U, N = N)
-##' bm_obg2 <- bm_obj
-##'
-##' # Set the initial estimates for the unknown parameters
-##' coef(bm_obj2) <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5, "X1_0"=0, "X2_0"=0,
-##' "X3_0"=0, "X4_0"=0, "X5_0"=0, "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0)
-##'
-##' # Run ENKF with the specified parameters
-##' enkf_np <- 1000
-##' enkf_out <- enkf(bm_obj2, Np = enkf_np)
-##'
-##' # Get the parameter estimates from the ENKF object
-##' coef(enkf_out)
-##'
 ##' @return
 ##' An object of class \sQuote{enkfd_spatPomp}.
 ##'
@@ -52,23 +35,23 @@ setClass(
   slots=c(
     paramMatrix = 'array',
     indices = 'vector',
-    units = 'character',
+    unit_names = 'character',
     unit_statenames = 'character',
-    obstypes = 'character',
-    unit_dmeasure = 'pomp_fun',
-    unit_rmeasure = 'pomp_fun',
-    unit_emeasure = 'pomp_fun',
-    unit_vmeasure = 'pomp_fun',
-    unit_mmeasure = 'pomp_fun'
+    unit_obsnames = 'character',
+    dunit_measure = 'pomp_fun',
+    runit_measure = 'pomp_fun',
+    eunit_measure = 'pomp_fun',
+    vunit_measure = 'pomp_fun',
+    munit_measure = 'pomp_fun'
   ),
   prototype=prototype(
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
     indices=integer(0),
-    unit_dmeasure = pomp:::pomp_fun(slotname="unit_dmeasure"),
-    unit_rmeasure = pomp:::pomp_fun(slotname="unit_rmeasure"),
-    unit_emeasure = pomp:::pomp_fun(slotname="unit_emeasure"),
-    unit_vmeasure = pomp:::pomp_fun(slotname="unit_vmeasure"),
-    unit_mmeasure = pomp:::pomp_fun(slotname="unit_mmeasure")
+    dunit_measure = pomp:::pomp_fun(slotname="dunit_measure"),
+    runit_measure = pomp:::pomp_fun(slotname="runit_measure"),
+    eunit_measure = pomp:::pomp_fun(slotname="eunit_measure"),
+    vunit_measure = pomp:::pomp_fun(slotname="vunit_measure"),
+    munit_measure = pomp:::pomp_fun(slotname="munit_measure")
   )
 )
 
@@ -134,10 +117,10 @@ enkf.internal <- function (object,
 
   if (pomp:::undefined(object@rprocess))
     pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@unit_emeasure))
-    pomp:::pStop_(paste(sQuote(c("unit_emeasure")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@unit_vmeasure))
-    pomp:::pStop_(paste(sQuote(c("unit_vmeasure")),collapse=", ")," is a needed basic component.")
+  if (pomp:::undefined(object@eunit_measure))
+    pomp:::pStop_(paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
+  if (pomp:::undefined(object@vunit_measure))
+    pomp:::pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
   #R <- as.matrix(R)
@@ -195,7 +178,7 @@ enkf.internal <- function (object,
         stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    dim(meas_var) <- c(length(spat_units(object)),  Np[1])
+    dim(meas_var) <- c(length(unit_names(object)),  Np[1])
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
@@ -205,7 +188,7 @@ enkf.internal <- function (object,
     )
     X <- X[,,1]
     predMeans[,k] <- pm <- rowMeans(X) # prediction mean
-    dim(Y) <- c(length(spat_units(object)), Np[1])
+    dim(Y) <- c(length(unit_names(object)), Np[1])
 
     # forecast mean
     ym <- rowMeans(Y)
@@ -234,15 +217,14 @@ enkf.internal <- function (object,
       forecast=forecast,
       cond.logLik=condlogLik,
       loglik=sum(condlogLik),
-      unit_rmeasure = object@unit_rmeasure,
-      unit_dmeasure = object@unit_dmeasure,
-      unit_emeasure = object@unit_emeasure,
-      unit_vmeasure = object@unit_vmeasure,
-      unit_mmeasure = object@unit_mmeasure,
-      units=object@units,
+      runit_measure = object@runit_measure,
+      dunit_measure = object@dunit_measure,
+      eunit_measure = object@eunit_measure,
+      vunit_measure = object@vunit_measure,
+      munit_measure = object@munit_measure,
+      unit_names=object@unit_names,
       unit_statenames=object@unit_statenames,
-      obstypes = object@obstypes)
+      unit_obsnames = object@unit_obsnames)
 }
-
 
 

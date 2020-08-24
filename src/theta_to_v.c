@@ -56,7 +56,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
 
 
   // extract the user-defined function
-  PROTECT(pompfunthetatov = GET_SLOT(object,install("unit_vmeasure"))); nprotect++;
+  PROTECT(pompfunthetatov = GET_SLOT(object,install("vunit_measure"))); nprotect++;
 
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
@@ -72,7 +72,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
   cov = REAL(cvec);
 
-  PROTECT(unitnames = GET_SLOT(object,install("units"))); nprotect++;
+  PROTECT(unitnames = GET_SLOT(object,install("unit_names"))); nprotect++;
   nunits = length(unitnames);
 
   // extract 'userdata' as pairlist
@@ -171,7 +171,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
       }
     }
 
-    warningcall(R_NilValue,"'unit_dmeasure' unspecified: likelihood undefined.");
+    warningcall(R_NilValue,"'vunit_measure' unspecified.");
 
   }
 

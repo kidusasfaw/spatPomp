@@ -57,7 +57,7 @@ b <- bm(U=3, N=10)
 # Run GIRF
 girfd.b <- girf(b,
                 Np = 100,
-                Ninter = length(spat_units(b)),
+                Ninter = length(unit_names(b)),
                 lookahead = 1,
                 Nguide = 50
 )

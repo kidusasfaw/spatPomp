@@ -43,21 +43,8 @@
 ##' lookahead = igirf_lookahead,
 ##' Nguide = igirf_nguide)
 ##'
-##' igirf_out2 <- igirf(bm_obj2, Ngirf = igirf_ngirf,
-##'                     rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
-##'                                   X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-##'                                   X8_0=0.02, X9_0=.02, X10_0 = .02),
-##'                     cooling.type = "geometric",
-##'                     cooling.fraction.50 = 0.5,
-##'                     Np=igirf_np,
-##'                     Ninter = igirf_ninter,
-##'                     lookahead = igirf_lookahead,
-##'                     Nguide = igirf_nguide,
-##'                     method = 'adams')
-##'
 ##' # Get the parameter estimates from the IGIRF objects
 ##' coef(igirf_out1)
-##' coef(igirf_out2)
 ##'
 ##' @return
 ##' Upon successful completion, \code{igirf} returns an object of class
@@ -331,7 +318,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     # four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
     ## for each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+    fcst_samp_var <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
     # test code
     x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
     tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
@@ -350,7 +337,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(spat_units(object)), lookahead_steps, Np[1])
+    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
     # end test code
     # for (p in 1:Np[1]){
     #   # find this particle's initialization and repeat in Nguide times
@@ -359,7 +346,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     #   # get all the guides for this particles
     #   Xg[,,,p] <- rprocess(object, x0=xp, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
     #                        params=tparamsp,.gnsi=gnsi)
-    #   for(u in 1:length(object@units)){
+    #   for(u in 1:length(unit_names(object))){
     #     snames = paste0(object@unit_statenames,u)
     #     for(l in 1:lookahead_steps){
     #       hXg = apply(X=Xg[snames,,l,p, drop = FALSE], MARGIN = c(2,3,4), FUN = h, param.vec=tparams[,p])
@@ -407,12 +394,12 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      dim(meas_var_skel) <- c(length(spat_units(object)), lookahead_steps, Np[1])
-      fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
+      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(spat_units(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
-      for(i in 1:length(spat_units(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
+      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
+      for(i in 1:length(unit_names(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
       mmp <- tryCatch(
         .Call('do_v_to_theta',
               object=object,
@@ -427,12 +414,12 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
         }
       )
       mom_match_param <- mmp
-      dim(mom_match_param) <- c(dim(tparams)[1], length(spat_units(object)), lookahead_steps, Np[1])
+      dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np[1])
       dimnames(mom_match_param) <- list(tparam = rownames(tparams))
       # end test code
       # create measurement variance at skeleton matrix
-      # meas_var_skel <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      # for(u in 1:length(object@units)){
+      # meas_var_skel <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      # for(u in 1:length(unit_names(object))){
       #   snames = paste0(object@unit_statenames,u)
       #   for (l in 1:lookahead_steps){
       #     hskel <- sapply(1:Np[1], function(i) apply(X=skel[snames,i,l, drop = FALSE], MARGIN = c(2,3), FUN = h, param.vec = tparams[,i]))
@@ -440,14 +427,14 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       #     meas_var_skel[u,l,] <- sapply(1:Np[1], function(i) theta.to.v(hskel[1,i,1],tparams[,i]))
       #   }
       # }
-      # fcst_var_upd <- array(0, dim = c(length(object@units), lookahead_steps, Np[1]))
-      # for(u in 1:length(object@units)){
+      # fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      # for(u in 1:length(unit_names(object))){
       #   for(l in 1:lookahead_steps){
       #     fcst_var_upd[u,l,] <- apply(fcst_samp_var[u,l,,drop = FALSE], MARGIN = 1,
       #                                 FUN = function(x) x*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1]))
       #   }
       # }
-      # mom_match_param <- array(0, dim = c(dim(params)[1], length(object@units), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
+      # mom_match_param <- array(0, dim = c(dim(params)[1], length(unit_names(object)), lookahead_steps, Np[1]), dimnames = list(variable = names(params[,1]), lookahead = NULL, J = NULL))
       # inflated_var <- meas_var_skel + fcst_var_upd
       # for(p in 1:Np[1]){
       #   mom_match_param[,,,p] = apply(X=inflated_var[,,p,drop=FALSE], MARGIN=c(1,2,3), FUN = v.to.theta, param.vec = tparams[,p])[,,,1]
@@ -556,4 +543,3 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
     loglik=sum(cond.loglik)
   )
 }
-

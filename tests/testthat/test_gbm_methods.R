@@ -23,7 +23,7 @@ for(u in 1:U) {
 #   t=1:N,
 #   y= log(obs(gbm8)),
 #   X0=log(rinit(gbm8)),
-#   A= diag(length(spat_units(gbm8))),
+#   A= diag(length(unit_names(gbm8))),
 #   Q=rootQ%*%rootQ,
 #   C=diag(1,nrow=nrow(dmat)),
 #   R=diag(coef(gbm8)["tau"]^2, nrow=nrow(dmat))
@@ -37,7 +37,7 @@ for(u in 1:U) {
 #    t=1:N,
 #    y=obs(bm_obj),
 #   X0=rinit(bm_obj),
-#    A=diag(length(spat_units(bm_obj))),
+#    A=diag(length(unit_names(bm_obj))),
 #    Q=rootQ%*%rootQ,
 #    C=diag(1,nrow=nrow(dmat)),
 #    R=diag(cf["tau"]^2, nrow=nrow(dmat))
@@ -136,7 +136,7 @@ test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimate
 #   igirf starting from arbitrary parameter set
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 igirf_lookahead <- 1
-igirf_ninter <- length(spat_units(gbm8))
+igirf_ninter <- length(unit_names(gbm8))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30
