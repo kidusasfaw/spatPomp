@@ -3,19 +3,19 @@
 \name{bpfilter-spatPomp}
 \alias{bpfilter-spatPomp}
 \alias{bpfilter,spatPomp-method}
-\title{Block Particle Filter (BPF)}
+\title{Block particle filter (BPF)}
 \usage{
-\S4method{bpfilter}{spatPomp}(object, Np, num_partitions, partitions_list, params)
+\S4method{bpfilter}{spatPomp}(object, Np, block_size, partition, params)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object}
 
 \item{Np}{The number of particles used for the simulations. If missing, \code{bpfilter} will attempt to run using \code{ncol(params)}}
 
-\item{num_partitions}{The number of partitions the spatial units are split into.}
+\item{block_size}{The number of spatial units per block.}
 
-\item{partitions_list}{List parameter that can specify which spatial units are grouped into the same partitions.
-The values are vectors of integers for the spatial units that should be grouped together}
+\item{partition}{List that can specifies a partition of the spatial units. Each partition element called a \code{block} and is
+an integer vector of neighboring units.}
 
 \item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}}
 }
@@ -35,14 +35,15 @@ the resampling does not result in particle depletion with one particle represent
 }
 \section{Details}{
 
-Only one of num_partitions or partitions_list needs to be specified and the other can be left unspecified as \code{bpfilter} will try to calculate it.
+Only one of \code{block_size} or \code{partition} should be specified.
+If both or neither is provided, an error is triggered.
 }
 
 \section{Methods}{
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{logLik}}}{ yields an estimate of the log-likelihood of the data under the model. }
 }
 }
 
@@ -50,19 +51,15 @@ The following methods are available for such an object:
 # Create a simulation of a BM using default parameter set
 b <- bm(U=6, N=10)
 
-#Run BP Filter with the specified number of particles and number of partitions
-bpfilterd.b <- bpfilter(b, Np = 20, num_partitions = 3)
+# Run BPF with the specified number of particles and number of units per block
+bpfilterd.b1 <- bpfilter(b, Np = 100, block_size = 2)
 
-#Run BP filter with the specified number of particles and specified groupings of partitions
-#Equivalent to above
-bpfilterd.bm <- bpfilter(b, Np = 20, partitions_list = list(c(1,2), c(3,4), c(5,6)))
+# Run BPF with the specified number of particles and partition. This specification
+is exactly equivalent to the previous example
+bpfilterd.b2 <- bpfilter(b, Np = 20, partition = list(c(1,2), c(3,4), c(5,6)))
 
-#Get the likelihood estimate from BP Filter
-logLik(bpfilterd.b)
-
-#Compare with the likelihood estimate from the particle filter
-pfd.b <- pfilter(b, Np= 500)
-logLik(pfd.b)
+# Get a likelihood estimate
+logLik(bpfilterd.b2)
 
 }
 \seealso{

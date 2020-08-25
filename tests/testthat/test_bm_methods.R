@@ -126,7 +126,7 @@ enkf_loglik <- replicate(10,logLik(enkf(bm_obj, Np = 1000)))
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from bpfilter
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, num_partitions = 3)))
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, block_size = 3)))
 
 
 
