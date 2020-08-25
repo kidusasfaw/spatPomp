@@ -75,9 +75,16 @@ setMethod(
   signature=signature(object="spatPomp"),
   function (object, Np, block_size, partition, params) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
+
     if (missing(params)) params <- coef(object)
+
     if(missing(partition) && missing(block_size))
       stop(ep,sQuote("partition"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
+
+    if (!missing(partition) & !missing(block_size)){
+      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("partition"), " should be provided, but not both.",call.=FALSE)
+    }
+
     if (missing(Np)) {
       if (is.matrix(params)) {
         Np <- ncol(params)
@@ -85,6 +92,7 @@ setMethod(
         stop(ep,sQuote("Np")," must be specified",call.=FALSE)
       }
     }
+
     if (missing(partition)){
       if(block_size > length(unit_names(object))){
         stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
@@ -94,6 +102,7 @@ setMethod(
       partition = split(all_units, sort(all_units %% nblocks))
     }
     partition <- lapply(partition, as.integer)
+
     bpfilter.internal(
      object=object,
      Np=Np,
