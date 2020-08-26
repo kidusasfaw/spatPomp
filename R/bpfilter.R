@@ -2,20 +2,20 @@ setClass(
   "bpfilterd_spatPomp",
   contains="spatPomp",
   slots=c(
-    partitions_list="list",
+    partition="list",
     Np="integer",
     cond.loglik="numeric",
     loglik="numeric"
   ),
   prototype=prototype(
-    partitions_list = list(),
+    partition = list(),
     Np=as.integer(NA),
     cond.loglik=as.double(NA),
     loglik=as.double(NA)
   )
 )
 
-##' Block Particle Filter (BPF)
+##' Block particle filter (BPF)
 ##'
 ##' An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp)
 ##' Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
@@ -37,50 +37,54 @@ setClass(
 ##' @param object A \code{spatPomp} object
 ##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}
 ##' @param Np The number of particles used for the simulations. If missing, \code{bpfilter} will attempt to run using \code{ncol(params)}
-##' @param num_partitions The number of partitions the spatial units are split into.
-##' @param partitions_list List parameter that can specify which spatial units are grouped into the same partitions.
-##'    The values are vectors of integers for the spatial units that should be grouped together
+##' @param block_size The number of spatial units per block.
+##' @param partition List that can specifies a partition of the spatial units. Each partition element called a \code{block} and is
+##' an integer vector of neighboring units.
 ##'
 ##' @examples
 ##' # Create a simulation of a BM using default parameter set
 ##' b <- bm(U=6, N=10)
 ##'
-##' #Run BP Filter with the specified number of particles and number of partitions
-##' bpfilterd.b <- bpfilter(b, Np = 20, num_partitions = 3)
+##' # Run BPF with the specified number of particles and number of units per block
+##' bpfilterd.b1 <- bpfilter(b, Np = 100, block_size = 2)
 ##'
-##' #Run BP filter with the specified number of particles and specified groupings of partitions
-##' #Equivalent to above
-##' bpfilterd.bm <- bpfilter(b, Np = 20, partitions_list = list(c(1,2), c(3,4), c(5,6)))
+##' # Run BPF with the specified number of particles and partition. This specification
+##' is exactly equivalent to the previous example
+##' bpfilterd.b2 <- bpfilter(b, Np = 20, partition = list(c(1,2), c(3,4), c(5,6)))
 ##'
-##' #Get the likelihood estimate from BP Filter
-##' logLik(bpfilterd.b)
-##'
-##' #Compare with the likelihood estimate from the particle filter
-##' pfd.b <- pfilter(b, Np= 500)
-##' logLik(pfd.b)
+##' # Get a likelihood estimate
+##' logLik(bpfilterd.b2)
 ##'
 ##' @return
 ##' Upon successful completion, \code{bpfilter} returns an object of class
 ##' \sQuote{bpfilterd_spatPomp}.
 ##'
 ##' @section Details:
-##' Only one of num_partitions or partitions_list needs to be specified and the other can be left unspecified as \code{bpfilter} will try to calculate it.
+##' Only one of \code{block_size} or \code{partition} should be specified.
+##' If both or neither is provided, an error is triggered.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+##' \item{\code{\link{logLik}}}{ yields an estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
 ##' @export
 setMethod(
   "bpfilter",
   signature=signature(object="spatPomp"),
-  function (object, Np, num_partitions, partitions_list, params) {
+  function (object, Np, block_size, partition, params) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
+
     if (missing(params)) params <- coef(object)
-    if(missing(partitions_list) && missing(num_partitions))
-      stop(ep,sQuote("partitions_list"), " or ", sQuote("num_partitions"), " must be specified to the call",call.=FALSE)
+
+    if(missing(partition) && missing(block_size))
+      stop(ep,sQuote("partition"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
+
+    if (!missing(partition) & !missing(block_size)){
+      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("partition"), " should be provided, but not both.",call.=FALSE)
+    }
+
     if (missing(Np)) {
       if (is.matrix(params)) {
         Np <- ncol(params)
@@ -88,21 +92,25 @@ setMethod(
         stop(ep,sQuote("Np")," must be specified",call.=FALSE)
       }
     }
-    if (missing(partitions_list)){
-      if(num_partitions > length(unit_names(object))){
-        stop(ep,sQuote("num_partitions"), " cannot be greater than the number of spatial units",call.=FALSE)
+
+    if (missing(partition)){
+      if(block_size > length(unit_names(object))){
+        stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
       }
-      partition_size = floor(length(unit_names(object))/num_partitions)
-      partitions_list = split(unit_names(object), ceiling(seq_along(unit_names(object))/partition_size))
+      all_units = seq_len(length(unit_names(object)))
+      nblocks = round(length(all_units)/block_size)
+      partition = split(all_units, sort(all_units %% nblocks))
     }
+    partition <- lapply(partition, as.integer)
+
     bpfilter.internal(
      object=object,
      Np=Np,
-     partitions_list=partitions_list,
+     partition=partition,
      params=params)
   }
 )
-bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE) {
+bpfilter.internal <- function (object, Np, partition, params, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("bpfilter"),": ")
   object <- as(object,"spatPomp")
   pompLoad(object)
@@ -111,8 +119,7 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
   nunits <- length(unit_names(object))
-
-  num_partitions <- length(partitions_list)
+  nblocks <- length(partition)
 
   if (length(Np)==1)
     Np <- rep(Np,times=ntimes+1)
@@ -144,13 +151,12 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
   x <- init.x
 
   # create array to store weights per particle per partition
-  weights <- array(data = numeric(0), dim=c(num_partitions,Np[1L]))
+  weights <- array(data = numeric(0), dim=c(nblocks,Np[1L]))
   loglik <- rep(NA,ntimes)
 
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
-    #cat("time \n", nt, "\n")
-    max_log_d <- vector(mode = "numeric", length = num_partitions)
+    max_log_d <- vector(mode = "numeric", length = nblocks)
     X <- tryCatch(
       rprocess(
         object,
@@ -166,20 +172,15 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
       }
     )
 
-    #cat(" \n X \n")
-    #print(X)
-
-
     # For each  partition, get each particle's weight
-    for(i in seq(num_partitions)){
-      partition <- partitions_list[[i]]
-      # print(partition)
+    for(i in seq(nblocks)){
+      block <- partition[[i]]
       log_vd <- tryCatch(
         vec_dmeasure(
           object,
           y=object@data[,nt,drop=FALSE],
           x=X,
-          units=match(partition, unit_names(object)),
+          units=block,
           times=times[nt+1],
           params=params,
           log=TRUE,
@@ -190,31 +191,19 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
                conditionMessage(e),call.=FALSE)
         }
       )
-      # print("done with for loop")
-      # print(dim(log_vd))
-      # print(log_vd)
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
       max_log_d[i] <- max(log_d)
       log_d <- log_d - max_log_d[i]
       weights[i,] <- exp(log_d)
     }
     gnsi <- FALSE
-    #cat("\nweights \n")
-    #print(weights)
 
     ## resample for each partition
-    for(i in seq(num_partitions)){
-      partition = partitions_list[[i]]
-      statenames = paste0(paste0(rep(object@unit_statenames, each = length(partition))), match(partition, unit_names(object)))
-      # cat("statenames \n", statenames, "\n")
-      # cat("dim(X) \n", dim(X))
+    for(i in seq_len(nblocks)){
+      block = partition[[i]]
+      us = object@unit_statenames
+      statenames = paste0(rep(us,length(block)),rep(block,each=length(us)))
       tempX = X[statenames,,,drop = FALSE]
-      # paste0("tempX \n", tempX, "\n")
-      # print(Np)
-      # paste0("Np \n", Np[nt+1], "\n")
-      # print(weights)
-      # paste0("weights \n", weights, "\n")
-
       xx <- tryCatch( #resampling with cross pollination
         .Call(
           "bpfilter_computations",
@@ -228,24 +217,16 @@ bpfilter.internal <- function (object, Np, partitions_list, params, .gnsi = TRUE
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      # cat("statenames \n", statenames, "\n")
-      # cat("dim(xx$states) \n", dim(xx$states), "\n")
-      # cat("xx$states \n", xx$states, "\n")
-
-
       x[statenames,] <- xx$states
-
       params <- xx$params
     }
-    #cat("\nnew x \n")
-    #print(x)
     log_weights = max_log_d + log(weights)
     loglik[nt] = sum(apply(log_weights,1,logmeanexp))
   } ## end of main loop
   new(
     "bpfilterd_spatPomp",
     object,
-    partitions_list=partitions_list,
+    partition=partition,
     Np=as.integer(Np),
     cond.loglik=loglik,
     loglik=sum(loglik)

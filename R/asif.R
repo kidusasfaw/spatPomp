@@ -265,7 +265,15 @@ setMethod(
   function (object, islands, Np, nbhd, params,
            tol = (1e-300),
            ...) {
-   if (missing(params)) params <- coef(object)
+   if(missing(params)) params <- coef(object)
+   if(missing(nbhd)){
+     nbhd <- function(object, unit, time){
+       nbhd_list = list()
+       if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+       if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+       return(nbhd_list)
+     }
+   }
    ## single thread for testing
    # single_island_output <- asif.internal(
    #  object=object,
