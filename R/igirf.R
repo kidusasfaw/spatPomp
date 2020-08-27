@@ -14,7 +14,6 @@
 ##' @inheritParams pomp::mif2
 ##'
 ##' @param Ngirf the number of iterations of perturbed GIRF.
-##'
 ##' @examples
 ##' # Create a simulation of a BM object with the specified parameters
 ##' U = 10; N = 10
@@ -370,14 +369,27 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
         #print(X.start)
-        skel <- pomp::flow(object, x0=X.start, t0=tt[s+1], params=tparams, times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],...)
-        #if(s>1 && length(znames) > 0){
-          skel.start <- skel[,,1]
-          X.start.znames <- X.start[znames,]
-          skel.start.znames <- skel.start[znames,]
-          skel.end.znames <- X.start.znames + skel.start.znames
-          skel[znames,,1] <- skel.end.znames
-        #}
+        skel <- tryCatch(
+          pomp::flow(object,
+                     x0=X.start,
+                     t0=tt[s+1],
+                     params=tparams,
+                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
+                     ...),
+          error = function (e) {
+            pomp::flow(object,
+                       x0=X.start,
+                       t0=tt[s+1],
+                       params=tparams,
+                       times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
+                       method = 'adams')
+          }
+        )
+        skel.start <- skel[,,1]
+        X.start.znames <- X.start[znames,]
+        skel.start.znames <- skel.start[znames,]
+        skel.end.znames <- X.start.znames + skel.start.znames
+        skel[znames,,1] <- skel.end.znames
       } else {
         skel <- X
       }
