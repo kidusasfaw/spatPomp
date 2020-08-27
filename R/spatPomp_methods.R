@@ -13,18 +13,18 @@ setAs(
   to="spatPomp",
   def = function (from) {
     new("spatPomp",from,
-        dunit_measure=from@dmeasure,
-        unit_names="unit",
+        unit_dmeasure=from@dmeasure,
+        units="unit",
         unit_statenames=character(0),
-        unit_obsnames = rownames(from@data))
+        obstypes = rownames(from@data))
   }
 )
 
 ##' @export
 setMethod(
-  "unit_names",
+  "spat_units",
   signature=signature(x="spatPomp"),
-  definition=function(x,...) x@unit_names
+  definition=function(x,...) x@units
 )
 
 
@@ -35,6 +35,32 @@ setMethod(
   definition=function (x, ...) {
     cat("<object of class ",sQuote("spatPomp"),">\n",sep="")
     invisible(x)
+  }
+)
+
+##' @name plot_spatpomp
+##' @title plot
+##' @aliases plot, plot_spatpomp-method
+##' @details
+##' Creates a two-dimensional heat map with spatial units on the x-axis and time on the y-axis.
+##' The gradient of the points represent the log-likelihood of the data at the intersection of the spatial units and time.
+##' @export
+setMethod(
+  "plot",
+  signature=signature(x="spatPomp"),
+  definition=function (x, ...) {
+    df <- as.data.frame(x)
+    ggplot(data = df) +
+      geom_tile(aes(
+        x = !!rlang::sym(x@unitname),
+        y = !!rlang::sym(x@timename),
+        fill = !!rlang::sym(x@obstypes))) +
+      scale_x_discrete() +
+      theme(axis.text.x = element_text(angle = 90,
+                                       size = 11-(2*floor(length(spat_units(x))/10)),
+                                       vjust = 0.5,
+                                       hjust=1)) +
+      scale_fill_gradientn(colours = terrain.colors(10))
   }
 )
 
@@ -50,7 +76,7 @@ setMethod(
     if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
       unitname <- object@unitname
-      unit_stateobs <- c(object@unit_obsnames, object@unit_statenames)
+      unit_stateobs <- c(object@obstypes, object@unit_statenames)
       unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
       get_unit_index_from_statename <- function(statename){
         stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
@@ -63,7 +89,7 @@ setMethod(
       gathered <- sims %>%
         tidyr::gather_(key="stateobs", val="val", to_gather) %>%
         dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs))%>%
-        dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
+        dplyr::mutate(unit = spat_units(object)[as.integer(ui)]) %>%
         dplyr::select(to_select) %>%
         dplyr::arrange_(.dots = to_arrange)
       stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
@@ -82,15 +108,15 @@ setMethod(
           sp <- new("spatPomp",sims[[i]],
                     unit_covarnames = object@unit_covarnames,
                     shared_covarnames = object@shared_covarnames,
-                    runit_measure = object@runit_measure,
-                    dunit_measure = object@dunit_measure,
-                    eunit_measure = object@eunit_measure,
-                    munit_measure = object@munit_measure,
-                    vunit_measure = object@vunit_measure,
-                    unit_names=object@unit_names,
+                    unit_rmeasure = object@unit_rmeasure,
+                    unit_dmeasure = object@unit_dmeasure,
+                    unit_emeasure = object@unit_emeasure,
+                    unit_mmeasure = object@unit_mmeasure,
+                    unit_vmeasure = object@unit_vmeasure,
+                    units=object@units,
                     unitname=object@unitname,
                     unit_statenames=object@unit_statenames,
-                    unit_obsnames = object@unit_obsnames)
+                    obstypes = object@obstypes)
           sp.list[[i]] <- sp
         }
         return(sp.list)
@@ -98,15 +124,15 @@ setMethod(
         sp <- new("spatPomp",sims,
                   unit_covarnames = object@unit_covarnames,
                   shared_covarnames = object@shared_covarnames,
-                  dunit_measure = object@dunit_measure,
-                  runit_measure = object@runit_measure,
-                  eunit_measure = object@eunit_measure,
-                  munit_measure = object@munit_measure,
-                  vunit_measure = object@vunit_measure,
-                  unit_names=object@unit_names,
+                  unit_dmeasure = object@unit_dmeasure,
+                  unit_rmeasure = object@unit_rmeasure,
+                  unit_emeasure = object@unit_emeasure,
+                  unit_mmeasure = object@unit_mmeasure,
+                  unit_vmeasure = object@unit_vmeasure,
+                  units=object@units,
                   unitname=object@unitname,
                   unit_statenames=object@unit_statenames,
-                  unit_obsnames = object@unit_obsnames)
+                  obstypes = object@obstypes)
         return(sp)
       }
     }
@@ -124,27 +150,15 @@ setMethod(
 )
 
 ##' @name logLik-girfd_spatPomp
-##' @title logLik
+##' @title loglik
 ##' @aliases logLik,girfd_spatPomp-method
-##' @rdname logLik
+##' @rdname loglik
 ##' @export
 setMethod(
   "logLik",
   signature=signature(object="girfd_spatPomp"),
   definition=function(object)object@loglik
 )
-
-##' @name logLik-bpfilterd_spatPomp
-##' @title logLik
-##' @aliases logLik,bpfilterd_spatPomp-method
-##' @rdname logLik
-##' @export
-setMethod(
-  "logLik",
-  signature=signature(object="bpfilterd_spatPomp"),
-  definition=function(object)object@loglik
-)
-
 
 ##' @name logLik-asifd.spatPomp
 ##' @title loglik

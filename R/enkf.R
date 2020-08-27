@@ -228,4 +228,3 @@ enkf.internal <- function (object,
 }
 
 
-
