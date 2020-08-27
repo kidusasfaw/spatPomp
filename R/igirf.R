@@ -123,6 +123,19 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                     unit_covarnames = object@unit_covarnames,
+                     shared_covarnames = object@shared_covarnames,
+                     runit_measure = object@runit_measure,
+                     dunit_measure = object@dunit_measure,
+                     eunit_measure = object@eunit_measure,
+                     munit_measure = object@munit_measure,
+                     vunit_measure = object@vunit_measure,
+                     unit_names=object@unit_names,
+                     unitname=object@unitname,
+                     unit_statenames=object@unit_statenames,
+                     unit_obsnames = object@unit_obsnames)
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
@@ -214,8 +227,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     g <- igirf.girf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
       params=paramMatrix,
       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
-      verbose=verbose,.indices=.indices,...,.gnsi=gnsi)
-
+      verbose=verbose,.indices=.indices,.gnsi=gnsi)
     gnsi <- FALSE
 
     paramMatrix <- g@paramMatrix
@@ -243,7 +255,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
 igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
                         Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
-                        verbose, .indices = integer(0), ...,.gnsi = TRUE) {
+                        verbose, .indices = integer(0),.gnsi = TRUE) {
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
@@ -501,7 +513,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
             stop(ep,conditionMessage(e),call.=FALSE) # nocov
           }
         )
-        cond.loglik[nt+1, s] <- xx$loglik
+        cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
         log_filter_guide_fun <- xx$logfilterguides
         params <- xx$params

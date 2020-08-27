@@ -112,8 +112,19 @@ enkf.internal <- function (object,
                            ..., verbose) {
 
   verbose <- as.logical(verbose)
-
-  # object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames)
 
   if (pomp:::undefined(object@rprocess))
     pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
@@ -123,7 +134,6 @@ enkf.internal <- function (object,
     pomp:::pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
-  #R <- as.matrix(R)
   params <- coef(object)
 
   t <- time(object)

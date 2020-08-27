@@ -7,6 +7,7 @@ set.seed(2)
 U = 10; N = 5
 bm_obj <- bm(U = U, N = N)
 
+
 # compute distance matrix to compute true log-likelihood
 dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
 dmat <- matrix(0,U,U)
@@ -15,6 +16,8 @@ for(u in 1:U) {
     dmat[u,v] <- dist(u,v)
   }
 }
+
+
 
 # compute the true log-likelihood
 rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
@@ -151,35 +154,21 @@ igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 800
 igirf_nguide <- 40
 igirf_ngirf <- 30
-coef(bm_obj) <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
-                "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0,
-                "X9_0"=0, "X10_0"=0)
+start_params <- c("rho" = 0.7, "sigma"=0.8, "tau"=0.2, "X1_0"=0, "X2_0"=0,
+                  "X3_0"=0, "X4_0"=0, "X5_0"=0,"X6_0"=0, "X7_0"=0, "X8_0"=0,
+                  "X9_0"=0, "X10_0"=0)
 igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
-                   rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
+                    params=start_params,
+                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
                                  X8_0=0.02, X9_0=0.02, X10_0=0.02),
-                   cooling.type = "geometric",
-                   cooling.fraction.50 = 0.5,
-                   Np=igirf_np,
-                   Ninter = igirf_ninter,
-                   lookahead = igirf_lookahead,
-                   Nguide = igirf_nguide)
-
-igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
-                   rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
-                                 X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                                 X8_0=0.02),
-                   cooling.type = "geometric",
-                   cooling.fraction.50 = 0.5,
-                   Np=igirf_np,
-                   Ninter = igirf_ninter,
-                   lookahead = igirf_lookahead,
-                   Nguide = igirf_nguide,
-                   method = 'adams')
-
+                    cooling.type = "geometric",
+                    cooling.fraction.50 = 0.5,
+                    Np=igirf_np,
+                    Ninter = igirf_ninter,
+                    lookahead = igirf_lookahead,
+                    Nguide = igirf_nguide)
 
 test_that("IGIRF produces estimates that are not far from the MLE", {
   expect_lt(abs(logLik(igirf_out1) - (-kfll_mle)), 20)
-  expect_lt(abs(logLik(igirf_out2) - (-kfll_mle)), 20)
-
 })

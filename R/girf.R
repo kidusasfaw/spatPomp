@@ -416,7 +416,6 @@ girf.internal <- function (object,
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
         log_filter_guide_fun <- xx$logfilterguides
-        # params <- xx$params[,1]
         fcst_samp_var <- xx$newfsv
       }
       else{
