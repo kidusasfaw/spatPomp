@@ -15,7 +15,7 @@ NULL
 ##' When \code{object} is a simple \sQuote{spatPomp} object,
 ##' \code{as(object,"data.frame")} or \code{as.data.frame(object)} results in a
 ##' data frame with the times, units, observables, states (if known), and
-##' interpolated covariates (if any) simulated from it.
+##' interpolated covariates (if any).
 ##'
 setAs(
   from="spatPomp",

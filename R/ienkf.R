@@ -36,9 +36,6 @@ setClass(
 ##' "X3_0"=35, "X4_0"=35, "X5_0"=35, "X6_0"=35, "X7_0"=35, "X8_0"=35, "X9_0"=35, "X10_0"=35)
 ##'
 ##' # Run IENKF with the specified parameters
-##' ienkf_np <- 10000
-##' ienkf_Nenkf <- 50
-##'
 ##' ienkf_out <- ienkf(gbm10_2,
 ##' Nenkf = ienkf_Nenkf,
 ##' rw.sd = rw.sd(
@@ -352,4 +349,5 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       unit_statenames=object@unit_statenames,
       unit_obsnames = object@unit_obsnames)
 }
+
 
