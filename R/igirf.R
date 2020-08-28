@@ -227,7 +227,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     g <- igirf.girf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
       params=paramMatrix,
       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
-      verbose=verbose,.indices=.indices,.gnsi=gnsi)
+      verbose=verbose,.indices=.indices, .gnsi=gnsi)
     gnsi <- FALSE
 
     paramMatrix <- g@paramMatrix
@@ -255,7 +255,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
 igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
                         Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
-                        verbose, .indices = integer(0),.gnsi = TRUE) {
+                        verbose, .indices = integer(0), .gnsi = TRUE) {
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
@@ -356,8 +356,7 @@ igirf.girf <- function (object, params, Ninter, lookahead, Nguide,
                      x0=X.start,
                      t0=tt[s+1],
                      params=tparams,
-                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-                     ...),
+                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]),
           error = function (e) {
             pomp::flow(object,
                        x0=X.start,
