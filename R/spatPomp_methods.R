@@ -4,7 +4,7 @@
 ##' @title spatpomp-methods
 ##' @rdname spatPomp-methods
 ##'
-##' @include spatPomp_class.R
+##' @include spatPomp_class.R generics.R
 ##'
 NULL
 
@@ -186,28 +186,18 @@ setMethod(
 setMethod(
   "spatPomp_Csnippet",
   signature=signature(object="character"),
-  definition=function(object, unit_statenames, unit_covarnames){
-    if(missing(unit_statenames) && missing(unit_covarnames))
+  definition=function(object, unit_statenames,...){
+    if(missing(unit_statenames))
       return(pomp::Csnippet(object))
     else{
-      if(missing(unit_statenames)) sn.inits <- character()
-      else{
-        sn.inits.lhs <- paste("double *",unit_statenames, sep = "")
-        sn.inits.rhs <- paste("&", unit_statenames,"1;",sep="")
-        sn.inits.vec <- paste(sn.inits.lhs, sn.inits.rhs, sep = " = ")
-        sn.inits <- paste0(sn.inits.vec, collapse = "\n")
-      }
-      if(missing(unit_covarnames)) cn.inits <- character()
-      else{
-        cn.inits.lhs <- paste("const double *",unit_covarnames, sep = "")
-        cn.inits.rhs <- paste("&", unit_covarnames,"1;",sep="")
-        cn.inits.vec <- paste(cn.inits.lhs, cn.inits.rhs, sep = " = ")
-        cn.inits <- paste0(cn.inits.vec, collapse = "\n")
-      }
-      all.inits <- paste(sn.inits, cn.inits, sep = "\n")
-      full.csnippet <- paste(all.inits, object, sep = "\n")
-      return(pomp::Csnippet(full.csnippet))
+      sn_inits_lhs <- paste("double *",unit_statenames, sep = "")
+      sn_inits_rhs <- paste("&", unit_statenames,"1;",sep="")
+      sn_inits_vec <- paste(sn_inits_lhs, sn_inits_rhs, sep = " = ")
+      sn_inits <- paste0(sn_inits_vec, collapse = "\n")
     }
+    all_inits <- paste(sn_inits, sep = "\n")
+    full_csnippet <- paste(all_inits, object, sep = "\n")
+    return(pomp::Csnippet(full_csnippet))
   }
 )
 
