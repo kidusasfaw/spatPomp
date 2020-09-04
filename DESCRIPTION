@@ -16,10 +16,10 @@ Suggests: scales, geosphere, magrittr,
   plyr, reshape2,
     testthat
 Collate:
-    'spatPomp_class.R'
-    'as_data_frame.R'
     'generics.R'
-    'asif.R'
+    'spatPomp_class.R'
+    'abf.R'
+    'as_data_frame.R'
     'asifir.R'
     'bm.R'
     'bm_extended.R'

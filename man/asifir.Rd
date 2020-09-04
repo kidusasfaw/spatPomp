@@ -11,18 +11,15 @@
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
-\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}}
+\item{params}{A parameter set for the spatiotemporal POMP.}
 
 \item{Np}{The number of particles for the adapted simulations within each island.}
 
 \item{islands}{The number of islands for the adapted simulations.}
 
-\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
-\code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
-
 \item{Ninter}{the number of intermediate resampling timepoints.}
 
-\item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
+\item{tol}{If the guide functions become too small (beyond floating-point precision limits), we set them to this value.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
@@ -81,7 +78,7 @@ logLik(pfd.b)
 }
 \seealso{
 Other particle filter methods: 
-\code{\link{asif}()},
+\code{\link{abf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
@@ -89,7 +86,7 @@ Other particle filter methods:
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
-\code{\link{asif}()},
+\code{\link{abf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{igirf}()}

@@ -64,16 +64,16 @@ logLik(bpfilterd.b2)
 }
 \seealso{
 Other particle filter methods: 
+\code{\link{abf}()},
 \code{\link{asifir}()},
-\code{\link{asif}()},
 \code{\link{girf}()},
 \code{\link{hippie}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
+\code{\link{abf}()},
 \code{\link{asifir}()},
-\code{\link{asif}()},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 }

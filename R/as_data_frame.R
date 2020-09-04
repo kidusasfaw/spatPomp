@@ -44,7 +44,6 @@ setAs(
       colnames(dat) <- nm
       unit_stateobscovars <- c(unit_stateobscovars, from@unit_covarnames)
     }
-
     # function to split unit name and unit index
     unit_stateobscovars_pat <- paste0(paste("^",unit_stateobscovars,sep=""), collapse = "|")
     get_unit_index_from_name <- function(name){
@@ -56,7 +55,6 @@ setAs(
     dat <- as.data.frame(dat)
     dat <- cbind(from@times,dat)
     colnames(dat)[1] <- timename
-
     # convert to long format with column for stateobscovars
     no_time_colnames <- colnames(dat)[-1]
     shared_covnames_ix <- which(no_time_colnames %in% from@shared_covarnames)

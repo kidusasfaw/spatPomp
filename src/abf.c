@@ -3,14 +3,7 @@
 #include "spatPomp_defines.h"
 #include <Rdefines.h>
 
-// examines resampling weights for filtering failure
-// computes log likelihood and effective sample size
-// computes (if desired) prediction mean, prediction variance, filtering mean.
-// it is assumed that ncol(x) == ncol(params).
-// resampling weights are used in filtering mean computation.
-// if length(resamp_weights) == 1, an unweighted average is computed.
-// returns all of the above in a named list
-SEXP asif_computations (SEXP x, SEXP params, SEXP Np,
+SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
 			   SEXP trackancestry,
 			   SEXP resamp_weights)
 {
@@ -41,7 +34,7 @@ SEXP asif_computations (SEXP x, SEXP params, SEXP Np,
     errorcall(R_NilValue,"ncol('states') should be a multiple of ncol('params')"); // # nocov
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
 
-  np = 1;       // number of particles to resample for asif is just one
+  np = 1;       // number of particles to resample for abf is just one
 
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
 

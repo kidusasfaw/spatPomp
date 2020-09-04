@@ -40,7 +40,7 @@ setMethod(
   signature=signature(x="spatPomp"),
   definition=function (x, log=F, ...) {
     df <- as.data.frame(x)
-    if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames])
+    if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames]+1)
     ggplot(data = df,
            mapping = aes(x = !!rlang::sym(x@timename),
                          y = factor(!!rlang::sym(x@unitname), level = unit_names(x)))) +
@@ -51,7 +51,9 @@ setMethod(
                                        vjust = 0.5,
                                        hjust=1)) +
       scale_fill_gradientn(colours = terrain.colors(10)) +
-      labs(x = "time", y = "unit")
+      labs(x = "time", y = "unit", fill = ifelse(log,
+                                                 paste("log(",x@unit_obsnames,"+1)",sep=""),
+                                                 x@unit_obsnames))
   }
 )
 

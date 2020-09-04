@@ -146,14 +146,14 @@ setMethod(
 )
 
 
-##' @name logLik-asifd.spatPomp
+##' @name logLik-abfd.spatPomp
 ##' @title loglik
-##' @aliases logLik,asifd.spatPomp-method
+##' @aliases logLik,abfd.spatPomp-method
 ##' @rdname loglik
 ##' @export
 setMethod(
   "logLik",
-  signature=signature(object="asifd_spatPomp"),
+  signature=signature(object="abfd_spatPomp"),
   definition=function(object)object@loglik
 )
 

@@ -180,9 +180,9 @@ girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
 }
 
 #' @export
-asifd_bm <- function(U=5,
+abfd_bm <- function(U=5,
                      N = 10,
-                     islands = 50,
+                     Nrep = 50,
                      Np = 10,
                      nbhd = function(object, time, unit) {
                        nbhd_list <- list()
@@ -193,16 +193,16 @@ asifd_bm <- function(U=5,
   b <- bm(U = U, N = N)
   # asifd_spatPomp object creation requirements
   bm_Np <- Np
-  bm_islands <- islands
+  bm_Nrep <- Nrep
   bm_nbhd <- nbhd
   bm_tol <- 1e-300
 
   # Output girfd_spatPomp object
   new(
-    "asifd_spatPomp",
+    "abfd_spatPomp",
     b,
     Np = as.integer(bm_Np),
-    islands = as.integer(bm_islands),
+    Nrep = as.integer(Nrep),
     nbhd = bm_nbhd,
     tol= bm_tol,
     loglik=as.double(NA)

@@ -1,25 +1,26 @@
-##' Adapted Simulation Island Filter (ASIF)
+##' Adapted Bagged Filter (ABF)
 ##'
-##' An algorithm for estimating the filter distribution of a spatiotemporal partially-observed Markov process (SpatPOMP for short).
-##' Running \code{asif} causes the algorithm to run independent island jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
-##' distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each island close to each other through resampling down
-##' to one particle per island at each observation time point.
+##' An algorithm for estimating the filter distribution and likelihood estimate of a spatiotemporal partially-observed Markov process model.
+##' Running \code{abf} causes the algorithm to run bootstrap replicate jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
+##' distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each replicate close to each other through resampling down
+##' to one particle per replicate at each observation time point.
 ##' The adapted simulations are then weighted in a way that tries to avert COD by making a weak coupling assumption to get an approximate filter distribution.
 ##' As a by-product, we also get a biased estimate of the likelihood of the data.
 ##'
-##' @name asif
-##' @rdname asif
+##' @name abf
+##' @rdname abf
 ##' @include spatPomp_class.R generics.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
+##' @importFrom foreach %doPar%
 ##'
 ##'
 ##' @param object A \code{spatPomp} object.
-##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{asif} will attempt to run using \code{coef(object)}
-##' @param Np The number of particles used within each island for the adapted simulations.
+##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}
+##' @param Np The number of particles used within each replicate for the adapted simulations.
 ##' @param nbhd A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
 ##' \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.
-##' @param islands The number of islands for the adapted simulations.
+##' @param Nreplicates The number of replicates for the adapted simulations.
 ##' @param tol If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.
 ##' @examples
 ##' # Create a simulation of a BM using default parameter set
@@ -32,18 +33,18 @@
 ##'   return(nbhd_list)
 ##' }
 ##'
-##' # Run ASIF specified number of Monte Carlo islands and particles per island
-##' asifd.b <- asif(b, islands = 50, Np = 10, nbhd = bm_nbhd)
+##' # Run ABF specified number of Monte Carlo islands and particles per island
+##' abfd.b <- abf(b, islands = 50, Np = 10, nbhd = bm_nbhd)
 ##'
-##' # Get the likelihood estimate from ASIF
-##' logLik(asifd.b)
+##' # Get the likelihood estimate from ABF
+##' logLik(abfd.b)
 ##'
 ##' # Compare with the likelihood estimate from Particle Filter
 ##' pfd.b <- pfilter(b, Np = 500)
 ##' logLik(pfd.b)
 ##' @return
-##' Upon successful completion, \code{asif} returns an object of class
-##' \sQuote{asifd_spatPomp}.
+##' Upon successful completion, \code{abf} returns an object of class
+##' \sQuote{abfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -54,7 +55,7 @@
 NULL
 
 setClass(
-  "island_spatPomp",
+  "adapted_replicate",
   slots=c(
     log_wm_times_wp_avg="array",
     log_wp_avg="array",
@@ -69,23 +70,24 @@ setClass(
   )
 )
 setClass(
-  "asifd_spatPomp",
+  "abfd_spatPomp",
   contains="spatPomp",
   slots=c(
-    islands="integer",
+    Nrep="integer",
     nbhd="function",
     Np="integer",
     tol="numeric",
     loglik="numeric"
   ),
   prototype=prototype(
+    Nrep=as.integer(NA),
     Np=as.integer(NA),
     tol=as.double(NA),
     loglik=as.double(NA)
   )
 )
-asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("asif"),": ")
+abf.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
+  ep <- paste0("in ",sQuote("abf"),": ")
   verbose = FALSE
   if(missing(nbhd))
     stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
@@ -202,7 +204,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
     ## do resampling if filtering has not failed
     xx <- tryCatch(
       .Call(
-        "asif_computations",
+        "abf_computations",
         x=X,
         params=params,
         Np=Np[nt+1],
@@ -218,7 +220,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
     params <- xx$params
 
     if (verbose && (nt%%5==0))
-      cat("asif timestep",nt,"of",ntimes,"finished\n")
+      cat("abf timestep",nt,"of",ntimes,"finished\n")
   } ## end of main loop
 
   # compute locally combined pred. weights for each time, unit and particle
@@ -246,7 +248,7 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
   log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
   pompUnload(object,verbose=verbose)
   new(
-    "island_spatPomp",
+    "adapted_replicate",
     log_wm_times_wp_avg = log_wm_times_wp_avg,
     log_wp_avg = log_wp_avg,
     Np=as.integer(Np),
@@ -255,14 +257,14 @@ asif.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
 
 
 }
-##' @name asif-spatPomp
-##' @aliases asif,spatPomp-method
-##' @rdname asif
+##' @name abf-spatPomp
+##' @aliases abf,spatPomp-method
+##' @rdname abf
 ##' @export
 setMethod(
-  "asif",
+  "abf",
   signature=signature(object="spatPomp"),
-  function (object, islands, Np, nbhd, params,
+  function (object, Nrep, Np, nbhd, params,
            tol = (1e-300),
            ...) {
    if(missing(params)) params <- coef(object)
@@ -275,20 +277,20 @@ setMethod(
      }
    }
    ## single thread for testing
-   # single_island_output <- asif.internal(
+   # single_rep_output <- abf.internal(
    #  object=object,
    #  params=params,
    #  Np=Np,
    #  nbhd = nbhd,
    #  tol=tol,
    #  ...)
-   # return(single_island_output)
+   # return(single_rep_output)
    ## end single thread for testing
    ## begin multi-thread code
    mcopts <- list(set.seed=TRUE)
-   mult_island_output <- foreach::foreach(i=1:islands,
+   mult_rep_output <- foreach::foreach(i=1:Nrep,
        .packages=c("pomp","spatPomp"),
-       .options.multicore=mcopts) %dopar%  spatPomp:::asif.internal(
+       .options.multicore=mcopts) %dopar%  spatPomp:::abf.internal(
      object=object,
      params=params,
      Np=Np,
@@ -298,8 +300,8 @@ setMethod(
      )
    ntimes = length(time(object))
    nunits = length(unit_names(object))
-   island_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
-   island_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
+   rep_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
+   rep_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
    cond_loglik <- foreach::foreach(u=seq_len(nunits),
                     .combine = 'rbind',
                     .packages=c("pomp", "spatPomp"),
@@ -307,11 +309,11 @@ setMethod(
                     {
                       cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
                       for (n in seq_len(ntimes)){
-                        log_mp_sum = logmeanexp(vapply(mult_island_output,
-                                                       FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+                        log_mp_sum = logmeanexp(vapply(mult_rep_output,
+                                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
                                                        FUN.VALUE = 1.0))
-                        log_p_sum = logmeanexp(vapply(mult_island_output,
-                                                      FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+                        log_p_sum = logmeanexp(vapply(mult_rep_output,
+                                                      FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
                                                       FUN.VALUE = 1.0))
                         cond_loglik_u[n] = log_mp_sum - log_p_sum
                       }
@@ -319,7 +321,7 @@ setMethod(
                     }
    # end multi-threaded code
    new(
-      "asifd_spatPomp",
+      "abfd_spatPomp",
       object,
       Np=as.integer(Np),
       tol=tol,
@@ -329,20 +331,20 @@ setMethod(
 )
 
 setMethod(
-  "asif",
-  signature=signature(object="asifd_spatPomp"),
-  function (object, islands, Np, nbhd, params,
+  "abf",
+  signature=signature(object="abfd_spatPomp"),
+  function (object, Nrep, Np, nbhd, params,
             tol,
             ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
     if (missing(params)) params <- coef(object)
-    if (missing(islands)) islands <- object@islands
+    if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd
 
-    asif(as(object,"spatPomp"),
+    abf(as(object,"spatPomp"),
            Np=Np,
-           islands=islands,
+           Nrep=Nrep,
            nbhd=nbhd,
            params = params,
            tol=tol,

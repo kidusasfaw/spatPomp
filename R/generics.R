@@ -1,5 +1,5 @@
-## Adapted Simulation Island Filter (ASIF)
-setGeneric("asif",function(object,...)standardGeneric("asif"))
+## Adapted Bagged Filter (ASIF)
+setGeneric("abf",function(object,...)standardGeneric("abf"))
 
 ## Adapted Simulation Island Filter (ASIF)
 setGeneric("asifir",function(object,...)standardGeneric("asifir"))

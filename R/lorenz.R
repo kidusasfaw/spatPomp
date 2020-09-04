@@ -175,29 +175,29 @@ girfd_lorenz <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
 }
 
 #' @export
-asifd_lorenz <- function(U=5,
-                     N = 10,
-                     islands = 50,
-                     Np = 10,
-                     nbhd = function(object, time, unit){
-                       nbhd_list = list()
-                       if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-                       if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
-                       return(nbhd_list)
-                     }){
+abfd_lorenz <- function(U=5,
+                        N = 10,
+                        Nrep = 50,
+                        Np = 10,
+                        nbhd = function(object, time, unit){
+                          nbhd_list = list()
+                          if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                          if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+                          return(nbhd_list)
+                        }){
   l <- lorenz(U = U, N = N)
-  # asifd_spatPomp object creation requirements
+  # abfd_spatPomp object creation requirements
   lorenz_Np <- Np
-  lorenz_islands <- islands
+  lorenz_Nrep <- Nrep
   lorenz_nbhd <- nbhd
   lorenz_tol <- 1e-300
 
-  # Output girfd_spatPomp object
+  # Output abfd_spatPomp object
   new(
-    "asifd_spatPomp",
+    "abfd_spatPomp",
     l,
     Np = as.integer(lorenz_Np),
-    islands = as.integer(lorenz_islands),
+    Nrep = as.integer(lorenz_Nrep),
     nbhd = lorenz_nbhd,
     tol= lorenz_tol,
     loglik=as.double(NA)

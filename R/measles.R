@@ -277,7 +277,7 @@ double binomial_var;
 double m;
 double mytol = 1e-5;
 m = rho*(C+mytol);
-binomial_var = rho*(1-rho)*C;	
+binomial_var = rho*(1-rho)*C;
 if(vc > binomial_var) {
   M_psi = sqrt(vc - binomial_var)/m;
 }
@@ -366,10 +366,10 @@ measles_skel <- Csnippet('
     else
       br = (1.0-cohort)*lag_birthrate[u];
 
-    foi = pow( (I[u]+iota)/pop[u],alpha);
+    foi = I[u]/pop[u];
     for (v=0; v < U ; v++) {
       if(v != u)
-        foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
+        foi += g * v_by_g[u][v] * (I[v]/pop[v] - I[u]/pop[u]) / pop[u];
     }
 
     DS[u] = br - (beta*foi + mu)*S[u];
@@ -378,7 +378,6 @@ measles_skel <- Csnippet('
     DR[u] = gamma*I[u] - mu*R[u];
     DW[u] = 0;
     DC[u] = gamma*I[u];
-    //DAcc[u] = 0;
   }
 ')
 
@@ -486,16 +485,16 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
 }
 
 #' @export
-asifd_measles <- function(U=5,
-                          N = 10,
-                          islands = 50,
-                          Np = 10,
-                          nbhd = function(object, time, unit) {
-                            nbhd_list <- list()
-                            if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-                            if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
-                            return(nbhd_list)
-                          }
+abfd_measles <- function(U=5,
+                         N = 10,
+                         Nrep = 50,
+                         Np = 10,
+                         nbhd = function(object, time, unit) {
+                           nbhd_list <- list()
+                           if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+                           if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
+                           return(nbhd_list)
+                         }
 ){
   # Get real data for U=40 so we can simulate using the resulting spatPomp
   measles_sim_U <- 40
@@ -554,14 +553,14 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   measles_Np <- Np
   measles_tol <- 1e-300
   measles_nbhd <- nbhd
-  measles_islands <- islands
+  measles_Nrep <- Nrep
 
   # Output asifd.spatPomp object
   new(
-    "asifd_spatPomp",
+    "abfd_spatPomp",
     m,
     Np = as.integer(measles_Np),
-    islands=as.integer(measles_islands),
+    Nrep=as.integer(measles_Nrep),
     nbhd=measles_nbhd,
     tol= measles_tol,
     loglik=as.double(NA)
