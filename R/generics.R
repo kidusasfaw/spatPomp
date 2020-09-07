@@ -1,8 +1,8 @@
-## Adapted Bagged Filter (ASIF)
+## Adapted Bagged Filter (ABF)
 setGeneric("abf",function(object,...)standardGeneric("abf"))
 
-## Adapted Simulation Island Filter (ASIF)
-setGeneric("asifir",function(object,...)standardGeneric("asifir"))
+## Adapted Bagged Filter with Intermediate Resampling (ASIF)
+setGeneric("abfir",function(object,...)standardGeneric("abfir"))
 
 ## Extract units from spatPomp object
 setGeneric("unit_names", function(x,...)standardGeneric("unit_names"))

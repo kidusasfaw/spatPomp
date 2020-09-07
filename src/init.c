@@ -5,6 +5,7 @@ static const R_CallMethodDef callMethods[] = {
   {"do_dunit_measure", (DL_FUNC) &do_dunit_measure, 8},
   {"do_runit_measure", (DL_FUNC) &do_runit_measure, 6},
   {"abf_computations", (DL_FUNC) &abf_computations, 5},
+  {"abfir_resample", (DL_FUNC) &abfir_resample, 5},
   {"girf_computations", (DL_FUNC) &girf_computations, 9},
   {"hippie_computations", (DL_FUNC) &hippie_computations, 10},
   {"bpfilter_computations", (DL_FUNC) &bpfilter_computations, 5},

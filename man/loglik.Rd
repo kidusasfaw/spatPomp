@@ -3,15 +3,15 @@
 \name{logLik-abfd.spatPomp}
 \alias{logLik-abfd.spatPomp}
 \alias{logLik,abfd.spatPomp-method}
-\alias{logLik-asifird_spatPomp}
-\alias{logLik,asifird_spatPomp-method}
+\alias{logLik-abfird_spatPomp}
+\alias{logLik,abfird_spatPomp-method}
 \alias{logLik-igirfd_spatPomp}
 \alias{logLik,igirfd_spatPomp-method}
 \title{loglik}
 \usage{
 \S4method{logLik}{abfd_spatPomp}(object)
 
-\S4method{logLik}{asifird_spatPomp}(object)
+\S4method{logLik}{abfird_spatPomp}(object)
 
 \S4method{logLik}{igirfd_spatPomp}(object)
 }

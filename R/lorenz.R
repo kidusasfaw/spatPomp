@@ -205,9 +205,9 @@ abfd_lorenz <- function(U=5,
 }
 
 #' @export
-asifird_lorenz <- function(U=5,
+abfird_lorenz <- function(U=5,
                        N = 10,
-                       islands = 50,
+                       Nrep = 50,
                        nbhd = function(object, time, unit){
                          nbhd_list = list()
                          if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -217,20 +217,19 @@ asifird_lorenz <- function(U=5,
                        Np = 10,
                        Ninter = U){
   l <- lorenz(U = U, N = N)
-  # asifird_spatPomp object creation requirements
+  # abfird_spatPomp object creation requirements
   lorenz_Np <- Np
   lorenz_Ninter <- Ninter
-  lorenz_islands <- islands
+  lorenz_Nrep <- Nrep
   lorenz_nbhd <- nbhd
   lorenz_tol <- 1e-300
 
-  # Output girfd_spatPomp object
   new(
-    "asifird_spatPomp",
+    "abfird_spatPomp",
     l,
     Np = as.integer(lorenz_Np),
     Ninter = as.integer(lorenz_Ninter),
-    islands = as.integer(lorenz_islands),
+    Nrep = as.integer(lorenz_Nrep),
     nbhd = lorenz_nbhd,
     tol= lorenz_tol,
     loglik=as.double(NA)

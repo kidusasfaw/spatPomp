@@ -112,13 +112,13 @@ abf_loglik <- replicate(n=10,
                                   nbhd = abf_nbhd))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from ASIFIR
+#   log-likelihood estimate from abfir
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-asifir_loglik <- replicate(n=10,
-                           expr = logLik(asifir(bm_obj,
-                                                islands = 100,
+abfir_loglik <- replicate(n=10,
+                          expr = logLik(abfir(bm_obj,
+                                                Nrep = 100,
                                                 Np=50,
-                                                nbhd = asif_nbhd)))
+                                                nbhd = abf_nbhd)))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   log-likelihood estimate from EnKF
@@ -133,12 +133,11 @@ bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, block_size = 3)
 
 
 
-test_that("ASIF, ASIFIR, GIRF all yield close to true log-likelihood estimates", {
+test_that("ABF, ABFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(abf_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(abfir_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(asifir_loglik) - loglik_true), 3)
   expect_lt(abs(logmeanexp(bpfilter_loglik) - loglik_true), 3)
 })
 

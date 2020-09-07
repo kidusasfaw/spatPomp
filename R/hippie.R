@@ -13,8 +13,6 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'
-##' @inheritParams spatPomp
-##' @inheritParams pfilter
 ##' @param Nhippie The number of iterations to perform.
 ##' @param islands The number of islands for the adapted simulations.
 ##' @param Np the number of particles inside each island.

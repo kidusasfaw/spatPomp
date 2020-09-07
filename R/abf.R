@@ -12,7 +12,7 @@
 ##' @include spatPomp_class.R generics.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
-##' @importFrom foreach %doPar%
+##' @importFrom foreach %dopar%
 ##'
 ##'
 ##' @param object A \code{spatPomp} object.

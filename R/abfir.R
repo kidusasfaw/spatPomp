@@ -1,29 +1,29 @@
-##' Adapted Simulation Island Filter with Intermediate Resampling (ASIF-IR)
+##' Adapted Bagged Filter with Intermediate Resampling (ABF-IR)
 ##'
 ##' An algorithm for estimating the likelihood of a spatiotemporal partially-observed
 ##' Markov process (SpatPOMP for short).
-##' Running \code{asifir} causes the algorithm to run independent island jobs which
+##' Running \code{abfir} causes the algorithm to run Monte Carlo replicated jobs which
 ##' each carry out an adapted simulation using intermediate resampling.
-##' Adapted simulation is an easier task than filtering, since particles in each island
+##' Adapted simulation is an easier task than filtering, since particles in each replicate
 ##' remain close to each other. Intermediate resampling further assists against
 ##' the curse of dimensionality (COD) problem for importance sampling.
 ##' The adapted simulations are then weighted in a way that tries to avert COD by
 ##' making a weak coupling assumption to get an approximate filter distribution.
 ##' As a by-product, we also get an approximation to the likelihood of the data.
 ##'
-##' @name asifir
-##' @rdname asifir
+##' @name abfir
+##' @rdname abfir
 ##' @include spatPomp_class.R generics.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
+##' @importFrom foreach %dopar%
 ##'
-##'
-##' @inheritParams asif
+##' @inheritParams abf
 ##' @inheritParams girf
 ##' @inheritParams pomp::pfilter
 ##' @param object A \code{spatPomp} object.
-##' @param Np The number of particles for the adapted simulations within each island.
-##' @param islands The number of islands for the adapted simulations.
+##' @param Np The number of particles for the adapted simulations within each Monte Carlo replicate.
+##' @param Nrep The number of Monte Carlo replicates for the adapted simulations.
 ##' @examples
 ##' # Create a simulation of a BM using default parameter set
 ##' b <- bm(U=3, N=10)
@@ -34,21 +34,21 @@
 ##'   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
 ##'   return(nbhd_list)
 ##' }
-##' # Run ASIFIR specified number of Monte Carlo islands and particles per island
-##' asifird.b <- asifir(b,
-##'                    islands = 50,
-##'                    Np=20,
-##'                    nbhd = bm_nbhd,
-##'                    Ninter = length(unit_names(bm3)))
-##' # Get the likelihood estimate from ASIFIR
-##' logLik(asifird.b)
+##' # Run abfir specified number of Monte Carlo replicates and particles per replicate
+##' abfird_b <- abfir(b,
+##'                   Nrep = 50,
+##'                   Np=20,
+##'                   nbhd = bm_nbhd,
+##'                   Ninter = length(unit_names(bm3)))
+##' # Get the likelihood estimate from abfir
+##' logLik(abfird_b)
 ##'
 ##' # Compare with the likelihood estimate from Particle Filter
-##' pfd.b <- pfilter(b, Np = 500)
-##' logLik(pfd.b)
+##' pfd_b <- pfilter(b, Np = 500)
+##' logLik(pfd_b)
 ##' @return
-##' Upon successful completion, \code{asifir} returns an object of class
-##' \sQuote{asifird_spatPomp}.
+##' Upon successful completion, \code{abfir} returns an object of class
+##' \sQuote{abfird_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -60,12 +60,12 @@
 NULL
 
 setClass(
-  "asifird_spatPomp",
+  "abfird_spatPomp",
   contains="spatPomp",
   slots=c(
     Ninter="integer",
     Np="integer",
-    islands="integer",
+    Nrep="integer",
     tol="numeric",
     loglik="numeric",
     nbhd="function"
@@ -73,15 +73,15 @@ setClass(
   prototype=prototype(
     Ninter=as.integer(NA),
     Np=as.integer(NA),
-    islands=as.integer(NA),
+    Nrep=as.integer(NA),
     tol=as.double(NA),
     loglik=as.double(NA),
     nbhd=function(){}
   )
 )
-asifir.internal <- function (object, params, Np, nbhd,
+abfir_internal <- function (object, params, Np, nbhd,
       Ninter, tol, .gnsi = TRUE,...) {
-  ep <- paste0("in ",sQuote("asifir"),": ")
+  ep <- paste0("in ",sQuote("abfir"),": ")
   verbose <- FALSE
   if(missing(nbhd))
     stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
@@ -97,7 +97,7 @@ asifir.internal <- function (object, params, Np, nbhd,
   U <- length(unit_names(object))
 
   if (missing(Np)) stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-  if (is.function(Np)) stop(ep,"Functions for Np not supported by asifir",call.=FALSE)
+  if (is.function(Np)) stop(ep,"Functions for Np not supported by abfir",call.=FALSE)
   if (length(Np)!=1) stop(ep,"Np should be a length 1 vector",call.=FALSE)
   Np <- as.integer(Np)
 
@@ -108,7 +108,7 @@ asifir.internal <- function (object, params, Np, nbhd,
   if (is.null(paramnames))
     stop(ep,sQuote("params")," must have names",call.=FALSE)
 
-  ## ideally, we shouldn't need param_matrix in asifir
+  ## ideally, we shouldn't need param_matrix in abfir
   param_matrix <- matrix(params,nrow=length(params),ncol=Np,
     dimnames=list(names(params),NULL))
 
@@ -272,7 +272,7 @@ asifir.internal <- function (object, params, Np, nbhd,
 #       }
 
       # U x Np x 1 matrix of skeleton prediction weights
-# TRY REMOVING DISCOUNT FOR ASIF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL
+# TRY REMOVING DISCOUNT FOR ABF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL
 #      discount_denom_init = times[n]
 #      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
       log_wp <- tryCatch(
@@ -297,7 +297,7 @@ asifir.internal <- function (object, params, Np, nbhd,
         weights <- exp(log_gp - log_gf)
         gnsi <- FALSE
         xx <- tryCatch(
-          .Call('asifir_resample', xp, Np, weights, log_gp, tol),
+          .Call('abfir_resample', xp, Np, weights, log_gp, tol),
           error = function (e) stop(ep,conditionMessage(e),call.=FALSE)
         )
         xf <- xx$states
@@ -313,13 +313,13 @@ asifir.internal <- function (object, params, Np, nbhd,
     # resample down to one particle, making Np copies of, say, particle #1.
     xas <- xf[,1]
 
-    if (verbose && (n%%5==0)) cat("asif timestep",n,"of",N,"finished\n")
+    if (verbose && (n%%5==0)) cat("abfir timestep",n,"of",N,"finished\n")
 
   } ## end of main loop n = 1:N
 
   # compute locally combined pred. weights for each time, unit and particle
   #
-  # matches asif.R except
+  # matches abf.R except
   #   pp -> np
   #   Np is assumed scalar
   #   ntimes -> N , nt -> n
@@ -349,7 +349,7 @@ asifir.internal <- function (object, params, Np, nbhd,
 
   pompUnload(object,verbose=verbose)
   new(
-    "island_spatPomp",
+    "adapted_replicate",
     log_wm_times_wp_avg = log_wm_times_wp_avg,
     log_wp_avg = log_wp_avg,
     Np=as.integer(Np),
@@ -358,20 +358,20 @@ asifir.internal <- function (object, params, Np, nbhd,
 
 
 }
-##' @name asifir-spatPomp
-##' @aliases asifir,spatPomp-method
-##' @rdname asifir
+##' @name abfir-spatPomp
+##' @aliases abfir,spatPomp-method
+##' @rdname abfir
 ##' @export
 setMethod(
-  "asifir",
+  "abfir",
   signature=signature(object="spatPomp"),
-  function (object, params, Np, islands, nbhd,
+  function (object, params, Np, Nrep, nbhd,
             Ninter, tol = (1e-300), ...) {
   if (missing(params)) params <- coef(object)
   if (missing(Ninter)) Ninter <- length(unit_names(object))
     # set.seed(396658101,kind="L'Ecuyer")
   # begin single-core
-  # single_island_output <- spatPomp:::asifir.internal(
+  # single_rep_output <- spatPomp:::abfir_internal(
   #   object=object,
   #   params=params,
   #   Np=Np,
@@ -380,12 +380,12 @@ setMethod(
   #   tol=tol,
   #   ...
   # )
-  # return(single_island_output)
+  # return(single_rep_output)
   # end single-core
   mcopts <- list(set.seed=TRUE)
-  mult_island_output <- foreach::foreach(i=1:islands,
+  mult_rep_output <- foreach::foreach(i=1:Nrep,
      .packages=c("pomp","spatPomp"),
-     .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::asifir.internal(
+     .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::abfir_internal(
        object=object,
        params=params,
        Np=Np,
@@ -394,11 +394,11 @@ setMethod(
        tol=tol,
        ...
      )
-   # compute sum (over all islands) of w_{d,n,i}^{P} for each (d,n)
+   # compute sum (over all Nrep) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
    U <- length(unit_names(object))
-   #island_mp_sums = array(data = numeric(0), dim = c(U,N))
-   #island_p_sums = array(data = numeric(0), dim = c(U, N))
+   #rep_mp_sums = array(data = numeric(0), dim = c(U,N))
+   #rep_p_sums = array(data = numeric(0), dim = c(U, N))
    cond_loglik <- foreach::foreach(u=seq_len(U),
                                    .combine = 'rbind',
                                    .packages=c("pomp", "spatPomp"),
@@ -406,11 +406,11 @@ setMethod(
                                    {
                                      cond_loglik_u <- array(data = numeric(0), dim=c(N))
                                      for (n in seq_len(N)){
-                                       log_mp_sum = logmeanexp(vapply(mult_island_output,
-                                                                      FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+                                       log_mp_sum = logmeanexp(vapply(mult_rep_output,
+                                                                      FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
                                                                       FUN.VALUE = 1.0))
-                                       log_p_sum = logmeanexp(vapply(mult_island_output,
-                                                                     FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+                                       log_p_sum = logmeanexp(vapply(mult_rep_output,
+                                                                     FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
                                                                      FUN.VALUE = 1.0))
                                        cond_loglik_u[n] = log_mp_sum - log_p_sum
                                      }
@@ -420,49 +420,49 @@ setMethod(
    # cond_loglik = array(data = numeric(0), dim=c(U, N))
    # for (u in seq_len(U)){
    #   for (n in seq_len(N)){
-   #     log_mp_sum = logmeanexp(vapply(mult_island_output,
-   #                                FUN = function(island_output) return(island_output@log_wm_times_wp_avg[u,n]),
+   #     log_mp_sum = logmeanexp(vapply(mult_rep_output,
+   #                                FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
    #                                FUN.VALUE = 1.0))
-   #     log_p_sum = logmeanexp(vapply(mult_island_output,
-   #                               FUN = function(island_output) return(island_output@log_wp_avg[u,n]),
+   #     log_p_sum = logmeanexp(vapply(mult_rep_output,
+   #                               FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
    #                               FUN.VALUE = 1.0))
    #     cond_loglik[u,n] = log_mp_sum - log_p_sum
-   #     # for (k in seq_len(islands)){
-   #     #   mp_sum = mp_sum + mult_island_output[[k]]@wm.times.wp.avg[u,n]
-   #     #   p_sum = p_sum + mult_island_output[[k]]@wp.avg[u,n]
+   #     # for (k in seq_len(Nrep)){
+   #     #   mp_sum = mp_sum + mult_rep_output[[k]]@wm.times.wp.avg[u,n]
+   #     #   p_sum = p_sum + mult_rep_output[[k]]@wp.avg[u,n]
    #     # }
    #     # cond.loglik[u,n] = log(mp_sum) - log(p_sum)
    #   }
    # }
    new(
-      "asifird_spatPomp",
+      "abfird_spatPomp",
       object,
       Np=as.integer(Np),
       tol=tol,
       loglik=sum(cond_loglik),
       Ninter = as.integer(Ninter),
-      islands = as.integer(islands),
+      Nrep = as.integer(Nrep),
       nbhd = nbhd
       )
   }
 )
 
 setMethod(
-  "asifir",
-  signature=signature(object="asifird_spatPomp"),
-  function (object, params, Np, islands, nbhd,
+  "abfir",
+  signature=signature(object="abfird_spatPomp"),
+  function (object, params, Np, Nrep, nbhd,
             Ninter, tol, ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
     if (missing(Ninter)) Ninter <- object@Ninter
     if (missing(params)) params <- coef(object)
-    if (missing(islands)) islands <- object@islands
+    if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd
 
-    asifir(as(object,"spatPomp"),
+    abfir(as(object,"spatPomp"),
          Np=Np,
          Ninter=Ninter,
-         islands=islands,
+         Nrep=Nrep,
          nbhd=nbhd,
          params = params,
          tol=tol,

@@ -112,16 +112,16 @@ The following methods are available for such an object:
 }
 \seealso{
 Other particle filter methods: 
+\code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{asifir}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
 \code{\link{ienkf-spatPomp}}
 
 Other \pkg{spatPomp} filtering methods: 
+\code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{asifir}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()}
 }

@@ -191,13 +191,12 @@ abfd_bm <- function(U=5,
                        return(nbhd_list)
                      }){
   b <- bm(U = U, N = N)
-  # asifd_spatPomp object creation requirements
+  # abfd_spatPomp object creation requirements
   bm_Np <- Np
   bm_Nrep <- Nrep
   bm_nbhd <- nbhd
   bm_tol <- 1e-300
 
-  # Output girfd_spatPomp object
   new(
     "abfd_spatPomp",
     b,
@@ -210,9 +209,9 @@ abfd_bm <- function(U=5,
 }
 
 #' @export
-asifird_bm <- function(U=5,
+abfird_bm <- function(U=5,
                        N = 10,
-                       islands = 50,
+                       Nrep = 50,
                        nbhd = function(object, time, unit){
                          nbhd_list = list()
                          if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -222,20 +221,19 @@ asifird_bm <- function(U=5,
                        Np = 10,
                        Ninter = U){
   b <- bm(U = U, N = N)
-  # asifird_spatPomp object creation requirements
+  # abfird_spatPomp object creation requirements
   bm_Np <- Np
   bm_Ninter <- Ninter
-  bm_islands <- islands
+  bm_Nrep <- Nrep
   bm_nbhd <- nbhd
   bm_tol <- 1e-300
 
-  # Output girfd_spatPomp object
   new(
-    "asifird_spatPomp",
+    "abfird_spatPomp",
     b,
     Np = as.integer(bm_Np),
     Ninter = as.integer(bm_Ninter),
-    islands = as.integer(bm_islands),
+    Nrep = as.integer(bm_Nrep),
     nbhd = bm_nbhd,
     tol= bm_tol,
     loglik=as.double(NA)

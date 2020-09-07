@@ -4,7 +4,7 @@
 #include "spatPomp_defines.h"
 #include <Rdefines.h>
 
-SEXP asifir_resample (SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol) {
+SEXP abfir_resample (SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol) {
   int nprotect = 0, all_fail = 0, j, k;
   SEXP newstates = R_NilValue, gfs = R_NilValue, dimX, newdim, Xnames;
   SEXP fail, retval, retvalnames;

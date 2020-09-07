@@ -55,16 +55,19 @@ pomp_onestep_sim *pos;
 //psp_table_lookup sp_table_lookup;
 //psp_make_covariate_table sp_make_covariate_table;
 
-//unit_dmeasure.c
+//dunit_measure.c
 extern SEXP do_dunit_measure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP params, SEXP log, SEXP gnsi);
 
-//unit_rmeasure.c
+//dunit_measure.c
 extern SEXP do_runit_measure(SEXP object, SEXP x, SEXP times, SEXP units, SEXP params, SEXP gnsi);
 
-//iif.c
+//abf.c
 extern SEXP abf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP weights);
 
-//iif.c
+//abfir.c
+extern SEXP abfir_resample(SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol);
+
+//bpfilter.c
 extern SEXP bpfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP resamp_weights);
 
 //girf.c

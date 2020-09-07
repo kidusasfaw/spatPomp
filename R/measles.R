@@ -549,7 +549,7 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   # Get simulated data for U cities and N times
   m <- measles_subset(m_U=U, m_N=N)
 
-  # asifd.spatPomp object creation requirements
+  # abfd_spatPomp object creation requirements
   measles_Np <- Np
   measles_tol <- 1e-300
   measles_nbhd <- nbhd
@@ -570,9 +570,9 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
 
 
 #' @export
-asifird_measles <- function(U=5,
+abfird_measles <- function(U=5,
                             N = 10,
-                            islands = 50,
+                            Nrep = 50,
                             Np = 10,
                             nbhd = function(object, time, unit) {
                               nbhd_list <- list()
@@ -635,20 +635,19 @@ BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.
   # Get simulated data for U cities and N times
   m <- measles_subset(m_U=U, m_N=N)
 
-  # gird_spatPomp object creation requirements
+  # abfird_spatPomp object creation requirements
   measles_Ninter <- Ninter
   measles_Np <- Np
   measles_tol <- 1e-300
   measles_nbhd <- nbhd
-  measles_islands <- islands
+  measles_Nrep <- Nrep
 
-  # Output girfd_spatPomp object
   new(
-    "asifird_spatPomp",
+    "abfird_spatPomp",
     m,
     Np = as.integer(measles_Np),
     Ninter=as.integer(measles_Ninter),
-    islands=as.integer(measles_islands),
+    Nrep=as.integer(measles_Nrep),
     nbhd=measles_nbhd,
     tol= measles_tol,
     loglik=as.double(NA)

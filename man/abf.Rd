@@ -65,7 +65,7 @@ logLik(pfd.b)
 }
 \seealso{
 Other particle filter methods: 
-\code{\link{asifir}()},
+\code{\link{abfir}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
@@ -73,7 +73,7 @@ Other particle filter methods:
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
-\code{\link{asifir}()},
+\code{\link{abfir}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{igirf}()}
