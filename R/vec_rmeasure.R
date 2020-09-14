@@ -25,6 +25,7 @@ vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) 
 setMethod(
   "vec_rmeasure",
   signature=signature(object="spatPomp"),
-  definition=function (object, x, times, params, ...)
+  definition=function (object, x, times, params, ...){
     vec_rmeasure.internal(object=object,x=x,times=times,params=params,...)
+  }
 )
