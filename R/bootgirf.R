@@ -1,10 +1,10 @@
-##' Guided intermediate resampling filter (GIRF)
+##' Guided intermediate resampling filter (GIRF) using a bootstrap guide function.
 ##'
-##' An implementation of the algorithm of Park and Ionides (2019),
-##' following the pseudocode in Asfaw, Ionides and King (2019).
+##' An implementation of the algorithm of Park and Ionides (2020),
+##' this function is under development, and later will be combined with girf().
 ##'
-##' @name girf
-##' @rdname girf
+##' @name bootgirf
+##' @rdname bootgirf
 ##' @include spatPomp_class.R generics.R spatPomp.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
@@ -23,8 +23,8 @@
 ##' # Create a simulation of a BM using default parameter set
 ##' b <- bm(U=3, N=10)
 ##'
-##' # Run GIRF
-##' girfd.b <- girf(b,
+##' # Run bootstrap-GIRF
+##' girfd.b <- bootgirf(b,
 ##'                 Np = 100,
 ##'                 Ninter = length(unit_names(b)),
 ##'                 lookahead = 1,
@@ -37,7 +37,7 @@
 ##' pfd.b <- pfilter(b, Np = 500)
 ##' logLik(pfd.b)
 ##' @return
-##' Upon successful completion, \code{girf} returns an object of class
+##' Upon successful completion, \code{bootgirf} returns an object of class
 ##' \sQuote{girfd_spatPomp}.
 ##'
 ##' @section Methods:
@@ -47,7 +47,7 @@
 ##' }
 ##'
 ##' @references
-##' \park2019
+##' \park2020
 ##'
 ##' \asfaw2019
 NULL
@@ -79,33 +79,33 @@ setClass(
 )
 
 setGeneric(
-  "girf",
+  "bootgirf",
   function (object, ...)
-    standardGeneric("girf")
+    standardGeneric("bootgirf")
 )
 
 setMethod(
-  "girf",
+  "bootgirf",
   signature=signature(object="missing"),
   definition=function (...) {
-    reqd_arg("girf","data")
+    reqd_arg("bootgirf","data")
   }
 )
 
 setMethod(
-  "girf",
+  "bootgirf",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    undef_method("girf",object)
+    undef_method("bootgirf",object)
   }
 )
 
-##' @name girf-spatPomp
-##' @aliases girf,spatPomp-method
-##' @rdname girf
+##' @name bootgirf-spatPomp
+##' @aliases bootgirf,spatPomp-method
+##' @rdname bootgirf
 ##' @export
 setMethod(
-  "girf",
+  "bootgirf",
   signature=signature(object="spatPomp"),
   definition=function (
     object,
@@ -122,7 +122,7 @@ setMethod(
     if (missing(Ninter)) Ninter <- length(unit_names(object))
 
     tryCatch(
-      girf.internal(
+      bootgirf.internal(
         object,
         Np,
         Ninter,
@@ -132,17 +132,17 @@ setMethod(
         tol,
         ...
       ),
-      error = function (e) pomp:::pStop("girf",conditionMessage(e))
+      error = function (e) pomp:::pStop("bootgirf",conditionMessage(e))
     )
   }
 )
 
 ##' @name girf-girfd_spatPomp
-##' @aliases girf,girfd_spatPomp-method
-##' @rdname girf
+##' @aliases bootgirf,girfd_spatPomp-method
+##' @rdname bootgirf
 ##' @export
 setMethod(
-  "girf",
+  "bootgirf",
   signature=signature(object="girfd_spatPomp"),
   function (object,
             Np,
@@ -160,7 +160,7 @@ setMethod(
     if (missing(lookahead)) lookahead <- object@lookahead
     if (missing(params)) params <- coef(object)
 
-    girf(as(object,"spatPomp"),
+    bootgirf(as(object,"spatPomp"),
          Np=Np,
          Ninter=Ninter,
          lookahead=lookahead,
@@ -172,7 +172,7 @@ setMethod(
   }
 )
 
-girf.internal <- function (object,
+bootgirf.internal <- function (object,
         Np,
         Ninter,
         lookahead,
@@ -183,7 +183,7 @@ girf.internal <- function (object,
         .gnsi = TRUE) {
 
   verbose <- FALSE
-  ep <- paste0("in ",sQuote("girf"),": ")
+  ep <- paste0("in ",sQuote("bootgirf"),": ")
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
@@ -243,23 +243,27 @@ girf.internal <- function (object,
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # get a matrix with nguides times nreps columns to propagate using rprocess
-    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
-    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
-                   params=params,.gnsi=gnsi)
-    xx <- tryCatch(
-      .Call('do_fcst_samp_var',
-            object=object,
-            X=Xg,
-            Np = as.integer(Np[1]),
-            times=times[(nt+2):(nt+1+lookahead_steps)],
-            params=params,
-            gnsi=TRUE),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
-      }
-    )
-    fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
+    x_with_guides <- x[,rep(1:Np[1], each=Nguide)]
+    guidesim_times <- c(sapply(1:lookahead_steps, function(bb) seq(from=times[nt+bb],to=times[nt+bb+1],length.out=Ninter+1)[-1])) # times at which guide simulations will be recorded
+    guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=guidesim_times, params=params,.gnsi=gnsi)
+    Xskel <- tryCatch( # skeleton 
+          pomp::flow(object,
+                     x0=x,
+                     t0=tt[s+1],
+                     params=params.matrix,
+                     times = guidesim_times,
+                     ...),
+          error = function (e) {
+            pomp::flow(object,
+                       x0=x,
+                       t0=tt[s+1],
+                       params=params.matrix,
+                       times = guidesim_times,
+                       method = 'adams')
+          }
+        )
+    resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),] # residuals
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
@@ -298,46 +302,9 @@ girf.internal <- function (object,
           skel.end.znames <- X.start.znames + skel.start.znames
           skel[znames,,1] <- skel.end.znames
         }
-        #print("skel after adjustment")
-        #print(skel)
-        #if(nt >= 3) return(1)
       } else {
         skel <- X
       }
-      meas_var_skel <- tryCatch(
-        .Call('do_theta_to_v',
-              object=object,
-              X=skel,
-              Np = as.integer(Np[1]),
-              times=times[(nt+2):(nt+1+lookahead_steps)],
-              params=params,
-              gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
-      )
-      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
-
-      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
-      for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
-      inflated_var <- meas_var_skel + fcst_var_upd
-      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
-      mmp <- tryCatch(
-        .Call('do_v_to_theta',
-              object=object,
-              X=skel,
-              vc=inflated_var,
-              Np = as.integer(Np[1]),
-              times=times[(nt+2):(nt+1+lookahead_steps)],
-              params=array.params,
-              gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
-      )
-      mom_match_param <- mmp
-      dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np[1])
-      dimnames(mom_match_param) <- list(param = names(params))
 
       # guide functions as product (so base case is 1)
       log_guide_fun = vector(mode = "numeric", length = Np[1])
@@ -346,14 +313,18 @@ girf.internal <- function (object,
         if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead_steps]
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/max(times[nt+1+l] - discount_denom_init, 2*(times[nt+2]-times[nt+1])) ## the denominator is at least twice the observation interval, to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function.
-        # print(times[nt+1+l] - tt[s+1])
+
+        # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
+        pseudosims <- skel[,rep(1:Np[1], each=Nguide),l] + resids[,rep(guidesim_index, each=Nguide),Ninter*l] - resids[,rep(guidesim_index, each=Nguide),s]
+        dim(pseudosims) <- c(dim(pseudosims), 1)
+
         log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
             y=object@data[,nt+l,drop=FALSE],
-            x=skel[,,l,drop = FALSE],
+            x=pseudosims,
             times=times[nt+1+l],
-            params=mom_match_param[,,l,],
+            params=params,
             log=TRUE, 
             .gnsi=gnsi
           )),
@@ -362,10 +333,9 @@ girf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
+        log_resamp_weights <- sapply(1:Np[1], function(j) sum(log_dmeas_weights[,(j-1)*Nguide+1:Nguide,]))*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
-      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol) 
       log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
@@ -402,17 +372,17 @@ girf.internal <- function (object,
                   x=X,
                   params=params,
                   Np=Np[nt+1],
-                  trackancestry=FALSE,
+                  trackancestry=TRUE, # (JP) check if trackancestry is correctly implemented.
                   doparRS=FALSE, 
                   weights=weights,
                   lgps=log_guide_fun,
-                  fsv=fcst_samp_var,
                   tol=tol
                   ),
             error = function (e) {
                 stop(ep,conditionMessage(e),call.=FALSE) # nocov
             }
         )
+        guidesim_index = guidesim_index[xx$ancestry] # update guidesim index
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
         log_filter_guide_fun <- xx$logfilterguides
@@ -423,28 +393,6 @@ girf.internal <- function (object,
         x <- X
         log_filter_guide_fun <- log(tol)
       }
-      # if(nt > 7 & nt < 11 & s == 1){
-      # print("nt")
-      # print(nt)
-      # print("log guide fun")
-      # print(log_guide_fun)
-      # print("discount factor")
-      # print(discount_factor)
-      # print("filter guide fun")
-      # print(filter_guide_fun)
-      # print("log weights")
-      # print(log_weights)
-      # print("dmeas_weights")
-      # print(dmeas_weights)
-      # print("log_dmeas_weights")
-      # print(log_dmeas_weights)
-      # print("meas_weights")
-      # print(meas_weights)
-      # print("log_meas_weights")
-      # print(log_meas_weights)
-      # print("log_s_not_1_weights")
-      # print(log_s_not_1_weights)
-      # }
     }
   }
   new(

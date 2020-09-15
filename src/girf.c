@@ -52,7 +52,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
 
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-  // Do we need to do parameter resampling? // JP: in iGIRF (iterated GIRF), each particle has both state variable and parameter components, so I think the answer is yes.
+  // Do we need to do parameter resampling?
   do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
 
   if (do_pr) {
@@ -195,7 +195,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   }
 
   if (do_ta) {
-    SET_ELEMENT(retval,5,anc);
+    SET_ELEMENT(retval,5,anc); // should this be xanc?
   }
   if (all_fail) {
     SET_ELEMENT(retval,6,lgps);
