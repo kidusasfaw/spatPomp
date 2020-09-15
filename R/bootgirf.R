@@ -250,14 +250,14 @@ bootgirf.internal <- function (object,
     Xskel <- tryCatch( # skeleton 
           pomp::flow(object,
                      x0=x,
-                     t0=tt[s+1],
+                     t0=times[nt+1],
                      params=params.matrix,
                      times = guidesim_times,
                      ...),
           error = function (e) {
             pomp::flow(object,
                        x0=x,
-                       t0=tt[s+1],
+                       t0=times[nt+1],
                        params=params.matrix,
                        times = guidesim_times,
                        method = 'adams')
