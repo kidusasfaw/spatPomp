@@ -5,7 +5,7 @@
 \alias{bpfilter,spatPomp-method}
 \title{Block particle filter (BPF)}
 \usage{
-\S4method{bpfilter}{spatPomp}(object, Np, block_size, partition, params)
+\S4method{bpfilter}{spatPomp}(object, Np, block_size, block_list, params)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object}
@@ -14,7 +14,7 @@
 
 \item{block_size}{The number of spatial units per block.}
 
-\item{partition}{List that can specifies a partition of the spatial units. Each partition element called a \code{block} and is
+\item{block_list}{List that can specifies a partition of the spatial units. Each partition element called a \code{block} and is
 an integer vector of neighboring units.}
 
 \item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}}
@@ -24,18 +24,18 @@ Upon successful completion, \code{bpfilter} returns an object of class
 \sQuote{bpfilterd_spatPomp}.
 }
 \description{
-An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp)
-Running \code{bpfilter} causes the algorithm to split the spatial units into different partitions so that each spatial
-unit belongs to one partition. After the particles are propagated, resampling of the particles occurs
-within each partition independently based on sampled weights within the partition. Each partition samples only the spatial
-components within the partition which allows for cross-pollination of particles where the highest weighted
+An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp).
+Running \code{bpfilter} causes the algorithm to split the spatial units into different blocks so that each spatial
+unit belongs to one block After the particles are propagated, resampling of the particles occurs
+within each block independently based on sampled weights within the block Each block samples only the spatial
+components within the block which allows for cross-pollination of particles where the highest weighted
 components of each particle are more likely to be resampled and get combined with resampled components of other particles.
 By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
 the resampling does not result in particle depletion with one particle representing the complex filter distribution.
 }
 \section{Details}{
 
-Only one of \code{block_size} or \code{partition} should be specified.
+Only one of \code{block_size} or \code{block_list} should be specified.
 If both or neither is provided, an error is triggered.
 }
 
@@ -54,9 +54,9 @@ b <- bm(U=6, N=10)
 # Run BPF with the specified number of particles and number of units per block
 bpfilterd.b1 <- bpfilter(b, Np = 100, block_size = 2)
 
-# Run BPF with the specified number of particles and partition. This specification
+# Run BPF with the specified number of particles and partition (block list). This specification
 is exactly equivalent to the previous example
-bpfilterd.b2 <- bpfilter(b, Np = 20, partition = list(c(1,2), c(3,4), c(5,6)))
+bpfilterd.b2 <- bpfilter(b, Np = 20, block_list = list(c(1,2), c(3,4), c(5,6)))
 
 # Get a likelihood estimate
 logLik(bpfilterd.b2)

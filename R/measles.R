@@ -104,7 +104,7 @@ v_by_g_C_array <- to_C_array(v_by_g_C_rows)
 v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
 measles_globals <- Csnippet(
-  paste0("const int U = ",U,"; \n ", v_by_g_C)
+  paste0(v_by_g_C)
 )
 
 measles_unit_statenames <- c('S','E','I','R','C','W')
@@ -382,19 +382,16 @@ measles_skel <- Csnippet('
 ')
 
 
-spatPomp(measles_cases,
+spatPomp2(measles_cases,
         units = "city",
         times = "year",
         t0 = min(measles_cases$year)-1/26,
         unit_statenames = measles_unit_statenames,
         covar = measles_covar,
-        tcovar = "year",
         rprocess=euler(measles_rprocess, delta.t=dt),
         skeleton=vectorfield(measles_skel),
-        accumvars = c(paste0("C",1:U),paste0("W",1:U)),
+        unit_accumvars = c("C","W"),
         paramnames=measles_paramnames,
-        covarnames=measles_covarnames,
-        unit_covarnames=measles_unit_covarnames,
         globals=measles_globals,
         rinit=measles_rinit,
         dmeasure=measles_dmeasure,
