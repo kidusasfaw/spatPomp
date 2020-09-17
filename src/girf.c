@@ -195,7 +195,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   }
 
   if (do_ta) {
-    SET_ELEMENT(retval,5,anc); // should this be xanc?
+    SET_ELEMENT(retval,5,anc); 
   }
   if (all_fail) {
     SET_ELEMENT(retval,6,lgps);
