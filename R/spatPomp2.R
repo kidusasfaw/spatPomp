@@ -382,6 +382,7 @@ setMethod(
       unit_obsnames = unit_obsnames,
       unitname = unitname,
       shared_covarnames = shared_covarnames,
+      unit_covarnames=as.character(unit_covarnames),
       unit_accumvars = unit_accumvars,
       eunit_measure=hitches$funs$eunit_measure,
       munit_measure=hitches$funs$munit_measure,
