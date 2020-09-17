@@ -1,10 +1,10 @@
 ##' Guided intermediate resampling filter (GIRF) using a bootstrap guide function.
 ##'
 ##' An implementation of the algorithm of Park and Ionides (2020),
-##' this function is under development, and later will be combined with girf(). In bootgirf.R (this file), the pseudo-simulations are obtained by adding difference in simulation residuals at two target times to the skeleton simulations.
+##' this function is under development, and later will be combined with girf(). In bootgirf2.R (this file), the pseudo-simulations are constructed by adding suitably scaled simulation residuals to the skeleton simulations.
 ##'
-##' @name bootgirf
-##' @rdname bootgirf
+##' @name bootgirf2
+##' @rdname bootgirf2
 ##' @include spatPomp_class.R generics.R spatPomp.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
@@ -24,7 +24,7 @@
 ##' b <- bm(U=3, N=10)
 ##'
 ##' # Run bootstrap-GIRF
-##' girfd.b <- bootgirf(b,
+##' girfd.b <- bootgirf2(b,
 ##'                 Np = 100,
 ##'                 Ninter = length(unit_names(b)),
 ##'                 lookahead = 1,
@@ -37,7 +37,7 @@
 ##' pfd.b <- pfilter(b, Np = 500)
 ##' logLik(pfd.b)
 ##' @return
-##' Upon successful completion, \code{bootgirf} returns an object of class
+##' Upon successful completion, \code{bootgirf2} returns an object of class
 ##' \sQuote{girfd_spatPomp}.
 ##'
 ##' @section Methods:
@@ -79,33 +79,33 @@ setClass(
 )
 
 setGeneric(
-  "bootgirf",
+  "bootgirf2",
   function (object, ...)
-    standardGeneric("bootgirf")
+    standardGeneric("bootgirf2")
 )
 
 setMethod(
-  "bootgirf",
+  "bootgirf2",
   signature=signature(object="missing"),
   definition=function (...) {
-    reqd_arg("bootgirf","data")
+    reqd_arg("bootgirf2","data")
   }
 )
 
 setMethod(
-  "bootgirf",
+  "bootgirf2",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    undef_method("bootgirf",object)
+    undef_method("bootgirf2",object)
   }
 )
 
-##' @name bootgirf-spatPomp
-##' @aliases bootgirf,spatPomp-method
-##' @rdname bootgirf
+##' @name bootgirf2-spatPomp
+##' @aliases bootgirf2,spatPomp-method
+##' @rdname bootgirf2
 ##' @export
 setMethod(
-  "bootgirf",
+  "bootgirf2",
   signature=signature(object="spatPomp"),
   definition=function (
     object,
@@ -122,7 +122,7 @@ setMethod(
     if (missing(Ninter)) Ninter <- length(unit_names(object))
 
     tryCatch(
-      bootgirf.internal(
+      bootgirf2.internal(
         object,
         Np,
         Ninter,
@@ -132,17 +132,17 @@ setMethod(
         tol,
         ...
       ),
-      error = function (e) pomp:::pStop("bootgirf",conditionMessage(e))
+      error = function (e) pomp:::pStop("bootgirf2",conditionMessage(e))
     )
   }
 )
 
-##' @name bootgirf-girfd_spatPomp
-##' @aliases bootgirf,girfd_spatPomp-method
-##' @rdname bootgirf
+##' @name bootgirf2-girfd_spatPomp
+##' @aliases bootgirf2,girfd_spatPomp-method
+##' @rdname bootgirf2
 ##' @export
 setMethod(
-  "bootgirf",
+  "bootgirf2",
   signature=signature(object="girfd_spatPomp"),
   function (object,
             Np,
@@ -160,7 +160,7 @@ setMethod(
     if (missing(lookahead)) lookahead <- object@lookahead
     if (missing(params)) params <- coef(object)
 
-    bootgirf(as(object,"spatPomp"),
+    bootgirf2(as(object,"spatPomp"),
          Np=Np,
          Ninter=Ninter,
          lookahead=lookahead,
@@ -172,7 +172,7 @@ setMethod(
   }
 )
 
-bootgirf.internal <- function (object,
+bootgirf2.internal <- function (object,
         Np,
         Ninter,
         lookahead,
@@ -183,7 +183,7 @@ bootgirf.internal <- function (object,
         .gnsi = TRUE) {
 
   verbose <- FALSE
-  ep <- paste0("in ",sQuote("bootgirf"),": ")
+  ep <- paste0("in ",sQuote("bootgirf2"),": ")
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
@@ -199,7 +199,6 @@ bootgirf.internal <- function (object,
   times <- time(object,t0=TRUE)
   t0 <- times[1]
   ntimes <- length(times)-1
-  U <- length(unit_names(object))
 
   if (missing(Np) || is.null(Np)) {
     pomp:::pStop_(sQuote("Np")," must be specified.")
@@ -245,26 +244,25 @@ bootgirf.internal <- function (object,
     lookahead_steps = min(lookahead, ntimes-nt)
     # get a matrix with nguides times nreps columns to propagate using rprocess
     x_with_guides <- x[,rep(1:Np[1], each=Nguide)]
-    guidesim_times <- c(sapply(1:lookahead_steps, function(bb) seq(from=times[nt+bb],to=times[nt+bb+1],length.out=Ninter+1)[-1])) # times at which guide simulations will be recorded
     guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
-    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=guidesim_times, params=params,.gnsi=gnsi)
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
     Xskel <- tryCatch( # skeleton 
           pomp::flow(object,
                      x0=x,
                      t0=times[nt+1],
                      params=params.matrix,
-                     times = guidesim_times,
+                     times = times[(nt+2):(nt+1+lookahead_steps)],
                      ...),
           error = function (e) {
             pomp::flow(object,
                        x0=x,
                        t0=times[nt+1],
                        params=params.matrix,
-                       times = guidesim_times,
+                       times = times[(nt+2):(nt+1+lookahead_steps)],
                        method = 'adams')
           }
         )
-    resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),] # residuals
+    resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
 
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
@@ -316,7 +314,8 @@ bootgirf.internal <- function (object,
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/max(times[nt+1+l] - discount_denom_init, 2*(times[nt+2]-times[nt+1])) ## the denominator is at least twice the observation interval, to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function.
 
         # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
-        pseudosims <- skel[,rep(1:Np[1], each=Nguide),l,drop=FALSE] + resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),Ninter*l,drop=FALSE] - resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),s,drop=FALSE]
+        pseudosims <- skel[,rep(1:Np[1], each=Nguide),l,drop=FALSE] + resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),l,drop=FALSE] * sqrt((times[nt+1+l]-tt[s+1])/(times[nt+1+l]-times[nt+1]))
+
         log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
@@ -382,7 +381,7 @@ bootgirf.internal <- function (object,
                   doparRS=FALSE, 
                   weights=weights,
                   lgps=log_guide_fun,
-                  fsv=array(0,dim=c(U, lookahead_steps, Np[1])), # bootgirf doesn't use fsv, set to an arbitrary val.
+                  fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np[1])), # bootgirf2 doesn't use fsv, set to an arbitrary val.
                   tol=tol
                   ),
             error = function (e) {
