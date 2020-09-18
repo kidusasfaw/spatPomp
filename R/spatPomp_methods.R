@@ -90,6 +90,7 @@ setMethod(
                     unit_names=object@unit_names,
                     unitname=object@unitname,
                     unit_statenames=object@unit_statenames,
+                    unit_accumvars = object@unit_accumvars,
                     unit_obsnames = object@unit_obsnames)
           sp.list[[i]] <- sp
         }
@@ -106,6 +107,7 @@ setMethod(
                   unit_names=object@unit_names,
                   unitname=object@unitname,
                   unit_statenames=object@unit_statenames,
+                  unit_accumvars = object@unit_accumvars,
                   unit_obsnames = object@unit_obsnames)
         return(sp)
       }
