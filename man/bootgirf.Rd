@@ -4,7 +4,7 @@
 \alias{bootgirf}
 \alias{bootgirf-spatPomp}
 \alias{bootgirf,spatPomp-method}
-\alias{girf-girfd_spatPomp}
+\alias{bootgirf-girfd_spatPomp}
 \alias{bootgirf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF) using a bootstrap guide function.}
 \usage{
@@ -40,7 +40,7 @@ Upon successful completion, \code{bootgirf} returns an object of class
 }
 \description{
 An implementation of the algorithm of Park and Ionides (2020),
-this function is under development, and later will be combined with girf().
+this function is under development, and later will be combined with girf(). In bootgirf.R (this file), the pseudo-simulations are obtained by adding difference in simulation residuals at two target times to the skeleton simulations.
 }
 \section{Methods}{
 
@@ -77,6 +77,7 @@ logLik(pfd.b)
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
@@ -86,6 +87,7 @@ Other particle filter methods:
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{igirf}()}

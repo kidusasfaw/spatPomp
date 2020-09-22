@@ -25,6 +25,7 @@ Collate:
     'bm_extended.R'
     'spatPomp.R'
     'bootgirf.R'
+    'bootgirf2.R'
     'bpfilter.R'
     'enkf.R'
     'gbm.R'

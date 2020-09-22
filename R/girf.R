@@ -113,24 +113,23 @@ setMethod(
     Ninter,
     lookahead,
     Nguide,
-    params,
     tol,
-    ...) {
+    ...,
+    verbose = getOption("verbose", FALSE)) {
 
-    if (missing(params)) params <- coef(object)
     if (missing(tol)) tol <- 1e-300
     if (missing(Ninter)) Ninter <- length(unit_names(object))
 
     tryCatch(
       girf.internal(
         object,
-        Np,
-        Ninter,
-        lookahead,
-        Nguide,
-        params,
-        tol,
-        ...
+        Np=Np,
+        Ninter=Ninter,
+        lookahead=lookahead,
+        Nguide=Nguide,
+        tol=tol,
+        ...,
+        verbose=verbose
       ),
       error = function (e) pomp:::pStop("girf",conditionMessage(e))
     )
@@ -177,13 +176,29 @@ girf.internal <- function (object,
         Ninter,
         lookahead,
         Nguide,
-        params,
         tol,
         ...,
+        verbose,
         .gnsi = TRUE) {
 
-  verbose <- FALSE
+  verbose <- as.logical(verbose)
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
+
   ep <- paste0("in ",sQuote("girf"),": ")
+  params <- coef(object)
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
@@ -237,7 +252,7 @@ girf.internal <- function (object,
   znames <- object@accumvars
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   # initialize filter guide function
-  log_filter_guide_fun <- array(0, dim = Np[1]) 
+  log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
     # intermediate times. using seq to get S+1 points between t_n and t_{n+1} inclusive
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
@@ -354,7 +369,7 @@ girf.internal <- function (object,
             x=skel[,,l,drop = FALSE],
             times=times[nt+1+l],
             params=mom_match_param[,,l,],
-            log=TRUE, 
+            log=TRUE,
             .gnsi=gnsi
           )),
           error = function (e) {
@@ -365,7 +380,7 @@ girf.internal <- function (object,
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
-      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol) 
+      ## log_guide_fun[log_guide_fun < log(tol)] <- log(tol)
       log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
@@ -381,7 +396,7 @@ girf.internal <- function (object,
             x=x_3d,
             times=times[nt+1],
             params=params,
-            log=TRUE, 
+            log=TRUE,
             .gnsi=gnsi
           )),
           error = function (e) {
@@ -403,7 +418,7 @@ girf.internal <- function (object,
                   params=params,
                   Np=Np[nt+1],
                   trackancestry=FALSE,
-                  doparRS=FALSE, 
+                  doparRS=FALSE,
                   weights=weights,
                   lgps=log_guide_fun,
                   fsv=fcst_samp_var,

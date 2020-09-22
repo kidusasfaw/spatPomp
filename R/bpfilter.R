@@ -73,10 +73,8 @@ setClass(
 setMethod(
   "bpfilter",
   signature=signature(object="spatPomp"),
-  function (object, Np, block_size, block_list, params) {
+  function (object, Np, block_size, block_list, ..., verbose=getOption("verbose", FALSE)) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
-
-    if (missing(params)) params <- coef(object)
 
     if(missing(block_list) && missing(block_size))
       stop(ep,sQuote("block_list"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
@@ -107,15 +105,31 @@ setMethod(
      object=object,
      Np=Np,
      block_list=block_list,
-     params=params)
+     ...,
+     verbose=verbose)
   }
 )
-bpfilter.internal <- function (object, Np, block_list, params, .gnsi = TRUE) {
+bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("bpfilter"),": ")
-  object <- as(object,"spatPomp")
-  pompLoad(object)
+  verbose <- as.logical(verbose)
+  p_object <- pomp(object,...)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
+  params <- coef(object)
+  pompLoad(object,verbose=verbose)
+  on.exit(pompUnload(object,verbose=verbose))
   gnsi <- as.logical(.gnsi)
-
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
   nunits <- length(unit_names(object))

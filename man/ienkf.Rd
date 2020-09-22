@@ -118,6 +118,7 @@ Assimilation Monthly Weather Review 129:2884--2903
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},

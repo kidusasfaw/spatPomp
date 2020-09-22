@@ -114,6 +114,7 @@ The following methods are available for such an object:
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
@@ -123,6 +124,7 @@ Other particle filter methods:
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()}

@@ -124,7 +124,8 @@ enkf.internal <- function (object,
                 unit_names=object@unit_names,
                 unitname=object@unitname,
                 unit_statenames=object@unit_statenames,
-                unit_obsnames = object@unit_obsnames)
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
 
   if (pomp:::undefined(object@rprocess))
     pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")

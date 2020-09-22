@@ -86,12 +86,24 @@ setClass(
     loglik=as.double(NA)
   )
 )
-abf.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
+abf_internal <- function (object, Np, nbhd, Ninter, tol, ..., verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("abf"),": ")
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
+  params <- coef(object)
   verbose = FALSE
-  if(missing(nbhd))
-    stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
-  object <- as(object,"spatPomp")
   pompLoad(object,verbose)
   gnsi <- as.logical(.gnsi)
   if (length(params)==0)
@@ -264,11 +276,11 @@ abf.internal <- function (object, params, Np, nbhd, tol, .gnsi = TRUE) {
 setMethod(
   "abf",
   signature=signature(object="spatPomp"),
-  function (object, Nrep, Np, nbhd, params,
+  function (object, Ninter, Nrep, Np, nbhd,
            tol = (1e-300),
-           ...) {
-   if(missing(params)) params <- coef(object)
-   if(missing(nbhd)){
+           ..., verbose=getOption("verbose",FALSE)) {
+    if (missing(Ninter)) Ninter <- length(unit_names(object))
+    if(missing(nbhd)){
      nbhd <- function(object, unit, time){
        nbhd_list = list()
        if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -290,13 +302,14 @@ setMethod(
    mcopts <- list(set.seed=TRUE)
    mult_rep_output <- foreach::foreach(i=1:Nrep,
        .packages=c("pomp","spatPomp"),
-       .options.multicore=mcopts) %dopar%  spatPomp:::abf.internal(
+       .options.multicore=mcopts) %dopar%  spatPomp:::abf_internal(
      object=object,
-     params=params,
      Np=Np,
-     nbhd = nbhd,
+     nbhd=nbhd,
+     Ninter=Ninter,
      tol=tol,
-     ...
+     ...,
+     verbose=verbose
      )
    ntimes = length(time(object))
    nunits = length(unit_names(object))

@@ -66,6 +66,7 @@ Thus, in either case, the perturbations at the end of 50 HIPPIE iterations are a
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},

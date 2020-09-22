@@ -82,6 +82,7 @@ logLik(pfd_b)
 \seealso{
 Other particle filter methods: 
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
@@ -91,6 +92,7 @@ Other particle filter methods:
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abf}()},
+\code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},

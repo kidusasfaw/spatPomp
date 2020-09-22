@@ -79,14 +79,27 @@ setClass(
     nbhd=function(){}
   )
 )
-abfir_internal <- function (object, params, Np, nbhd,
-      Ninter, tol, .gnsi = TRUE,...) {
+abfir_internal <- function (object, Np, nbhd,
+      Ninter, tol, ..., verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("abfir"),": ")
-  verbose <- FALSE
-  if(missing(nbhd))
-    stop(ep,sQuote("nbhd")," must be specified for the spatPomp object",call.=FALSE)
-  object <- as(object,"spatPomp")
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
+  params <- coef(object)
+  verbose = FALSE
   pompLoad(object,verbose=verbose)
+  on.exit(pompUnload(object,verbose=verbose))
   gnsi <- as.logical(.gnsi)
 
   if (length(params)==0) stop(ep,sQuote("params")," must be specified",call.=FALSE)
@@ -103,7 +116,6 @@ abfir_internal <- function (object, params, Np, nbhd,
 
   if (NCOL(params)>1) stop(ep,"does not accept matrix parameter input",call.=FALSE)
 
-  coef(object) <- params
   paramnames <- names(params)
   if (is.null(paramnames))
     stop(ep,sQuote("params")," must have names",call.=FALSE)
@@ -193,8 +205,21 @@ abfir_internal <- function (object, params, Np, nbhd,
         xp[znames,,1] <- xp[znames,,1,drop=FALSE][,,1] + xf.znames
       }
       if(s < Ninter){
-        skel <- pomp::flow(object, x0=xp[,,1], t0=tt[s+1],
-          params=param_matrix, times = times[n + 1],...)
+        skel <- tryCatch(
+          pomp::flow(object,
+                     x0=xp[,,1],
+                     t0=tt[s+1],
+                     params=param_matrix,
+                     times = times[n + 1],
+                     ...),
+          error = function (e) {
+            pomp::flow(object,
+                       x0=xp[,,1],
+                       t0=tt[s+1],params=param_matrix,
+                       times = times[n + 1],
+                       method='adams')
+            }
+        )
         if(length(znames) > 0){
           skel.lookahead1.znames <- skel[znames,,1,drop=FALSE]
           xp.znames <- xp[znames,,1,drop=FALSE]
@@ -365,15 +390,22 @@ abfir_internal <- function (object, params, Np, nbhd,
 setMethod(
   "abfir",
   signature=signature(object="spatPomp"),
-  function (object, params, Np, Nrep, nbhd,
-            Ninter, tol = (1e-300), ...) {
-  if (missing(params)) params <- coef(object)
+  function (object, Np, Nrep, nbhd,
+            Ninter, tol = (1e-300), ...,
+            verbose=getOption("verbose",FALSE)) {
   if (missing(Ninter)) Ninter <- length(unit_names(object))
+  if(missing(nbhd)){
+    nbhd <- function(object, unit, time){
+      nbhd_list = list()
+      if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+      if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+      return(nbhd_list)
+    }
+  }
     # set.seed(396658101,kind="L'Ecuyer")
   # begin single-core
   # single_rep_output <- spatPomp:::abfir_internal(
   #   object=object,
-  #   params=params,
   #   Np=Np,
   #   nbhd=nbhd,
   #   Ninter=Ninter,
@@ -387,12 +419,12 @@ setMethod(
      .packages=c("pomp","spatPomp"),
      .options.multicore=list(set.seed=TRUE)) %dopar% spatPomp:::abfir_internal(
        object=object,
-       params=params,
        Np=Np,
        nbhd=nbhd,
        Ninter=Ninter,
        tol=tol,
-       ...
+       ...,
+       verbose=verbose
      )
    # compute sum (over all Nrep) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
@@ -450,12 +482,11 @@ setMethod(
 setMethod(
   "abfir",
   signature=signature(object="abfird_spatPomp"),
-  function (object, params, Np, Nrep, nbhd,
+  function (object, Np, Nrep, nbhd,
             Ninter, tol, ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
     if (missing(Ninter)) Ninter <- object@Ninter
-    if (missing(params)) params <- coef(object)
     if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd
 
@@ -464,7 +495,6 @@ setMethod(
          Ninter=Ninter,
          Nrep=Nrep,
          nbhd=nbhd,
-         params = params,
          tol=tol,
          ...)
   }
