@@ -332,14 +332,9 @@ bootgirf.internal <- function (object,
                  conditionMessage(e),call.=FALSE)
           }
         )
-        ## log of mean of dmeasure at pseudosims for each u and particle
-        log_fcst_lik <- sapply(1:U, function(u) {
-          ldw_u <- log_dmeas_weights[u,,1]
-          sapply(1:Np[1], function(j) {
-            log(mean(exp(ldw_u[(j-1)*Nguide+1:Nguide])))
-          })
-        })
-        log_resamp_weights <- apply(log_fcst_lik, 1, sum)*discount_factor
+        ldw <- array(log_dmeas_weights, c(U,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
+        log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
+        log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
       log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
