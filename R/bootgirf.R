@@ -200,7 +200,6 @@ bootgirf.internal <- function (object,
   t0 <- times[1]
   ntimes <- length(times)-1
   U <- length(unit_names(object))
-
   if (missing(Np) || is.null(Np)) {
     pomp:::pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
