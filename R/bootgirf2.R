@@ -199,7 +199,7 @@ bootgirf2.internal <- function (object,
   times <- time(object,t0=TRUE)
   t0 <- times[1]
   ntimes <- length(times)-1
-
+  U <- length(unit_names(object))
   if (missing(Np) || is.null(Np)) {
     pomp:::pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
@@ -362,7 +362,7 @@ bootgirf2.internal <- function (object,
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
       }
-      max_log_weights <- max(log_weights)
+      max_log_weights <- max(log_weights, na.rm=TRUE)
       if(max_log_weights > -Inf){
         log_weights <- log_weights - max_log_weights
         weights <- exp(log_weights)

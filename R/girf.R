@@ -275,7 +275,6 @@ girf.internal <- function (object,
     )
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
-
     # tt has S+1 (or Ninter+1) entries
     for (s in 1:Ninter){
       # get prediction simulations
@@ -353,7 +352,6 @@ girf.internal <- function (object,
       mom_match_param <- mmp
       dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np[1])
       dimnames(mom_match_param) <- list(param = names(params))
-
       # guide functions as product (so base case is 1)
       log_guide_fun = vector(mode = "numeric", length = Np[1])
 

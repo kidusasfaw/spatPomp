@@ -218,10 +218,14 @@ measles_dmeasure <- Csnippet("
   for (u = 0; u < U; u++) {
     m = rho*(C[u]+mytol);
     v = m*(1.0-rho+psi*psi*m);
-    if (cases[u] > 0.0) {
-      lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
-    } else {
-        lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+    // C < 0 can happen in bootstrap methods such as bootgirf
+    if (C < 0) {lik += log(tol);} else {
+      if (cases[u] > tol) {
+        lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-
+          pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
+      } else {
+          lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+      }
     }
   }
   if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
@@ -247,18 +251,21 @@ measles_rmeasure <- Csnippet("
 ")
 
 measles_dunit_measure <- Csnippet('
-                       // consider adding 1 to the variance for the case C = 0
-                       double mytol = 1e-5;
-                       double m = rho*(C+mytol);
-                       double v = m*(1.0-rho+psi*psi*m);
-                       double tol = 1e-300;
-                       if (cases > 0.0) {
-                         lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
-                       } else {
-                           lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
-                       }
-                       if(give_log) lik = log(lik);
-                       ')
+  double mytol = 1e-5;
+  double m = rho*(C+mytol);
+  double v = m*(1.0-rho+psi*psi*m);
+  double tol = 1e-300;
+  // C < 0 can happen in bootstrap methods such as bootgirf
+  if (C < 0) {lik = 0;} else {
+    if (cases > tol) {
+      lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-
+        pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
+    } else {
+      lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
+    }
+  }
+  if(give_log) lik = log(lik);
+')
 
 measles_eunit_measure <- Csnippet("
 ey = rho*C;
