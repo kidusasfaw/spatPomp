@@ -68,7 +68,7 @@ extern SEXP abf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, S
 extern SEXP abfir_resample(SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol);
 
 //bpfilter.c
-extern SEXP bpfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP resamp_weights);
+extern SEXP bpfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP doparRS, SEXP resamp_weights);
 
 //girf.c
 extern SEXP girf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP doparRS, SEXP weights, SEXP gps, SEXP fsv, SEXP tol);

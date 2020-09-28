@@ -4,12 +4,14 @@ setClass(
   slots=c(
     block_list="list",
     Np="integer",
+    paramMatrix="array",
     cond.loglik="numeric",
     loglik="numeric"
   ),
   prototype=prototype(
     block_list = list(),
     Np=as.integer(NA),
+    paramMatrix=array(data=numeric(0),dim=c(0,0)),
     cond.loglik=as.double(NA),
     loglik=as.double(NA)
   )
@@ -225,6 +227,7 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
           params=params,
           Np=Np[nt+1],
           trackancestry=FALSE,
+          doparRS=FALSE,
           weights=weights[i,]
         ),
         error = function (e) {

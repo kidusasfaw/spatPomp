@@ -6,7 +6,16 @@
 \alias{abf,spatPomp-method}
 \title{Adapted Bagged Filter (ABF)}
 \usage{
-\S4method{abf}{spatPomp}(object, Nrep, Np, nbhd, params, tol = (1e-300), ...)
+\S4method{abf}{spatPomp}(
+  object,
+  Ninter,
+  Nrep,
+  Np,
+  nbhd,
+  tol = (1e-300),
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -16,9 +25,9 @@
 \item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
 \code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
 
-\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
-
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
+
+\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
 
 \item{Nreplicates}{The number of replicates for the adapted simulations.}
 }
@@ -71,6 +80,7 @@ Other particle filter methods:
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
@@ -80,6 +90,7 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
+\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

@@ -5,7 +5,14 @@
 \alias{bpfilter,spatPomp-method}
 \title{Block particle filter (BPF)}
 \usage{
-\S4method{bpfilter}{spatPomp}(object, Np, block_size, block_list, params)
+\S4method{bpfilter}{spatPomp}(
+  object,
+  Np,
+  block_size,
+  block_list,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object}
@@ -70,6 +77,7 @@ Other particle filter methods:
 \code{\link{bootgirf}()},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
@@ -79,6 +87,7 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{girf}()},
+\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

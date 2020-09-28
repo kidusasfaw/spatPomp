@@ -63,6 +63,17 @@ ienkf_out <- ienkf(bm_obj,
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
 
+ibpf_out <- ibpfilter(bm_obj,
+                      Nbpf = ienkf_Nenkf,
+                      Np = 100,
+                     rw.sd = rw.sd(
+                       rho=0.1, sigma=0.1, tau=0.1, X1_0=0.0, X2_0=0.0,
+                       X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
+                     cooling.type = "geometric",
+                     cooling.fraction.50 = 0.5,
+                     spat_regression = 0.9,
+                     block_size = 2)
+
 enkf_out <- enkf(bm_obj,
                  Np = ienkf_np)
 

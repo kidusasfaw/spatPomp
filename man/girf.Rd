@@ -8,7 +8,16 @@
 \alias{girf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF)}
 \usage{
-\S4method{girf}{spatPomp}(object, Np, Ninter, lookahead, Nguide, params, tol, ..., verbose = FALSE)
+\S4method{girf}{spatPomp}(
+  object,
+  Np,
+  Ninter,
+  lookahead,
+  Nguide,
+  tol,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 
 \S4method{girf}{girfd_spatPomp}(object, Np, Ninter, lookahead, Nguide, params, tol, ...)
 }
@@ -23,8 +32,6 @@
 
 \item{Nguide}{The number of simulations used to estimate state process uncertainty for each particle.}
 
-\item{params}{A parameter set for the spatiotemporal POMP.}
-
 \item{tol}{If the guide functions become too small (beyond floating-point precision limits), we set them to this value.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
@@ -35,6 +42,8 @@ This allows the user to pass information to the basic components outside of the 
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+
+\item{params}{A parameter set for the spatiotemporal POMP.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class
@@ -83,6 +92,7 @@ Other particle filter methods:
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{hippie}()},
+\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
@@ -92,6 +102,7 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{bootgirf2}()},
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
+\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

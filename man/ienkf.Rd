@@ -123,6 +123,7 @@ Other particle filter methods:
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 

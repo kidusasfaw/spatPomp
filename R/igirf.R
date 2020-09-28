@@ -17,7 +17,7 @@
 ##'
 ##' @return
 ##' Upon successful completion, \code{igirf} returns an object of class
-##' \sQuote{igirfd.spatPomp}.
+##' \sQuote{igirfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

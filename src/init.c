@@ -8,7 +8,7 @@ static const R_CallMethodDef callMethods[] = {
   {"abfir_resample", (DL_FUNC) &abfir_resample, 5},
   {"girf_computations", (DL_FUNC) &girf_computations, 9},
   {"hippie_computations", (DL_FUNC) &hippie_computations, 10},
-  {"bpfilter_computations", (DL_FUNC) &bpfilter_computations, 5},
+  {"bpfilter_computations", (DL_FUNC) &bpfilter_computations, 6},
   {"do_fcst_samp_var", (DL_FUNC) &do_fcst_samp_var, 6},
   {"do_v_to_theta", (DL_FUNC) &do_v_to_theta, 7},
   {"do_theta_to_v", (DL_FUNC) &do_theta_to_v, 6},

@@ -6,12 +6,19 @@
 \alias{abfir,spatPomp-method}
 \title{Adapted Bagged Filter with Intermediate Resampling (ABF-IR)}
 \usage{
-\S4method{abfir}{spatPomp}(object, params, Np, Nrep, nbhd, Ninter, tol = (1e-300), ...)
+\S4method{abfir}{spatPomp}(
+  object,
+  Np,
+  Nrep,
+  nbhd,
+  Ninter,
+  tol = (1e-300),
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
-
-\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
 
 \item{Np}{The number of particles for the adapted simulations within each Monte Carlo replicate.}
 
@@ -30,6 +37,8 @@ See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{abfir} returns an object of class
@@ -87,6 +96,7 @@ Other particle filter methods:
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
 \code{\link{hippie}()},
+\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
@@ -96,6 +106,7 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
+\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

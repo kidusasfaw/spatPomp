@@ -70,6 +70,7 @@ Other particle filter methods:
 \code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
+\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
