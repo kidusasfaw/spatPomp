@@ -23,8 +23,6 @@ See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \value{
 An object of class \sQuote{enkfd_spatPomp}.
@@ -47,7 +45,6 @@ Assimilation Monthly Weather Review 129:2884--2903
 }
 \seealso{
 Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{hippie}()},
 \code{\link{ienkf-spatPomp}}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}

@@ -13,7 +13,7 @@
 ##'
 ##' @name abfir
 ##' @rdname abfir
-##' @include spatPomp_class.R generics.R
+##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom foreach %dopar%
@@ -380,9 +380,10 @@ abfir_internal <- function (object, Np, nbhd,
     Np=as.integer(Np),
     tol=tol
   )
-
-
 }
+
+setGeneric("abfir",function(object,...)standardGeneric("abfir"))
+
 ##' @name abfir-spatPomp
 ##' @aliases abfir,spatPomp-method
 ##' @rdname abfir

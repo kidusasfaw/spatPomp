@@ -4,7 +4,7 @@
 ##' @title spatpomp-methods
 ##' @rdname spatPomp-methods
 ##'
-##' @include spatPomp_class.R generics.R
+##' @include spatPomp_class.R
 ##'
 NULL
 
@@ -19,6 +19,8 @@ setAs(
         unit_obsnames = rownames(from@data))
   }
 )
+
+setGeneric("unit_names", function(x,...)standardGeneric("unit_names"))
 
 ##' @export
 setMethod(
@@ -180,6 +182,8 @@ setMethod(
   signature=signature(object="igirfd_spatPomp"),
   definition=function(object)object@loglik
 )
+
+setGeneric("spatPomp_Csnippet", function(object,...)standardGeneric("spatPomp_Csnippet"))
 
 ##' @name spatPomp_Csnippet
 ##' @title spatPomp_Csnippet

@@ -1,21 +1,3 @@
-setClass(
-  "bpfilterd_spatPomp",
-  contains="spatPomp",
-  slots=c(
-    block_list="list",
-    Np="integer",
-    paramMatrix="array",
-    cond.loglik="numeric",
-    loglik="numeric"
-  ),
-  prototype=prototype(
-    block_list = list(),
-    Np=as.integer(NA),
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    cond.loglik=as.double(NA),
-    loglik=as.double(NA)
-  )
-)
 
 ##' Block particle filter (BPF)
 ##'
@@ -31,7 +13,7 @@ setClass(
 ##' @name bpfilter-spatPomp
 ##' @aliases bpfilter,spatPomp-method
 ##' @rdname bpfilter
-##' @include spatPomp_class.R generics.R
+##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##'
@@ -71,6 +53,28 @@ setClass(
 ##' \item{\code{\link{logLik}}}{ yields an estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
+
+setClass(
+  "bpfilterd_spatPomp",
+  contains="spatPomp",
+  slots=c(
+    block_list="list",
+    Np="integer",
+    paramMatrix="array",
+    cond.loglik="numeric",
+    loglik="numeric"
+  ),
+  prototype=prototype(
+    block_list = list(),
+    Np=as.integer(NA),
+    paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    cond.loglik=as.double(NA),
+    loglik=as.double(NA)
+  )
+)
+
+setGeneric("bpfilter",  function (object, ...)standardGeneric("bpfilter"))
+
 ##' @export
 setMethod(
   "bpfilter",

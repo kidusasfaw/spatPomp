@@ -23,6 +23,8 @@ vec_dmeasure.internal <- function (object, y, x, units, times, params, log = FAL
   return(weights)
 }
 
+setGeneric("vec_dmeasure", function(object,...)standardGeneric("vec_dmeasure"))
+
 ##' @export
 setMethod(
   "vec_dmeasure",

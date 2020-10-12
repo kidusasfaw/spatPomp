@@ -21,6 +21,8 @@ vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) 
   return(weights)
 }
 
+setGeneric("vec_rmeasure", function(object,...)standardGeneric("vec_rmeasure"))
+
 ##' @export
 setMethod(
   "vec_rmeasure",

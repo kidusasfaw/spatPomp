@@ -6,7 +6,7 @@
 \alias{igirf,spatPomp-method}
 \alias{igirf-igirfd_spatPomp}
 \alias{igirf,igirfd_spatPomp-method}
-\title{Iterated guided intermediate resampling filter (iGIRF)}
+\title{Iterated guided intermediate resampling filter (IGIRF)}
 \usage{
 \S4method{igirf}{spatPomp}(
   data,
@@ -18,6 +18,7 @@
   Ninter,
   lookahead,
   Nguide,
+  kind = c("quantile", "moment"),
   tol = 1e-300,
   max.fail = Inf,
   save.states = FALSE,
@@ -35,9 +36,7 @@
   Ninter,
   lookahead,
   Nguide,
-  h,
-  theta.to.v,
-  v.to.theta,
+  kind = c("quantile", "moment"),
   tol,
   ...,
   verbose = getOption("verbose", FALSE)
@@ -114,22 +113,15 @@ The following methods are available for such an object:
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
-\code{\link{hippie}()},
-\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
-\code{\link{girf}()},
-\code{\link{ibpfilter}()}
+\code{\link{girf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

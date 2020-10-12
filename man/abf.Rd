@@ -75,22 +75,15 @@ logLik(pfd.b)
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
-\code{\link{hippie}()},
-\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
 \code{\link{girf}()},
-\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

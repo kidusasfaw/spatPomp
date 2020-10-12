@@ -14,12 +14,23 @@
   Ninter,
   lookahead,
   Nguide,
+  kind = c("quantile", "moment"),
   tol,
   ...,
   verbose = getOption("verbose", FALSE)
 )
 
-\S4method{girf}{girfd_spatPomp}(object, Np, Ninter, lookahead, Nguide, params, tol, ...)
+\S4method{girf}{girfd_spatPomp}(
+  object,
+  Np,
+  Ninter,
+  lookahead,
+  Nguide,
+  params,
+  kind = c("quantile", "moment"),
+  tol,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -40,8 +51,6 @@ See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
 \item{params}{A parameter set for the spatiotemporal POMP.}
 }
@@ -88,21 +97,14 @@ logLik(pfd.b)
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
-\code{\link{hippie}()},
-\code{\link{ibpfilter}()},
 \code{\link{ienkf-spatPomp}},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bootgirf2}()},
-\code{\link{bootgirf}()},
 \code{\link{bpfilter-spatPomp}},
-\code{\link{ibpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

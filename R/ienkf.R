@@ -1,23 +1,13 @@
-setClass(
-  "ienkfd_spatPomp",
-  contains="enkfd_spatPomp",
-  slots=c(Nenkf = 'integer',
-          rw.sd = 'matrix',
-          cooling.type = 'character',
-          cooling.fraction.50 = 'numeric',
-          traces = 'matrix'
-      )
-)
-
-##' Iterative Ensemble Kalman Filter (IENKF)
+##' Iterated ensemble Kalman filter (IEnKF)
 ##'
-##' An implementation of a parameter estimation algorithm combining
-##' ENKF with IF2.
+##' A parameter estimation algorithm combining that uses EnKF to
+##' perform the filtering step in the iterated filtering context of
+##' IF2.
 ##'
 ##' @name ienkf-spatPomp
 ##' @aliases ienkf,spatPomp-method
 ##' @rdname ienkf
-##' @include spatPomp_class.R generics.R
+##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'
@@ -28,24 +18,25 @@ setClass(
 ##'
 ##' @examples
 ##' # Create a simulation of a GBM using a default parameter set
-##' gbm10 <- gbm(U = 10, N = 30, IVP_values = 35, delta.t = .0001, delta.obs = .001)
-##' gbm10_2 <- gbm10
+##' gbm10 <- gbm(U = 10, N = 30)
 ##'
 ##' # Set the initial estimates for the unknown parameters
-##'  coef(gbm10_2) <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=35, "X2_0"=35,
-##' "X3_0"=35, "X4_0"=35, "X5_0"=35, "X6_0"=35, "X7_0"=35, "X8_0"=35, "X9_0"=35, "X10_0"=35)
+##'  start_params <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=1, "X2_0"=1,
+##' "X3_0"=1, "X4_0"=1, "X5_0"=1, "X6_0"=1, "X7_0"=1, "X8_0"=1, "X9_0"=1, "X10_0"=1)
 ##'
 ##' # Run IENKF with the specified parameters
-##' ienkf_out <- ienkf(gbm10_2,
-##' Nenkf = ienkf_Nenkf,
-##' rw.sd = rw.sd(
-##'   rho=0.02, sigma=0.02, tau=0.02, X1_0=0.0, X2_0=0.0,
-##'   X3_0=0.0, X4_0=0.0, X5_0=0.0, X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
-##' cooling.type = "geometric",
-##' cooling.fraction.50 = 0.5,
-##' Np=ienkf_np)
+##' ienkf_out <- ienkf(gbm10,
+##'                    Nenkf = 10,
+##'                    rw.sd = rw.sd(
+##'   rho=0.02, sigma=0.02, tau=0.02,
+##'   X1_0=0.0, X2_0=0.0, X3_0=0.0, X4_0=0.0, X5_0=0.0,
+##'   X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0
+##'                    ),
+##'                    cooling.type = "geometric",
+##'                    cooling.fraction.50 = 0.5,
+##'                    Np=1000)
 ##'
-##' # Get the parameter estimates from the IENKF object
+##' # Get the parameter estimates from the output
 ##' coef(ienkf_out)
 ##'
 ##' @return
@@ -83,6 +74,19 @@ setClass(
 ## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
 
+setClass(
+  "ienkfd_spatPomp",
+  contains="enkfd_spatPomp",
+  slots=c(Nenkf = 'integer',
+          rw.sd = 'matrix',
+          cooling.type = 'character',
+          cooling.fraction.50 = 'numeric',
+          traces = 'matrix'
+  )
+)
+
+setGeneric("ienkf",  function (data, ...)standardGeneric("ienkf"))
+
 setMethod(
   "ienkf",
   signature=signature(data="spatPomp"),
@@ -116,6 +120,19 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
                            .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames)
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@eunit_measure) || pomp:::undefined(object@vunit_measure))
     pomp:::pStop_(paste(sQuote(c("rprocess","eunit_measure","vunit_measure")),collapse=", ")," are needed basic components.")

@@ -9,7 +9,7 @@
 ##'
 ##' @name abf
 ##' @rdname abf
-##' @include spatPomp_class.R generics.R
+##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom foreach %dopar%
@@ -266,9 +266,10 @@ abf_internal <- function (object, Np, nbhd, Ninter, tol, ..., verbose, .gnsi = T
     Np=as.integer(Np),
     tol=tol
   )
-
-
 }
+
+setGeneric("abf",function(object,...)standardGeneric("abf"))
+
 ##' @name abf-spatPomp
 ##' @aliases abf,spatPomp-method
 ##' @rdname abf
