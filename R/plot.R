@@ -41,17 +41,19 @@ setMethod(
   definition=function (x, log=F, ...) {
     df <- as.data.frame(x)
     if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames]+1)
-    ggplot(data = df,
-           mapping = aes(x = !!rlang::sym(x@timename),
-                         y = factor(!!rlang::sym(x@unitname), level = unit_names(x)))) +
-      geom_tile(mapping = aes(fill = !!rlang::sym(x@unit_obsnames))) +
-      scale_x_continuous(expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      theme(axis.text.y = element_text(size = 11-(2*floor(length(unit_names(x))/10)),
-                                       vjust = 0.5,
-                                       hjust=1)) +
-      scale_fill_gradientn(colours = terrain.colors(10)) +
-      labs(x = "time", y = "unit", fill = ifelse(log,
+    ggplot2::ggplot(data = df,
+           mapping = ggplot2::aes(x = !!rlang::sym(x@timename),
+                                  y = factor(!!rlang::sym(x@unitname),
+                                             level = unit_names(x)))) +
+      ggplot2::geom_tile(mapping = ggplot2::aes(fill = !!rlang::sym(x@unit_obsnames))) +
+      ggplot2::scale_x_continuous(expand=c(0,0)) +
+      ggplot2::scale_y_discrete(expand=c(0,0)) +
+      ggplot2::theme(axis.text.y = ggplot2::element_text(
+        size = 11-(2*floor(length(unit_names(x))/10)),
+        vjust = 0.5,
+        hjust=1)) +
+      ggplot2::scale_fill_gradientn(colours = terrain.colors(10)) +
+      ggplot2::labs(x = "time", y = "unit", fill = ifelse(log,
                                                  paste("log(",x@unit_obsnames,"+1)",sep=""),
                                                  x@unit_obsnames))
   }

@@ -1,20 +1,21 @@
 Package: spatPomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
-Version: 0.1.2
+Version: 0.11.9.0
+Date: 2020-10-12
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
              person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
              person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+URL: https://github.com/kidusasfaw/spatPomp
+Description: The spatPomp package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. To do so, it relies on and extends a number of facilities that the pomp package provides for inference on time series data using partially-observed Markov process (POMP) models.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Contact: kasfaw at umich dot edu
 Depends: pomp (>= 2.0)
 LinkingTo: pomp
-Suggests: scales, geosphere, magrittr,
-  plyr, reshape2,
-    testthat
+Suggests: scales, geosphere, magrittr, plyr, reshape2, testthat
+Imports: doParallel (>= 1.0.11), parallel, foreach, dplyr, tidyr, stringr, ggplot2
 Collate:
     'spatPomp_class.R'
     'abf.R'
@@ -37,10 +38,3 @@ Collate:
     'vec_dmeasure.R'
     'vec_rmeasure.R'
 RoxygenNote: 7.1.0
-Imports: doParallel (>= 1.0.11),
-    parallel,
-    foreach,
-    dplyr,
-    tidyr,
-    stringr,
-    ggplot2

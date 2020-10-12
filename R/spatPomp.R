@@ -132,7 +132,11 @@ setMethod(
     # get observation types
     unit_obsnames <- names(data)[-c(upos,tpos)]
     if(missing(unit_statenames)) unit_statenames <- as.character(NULL)
-    if(missing(unit_accumvars)) unit_accumvars <- as.character(NULL)
+    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),1:U)
+    else {
+      pomp_accumvars <- NULL
+      unit_accumvars <- as.character(NULL)
+    }
 
     # if missing workhorses, set to default
     if (missing(rinit)) rinit <- NULL
@@ -215,8 +219,6 @@ setMethod(
     pomp_obsnames <- paste0(rep(unit_obsnames,each=U),1:U)
     if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
     else pomp_covarnames <- NULL
-    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),1:U)
-    else pomp_accumvars <- NULL
     if (missing(paramnames)) paramnames <- NULL
     if (!missing(paramnames)) mparamnames <- paste("M_", paramnames, sep = "")
 

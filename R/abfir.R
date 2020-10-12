@@ -120,7 +120,6 @@ abfir_internal <- function (object, Np, nbhd,
   if (is.null(paramnames))
     stop(ep,sQuote("params")," must have names",call.=FALSE)
 
-  ## ideally, we shouldn't need param_matrix in abfir
   param_matrix <- matrix(params,nrow=length(params),ncol=Np,
     dimnames=list(names(params),NULL))
 
@@ -154,8 +153,6 @@ abfir_internal <- function (object, Np, nbhd,
         conditionMessage(e),call.=FALSE)
     )
     xg_2dim <- xg[,,1]
-    # print(xg_2dim)
-    # print("xg_2dim done")
     xg_with_rep <- do.call(cbind,replicate(Np, xg_2dim, simplify=FALSE))
     dim(xg_with_rep) <- c(dim(xg_with_rep)[1],dim(xg_with_rep)[2],1)
     dimnames(xg_with_rep) <- list(states = rownames(xg_2dim))
@@ -174,7 +171,6 @@ abfir_internal <- function (object, Np, nbhd,
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), Np)
 
-    ## determine the weights
     log_weights <- tryCatch(
       vec_dmeasure(
         object,
@@ -191,10 +187,7 @@ abfir_internal <- function (object, Np, nbhd,
       }
     )
 
-    # weights[weights < tol] <- tol
     log_cond_densities[,,n] <- log_weights[,,1]
-    ## adapted simulation via intermediate resampling
-    # tt has S+1 (or Ninter+1) entries
     tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
     log_gf <- rep(0,Np) # filtered guide function
     for (s in 1:Ninter){
@@ -228,16 +221,6 @@ abfir_internal <- function (object, Np, nbhd,
       } else {
         skel <- xp
       }
-
-      # create measurement variance at skeleton matrix
-      # meas_var_skel <- array(0, dim = c(U, Np))
-      # for(u in 1:U){
-      #   snames = paste0(object@unit_statenames,u)
-      #   for(np in 1:Np){
-      #     hskel <- h(state.vec=skel[snames,np,1],param.vec=params)
-      #     meas_var_skel[u,np] <- theta.to.v(meas.mean=hskel,param.vec=params)
-      #   }
-      # }
       meas_var_skel <- tryCatch(
         .Call('do_theta_to_v',
               object=object,
@@ -252,20 +235,6 @@ abfir_internal <- function (object, Np, nbhd,
       )
       meas_var_skel <- meas_var_skel[,,1]
       fcst_var_upd <- fcst_samp_var*(times[n+1] - tt[s+1])/(times[n+1] - times[n])
-      # print(xg)
-      # print("done with xg")
-      # print(meas_var_skel)
-      # print("done with mvs")
-      # print(fcst_samp_var)
-      # print("done with fsv")
-      # print(fcst_var_upd)
-      # print("done with fvu")
-      # return(1)
-      # fcst_var_upd <- array(0, dim = c(U, Np))
-      # for(u in 1:U){
-      #   fcst_var_upd[u,] <- fcst_samp_var[u] *
-      #     (times[n+1] - tt[s+1])/(times[n+1] - times[n])
-      # }
       inflated_var <- meas_var_skel + fcst_var_upd
       dim(inflated_var) <- c(U, Np, 1)
       array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np, 1), dimnames = list(params = names(params)))
@@ -285,21 +254,6 @@ abfir_internal <- function (object, Np, nbhd,
       )
       mom_match_param <- mmp[,,,1]
 
-#       mom_match_param <- array(0, dim = c(length(params), U, Np),
-#         dimnames = list(params = names(params), unit = NULL, J = NULL))
-#       inflated_var <- meas_var_skel + fcst_var_upd
-#       for(u in 1:U){
-#         for(np in 1:Np){
-#           snames = paste0(object@unit_statenames,u)
-#           mom_match_param[,u,np] <- v.to.theta(var=inflated_var[u,np],
-# 	    param.vec=params, state.vec=skel[snames,np,1])
-#         }
-#       }
-
-      # U x Np x 1 matrix of skeleton prediction weights
-# TRY REMOVING DISCOUNT FOR ABF-IR, FOR SIMPLICITY IF IT IS NO BIG DEAL
-#      discount_denom_init = times[n]
-#      discount_factor = 1 - (times[n+1] - tt[s+1])/(times[n+1] - discount_denom_init)
       log_wp <- tryCatch(
         vec_dmeasure(
           object,
@@ -313,10 +267,8 @@ abfir_internal <- function (object, Np, nbhd,
         error = function (e) stop(ep,"error in calculation of wp: ",
           conditionMessage(e),call.=FALSE)
       )
-#      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)*discount_factor
       log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
       max_log_gp <- max(log_gp)
-      #log_gp[log_gp < log(tol)] <- log(tol)
       if(max_log_gp > -Inf){
         log_gp <- log_gp - max_log_gp
         weights <- exp(log_gp - log_gf)
@@ -333,22 +285,13 @@ abfir_internal <- function (object, Np, nbhd,
         log_gf <- log(tol)
       }
 
-    } ## end of intermediate resampling loop s = 1:Ninter
-
+    }
     # resample down to one particle, making Np copies of, say, particle #1.
     xas <- xf[,1]
 
     if (verbose && (n%%5==0)) cat("abfir timestep",n,"of",N,"finished\n")
 
-  } ## end of main loop n = 1:N
-
-  # compute locally combined pred. weights for each time, unit and particle
-  #
-  # matches abf.R except
-  #   pp -> np
-  #   Np is assumed scalar
-  #   ntimes -> N , nt -> n
-  #   nunits -> U , unit -> u
+  }
   log_loc_comb_pred_weights = array(data = numeric(0), dim=c(U,Np, N))
   log_wm_times_wp_avg = array(data = numeric(0), dim = c(U, N))
   log_wp_avg = array(data = numeric(0), dim = c(U, N))
@@ -430,8 +373,6 @@ setMethod(
    # compute sum (over all Nrep) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
    U <- length(unit_names(object))
-   #rep_mp_sums = array(data = numeric(0), dim = c(U,N))
-   #rep_p_sums = array(data = numeric(0), dim = c(U, N))
    cond_loglik <- foreach::foreach(u=seq_len(U),
                                    .combine = 'rbind',
                                    .packages=c("pomp", "spatPomp"),
@@ -449,24 +390,6 @@ setMethod(
                                      }
                                      cond_loglik_u
                                    }
-   # OLD CODE. Remove by 1/15/2020
-   # cond_loglik = array(data = numeric(0), dim=c(U, N))
-   # for (u in seq_len(U)){
-   #   for (n in seq_len(N)){
-   #     log_mp_sum = logmeanexp(vapply(mult_rep_output,
-   #                                FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-   #                                FUN.VALUE = 1.0))
-   #     log_p_sum = logmeanexp(vapply(mult_rep_output,
-   #                               FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-   #                               FUN.VALUE = 1.0))
-   #     cond_loglik[u,n] = log_mp_sum - log_p_sum
-   #     # for (k in seq_len(Nrep)){
-   #     #   mp_sum = mp_sum + mult_rep_output[[k]]@wm.times.wp.avg[u,n]
-   #     #   p_sum = p_sum + mult_rep_output[[k]]@wp.avg[u,n]
-   #     # }
-   #     # cond.loglik[u,n] = log(mp_sum) - log(p_sum)
-   #   }
-   # }
    new(
       "abfird_spatPomp",
       object,

@@ -45,7 +45,7 @@ Assimilation Monthly Weather Review 129:2884--2903
 }
 \seealso{
 Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{ienkf-spatPomp}}
+\code{\link{ienkf}()}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filtering methods}

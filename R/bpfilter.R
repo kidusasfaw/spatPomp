@@ -1,17 +1,15 @@
-
 ##' Block particle filter (BPF)
 ##'
-##' An algorithm used to estimate the filter distribution of a spatiotemporal partially-observed Markov process (spatPomp).
-##' Running \code{bpfilter} causes the algorithm to split the spatial units into different blocks so that each spatial
-##' unit belongs to one block After the particles are propagated, resampling of the particles occurs
-##' within each block independently based on sampled weights within the block Each block samples only the spatial
-##' components within the block which allows for cross-pollination of particles where the highest weighted
-##' components of each particle are more likely to be resampled and get combined with resampled components of other particles.
-##' By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of dimensionality so that
-##' the resampling does not result in particle depletion with one particle representing the complex filter distribution.
+##' An implementation of the block particle filter algorithm of Rebeschini and van Handel (2015), which is used to estimate the filter distribution
+##' of a spatiotemporal partially-observed Markov process.
+##' \code{bpfilter} requires a partition of the spatial units which can be provided by either the \code{block_size} or \code{block_list} argument
+##' The elements of the partition are called blocks. We perform a resampling for each block independently based on sample weights within the block.
+##' Each resampled block only contains latent states for the spatial components within the block which allows for a ``cross-pollination" of
+##' particles where the highest weighted segments of each particle are more likely to be resampled and get combined with resampled components of
+##' other particles. By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of
+##' dimensionality so that resampling does not result in particle depletion.
 ##'
-##' @name bpfilter-spatPomp
-##' @aliases bpfilter,spatPomp-method
+##' @name bpfilter
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
@@ -47,6 +45,8 @@
 ##' Only one of \code{block_size} or \code{block_list} should be specified.
 ##' If both or neither is provided, an error is triggered.
 ##'
+##' @references \rebeschini2015
+##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
@@ -75,6 +75,9 @@ setClass(
 
 setGeneric("bpfilter",  function (object, ...)standardGeneric("bpfilter"))
 
+##' @name bpfilter-spatPomp
+##' @aliases bpfilter,spatPomp-method
+##' @rdname bpfilter
 ##' @export
 setMethod(
   "bpfilter",

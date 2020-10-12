@@ -9,7 +9,6 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##'
-##'
 ##' @inheritParams spatPomp
 ##' @inheritParams pomp::mif2
 ##'
@@ -225,13 +224,13 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
       g <- igirf.momgirf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
                       params=paramMatrix,
                       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
-                      ...,verbose=verbose,.indices=.indices, .gnsi=gnsi)
+                      verbose=verbose,.indices=.indices, .gnsi=gnsi)
     }
     if(kind == 'quantile'){
       g <- igirf.bootgirf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
                       params=paramMatrix,
                       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
-                      ...,verbose=verbose,.indices=.indices, .gnsi=gnsi)
+                      verbose=verbose,.indices=.indices, .gnsi=gnsi)
 
     }
     gnsi <- FALSE

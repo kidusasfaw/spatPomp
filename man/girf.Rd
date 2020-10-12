@@ -97,14 +97,14 @@ logLik(pfd.b)
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bpfilter-spatPomp}},
-\code{\link{ienkf-spatPomp}},
+\code{\link{bpfilter}()},
+\code{\link{ienkf}()},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bpfilter-spatPomp}},
+\code{\link{bpfilter}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

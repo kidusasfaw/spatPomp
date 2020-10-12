@@ -128,19 +128,18 @@ girf_loglik <- replicate(n = 10,
                           )
 )
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from GIRF with lookahead > 1
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## GIRF with lookahead > 1
+girf_loglik2 <- replicate(n = 5,
+                         expr = logLik(
+                           girf(bm_obj,
+                                Np = 500,
+                                lookahead = 2,
+                                Nguide = 50
+                           )
+                         )
+)
 
-girf_loglik_l2 <- replicate(10,logLik(girf(bm_obj,
-                                        Np = 500,
-                                        lookahead = 2,
-                                        Nguide = 50
-)))
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from ABF
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ABF
 abf_nbhd <- function(object, time, unit) {
   nbhd_list <- list()
   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -149,32 +148,20 @@ abf_nbhd <- function(object, time, unit) {
 }
 
 abf_loglik <- replicate(n=10,
-                         expr=abf(bm_obj,
-                                  Nrep = 100,
-                                  Np = 50,
-                                  nbhd = abf_nbhd))
+                         expr = logLik(abf(bm_obj,
+                                           Nrep = 100,
+                                           Np = 50,
+                                           nbhd = abf_nbhd)))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from abfir
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ABFIR
 abfir_loglik <- replicate(n=10,
                           expr = logLik(abfir(bm_obj,
                                                 Nrep = 100,
                                                 Np=50,
                                                 nbhd = abf_nbhd)))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from EnKF
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-enkf_loglik <- replicate(10,logLik(enkf(bm_obj, Np = 1000)))
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from bpfilter
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 10, block_size = 3)))
-
-
+## BPF
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 100, block_size = 3)))
 
 test_that("ABF, ABFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)

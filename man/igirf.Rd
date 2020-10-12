@@ -113,14 +113,14 @@ The following methods are available for such an object:
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bpfilter-spatPomp}},
+\code{\link{bpfilter}()},
 \code{\link{girf}()},
-\code{\link{ienkf-spatPomp}}
+\code{\link{ienkf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
-\code{\link{bpfilter-spatPomp}},
+\code{\link{bpfilter}()},
 \code{\link{girf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

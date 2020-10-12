@@ -122,6 +122,13 @@ lorenz_dunit_measure <- Csnippet("
   if(!give_log) lik = exp(lik);
 ")
 
+lorenz_runit_measure <- Csnippet("
+  double tol = pow(1.0e-18,U);
+  double Y;
+  Y = rnorm(X,tau+tol);
+")
+
+
 lorenz <- spatPomp(lorenz_data,
                times="time",
                t0=0,
@@ -129,7 +136,6 @@ lorenz <- spatPomp(lorenz_data,
                unit_statenames = lorenz_unit_statenames,
                rprocess=euler(lorenz_rprocess,delta.t=dt),
                skeleton=vectorfield(lorenz_skel),
-               statenames=lorenz_statenames,
                paramnames=lorenz_paramnames,
                globals=lorenz_globals,
                rmeasure=lorenz_rmeasure,
@@ -138,6 +144,7 @@ lorenz <- spatPomp(lorenz_data,
                munit_measure=lorenz_munit_measure,
                vunit_measure=lorenz_vunit_measure,
                dunit_measure=lorenz_dunit_measure,
+               runit_measure=lorenz_runit_measure,
                partrans = parameter_trans(log = c("F", "sigma", "tau")),
                rinit=lorenz_rinit
   )

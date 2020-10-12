@@ -120,6 +120,7 @@ setMethod(
 
     if (missing(tol)) tol <- 1e-300
     if (missing(Ninter)) Ninter <- length(unit_names(object))
+    kind = match.arg(kind)
 
     if(kind == 'moment'){
       tryCatch(
@@ -464,13 +465,28 @@ bootgirf.internal <- function (object,
                                Ninter,
                                lookahead,
                                Nguide,
-                               params,
                                tol,
                                ...,
+                               verbose,
                                .gnsi = TRUE) {
 
-  verbose <- FALSE
-  ep <- paste0("in ",sQuote("bootgirf"),": ")
+  ep <- paste0("in ",sQuote("girf"),": ")
+
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+                unit_covarnames = object@unit_covarnames,
+                shared_covarnames = object@shared_covarnames,
+                runit_measure = object@runit_measure,
+                dunit_measure = object@dunit_measure,
+                eunit_measure = object@eunit_measure,
+                munit_measure = object@munit_measure,
+                vunit_measure = object@vunit_measure,
+                unit_names=object@unit_names,
+                unitname=object@unitname,
+                unit_statenames=object@unit_statenames,
+                unit_obsnames = object@unit_obsnames,
+                unit_accumvars = object@unit_accumvars)
+  params <- coef(object)
 
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
     pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")

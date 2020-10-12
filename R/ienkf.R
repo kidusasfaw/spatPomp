@@ -4,10 +4,9 @@
 ##' perform the filtering step in the iterated filtering context of
 ##' IF2.
 ##'
-##' @name ienkf-spatPomp
-##' @aliases ienkf,spatPomp-method
+##' @name ienkf
 ##' @rdname ienkf
-##' @include spatPomp_class.R
+##' @include spatPomp_class.R spatPomp.R enkf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##'
@@ -16,6 +15,10 @@
 ##'
 ##' @param Nenkf number of iterations of perturbed ENKF.
 ##'
+##' @return
+##' Upon successful completion, \code{ienkf} returns an object of class
+##' \sQuote{ienkfd_spatPomp}.
+
 ##' @examples
 ##' # Create a simulation of a GBM using a default parameter set
 ##' gbm10 <- gbm(U = 10, N = 30)
@@ -87,6 +90,10 @@ setClass(
 
 setGeneric("ienkf",  function (data, ...)standardGeneric("ienkf"))
 
+##' @name ienkf-spatPomp
+##' @aliases ienkf,spatPomp-method
+##' @rdname ienkf
+##' @export
 setMethod(
   "ienkf",
   signature=signature(data="spatPomp"),

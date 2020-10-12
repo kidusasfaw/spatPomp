@@ -389,7 +389,7 @@ measles_skel <- Csnippet('
 ')
 
 
-spatPomp2(measles_cases,
+spatPomp(measles_cases,
         units = "city",
         times = "year",
         t0 = min(measles_cases$year)-1/26,

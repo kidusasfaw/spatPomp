@@ -30,7 +30,7 @@ to_C_array <- function(v)paste0("{",paste0(v,collapse=","),"}")
 dist_C_rows <- apply(dmat,1,to_C_array)
 dist_C_array <- to_C_array(dist_C_rows)
 dist_C <- paste0("const int dist[",U,"][",U,"] = ",dist_C_array,"; ")
-bm_globals <- Csnippet(paste0("#define U ", U, " \n ", dist_C))
+bm_globals <- Csnippet(paste0(dist_C))
 
 
 obs_names <- paste0("U",1:U)
@@ -127,7 +127,7 @@ bm_runit_measure <- Csnippet("
   Y = rnorm(X,tau+tol);
 ")
 
-bm_spatPomp <- spatPomp(bm_data,
+bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time,unit),
                times="time",
                t0=0,
                units="unit",
@@ -146,7 +146,6 @@ bm_spatPomp <- spatPomp(bm_data,
                partrans = parameter_trans(log = c("sigma", "tau"), logit = c("rho")),
                rinit=bm_rinit
   )
-
 
 ## We need a parameter vector. For now, we initialize the process at zero.
 test_ivps <- rep(0,U)
