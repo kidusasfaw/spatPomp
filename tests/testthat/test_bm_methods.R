@@ -94,7 +94,7 @@ igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     Ninter = igirf_ninter,
                     lookahead = igirf_lookahead,
                     Nguide = igirf_nguide,
-                    kind = 'quantile')
+                    kind = 'bootstrap')
 
 ## test
 ### IGIRF

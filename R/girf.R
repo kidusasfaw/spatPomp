@@ -113,7 +113,7 @@ setMethod(
     Ninter,
     lookahead,
     Nguide,
-    kind=c('quantile','moment'),
+    kind=c('bootstrap','moment'),
     tol,
     ...,
     verbose = getOption("verbose", FALSE)) {
@@ -138,7 +138,7 @@ setMethod(
       )
     }
 
-    if(kind == 'quantile'){
+    if(kind == 'bootstrap'){
       tryCatch(
         bootgirf.internal(
           object,
@@ -170,7 +170,7 @@ setMethod(
             lookahead,
             Nguide,
             params,
-            kind = c('quantile','moment'),
+            kind = c('bootstrap','moment'),
             tol,
             ...
             ) {

@@ -190,25 +190,30 @@ setMethod(
     if(!missing(covar)){
       upos_cov <- match(unitname, names(covar))
       tpos_cov <- match(tcovar, names(covar))
+      cov_col_order <- c()
       if(missing(shared_covarnames)) unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]
       else {
         pos_shared_cov <- match(shared_covarnames, names(covar))
         unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov, pos_shared_cov)]
+        cov_col_order <- c(cov_col_order, shared_covarnames)
       }
-      tmp <- 1:length(unit_names)
-      names(tmp) <- unit_names
-      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
-      pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
-      pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-      pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
-      cov_col_order <- c()
-      for(cn in unit_covarnames){
-        for(i in 1:U){
-          cov_col_order = c(cov_col_order, paste0(cn, i))
+      if(length(unit_covarnames) > 0){
+        tmp <- 1:length(unit_names)
+        names(tmp) <- unit_names
+        pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
+        pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+        for(cn in unit_covarnames){
+          for(i in 1:U){
+            cov_col_order = c(cov_col_order, paste0(cn, i))
+          }
         }
+        pomp_covar <- pomp_covar[, c(timename, cov_col_order)]
+        pomp_covar <- pomp::covariate_table(pomp_covar, times=tcovar)
+      } else{
+        pomp_covar <- pomp::covariate_table(covar, times=tcovar)
       }
-      pomp_covar <- pomp_covar[, c(timename, cov_col_order)]
-      pomp_covar <- pomp::covariate_table(pomp_covar, times=tcovar)
     } else {
       pomp_covar <- pomp::covariate_table()
     }
@@ -217,11 +222,16 @@ setMethod(
     if(!missing(unit_statenames)) pomp_statenames <- paste0(rep(unit_statenames,each=U),1:U)
     else pomp_statenames <- NULL
     pomp_obsnames <- paste0(rep(unit_obsnames,each=U),1:U)
-    if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
+    if (!missing(covar)){
+      if(missing(shared_covarnames)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
+      else {
+        if(length(unit_covarnames) == 0) pomp_covarnames <- shared_covarnames
+        else pomp_covarnames <- c(shared_covarnames, paste0(rep(unit_covarnames,each=U),1:U))
+      }
+    }
     else pomp_covarnames <- NULL
     if (missing(paramnames)) paramnames <- NULL
     if (!missing(paramnames)) mparamnames <- paste("M_", paramnames, sep = "")
-
 
     # We will always have a global giving us the number of spatial units
     if(missing(globals)) globals <- Csnippet(paste0("const int U = ",length(unit_names),";\n"))
@@ -309,7 +319,6 @@ setMethod(
     unit_covarnames <- data@unit_covarnames
     if(missing(shared_covarnames))  shared_covarnames <- data@shared_covarnames
     if(missing(unit_accumvars)) unit_accumvars <- data@unit_accumvars
-
     if(!missing(covar)){
       if(timename %in% names(covar)) tcovar <- timename
       else{
@@ -318,25 +327,28 @@ setMethod(
       }
       upos_cov <- match(unitname, names(covar))
       tpos_cov <- match(tcovar, names(covar))
+      cov_col_order <- c()
       if(missing(shared_covarnames)) unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]
       else {
         pos_shared_cov <- match(shared_covarnames, names(covar))
         unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov, pos_shared_cov)]
+        cov_col_order <- c(cov_col_order, shared_covarnames)
       }
-      tmp <- 1:length(unit_names)
-      names(tmp) <- unit_names
-      pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
-      pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
-      pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-      pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
-      cov_col_order <- c()
-      for(cn in unit_covarnames){
-        for(i in 1:U){
-          cov_col_order = c(cov_col_order, paste0(cn, i))
+      if(length(unit_covarnames) > 0){
+        tmp <- 1:length(unit_names)
+        names(tmp) <- unit_names
+        pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
+        pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+        for(cn in unit_covarnames){
+          for(i in 1:U){
+            cov_col_order = c(cov_col_order, paste0(cn, i))
+          }
         }
+        pomp_covar <- pomp_covar[, c(timename, cov_col_order)]
+        pomp_covar <- pomp::covariate_table(pomp_covar, times=tcovar)
       }
-      pomp_covar <- pomp_covar[, c(timename, cov_col_order)]
-      pomp_covar <- pomp::covariate_table(pomp_covar, times=tcovar)
     } else pomp_covar <- data@covar
 
     if (missing(t0)) t0 <- data@t0

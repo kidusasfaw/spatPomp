@@ -74,7 +74,7 @@ setMethod(
   "igirf",
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
-                        Ninter,lookahead,Nguide,kind=c('quantile', 'moment'),
+                        Ninter,lookahead,Nguide,kind=c('bootstrap', 'moment'),
                         tol = 1e-300, max.fail = Inf,save.states = FALSE,
                         ..., verbose = getOption("verbose", FALSE)) {
 
@@ -95,7 +95,7 @@ setMethod(
   "igirf",
   signature=signature(data="igirfd_spatPomp"),
   function (data,Ngirf,Np,rw.sd,cooling.type, cooling.fraction.50, Ninter,
-            lookahead,Nguide,kind=c('quantile','moment'),tol, ...,
+            lookahead,Nguide,kind=c('bootstrap','moment'),tol, ...,
             verbose = getOption("verbose", FALSE)) {
     if (missing(Ngirf)) Ngirf <- data@Ngirf
     if (missing(rw.sd)) rw.sd <- data@rw.sd
@@ -226,7 +226,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
                       verbose=verbose,.indices=.indices, .gnsi=gnsi)
     }
-    if(kind == 'quantile'){
+    if(kind == 'bootstrap'){
       g <- igirf.bootgirf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
                       params=paramMatrix,
                       Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
