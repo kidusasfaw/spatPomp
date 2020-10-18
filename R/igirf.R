@@ -558,6 +558,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
+      tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=tparams,.gnsi=gnsi)
       if(s>1 && length(znames)>0){
@@ -607,7 +608,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             y=object@data[,nt+l,drop=FALSE],
             x=pseudosims,
             times=times[nt+1+l],
-            params=tparams,
+            params=tp_with_guides,
             log=TRUE,
             .gnsi=gnsi
           )),
@@ -616,6 +617,18 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
                  conditionMessage(e),call.=FALSE)
           }
         )
+        if(any(is.na(log_dmeas_weights))){
+          # find particle with the NA
+          na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
+          na_ix_col <- (na_ix %/% U) + (na_ix %% U > 0)
+          illegal_dunit_measure_error(
+            time=times[nt+1+l],
+            lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
+            datvals=object@data[,nt+l],
+            states=pseudosims[,na_ix_col,1L],
+            params=tp_with_guides[,na_ix_col]
+          )
+        }
         ldw <- array(log_dmeas_weights, c(U,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
         log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
         log_resamp_weights <- log_fcst_lik*discount_factor
@@ -700,6 +713,18 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     loglik=sum(cond.loglik)
   )
 }
+
+illegal_dunit_measure_error <- function(time, lik, datvals, states, params){
+  showvals <- c(time=time,lik=lik,datvals,states,params)
+  m1 <- formatC(names(showvals),preserve.width="common")
+  m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
+  pomp:::pStop_(
+    sQuote("dunit_measure")," returns illegal value.\n",
+    "Likelihood, data, states, and parameters are:\n",
+    paste0(m1,": ",m2,collapse="\n")
+  )
+}
+
 
 
 
