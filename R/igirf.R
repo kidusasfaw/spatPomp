@@ -411,6 +411,18 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
                  conditionMessage(e),call.=FALSE)
           }
         )
+        if(any(is.na(log_dmeas_weights))){
+          # find particle with the NA
+          na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
+          na_ix_col <- (na_ix %/% U) + (na_ix %% U > 0)
+          illegal_dunit_measure_error(
+            time=times[nt+1+l],
+            lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
+            datvals=object@data[,nt+l],
+            states=skel[,na_ix_col,l],
+            params=mom_match_param[,,l,na_ix_col]
+          )
+        }
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
