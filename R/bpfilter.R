@@ -2,40 +2,38 @@
 ##'
 ##' An implementation of the block particle filter algorithm of Rebeschini and van Handel (2015), which is used to estimate the filter distribution
 ##' of a spatiotemporal partially-observed Markov process.
-##' \code{bpfilter} requires a partition of the spatial units which can be provided by either the \code{block_size} or \code{block_list} argument
-##' The elements of the partition are called blocks. We perform a resampling for each block independently based on sample weights within the block.
+##' \code{bpfilter} requires a partition of the spatial units which can be provided by either the \code{block_size} or the \code{block_list} argument.
+##' The elements of the partition are called blocks. We perform resampling for each block independently based on sample weights within the block.
 ##' Each resampled block only contains latent states for the spatial components within the block which allows for a ``cross-pollination" of
 ##' particles where the highest weighted segments of each particle are more likely to be resampled and get combined with resampled components of
-##' other particles. By using local particle filters and resampling with a smaller subset of dimensions, it tries to avert the curse of
-##' dimensionality so that resampling does not result in particle depletion.
+##' other particles. The method mitigates the curse of dimensionality by resampling locally.
 ##'
 ##' @name bpfilter
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
+##' @inheritParams abf
 ##'
-##'
-##' @param object A \code{spatPomp} object
-##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{bpfilter} will attempt to run using \code{coef(object)}
-##' @param Np The number of particles used for the simulations. If missing, \code{bpfilter} will attempt to run using \code{ncol(params)}
-##' @param block_size The number of spatial units per block.
-##' @param block_list List that can specifies a partition of the spatial units. Each partition element called a \code{block} and is
+##' @param block_size The number of spatial units per block. If this is provided, the method subdivides units approximately evenly
+##' into blocks with size \code{block_size}.
+##' @param block_list List that specifies an exact partition of the spatial units. Each partition element, or block, is
 ##' an integer vector of neighboring units.
 ##'
 ##' @examples
-##' # Create a simulation of a BM using default parameter set
+##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=6, N=10)
 ##'
-##' # Run BPF with the specified number of particles and number of units per block
-##' bpfilterd.b1 <- bpfilter(b, Np = 100, block_size = 2)
+##' # Run BPF with the specified number of units per block
+##' bpfilterd_b1 <- bpfilter(b, Np = 100, block_size = 2)
 ##'
-##' # Run BPF with the specified number of particles and partition (block list). This specification
-##' is exactly equivalent to the previous example
-##' bpfilterd.b2 <- bpfilter(b, Np = 20, block_list = list(c(1,2), c(3,4), c(5,6)))
+##' # Run BPF with the specified partition
+##' bpfilterd_b2 <- bpfilter(b,
+##'                          Np = 20,
+##'                          block_list = list(c(1,2), c(3,4), c(5,6)))
 ##'
 ##' # Get a likelihood estimate
-##' logLik(bpfilterd.b2)
+##' logLik(bpfilterd_b2)
 ##'
 ##' @return
 ##' Upon successful completion, \code{bpfilter} returns an object of class

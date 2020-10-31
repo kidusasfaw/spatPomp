@@ -18,7 +18,7 @@
   Ninter,
   lookahead,
   Nguide,
-  kind = c("quantile", "moment"),
+  kind = c("bootstrap", "moment"),
   tol = 1e-300,
   max.fail = Inf,
   save.states = FALSE,
@@ -36,7 +36,7 @@
   Ninter,
   lookahead,
   Nguide,
-  kind = c("quantile", "moment"),
+  kind = c("bootstrap", "moment"),
   tol,
   ...,
   verbose = getOption("verbose", FALSE)

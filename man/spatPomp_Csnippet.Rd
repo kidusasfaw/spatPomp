@@ -4,7 +4,15 @@
 \alias{spatPomp_Csnippet}
 \title{spatPomp_Csnippet}
 \usage{
-\S4method{spatPomp_Csnippet}{character}(object, unit_statenames, ...)
+\S4method{spatPomp_Csnippet}{character}(
+  code,
+  unit_statenames,
+  unit_covarnames,
+  unit_ivpnames,
+  unit_paramnames,
+  unit_vfnames,
+  ...
+)
 }
 \description{
 spatPomp_Csnippet

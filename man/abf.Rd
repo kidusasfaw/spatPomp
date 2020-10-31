@@ -8,7 +8,6 @@
 \usage{
 \S4method{abf}{spatPomp}(
   object,
-  Ninter,
   Nrep,
   Np,
   nbhd,
@@ -20,57 +19,70 @@
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
+\item{Nrep}{The number of bootstrap replicates for the adapted simulations.}
+
 \item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
-\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}. The function should return a \code{list} of two-element vectors. The list output of
-\code{nbhd(u,n)} consists of vectors \code{c(a,b)} where \eqn{(a,b)} is a neighbor of \code{(u,n)} in space-time.}
+\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}.
+The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
+which is represented by \code{c(unit,time)}. See example below for more details.}
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
-\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 
-\item{Nreplicates}{The number of replicates for the adapted simulations.}
+When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+
+\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+
+\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
 }
 \value{
 Upon successful completion, \code{abf} returns an object of class
 \sQuote{abfd_spatPomp}.
 }
 \description{
-An algorithm for estimating the filter distribution and likelihood estimate of a spatiotemporal partially-observed Markov process model.
+An algorithm for estimating the filter distribution and likelihood of a spatiotemporal partially-observed Markov process model.
 Running \code{abf} causes the algorithm to run bootstrap replicate jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
 distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each replicate close to each other through resampling down
 to one particle per replicate at each observation time point.
-The adapted simulations are then weighted in a way that tries to avert COD by making a weak coupling assumption to get an approximate filter distribution.
-As a by-product, we also get a biased estimate of the likelihood of the data.
+The adapted simulations are then weighted in a way that mitigates COD by making a weak coupling assumption to get an approximate filter distribution.
+As a by-product, we also get an estimate of the likelihood of the data.
 }
 \section{Methods}{
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{logLik}}}{ yields a biased estimate of the log-likelihood of the data under the model. }
+\item{\code{\link{logLik}}}{ yields an estimate of the log-likelihood of the data under the model. }
 }
 }
 
 \examples{
-# Create a simulation of a BM using default parameter set
+# Create a simulation of a Brownian motion
 b <- bm(U=3, N=10)
 
-# Create a neighborhood function mapping a point in space-time to a list of "neighboring points" in space-time
+# Create a neighborhood function mapping a point in space-time
+# to a list of neighboring points in space-time
 bm_nbhd <- function(object, time, unit) {
   nbhd_list = list()
-  if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
+  if(time > 1 && unit > 1){
+    nbhd_list = c(nbhd_list, list(c(unit-1, time-1)))
+  }
   return(nbhd_list)
 }
 
 # Run ABF specified number of Monte Carlo islands and particles per island
-abfd.b <- abf(b, islands = 50, Np = 10, nbhd = bm_nbhd)
+abfd_bm <- abf(b, islands=50, Np=10, nbhd=bm_nbhd)
 
 # Get the likelihood estimate from ABF
-logLik(abfd.b)
+logLik(abfd_bm)
 
 # Compare with the likelihood estimate from Particle Filter
-pfd.b <- pfilter(b, Np = 500)
-logLik(pfd.b)
+pfd_bm <- pfilter(b, Np = 500)
+logLik(pfd_bm)
 }
 \seealso{
 Other particle filter methods: 

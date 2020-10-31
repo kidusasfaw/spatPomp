@@ -16,12 +16,11 @@ setGeneric(
     standardGeneric("plot")
 )
 
-
 ##' @export
 setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
-  definition=function (x, params = names(coef(x)), ...) {
+  definition=function (x, params = names(coef(x)), ncol = 3, ...) {
     plot.df <- data.frame(x@traces[,c("loglik", params)])
     cn <- colnames(plot.df)
     plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
@@ -30,7 +29,7 @@ setMethod(
     to.plot <- plot.df %>% tidyr::gather_(key = "param", val = "value", to.gather) %>% .[-1,]
     ggplot2::ggplot(data = to.plot) +
       ggplot2::geom_line(mapping = ggplot2::aes(x = iteration, y = value)) +
-      ggplot2::facet_wrap(~param, ncol = 3, scales = "free")
+      ggplot2::facet_wrap(~param, ncol = ncol, scales = "free")
   }
 )
 

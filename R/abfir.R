@@ -1,13 +1,12 @@
 ##' Adapted Bagged Filter with Intermediate Resampling (ABF-IR)
 ##'
-##' An algorithm for estimating the likelihood of a spatiotemporal partially-observed
-##' Markov process (SpatPOMP for short).
+##' An algorithm for estimating the filter distribution and likelihood of a spatiotemporal partially-observed Markov process model.
 ##' Running \code{abfir} causes the algorithm to run Monte Carlo replicated jobs which
 ##' each carry out an adapted simulation using intermediate resampling.
 ##' Adapted simulation is an easier task than filtering, since particles in each replicate
 ##' remain close to each other. Intermediate resampling further assists against
 ##' the curse of dimensionality (COD) problem for importance sampling.
-##' The adapted simulations are then weighted in a way that tries to avert COD by
+##' The adapted simulations are then weighted in a way that mitigates COD by
 ##' making a weak coupling assumption to get an approximate filter distribution.
 ##' As a by-product, we also get an approximation to the likelihood of the data.
 ##'
@@ -21,31 +20,31 @@
 ##' @inheritParams abf
 ##' @inheritParams girf
 ##' @inheritParams pomp::pfilter
-##' @param object A \code{spatPomp} object.
-##' @param Np The number of particles for the adapted simulations within each Monte Carlo replicate.
-##' @param Nrep The number of Monte Carlo replicates for the adapted simulations.
 ##' @examples
-##' # Create a simulation of a BM using default parameter set
+##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=3, N=10)
 ##'
-##' # Create a neighborhood function mapping a point in space-time to a list of ``neighboring points" in space-time
+##' # Create a neighborhood function mapping a point in space-time
+##' # to a list of ``neighboring points" in space-time
 ##' bm_nbhd <- function(object, time, unit) {
 ##'   nbhd_list = list()
-##'   if(time > 1 && unit > 1) nbhd_list = c(nbhd_list, list(c(unit - 1, time - 1)))
+##'   if(time > 1 && unit > 1){
+##'     nbhd_list = c(nbhd_list, list(c(unit-1, time-1)))
+##'   }
 ##'   return(nbhd_list)
 ##' }
-##' # Run abfir specified number of Monte Carlo replicates and particles per replicate
-##' abfird_b <- abfir(b,
+##' # Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
+##' abfird_bm <- abfir(b,
 ##'                   Nrep = 50,
 ##'                   Np=20,
 ##'                   nbhd = bm_nbhd,
-##'                   Ninter = length(unit_names(bm3)))
-##' # Get the likelihood estimate from abfir
-##' logLik(abfird_b)
+##'                   Ninter = length(unit_names(b)))
+##' # Get the likelihood estimate from ABFIR
+##' logLik(abfird_bm)
 ##'
-##' # Compare with the likelihood estimate from Particle Filter
-##' pfd_b <- pfilter(b, Np = 500)
-##' logLik(pfd_b)
+##' # Compare with the likelihood estimate from a particle filter
+##' pfd_bm <- pfilter(b, Np = 500)
+##' logLik(pfd_bm)
 ##' @return
 ##' Upon successful completion, \code{abfir} returns an object of class
 ##' \sQuote{abfird_spatPomp}.
