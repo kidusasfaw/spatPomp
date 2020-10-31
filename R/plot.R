@@ -21,8 +21,8 @@ setGeneric(
 setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
-  definition=function (x, ...) {
-    plot.df <- data.frame(x@traces)
+  definition=function (x, params = names(coef(x)), ...) {
+    plot.df <- data.frame(x@traces[,c("loglik", params)])
     cn <- colnames(plot.df)
     plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
     names(plot.df) <- c("iteration", cn)

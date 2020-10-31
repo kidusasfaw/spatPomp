@@ -183,7 +183,7 @@ setMethod(
   definition=function(object)object@loglik
 )
 
-setGeneric("spatPomp_Csnippet", function(object,...)standardGeneric("spatPomp_Csnippet"))
+setGeneric("spatPomp_Csnippet", function(code,...)standardGeneric("spatPomp_Csnippet"))
 
 ##' @name spatPomp_Csnippet
 ##' @title spatPomp_Csnippet
@@ -191,18 +191,48 @@ setGeneric("spatPomp_Csnippet", function(object,...)standardGeneric("spatPomp_Cs
 ##' @export
 setMethod(
   "spatPomp_Csnippet",
-  signature=signature(object="character"),
-  definition=function(object, unit_statenames,...){
-    if(missing(unit_statenames))
-      return(pomp::Csnippet(object))
-    else{
+  signature=signature(code="character"),
+  definition=function(code, unit_statenames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames, ...){
+    if(missing(unit_statenames) &&
+       missing(unit_covarnames) &&
+       missing(unit_ivpnames) &&
+       missing(unit_paramnames) &&
+       missing(unit_vfnames))
+      return(pomp::Csnippet(code))
+    sn_inits <- cn_inits <- in_inits <- pn_inits <- vn_inits <- character()
+    if(!missing(unit_statenames)){
       sn_inits_lhs <- paste("double *",unit_statenames, sep = "")
       sn_inits_rhs <- paste("&", unit_statenames,"1;",sep="")
       sn_inits_vec <- paste(sn_inits_lhs, sn_inits_rhs, sep = " = ")
       sn_inits <- paste0(sn_inits_vec, collapse = "\n")
     }
-    all_inits <- paste(sn_inits, sep = "\n")
-    full_csnippet <- paste(all_inits, object, sep = "\n")
+    if(!missing(unit_covarnames)){
+      cn_inits_lhs <- paste("const double *",unit_covarnames, sep = "")
+      cn_inits_rhs <- paste("&", unit_covarnames,"1;",sep="")
+      cn_inits_vec <- paste(cn_inits_lhs, cn_inits_rhs, sep = " = ")
+      cn_inits <- paste0(cn_inits_vec, collapse = "\n")
+    }
+    if(!missing(unit_ivpnames)){
+      left_ivpnames = paste(unit_ivpnames, "_0", sep = "")
+      in_inits_lhs <- paste("const double *",left_ivpnames, sep = "")
+      in_inits_rhs <- paste("&", unit_ivpnames,"1_0;",sep="")
+      in_inits_vec <- paste(in_inits_lhs, in_inits_rhs, sep = " = ")
+      in_inits <- paste0(in_inits_vec, collapse = "\n")
+    }
+    if(!missing(unit_paramnames)){
+      pn_inits_lhs <- paste("const double *",unit_paramnames, sep = "")
+      pn_inits_rhs <- paste("&", unit_paramnames,"1;",sep="")
+      pn_inits_vec <- paste(pn_inits_lhs, pn_inits_rhs, sep = " = ")
+      pn_inits <- paste0(pn_inits_vec, collapse = "\n")
+    }
+    if(!missing(unit_vfnames)){
+      vn_inits_lhs <- paste("double *D",unit_vfnames, sep = "")
+      vn_inits_rhs <- paste("&", unit_vfnames,"1;",sep="")
+      vn_inits_vec <- paste(vn_inits_lhs, vn_inits_rhs, sep = " = ")
+      vn_inits <- paste0(vn_inits_vec, collapse = "\n")
+    }
+    all_inits <- paste(sn_inits, cn_inits, in_inits, pn_inits, vn_inits, sep = "\n")
+    full_csnippet <- paste(all_inits, code, sep = "\n")
     return(pomp::Csnippet(full_csnippet))
   }
 )
