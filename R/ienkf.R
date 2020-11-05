@@ -1,8 +1,9 @@
 ##' Iterated ensemble Kalman filter (IEnKF)
 ##'
-##' A parameter estimation algorithm combining that uses EnKF to
-##' perform the filtering step in the iterated filtering context of
-##' IF2.
+##' An implementation of a parameter estimation algorithm that uses
+##' the ensemble Kalman filter (Evensen, G. (1994)) to perform the filtering step in the
+##' parameter-perturbed iterated filtering scheme of Ionides et al. (2015)
+##' following the pseudocode in Asfaw, et al. (2020).
 ##'
 ##' @name ienkf
 ##' @rdname ienkf
@@ -12,39 +13,41 @@
 ##'
 ##' @inheritParams spatPomp
 ##' @inheritParams pomp::mif2
+##' @inheritParams enkf
 ##'
-##' @param Nenkf number of iterations of perturbed ENKF.
+##' @param data an object of class \code{spatPomp}
+##' @param Nenkf number of iterations of perturbed EnKF.
 ##'
 ##' @return
 ##' Upon successful completion, \code{ienkf} returns an object of class
 ##' \sQuote{ienkfd_spatPomp}.
 
 ##' @examples
-##' # Create a simulation of a GBM using a default parameter set
-##' gbm10 <- gbm(U = 10, N = 30)
+##' # Create a simulation of a geometric Brownian motion
+##' gbm10 <- gbm(U=10, N=30)
 ##'
 ##' # Set the initial estimates for the unknown parameters
-##'  start_params <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=1, "X2_0"=1,
-##' "X3_0"=1, "X4_0"=1, "X5_0"=1, "X6_0"=1, "X7_0"=1, "X8_0"=1, "X9_0"=1, "X10_0"=1)
+##' start_params <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5,
+##'                   "X1_0"=1, "X2_0"=1, "X3_0"=1, "X4_0"=1,
+##'                   "X5_0"=1, "X6_0"=1, "X7_0"=1, "X8_0"=1,
+##'                   "X9_0"=1, "X10_0"=1)
 ##'
-##' # Run IENKF with the specified parameters
+##' # Run IEnKF with the specified parameters
 ##' ienkf_out <- ienkf(gbm10,
 ##'                    Nenkf = 10,
+##'                    Np=1000,
 ##'                    rw.sd = rw.sd(
 ##'   rho=0.02, sigma=0.02, tau=0.02,
 ##'   X1_0=0.0, X2_0=0.0, X3_0=0.0, X4_0=0.0, X5_0=0.0,
 ##'   X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0
 ##'                    ),
 ##'                    cooling.type = "geometric",
-##'                    cooling.fraction.50 = 0.5,
-##'                    Np=1000)
+##'                    cooling.fraction.50 = 0.5
+##'                    )
 ##'
 ##' # Get the parameter estimates from the output
 ##' coef(ienkf_out)
 ##'
-##' @return
-##' Upon successful completion, \code{ienkf} returns an object of class
-##' \sQuote{ienkfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

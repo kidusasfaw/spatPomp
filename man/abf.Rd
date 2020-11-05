@@ -88,6 +88,7 @@ logLik(pfd_bm)
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
@@ -95,6 +96,7 @@ Other particle filter methods:
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 }

@@ -20,8 +20,6 @@
   Nguide,
   kind = c("bootstrap", "moment"),
   tol = 1e-300,
-  max.fail = Inf,
-  save.states = FALSE,
   ...,
   verbose = getOption("verbose", FALSE)
 )
@@ -43,20 +41,11 @@
 )
 }
 \arguments{
-\item{data}{either a data frame holding the spatiotemporal data,
-or an object of class \sQuote{spatPomp},
-i.e., the output of another \pkg{spatPomp} calculation.}
+\item{data}{an object of class \code{spatPomp} or \code{igirfd_spatPomp}}
 
-\item{Ngirf}{the number of iterations of perturbed GIRF.}
+\item{Ngirf}{the number of iterations of parameter-perturbed GIRF.}
 
-\item{Np}{the number of particles to use.
-This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-Alternatively, if one wishes the number of particles to vary across timesteps, one may specify \code{Np} either as a vector of positive integers of length \preformatted{length(time(object,t0=TRUE))} or as a function taking a positive integer argument.
-In the latter case, \code{Np(k)} must be a single positive integer, representing the number of particles to be used at the \code{k}-th timestep:
-\code{Np(0)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-\code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
-and so on,
-while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
+\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
 
 \item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 Parameters that are to be estimated should have positive perturbations specified here.
@@ -79,6 +68,16 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
+\item{Ninter}{the number of intermediate resampling time points.}
+
+\item{lookahead}{The number of future observations included in the guide function.}
+
+\item{Nguide}{The number of simulations used to estimate state process uncertainty for each particle.}
+
+\item{kind}{One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.}
+
+\item{tol}{If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.}
+
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 
@@ -94,26 +93,28 @@ Upon successful completion, \code{igirf} returns an object of class
 }
 \description{
 An implementation of a parameter estimation algorithm combining
-GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in Asfaw, Ionides and King (2019).
+the intermediate resampling scheme of the guided intermediate resampling filter of Park and Ionides (2020)
+and the parameter perturbation scheme of Ionides et al. (2015) following the pseudocode in Asfaw, et al. (2020).
 }
 \section{Methods}{
 
 The following methods are available for such an object:
 \describe{
-\item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
+\item{\code{\link{coef}}}{ gives the Monte Carlo maximum likelihood parameter estimate. }
 }
 }
 
 \references{
-\park2019
+\park2020
 
-\asfaw2019
+\asfaw2020
 }
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{ienkf}()}
 
@@ -121,7 +122,12 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()}
+
+Other \pkg{spatPomp} parameter estimation methods: 
+\code{\link{ienkf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}
+\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}

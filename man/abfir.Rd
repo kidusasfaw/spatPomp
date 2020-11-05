@@ -28,7 +28,7 @@
 The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
 which is represented by \code{c(unit,time)}. See example below for more details.}
 
-\item{Ninter}{the number of intermediate resampling timepoints.}
+\item{Ninter}{the number of intermediate resampling time points.}
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
@@ -95,6 +95,7 @@ logLik(pfd_bm)
 Other particle filter methods: 
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
@@ -102,6 +103,7 @@ Other particle filter methods:
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 }

@@ -21,11 +21,9 @@
 )
 }
 \arguments{
-\item{data}{either a data frame holding the spatiotemporal data,
-or an object of class \sQuote{spatPomp},
-i.e., the output of another \pkg{spatPomp} calculation.}
+\item{data}{an object of class \code{spatPomp}}
 
-\item{Nenkf}{number of iterations of perturbed ENKF.}
+\item{Nenkf}{number of iterations of perturbed EnKF.}
 
 \item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 Parameters that are to be estimated should have positive perturbations specified here.
@@ -57,26 +55,20 @@ In the latter case, \code{Np(k)} must be a single positive integer, representing
 and so on,
 while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+\item{...}{If there are arguments that the user would like to pass to \pkg{pomp}'s basic constructor function's \dots argument,
+this argument passes them along. Not recommended for this version of \pkg{spatPomp}.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{ienkf} returns an object of class
 \sQuote{ienkfd_spatPomp}.
-
-Upon successful completion, \code{ienkf} returns an object of class
-\sQuote{ienkfd_spatPomp}.
 }
 \description{
-A parameter estimation algorithm combining that uses EnKF to
-perform the filtering step in the iterated filtering context of
-IF2.
+An implementation of a parameter estimation algorithm that uses
+the ensemble Kalman filter (Evensen, G. (1994)) to perform the filtering step in the
+parameter-perturbed iterated filtering scheme of Ionides et al. (2015)
+following the pseudocode in Asfaw, et al. (2020).
 }
 \section{Methods}{
 
@@ -87,27 +79,31 @@ The following methods are available for such an object:
 }
 
 \examples{
-# Create a simulation of a GBM using a default parameter set
-gbm10 <- gbm(U = 10, N = 30)
+# Create a simulation of a geometric Brownian motion
+gbm10 <- gbm(U=10, N=30)
 
 # Set the initial estimates for the unknown parameters
- start_params <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5, "X1_0"=1, "X2_0"=1,
-"X3_0"=1, "X4_0"=1, "X5_0"=1, "X6_0"=1, "X7_0"=1, "X8_0"=1, "X9_0"=1, "X10_0"=1)
+start_params <- c("rho" = 0.7, "sigma"= 0.5, "tau"=0.5,
+                  "X1_0"=1, "X2_0"=1, "X3_0"=1, "X4_0"=1,
+                  "X5_0"=1, "X6_0"=1, "X7_0"=1, "X8_0"=1,
+                  "X9_0"=1, "X10_0"=1)
 
-# Run IENKF with the specified parameters
+# Run IEnKF with the specified parameters
 ienkf_out <- ienkf(gbm10,
                    Nenkf = 10,
+                   Np=1000,
                    rw.sd = rw.sd(
   rho=0.02, sigma=0.02, tau=0.02,
   X1_0=0.0, X2_0=0.0, X3_0=0.0, X4_0=0.0, X5_0=0.0,
   X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0
                    ),
                    cooling.type = "geometric",
-                   cooling.fraction.50 = 0.5,
-                   Np=1000)
+                   cooling.fraction.50 = 0.5
+                   )
 
 # Get the parameter estimates from the output
 coef(ienkf_out)
+
 
 }
 \references{
@@ -126,11 +122,12 @@ Other particle filter methods:
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{enkf}()}
+\code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}

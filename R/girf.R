@@ -1,7 +1,7 @@
 ##' Guided intermediate resampling filter (GIRF)
 ##'
-##' An implementation of the algorithm of Park and Ionides (2019),
-##' following the pseudocode in Asfaw, Ionides and King (2019).
+##' An implementation of the algorithm of Park and Ionides (2020),
+##' following the pseudocode in Asfaw et al. (2020).
 ##'
 ##' @name girf
 ##' @rdname girf
@@ -10,32 +10,30 @@
 ##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams spatPomp
-##' @param object A \code{spatPomp} object.
-##' @param params A parameter set for the spatiotemporal POMP.
-##' @param Np The number of Monte Carlo particles to be used.
-##' @param Ninter the number of intermediate resampling timepoints.
+##' @inheritParams bpfilter
+##' @param Ninter the number of intermediate resampling time points.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
-##' @param tol If the guide functions become too small (beyond floating-point precision limits), we set them to this value.
+##' @param kind One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.
+##' @param tol If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.
 ##'
 ##' @examples
-##' # Create a simulation of a BM using default parameter set
+##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=3, N=10)
 ##'
 ##' # Run GIRF
-##' girfd.b <- girf(b,
-##'                 Np = 100,
-##'                 Ninter = length(unit_names(b)),
-##'                 lookahead = 1,
-##'                 Nguide = 50
+##' girfd_bm <- girf(b,
+##'                  Np = 100,
+##'                  Ninter = length(unit_names(b)),
+##'                  lookahead = 1,
+##'                  Nguide = 50
 ##' )
 ##' # Get the likelihood estimate from GIRF
-##' logLik(girfd.b)
+##' logLik(girfd_bm)
 ##'
 ##' # Compare with the likelihood estimate from particle filter
-##' pfd.b <- pfilter(b, Np = 500)
-##' logLik(pfd.b)
+##' pfd_bm <- pfilter(b, Np = 500)
+##' logLik(pfd_bm)
 ##' @return
 ##' Upon successful completion, \code{girf} returns an object of class
 ##' \sQuote{girfd_spatPomp}.
@@ -47,9 +45,9 @@
 ##' }
 ##'
 ##' @references
-##' \park2019
+##' \park2020
 ##'
-##' \asfaw2019
+##' \asfaw2020
 NULL
 
 
@@ -169,7 +167,6 @@ setMethod(
             Ninter,
             lookahead,
             Nguide,
-            params,
             kind = c('bootstrap','moment'),
             tol,
             ...
@@ -179,14 +176,12 @@ setMethod(
     if (missing(Ninter)) Ninter <- object@Ninter
     if (missing(Nguide)) Nguide <- object@Nguide
     if (missing(lookahead)) lookahead <- object@lookahead
-    if (missing(params)) params <- coef(object)
 
     girf(as(object,"spatPomp"),
          Np=Np,
          Ninter=Ninter,
          lookahead=lookahead,
          Nguide=Nguide,
-         params=params,
          kind=kind,
          tol=tol,
          ...)

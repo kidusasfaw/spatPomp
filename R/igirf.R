@@ -1,18 +1,21 @@
 ##' Iterated guided intermediate resampling filter (IGIRF)
 ##'
 ##' An implementation of a parameter estimation algorithm combining
-##' GIRF with IF2, proposed by Park and Ionides (2019), following the pseudocode in Asfaw, Ionides and King (2019).
+##' the intermediate resampling scheme of the guided intermediate resampling filter of Park and Ionides (2020)
+##' and the parameter perturbation scheme of Ionides et al. (2015) following the pseudocode in Asfaw, et al. (2020).
 ##'
 ##' @name igirf
 ##' @rdname igirf
 ##' @include spatPomp_class.R spatPomp.R girf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
+##' @family \pkg{spatPomp} parameter estimation methods
 ##'
-##' @inheritParams spatPomp
+##' @inheritParams girf
 ##' @inheritParams pomp::mif2
 ##'
-##' @param Ngirf the number of iterations of perturbed GIRF.
+##' @param data an object of class \code{spatPomp} or \code{igirfd_spatPomp}
+##' @param Ngirf the number of iterations of parameter-perturbed GIRF.
 ##'
 ##' @return
 ##' Upon successful completion, \code{igirf} returns an object of class
@@ -21,13 +24,13 @@
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{
-##' \item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
+##' \item{\code{\link{coef}}}{ gives the Monte Carlo maximum likelihood parameter estimate. }
 ##' }
 ##'
 ##' @references
-##' \park2019
+##' \park2020
 ##'
-##' \asfaw2019
+##' \asfaw2020
 NULL
 
 rw.sd <- pomp:::safecall
@@ -75,13 +78,13 @@ setMethod(
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
                         Ninter,lookahead,Nguide,kind=c('bootstrap', 'moment'),
-                        tol = 1e-300, max.fail = Inf,save.states = FALSE,
+                        tol = 1e-300,
                         ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,kind,tol = tol,
-        max.fail = Inf, save.states = FALSE,...,verbose=verbose),
+        ...,verbose=verbose),
       error = function (e) pomp:::pStop("igirf",conditionMessage(e))
     )
   }
@@ -115,7 +118,7 @@ setMethod(
 
 igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
                             Ninter,lookahead,Nguide,kind,
-                            tol, max.fail = Inf,save.states = FALSE,...,
+                            tol, ...,
                             .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
@@ -223,13 +226,13 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     if(kind == 'moment'){
       g <- igirf.momgirf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
                       params=paramMatrix,
-                      Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
+                      Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,
                       verbose=verbose,.indices=.indices, .gnsi=gnsi)
     }
     if(kind == 'bootstrap'){
       g <- igirf.bootgirf(object=object,Ninter=Ninter,Nguide=Nguide,lookahead=lookahead,
                       params=paramMatrix,
-                      Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,max.fail=max.fail,
+                      Np=Np,girfiter=.ndone+n,cooling.fn=cooling.fn,rw.sd=rw.sd,tol=tol,
                       verbose=verbose,.indices=.indices, .gnsi=gnsi)
 
     }
@@ -259,7 +262,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 }
 
 igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
-                        Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
+                        Np, girfiter, rw.sd, cooling.fn, tol,
                         ..., verbose, .indices = integer(0), .gnsi = TRUE) {
 
   tol <- as.numeric(tol)
@@ -506,7 +509,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
 }
 
 igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
-                            Np, girfiter, rw.sd, cooling.fn, tol, max.fail = Inf,
+                            Np, girfiter, rw.sd, cooling.fn, tol,
                             ..., verbose, .indices = integer(0), .gnsi = TRUE) {
 
   tol <- as.numeric(tol)

@@ -1,9 +1,15 @@
 % unlike in latex, new lines within \newcommand end the command (even using %)
+\newcommand{\Anderson2001}{J.L. Anderson. An Ensemble Adjustment Kalman Filter for Data Assimilation. \emph{Monthly Weather Review} \bold{129}, 2884--2903, 2001.}
+
 \newcommand{\arulampalam2002}{Arulampalam, M. S., Maskell, S., Gordon, N. and Clapp, T. (2002) A Tutorial on Particle Filters for Online Nonlinear/Non-Gaussian Bayesian Tracking. \emph{IEEE Trans. Sig. Proc.}, \bold{50(2)}, 174--188.}
 
-\newcommand{\asfaw2019}{Asfaw, K., Ionides, E. L. and King, A. A. (2019) Statistical inference for spatiotemporal partially observed Markov processes via the R package spatpomp. \emph{Manuscript in preparation}.}
+\newcommand{\asfaw2020}{Asfaw, K. et al. (2020) Statistical inference for spatiotemporal partially observed Markov processes via the R package spatpomp. \emph{Manuscript in preparation}.}
 
 \newcommand{\breto2019}{Breto, C., Ionides, E. L. and King, A. A. (2019) Panel Data Analysis via Mechanistic Models. \emph{To appear in Journal of the American Statistical Association}.}
+
+\newcommand{\Evensen1994}{G. Evensen. Sequential data assimilation with a nonlinear quasi-geostrophic model using Monte Carlo methods to forecast error statistics. \emph{Journal of Geophysical Research: Oceans} \bold{99}, 10143--10162, 1994.}
+
+\newcommand{\Evensen2009}{G. Evensen. \emph{Data assimilation: the ensemble Kalman filter}. Springer-Verlag, 2009.}
 
 \newcommand{\ionides2006}{Ionides, E. L., Breto, C. and King, A. A. (2006) Inference for nonlinear dynamical systems. \emph{Proceedings of the National Academy of Sciences}, \bold{103(49)}, 18438--18443. \acronym{DOI}: 10.1073/pnas.0603181103}
 
@@ -13,7 +19,7 @@
 
 \newcommand{\king2016}{King, A. A., Nguyen, D. and Ionides, E. L. (2016) Statistical Inference for Partially Observed Markov Processes via the R Package pomp. \emph{Journal of Statistical Software}, \bold{69(12)}, 1--43. \acronym{DOI}: 10.18637/jss.v069.i12}
 
-\newcommand{\park2019}{Park, J. and Ionides, E. L. (2019) A guided intermediate resampling particle filter for inference on high dimensional systems. \emph{Arxiv 1708.08543v2}}
+\newcommand{\park2020}{Park, J. and Ionides, E. L. (2020) Inference on high-dimensional implicit dynamic models using a guided intermediate resampling filter. \emph{Statistics and Computing}, \acronym{DOI}: 10.1007/s11222-020-09957-3}
 
 \newcommand{\rebeschini2015}{Rebeschini, P., & Van Handel, R. (2015). Can local particle filters beat the curse of dimensionality?. \emph{The Annals of Applied Probability}, \bold{25(5)}, 2809-2866.}
 

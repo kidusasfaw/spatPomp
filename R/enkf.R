@@ -1,32 +1,37 @@
-##' Generalized Ensemble Kalman filter
+##' Generalized Ensemble Kalman filter (EnKF)
 ##'
 ##' A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994).
-##' This function is generalized to allow for an R matrix that varies over time.
+##' This function is generalized to allow for an measurement covariance matrix that varies over time.
 ##' This is useful if the measurement model varies with the state.
 ##'
 ##' @name enkf
 ##' @rdname enkf
 ##' @include spatPomp_class.R spatPomp.R
 ##' @aliases enkf  enkf,ANY-method enkf,missing-method
-##' @family particle filtering methods
-##' @family \pkg{spatPomp} parameter estimation methods
+##' @family particle filter methods
+##' @family \pkg{spatPomp} filtering methods
 ##'
-##' @inheritParams spatPomp
-##' @param Np the number of particles to use.
+##' @param data A \code{spatPomp} object.
+##' @param Np The number of Monte Carlo particles used to approximate the filter distribution.
+##' @examples
+##' # Create a simulation of a Brownian motion
+##' b <- bm(U=6, N=10)
 ##'
+##' # Run EnKF
+##' enkfd_bm <- enkf(b, Np = 100)
+##'
+##' # Get a likelihood estimate
+##' logLik(enkfd_bm)
+
 ##' @return
 ##' An object of class \sQuote{enkfd_spatPomp}.
 ##'
-##' @references
-##' Evensen, G. (1994) Sequential data assimilation with a
-##' nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
-##' error statistics Journal of Geophysical Research: Oceans 99:10143--10162
+##' @references \Evensen1994
 ##'
-##' Evensen, G. (2009) Data assimilation: the ensemble Kalman filter
-##' Springer-Verlag.
+##' \Evensen2009
 ##'
-##' Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
-##' Assimilation Monthly Weather Review 129:2884--2903
+##' \Anderson2001
+##'
 NULL
 
 setClass(

@@ -43,7 +43,7 @@ and compared on a growing body of models and datasets.
 }
 
 \references{
-\asfaw2019
+\asfaw2020
 }
 \seealso{
 \link[=pomp-package]{pomp package}, \link{panelPomp}

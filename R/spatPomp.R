@@ -1,17 +1,54 @@
-##' Constructor of the basic spatPomp object
+##' Constructor of the spatPomp object
 ##'
-##' This function constructs a \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
+##' This function constructs a class \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
 ##' Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.
 ##' Consequently, we assume some familiarity with \pkg{pomp} and its description by King, Nguyen and Ionides (2016).
 ##' The \code{spatPomp} class inherits from \code{pomp} with the additional unit structure being a defining feature of the resulting models and inference algorithms.
 ##'
+##' One implements a \acronym{SpatPOMP} model by specifying some or all of its \emph{basic components}, including:
+##' \describe{
+##' \item{rinit,}{the simulator from the distribution of the latent state process at the zero-time;}
+##' \item{rprocess,}{the transition simulator of the latent state process;}
+##' \item{dunit_measure,}{the evaluator of the conditional density at a unit's measurement given the unit's latent state;}
+##' \item{eunit_measure,}{the evaluator of the expectation of a unit's measurement given the unit's latent state;}
+##' \item{munit_measure,}{the evaluator of the moment-matched parameter set given a unit's latent state and some empirical measurement variance;}
+##' \item{vunit_measure,}{the evaluator of the variance of a unit's measurement given the unit's latent state;}
+##' \item{runit_measure,}{the simulator of a unit's measurement conditional on the unit's latent state;}
+##' \item{dprocess,}{the evaluator of the density for transitions of the latent state process;}
+##' \item{rmeasure,}{the simulator of the measurements conditional on the latent state;}
+##' \item{dmeasure,}{the evaluator of the conditional density of the measurements given the latent state;}
+##' \item{rprior,}{the simulator from a prior distribution on the parameters;}
+##' \item{dprior,}{the evaluator of the prior density;}
+##' \item{skeleton,}{which computes the deterministic skeleton of the unobserved state process;}
+##' \item{partrans,}{which performs parameter transformations.}
+##' }
+##' The basic structure and its rationale are described in Asfaw et al. (2020).
+##'
+##' Each basic component is supplied via an argument of the same name to \code{spatPomp()}.
+##' The five unit-level model components must be provided via C snippets. The remaining components, whose behaviors are inherited from
+##' \pkg{pomp} may be furnished using C snippets, \R functions, or pre-compiled native routine available in user-provided dynamically loaded libraries.
+##' @param data either a dataframe holding the spatiotemporal data,
+##' or an object of class \sQuote{spatPomp}, i.e., the output of another \pkg{spatPomp} calculation.
+##' If dataframe, the user must provide the name of the times column using the \code{times} argument and
+##' the spatial unit column name using the \code{units} argument. The dataframe provided should be sorted in
+##' increasing order of time and unit name respectively, i.e. observation 1 in unit A should come before observation
+##' 1 in unit B, which should come before observation 2 in unit A.
+##' @param covar An optional dataframe for supplying covariate information. If provided, there must be two
+##' columns that provide the observation time and the observation spatial unit with the same names and arrangement as the \code{data}.
+##' @param unit_statenames The names of the components of the latent state. E.g. if the user is constructing an joint SIR model
+##' over many spatial units, \code{c('S','I','R')} would be passed.
+##' @param unit_accumvars a subset of the \code{unit_statenames} argument that are accumulator variables. See \link[=accumulators]{?pomp::accumulators}
+##' for more on the concept of \pkg{pomp} accumulators.
+##' @param shared_covarnames If \code{covar} is supplied, covariates that are shared must still be specified for each unit, i.e.,
+##' rows with equal values for the same time over all units must be supplied. However, if such covariates exists, supply the names
+##' using this argument.
 ##' @param eunit_measure Evaluator of the expected measurement given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
-##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
+##' Only C snippets are accepted. The C snippet should assign the scalar approximation to the expected measurement to the pre-defined variable \code{ey} given the latent state and the parameters.
 ##' For more information, see the examples section below.
 ##' @param vunit_measure Evaluator of the theoretical measurement variance given the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
-##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
+##' Only C snippets are accepted. The C snippet should assign the scalar approximation to the measurement variance to the pre-defined variable \code{vc} given the latent state and the parameters.
 ##' For more information, see the examples section below.
-##' @param munit_measure Evaluator of a moment-matched measurement variance parameter (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
+##' @param munit_measure Evaluator of a moment-matched parameter set (like the standard deviation parameter of a normal distribution or the size parameter of a negative binomial distribution) given an empirical variance estimate, the latent states and all model parameters.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar approximation to the measurement variance parameter to the pre-defined variable corresponding to that parameter, which has been predefined with a \code{M_} prefix. For instance, if the moment-matched parameter is \code{psi}, then the user should assign \code{M_psi} to the moment-matched value.
 ##' For more information, see the examples section below.
 ##' @param dunit_measure Evaluator of the unit measurement model density given the measurement, the latent states and model parameters. The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
@@ -21,16 +58,17 @@
 ##' The \code{unit} variable is pre-defined, which allows the user to specify differing specifications for each unit using \code{if} conditions.
 ##' Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
 ##' For more information, see the examples section below.
+##' @param \dots If there are arguments that the user would like to pass to \pkg{pomp}'s basic constructor function's \dots argument,
+##' this argument passes them along. Not recommended for this version of \pkg{spatPomp}.
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'
 ##' @include spatPomp_class.R
 ##'
-##' @param data either a data frame holding the spatiotemporal data,
-##' or an object of class \sQuote{spatPomp},
-##' i.e., the output of another \pkg{spatPomp} calculation.
-##'
 ##' @inheritParams pomp::pomp
+##' @references \asfaw2020
+##'
+NULL
 
 setGeneric(
   "construct_spatPomp",
@@ -38,6 +76,8 @@ setGeneric(
     standardGeneric("construct_spatPomp")
 )
 
+
+##' @rdname spatPomp
 ##' @export
 spatPomp <- function (data, units, times, covar, t0, ...,
                       eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure,

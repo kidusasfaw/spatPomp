@@ -28,13 +28,13 @@
 #' and compared on a growing body of models and datasets.
 #'
 #' @section Documentation:
-#' \pkg{spatPomp} is described by Asfaw, Ionides and King (2019).
+#' \pkg{spatPomp} is described by Asfaw et al. (2020)
 #'
 #' @section License:
 #' \pkg{spatPomp} is provided under the \acronym{MIT} License.
 #'
-#' @references \asfaw2019
-#' @author Kidus Asfaw, Edward Ionides, Aaron King
+#' @references \asfaw2020
+#' @author Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron King
 #'
 #' @seealso \link[=pomp-package]{pomp package}, \link{panelPomp}
 #'

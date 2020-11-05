@@ -26,41 +26,31 @@
   Ninter,
   lookahead,
   Nguide,
-  params,
   kind = c("bootstrap", "moment"),
   tol,
   ...
 )
 }
 \arguments{
-\item{object}{A \code{spatPomp} object.}
+\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
 
-\item{Np}{The number of Monte Carlo particles to be used.}
-
-\item{Ninter}{the number of intermediate resampling timepoints.}
+\item{Ninter}{the number of intermediate resampling time points.}
 
 \item{lookahead}{The number of future observations included in the guide function.}
 
 \item{Nguide}{The number of simulations used to estimate state process uncertainty for each particle.}
 
-\item{tol}{If the guide functions become too small (beyond floating-point precision limits), we set them to this value.}
+\item{kind}{One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{params}{A parameter set for the spatiotemporal POMP.}
+\item{tol}{If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class
 \sQuote{girfd_spatPomp}.
 }
 \description{
-An implementation of the algorithm of Park and Ionides (2019),
-following the pseudocode in Asfaw, Ionides and King (2019).
+An implementation of the algorithm of Park and Ionides (2020),
+following the pseudocode in Asfaw et al. (2020).
 }
 \section{Methods}{
 
@@ -71,33 +61,34 @@ The following methods are available for such an object:
 }
 
 \examples{
-# Create a simulation of a BM using default parameter set
+# Create a simulation of a Brownian motion
 b <- bm(U=3, N=10)
 
 # Run GIRF
-girfd.b <- girf(b,
-                Np = 100,
-                Ninter = length(unit_names(b)),
-                lookahead = 1,
-                Nguide = 50
+girfd_bm <- girf(b,
+                 Np = 100,
+                 Ninter = length(unit_names(b)),
+                 lookahead = 1,
+                 Nguide = 50
 )
 # Get the likelihood estimate from GIRF
-logLik(girfd.b)
+logLik(girfd_bm)
 
 # Compare with the likelihood estimate from particle filter
-pfd.b <- pfilter(b, Np = 500)
-logLik(pfd.b)
+pfd_bm <- pfilter(b, Np = 500)
+logLik(pfd_bm)
 }
 \references{
-\park2019
+\park2020
 
-\asfaw2019
+\asfaw2020
 }
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 
@@ -105,6 +96,7 @@ Other \pkg{spatPomp} filtering methods:
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
+\code{\link{enkf}()},
 \code{\link{igirf}()}
 }
 \concept{\pkg{spatPomp} filtering methods}

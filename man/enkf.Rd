@@ -6,46 +6,55 @@
 \alias{enkf,missing-method}
 \alias{enkf-spatPomp}
 \alias{enkf,spatPomp-method}
-\title{Generalized Ensemble Kalman filter}
+\title{Generalized Ensemble Kalman filter (EnKF)}
 \usage{
 \S4method{enkf}{spatPomp}(data, Np, ..., verbose = getOption("verbose", FALSE))
 }
 \arguments{
-\item{data}{either a data frame holding the spatiotemporal data,
-or an object of class \sQuote{spatPomp},
-i.e., the output of another \pkg{spatPomp} calculation.}
+\item{data}{A \code{spatPomp} object.}
 
-\item{Np}{the number of particles to use.}
-
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
 }
 \value{
 An object of class \sQuote{enkfd_spatPomp}.
 }
 \description{
 A function to perform filtering using the ensemble Kalman filter of Evensen, G. (1994).
-This function is generalized to allow for an R matrix that varies over time.
+This function is generalized to allow for an measurement covariance matrix that varies over time.
 This is useful if the measurement model varies with the state.
 }
+\examples{
+# Create a simulation of a Brownian motion
+b <- bm(U=6, N=10)
+
+# Run EnKF
+enkfd_bm <- enkf(b, Np = 100)
+
+# Get a likelihood estimate
+logLik(enkfd_bm)
+}
 \references{
-Evensen, G. (1994) Sequential data assimilation with a
-nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
-error statistics Journal of Geophysical Research: Oceans 99:10143--10162
+\Evensen1994
 
-Evensen, G. (2009) Data assimilation: the ensemble Kalman filter
-Springer-Verlag.
+\Evensen2009
 
-Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
-Assimilation Monthly Weather Review 129:2884--2903
+\Anderson2001
 }
 \seealso{
-Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{ienkf}()}
+Other particle filter methods: 
+\code{\link{abfir}()},
+\code{\link{abf}()},
+\code{\link{bpfilter}()},
+\code{\link{girf}()},
+\code{\link{ienkf}()},
+\code{\link{igirf}()}
+
+Other \pkg{spatPomp} filtering methods: 
+\code{\link{abfir}()},
+\code{\link{abf}()},
+\code{\link{bpfilter}()},
+\code{\link{girf}()},
+\code{\link{igirf}()}
 }
-\concept{\pkg{spatPomp} parameter estimation methods}
-\concept{particle filtering methods}
+\concept{\pkg{spatPomp} filtering methods}
+\concept{particle filter methods}

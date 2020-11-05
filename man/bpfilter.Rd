@@ -17,24 +17,13 @@
 )
 }
 \arguments{
-\item{object}{A \code{spatPomp} object.}
-
-\item{Np}{The number of particles used within each replicate for the adapted simulations.}
+\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
 
 \item{block_size}{The number of spatial units per block. If this is provided, the method subdivides units approximately evenly
 into blocks with size \code{block_size}.}
 
 \item{block_list}{List that specifies an exact partition of the spatial units. Each partition element, or block, is
 an integer vector of neighboring units.}
-
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{bpfilter} returns an object of class
@@ -86,6 +75,7 @@ logLik(bpfilterd_b2)
 Other particle filter methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
@@ -93,6 +83,7 @@ Other particle filter methods:
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{igirf}()}
 }
