@@ -1,7 +1,7 @@
 # The `spatPomp` package
-## What is
-The spatPomp package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models.
-To do so, it relies on and extends a number of facilities that the pomp package provides for inference on time series data using partially-observed Markov process (POMP) models.
+## What is this package?
+The `spatPomp` package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models.
+To do so, it relies on and extends a number of facilities that the `pomp` package provides for inference on time series data using partially-observed Markov process (POMP) models.
 
 ## Why use `spatPomp`?
 The `spatPomp` package concerns models consisting of a collection of interacting units.
