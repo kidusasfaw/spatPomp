@@ -21,10 +21,10 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
 SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
+  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfunthetatov;
-  SEXP fnthetatov, args, ans;
+  SEXP fnthetatov, args;
   SEXP F;
   SEXP x;
   SEXP unitnames;

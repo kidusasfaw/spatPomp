@@ -27,7 +27,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   int *dim, np;
   int nvars, npars = 0, nreps, nlost, nunits, nlookaheads;
   int do_ta, do_pr, all_fail = 0;
-  double sum = 0, sumsq = 0, vsq, ws, w, toler;
+  double ws, w, toler;
   int j, k;
 
   PROTECT(dimX = GET_DIM(x)); nprotect++;
@@ -37,7 +37,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
   PROTECT(dimfsv = GET_DIM(fsv)); nprotect++;
-  dim = INTEGER(dimfsv); 
+  dim = INTEGER(dimfsv);
   nunits = dim[0]; nlookaheads = dim[1]; // todo: consider allowing multi-dimensional observations for each spatial unit.
   f = REAL(fsv);
 
@@ -195,7 +195,7 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
   }
 
   if (do_ta) {
-    SET_ELEMENT(retval,5,anc); 
+    SET_ELEMENT(retval,5,anc);
   }
   if (all_fail) {
     SET_ELEMENT(retval,6,lgps);

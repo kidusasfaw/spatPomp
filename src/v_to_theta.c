@@ -9,23 +9,14 @@
 #include "spatPomp_defines.h"
 #include "pomp.h"
 
-static R_INLINE SEXP ret_array (int npars, int nunits, int nreps, int ntimes) {
-  int dim[4] = {npars, nunits, nreps, ntimes};
-  const char *dimnm[4] = {"param", "unit","rep","time"};
-  SEXP F;
-  PROTECT(F = makearray(4,dim));
-  fixdimnames(F,dimnm,4);
-  UNPROTECT(1);
-  return F;
-}
 SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
+  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
-  SEXP fn, args, ans;
-  SEXP F, M, mparams;
+  SEXP fn, args;
+  SEXP F = NULL, mparams;
   SEXP x;
   SEXP unitnames;
   int *dim;
@@ -128,7 +119,7 @@ SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP param
     double *xs = REAL(x), *ps = REAL(params), *time = REAL(times), *v = REAL(vc);
     double *ft = REAL(mparams);
     double *xp, *pp;
-    int i, j, k, l;
+    int i, j, k;
 
     // extract state, parameter, covariate, observable indices
     sidx = INTEGER(GET_SLOT(pompfun,install("stateindex")));

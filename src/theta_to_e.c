@@ -18,13 +18,14 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
   UNPROTECT(1);
   return F;
 }
+
 SEXP do_theta_to_e (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
+  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfunthetatoe;
-  SEXP fnthetatoe, args, ans;
+  SEXP fnthetatoe, args;
   SEXP F;
   SEXP x;
   SEXP unitnames;

@@ -9,91 +9,6 @@
 #include "spatPomp_defines.h"
 #include "pomp.h"
 
-static R_INLINE SEXP unit_dmeas_args (SEXP args, SEXP Onames, SEXP Snames,
-                                 SEXP Pnames, SEXP Cnames, SEXP unit, SEXP log)
-{
-  int nprotect = 0;
-  SEXP var;
-  int v;
-
-  // we construct the call from end to beginning
-  // 'log', covariates, parameter, unit, states, observables, then time
-
-
-  // 'log' is a needed argument
-  PROTECT(args = LCONS(AS_LOGICAL(log),args)); nprotect++;
-  SET_TAG(args,install("log"));
-
-  // Covariates
-  for (v = LENGTH(Cnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Cnames,v))));
-  }
-
-  // Parameters
-  for (v = LENGTH(Pnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Pnames,v))));
-  }
-
-  // Unit
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
-  SET_TAG(args,install("d"));
-
-  // Latent state variables
-  for (v = LENGTH(Snames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Snames,v))));
-  }
-
-  // Observables
-  for (v = LENGTH(Onames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Onames,v))));
-  }
-
-  // Time
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
-  SET_TAG(args,install("t"));
-
-  UNPROTECT(nprotect);
-  return args;
-
-}
-
-static R_INLINE SEXP eval_call (
-    SEXP fn, SEXP args,
-    double *t,
-    double *unit,
-    double *y, int nobs,
-    double *x, int nvar,
-    double *p, int npar,
-    double *c, int ncov)
-{
-
-  SEXP var = args, ans;
-  int v;
-
-  *(REAL(CAR(var))) = *t; var = CDR(var);
-  for (v = 0; v < nobs; v++, y++, var=CDR(var)) *(REAL(CAR(var))) = *y;
-  for (v = 0; v < nvar; v++, x++, var=CDR(var)) *(REAL(CAR(var))) = *x;
-  *(REAL(CAR(var))) = *unit; var = CDR(var);
-  for (v = 0; v < npar; v++, p++, var=CDR(var)) *(REAL(CAR(var))) = *p;
-  for (v = 0; v < ncov; v++, c++, var=CDR(var)) *(REAL(CAR(var))) = *c;
-
-  PROTECT(ans = eval(LCONS(fn,args),CLOENV(fn)));
-
-  UNPROTECT(1);
-  return ans;
-
-}
-
 static R_INLINE SEXP ret_array (int nreps, int ntimes) {
   int dim[2] = {nreps, ntimes};
   const char *dimnm[2] = {"rep","time"};
@@ -108,10 +23,10 @@ SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
 {
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
+  int ntimes, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
-  SEXP fn, args, ans;
+  SEXP fn, args;
   SEXP F;
   int *dim;
   lookup_table_t covariate_table;
@@ -166,42 +81,6 @@ SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
   switch (mode) {
 
   case Rfun: {
-    //double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
-    //double *ft = REAL(F);
-    //int j, k;
-
-    // build argument list
-    //PROTECT(args = dmeas_args(args,Onames,Snames,Pnames,Cnames,log)); nprotect++;
-
-    //for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
-
-      //R_CheckUserInterrupt();	// check for user interrupt
-
-      //table_lookup(&covariate_table,*time,cov); // interpolate the covariates
-
-      //for (j = 0; j < nreps; j++, ft++) { // loop over replicates
-
-        // evaluate the call
-        //PROTECT(
-          //ans = eval_call(
-            //fn,args,
-            //time,
-            //ys,nobs,
-            //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-            //ps+npars*(j%nrepsp),npars,
-            //cov,ncovars
-          //)
-        //);
-
-        //if (k == 0 && j == 0 && LENGTH(ans) != 1)
-          //errorcall(R_NilValue,"user 'dmeasure' returns a vector of length %d when it should return a scalar.",LENGTH(ans));
-
-        //*ft = *(REAL(AS_NUMERIC(ans)));
-
-        //UNPROTECT(1);
-
-      //}
-    //}
   }
 
     break;

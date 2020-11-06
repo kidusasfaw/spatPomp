@@ -21,10 +21,10 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
 SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp, nobs;
+  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
-  SEXP fn, args, ans;
+  SEXP fn, args;
   SEXP F, M;
   SEXP x;
   SEXP unitnames;
