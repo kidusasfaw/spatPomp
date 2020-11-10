@@ -22,7 +22,6 @@ static R_INLINE SEXP ret_array (int n, int nreps, int ntimes, SEXP names) {
 
   UNPROTECT(1);
   return Y;
-
 }
 
 SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params, SEXP gnsi)
@@ -83,74 +82,6 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
   switch (mode) {
 
   case Rfun: {
-    //double *ys, *yt = 0;
-    //double *time = REAL(times), *xs = REAL(x), *ps = REAL(params);
-    //SEXP ans;
-    //int j, k;
-
-    //PROTECT(args = add_args(args,Snames,Pnames,Cnames)); nprotect++;
-
-    //for (k = 0; k < ntimes; k++, time++) { // loop over times
-
-      //R_CheckUserInterrupt();	// check for user interrupt
-
-      //table_lookup(&covariate_table,*time,cov); // interpolate the covariates
-
-      //for (j = 0; j < nreps; j++) { // loop over replicates
-
-        //if (k == 0 && j == 0) {
-
-          //PROTECT(
-            //ans = eval_call(
-              //fn,args,
-              //time,
-              //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-              //ps+npars*(j%nrepsp),npars,
-              //cov,ncovars
-            //)
-          //); nprotect++;
-
-          //nobs = LENGTH(ans);
-
-          //PROTECT(Onames = GET_NAMES(ans)); nprotect++;
-          //if (invalid_names(Onames))
-            //errorcall(R_NilValue,"'rmeasure' must return a named numeric vector.");
-
-          //PROTECT(Y = ret_array(nobs,nreps,ntimes,Onames)); nprotect++;
-
-          //yt = REAL(Y);
-          //ys = REAL(AS_NUMERIC(ans));
-
-          //memcpy(yt,ys,nobs*sizeof(double));
-          //yt += nobs;
-
-        //} else {
-
-          //PROTECT(
-            //ans = eval_call(
-              //fn,args,
-              //time,
-              //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-              //ps+npars*(j%nrepsp),npars,
-              //cov,ncovars
-            //)
-          //);
-
-          //if (LENGTH(ans) != nobs)
-            //errorcall(R_NilValue,"'rmeasure' returns variable-length results.");
-
-          //ys = REAL(AS_NUMERIC(ans));
-
-          //memcpy(yt,ys,nobs*sizeof(double));
-          //yt += nobs;
-
-          //UNPROTECT(1);
-
-        //}
-
-      //}
-    //}
-
   }
 
     break;

@@ -109,13 +109,9 @@ SEXP girf_computations (SEXP x, SEXP params, SEXP Np,
     // create storage for filter guide functions
     gdim[0] = np;
     PROTECT(lgfs = makearray(1,gdim)); nprotect++;
-    //setrownames(newstates,Xnames,2);
-    //fixdimnames(newstates,dimnm,2);
     // create storage for forecast sample variance of filter states
     newfsvdim[0] = nunits; newfsvdim[1] = nlookaheads; newfsvdim[2] = np;
     PROTECT(newfsv = makearray(3,newfsvdim)); nprotect++;
-    //setrownames(newstates,Xnames,2);
-    //fixdimnames(newstates,dimnm,2);
 
 
     ss = REAL(x);

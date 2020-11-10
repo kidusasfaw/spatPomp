@@ -2,25 +2,32 @@
 % Please edit documentation in R/gbm.R
 \name{gbm}
 \alias{gbm}
-\title{Geometric Brownian motion spatPomp generator}
+\title{Geometric Brownian motion spatPomp simulator}
 \usage{
-gbm(U = 5, N = 100, delta.t = 0.1, IVP_values = 1, delta.obs = 1)
+gbm(U = 5, N = 100, delta_t = 0.1, IVP_values = 1, delta_obs = 1)
 }
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}
 
 \item{N}{A length-one numeric signifying the number of time steps to evolve the process.}
+
+\item{delta_t}{process simulations are performed every \code{delta_t} time units}
+
+\item{IVP_values}{initial value parameters for the latent states}
+
+\item{delta_obs}{observations occur every \code{delta_obs} time units}
 }
 \value{
-A spatPomp object with the specified dimension and time steps.
+An object of class \sQuote{spatPomp}.
 }
 \description{
 Generate a spatPomp object representing a \code{U}-dimensional
-Geometric Brownian motion with spatial correlation decaying geometrically with
-distance around a circle. The model is defined in continuous time
-though in this case an Euler approximation is exact at the evaluation
-times.
+geometric Brownian motion with spatial correlation decaying geometrically with
+distance around a circle. The model is defined in continuous time, but
+an Euler approximation is used for this numerical implementation.
 }
 \examples{
-bm(U=4, N=20)
+g <- gbm(U=4, N=20)
+# See all the model specifications of the object
+spy(g)
 }

@@ -2,13 +2,13 @@
 % Please edit documentation in R/lorenz.R
 \name{lorenz}
 \alias{lorenz}
-\title{Lorenz 96 spatPomp generator}
+\title{Lorenz '96 spatPomp simulator}
 \usage{
 lorenz(
   U = 5,
   N = 100,
-  dt = 0.01,
-  dt_obs = 0.5,
+  delta_t = 0.01,
+  delta_obs = 0.5,
   regular_params = c(F = 8, sigma = 1, tau = 1)
 )
 }
@@ -17,20 +17,27 @@ lorenz(
 
 \item{N}{A length-one numeric signifying the number of observations.}
 
-\item{dt}{A length-one numeric giving the Euler time step for the numerical solution.}
+\item{delta_t}{A length-one numeric giving the Euler time step for the numerical solution.}
 
-\item{dt_obs}{A length-one numeric giving the time between observations.}
+\item{delta_obs}{A length-one numeric giving the time between observations.}
+
+\item{regular_params}{A named numeric vector containing the values of the \code{F},
+\code{sigma} and \code{tau} parameters.
+\code{F=8} is a common value that causes chaotic behavior.}
 }
 \value{
-A spatPomp object with the specified dimension and time steps.
+An object of class \sQuote{spatPomp}.
 }
 \description{
-Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz 96 process with
-\code{N} measurements made at times \eqn{t_n = n * dt_{obs}}, simulated using an Euler method
-with time increment \code{dt}.
+Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz '96 process with
+\code{N} measurements made at times \eqn{t_n = n * delta_obs}, simulated using an Euler method
+with time increment \code{delta_t}.
 }
 \examples{
-l <- lorenz(U=5, N=100, dt=0.01, dt_obs=1)
+l <- lorenz(U=5, N=100, delta_t=0.01, delta_obs=1)
 # See all the model specifications of the object
 spy(l)
+}
+\references{
+\lorenz96
 }

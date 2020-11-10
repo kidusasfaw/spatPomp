@@ -1,11 +1,8 @@
-// dear emacs, please treat this as -*- C++ -*-
-
 #include <R.h>
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
-
 #include "spatPomp_defines.h"
 #include "pomp.h"
 
@@ -18,6 +15,7 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
   UNPROTECT(1);
   return F;
 }
+
 SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
@@ -37,7 +35,6 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   ntimes = length(times);
   if (ntimes < 1) errorcall(R_NilValue,"length('times') = 0, no work to do.");
 
-
   PROTECT(x = as_state_array(X)); nprotect++;
   dim = INTEGER(GET_DIM(x));
   nvars = dim[0]; nrepsx = dim[1]; nguides = nrepsx/nparticles;
@@ -54,18 +51,13 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   if ((nreps % nrepsp != 0) || (nreps % nrepsx != 0))
     errorcall(R_NilValue,"larger number of replicates is not a multiple of smaller.");
 
-
   // extract the user-defined function
   PROTECT(pompfunthetatov = GET_SLOT(object,install("vunit_measure"))); nprotect++;
-
-
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = (*gcn)(GET_SLOT(object,install("covar")))); nprotect++;
   PROTECT(Onames = GET_SLOT(pompfunthetatov,install("obsnames"))); nprotect++;
-
   PROTECT(fnthetatov = (*pfh)(pompfunthetatov,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
-
 
   // set up the covariate table
   covariate_table = (*mct)(GET_SLOT(object,install("covar")),&ncovars);
@@ -81,44 +73,7 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   // create array to store results
   PROTECT(F = ret_array(nunits, nreps, ntimes)); nprotect++;
   switch (mode) {
-
   case Rfun: {
-    //double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
-    //double *ft = REAL(F);
-    //int j, k;
-
-    // build argument list
-    //PROTECT(args = dmeas_args(args,Onames,Snames,Pnames,Cnames,log)); nprotect++;
-
-    //for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
-
-    //R_CheckUserInterrupt();	// check for user interrupt
-
-    //table_lookup(&covariate_table,*time,cov); // interpolate the covariates
-
-    //for (j = 0; j < nreps; j++, ft++) { // loop over replicates
-
-    // evaluate the call
-    //PROTECT(
-    //ans = eval_call(
-    //fn,args,
-    //time,
-    //ys,nobs,
-    //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-    //ps+npars*(j%nrepsp),npars,
-    //cov,ncovars
-    //)
-    //);
-
-    //if (k == 0 && j == 0 && LENGTH(ans) != 1)
-    //errorcall(R_NilValue,"user 'dmeasure' returns a vector of length %d when it should return a scalar.",LENGTH(ans));
-
-    //*ft = *(REAL(AS_NUMERIC(ans)));
-
-    //UNPROTECT(1);
-
-    //}
-    //}
   }
 
     break;
@@ -139,7 +94,6 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
 
     // address of native routine
     *((void **) (&ffthetatov)) = R_ExternalPtrAddr(fnthetatov);
-
     (*spu)(args);
     for (k = 0; k < ntimes; k++, time++) { // loop over times
       // interpolate the covar functions for the covariates
@@ -152,11 +106,8 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
           (*ffthetatov)(ft,xp,pp,oidx,sidx,pidx,cidx,ncovars,cov,*time,i);
         }
       }
-
     }
-
     (*upu)();
-
   }
 
     break;
@@ -170,11 +121,8 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
         *ft = R_NaReal;
       }
     }
-
     warningcall(R_NilValue,"'vunit_measure' unspecified.");
-
   }
-
   }
   // create array to store variances for each combination of unit, particle and lookahead
   UNPROTECT(nprotect);

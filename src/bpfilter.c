@@ -49,7 +49,6 @@ SEXP bpfilter_computations (SEXP x, SEXP params, SEXP Np,
 
   double *ss = 0, *st = 0, *ps = 0, *pt = 0;
 
-
   int xdim[2];
   int sample[np];
 

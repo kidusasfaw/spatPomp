@@ -2,20 +2,23 @@
 % Please edit documentation in R/bm.R
 \name{bm}
 \alias{bm}
-\title{Brownian motion spatPomp generator}
+\title{Brownian motion spatPomp simulator}
 \usage{
-bm(U = 5, N = 100, delta.t = 0.1)
+bm(U = 5, N = 100, delta_t = 0.1)
 }
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}
 
 \item{N}{A length-one numeric signifying the number of observation time steps to evolve the process.}
+
+\item{delta_t}{Process simulations are performed every \code{delta_t} time units
+whereas observations occur every one time unit}
 }
 \value{
-A spatPomp object with the specified dimension and time steps.
+An object of class \sQuote{spatPomp}.
 }
 \description{
-Generate a spatPomp object representing a \code{U}-dimensional
+Generate a class \sQuote{spatPomp} object representing a \code{U}-dimensional
 Brownian motion with spatial correlation decaying geometrically with
 distance around a circle. The model is defined in continuous time
 though in this case an Euler approximation is exact at the evaluation

@@ -19,6 +19,8 @@
 
 \newcommand{\king2016}{King, A. A., Nguyen, D. and Ionides, E. L. (2016) Statistical Inference for Partially Observed Markov Processes via the R Package pomp. \emph{Journal of Statistical Software}, \bold{69(12)}, 1--43. \acronym{DOI}: 10.18637/jss.v069.i12}
 
+\newcommand{\lorenz96}{Lorenz, E. N. (1996) Predictability: A problem partly solved. \emph{Proceedings of the seminar on predictability}}
+
 \newcommand{\park2020}{Park, J. and Ionides, E. L. (2020) Inference on high-dimensional implicit dynamic models using a guided intermediate resampling filter. \emph{Statistics and Computing}, \acronym{DOI}: 10.1007/s11222-020-09957-3}
 
 \newcommand{\rebeschini2015}{Rebeschini, P., & Van Handel, R. (2015). Can local particle filters beat the curse of dimensionality?. \emph{The Annals of Applied Probability}, \bold{25(5)}, 2809-2866.}
