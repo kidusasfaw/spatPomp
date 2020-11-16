@@ -187,8 +187,11 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   if (missing(rw.sd))
     pStop_(sQuote("rw.sd")," must be specified!")
-  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
-
+  #rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,
+                                     time=igirf_rw_sd_times(times=time(object),Ninter=Ninter),
+                                     paramnames=names(start))
+  print(rw.sd)
   if (missing(cooling.fraction.50))
     pStop_(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
@@ -738,6 +741,13 @@ illegal_dunit_measure_error <- function(time, lik, datvals, states, params){
     "Likelihood, data, states, and parameters are:\n",
     paste0(m1,": ",m2,collapse="\n")
   )
+}
+
+igirf_rw_sd_times <- function(times, Ninter){
+  rw_sd_times <- c()
+  for(i in seq(length(times)-1)) rw_sd_times <- c(
+    rw_sd_times, seq(from=times[i],to=times[i+1],length.out=Ninter+1))
+  return(rw_sd_times)
 }
 
 

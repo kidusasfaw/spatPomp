@@ -34,6 +34,8 @@ bm <- function(U=5,N=100,delta_t=0.1){
 
   obs_names <- paste0("U",1:U)
   bm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
+  bm_unitnames <- unique(bm_data$unit)
+  bm_unitnames_level <- paste("U",sort(as.numeric(stringr::str_remove(bm_unitnames, "U"))),sep='')
 
   bm_unit_statenames <- c("X")
   bm_statenames <- paste0(bm_unit_statenames,1:U)
@@ -126,7 +128,7 @@ bm <- function(U=5,N=100,delta_t=0.1){
     Y = rnorm(X,tau+tol);
   ")
 
-  bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time,unit),
+  bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time, factor(unit, levels = bm_unitnames_level)),
                  times="time",
                  t0=0,
                  units="unit",
