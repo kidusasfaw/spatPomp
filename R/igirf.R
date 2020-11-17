@@ -191,7 +191,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,
                                      time=igirf_rw_sd_times(times=time(object),Ninter=Ninter),
                                      paramnames=names(start))
-  print(rw.sd)
   if (missing(cooling.fraction.50))
     pStop_(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
