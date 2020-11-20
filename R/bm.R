@@ -64,27 +64,25 @@ bm <- function(U=5,N=100,delta_t=0.1){
     }
   ", unit_statenames = c("X"))
 
-  bm_skel <- Csnippet("
-    //double *X = &X1;
-    double *DX = &DX1;
-    int u;
-    //double dW[U];
-    //int u,v;
-    for (u = 0 ; u < U ; u++) {
-      DX[u] = 0;
-    }
-  ")
+  bm_skel <- spatPomp_Csnippet(
+    unit_statenames = c("X"),
+    unit_vfnames = c("X"),
+    code = "
+      for (int u = 0 ; u < U ; u++) {
+        DX[u] = 0;
+      }
+    "
+  )
 
-
-  bm_rinit <- Csnippet("
-    double *X = &X1;
-    const double *X_0 =&X1_0;
-    int u;
-    for (u = 0; u < U; u++) {
-      X[u]=X_0[u];
-    }
-  ")
-
+  bm_rinit <- spatPomp_Csnippet(
+    unit_statenames = c("X"),
+    unit_ivpnames = c("X"),
+    code = "
+      for (int u = 0; u < U; u++) {
+        X[u]=X_0[u];
+      }
+    "
+  )
 
   bm_dmeasure <- Csnippet("
     const double *X = &X1;

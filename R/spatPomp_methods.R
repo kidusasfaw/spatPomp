@@ -22,6 +22,18 @@ setAs(
 
 setGeneric("unit_names", function(x,...)standardGeneric("unit_names"))
 
+##' Unit names of a spatiotemporal model
+##'
+##' \code{unit_names} outputs the contents of the \code{unit_names} slot
+##' of a \code{spatPomp} object. The order in which the spatial units
+##' appear in the output vector determines the order in which latent
+##' states and observations for the spatial units are stored.
+##'
+##' @name unit_names
+##' @rdname unit_names
+##' @include spatPomp_class.R spatPomp.R
+##'
+##' @inheritParams abf
 ##' @export
 setMethod(
   "unit_names",
@@ -39,7 +51,27 @@ setMethod(
     invisible(x)
   }
 )
-
+##' Simulation of a spatiotemporal partially-observed Markov process
+##'
+##' \code{simulate} generates simulations of the latent and measurement
+##' processes.
+##'
+##' @name simulate
+##' @rdname simulate
+##' @include spatPomp_class.R spatPomp.R
+##'
+##' @inheritParams abf
+##'
+##' @param nsim number of simulations.
+##' @param format the format of the simulated results. If the argument is
+##' set to \code{'spatPomps'}, the default behavior, then the output is a
+##' \code{list} of \code{spatPomp} objects. Options are \code{'spatPomps'}
+##' and \code{'data.frame'}.
+##' @examples
+##' # Get a spatPomp object
+##' b <- bm(U=5, N=10)
+##' # Get 10 simulations from same model as data.frame
+##' sims <- simulate(b, nsim=10, format='data.frame')
 ##' @export
 setMethod(
   "simulate",
@@ -185,14 +217,77 @@ setMethod(
 
 setGeneric("spatPomp_Csnippet", function(code,...)standardGeneric("spatPomp_Csnippet"))
 
+##' C snippets
+##'
+##' \code{spatPomp_Csnippet()} is used to provide snippets of \proglang{C}
+##' code that specify model components. It functions similarly to \code{Csnippet()} from
+##' the \pkg{pomp} package; in fact, the output of \code{spatPomp_Csnippet} is an object
+##' of class \code{Csnippet}.  It additionally provides some arguments that allow the user
+##' to stay focused on model development in the spatiotemporal context  where
+##' model size grows.
+##'
 ##' @name spatPomp_Csnippet
-##' @title spatPomp_Csnippet
 ##' @rdname spatPomp_Csnippet
+##' @include spatPomp_class.R spatPomp.R
+##'
+##' @param code encodes a component of a spatiotemporal POMP model using \proglang{C} code
+##' @param unit_statenames a subset of the \code{unit_statenames} slot of
+##' the \code{spatPomp} object for which we are writing a model. This argument
+##' allows the user to get variables that can be indexed conveniently to update
+##' states and measurements in a loop. See examples for more details.
+##' @param unit_covarnames if the model has covariate information for each unit,
+##' the names of the covariates for each unit can be supplied to this argument.
+##' This allows the user to get variables that can be indexed conveniently to
+##' use incorporate the covariate information in a loop. See examples for more
+##' details.
+##' @param unit_ivpnames This argument is particularly useful when specifying the
+##' \code{rinit} model component. The \code{paramnames} argument to the
+##' \code{spatPomp()} constructor often has names for initial value
+##' parameters for the latent states (e.g. \code{S1_0}, \code{S2_0} for the
+##' the quantity of susceptibles at unit 1 and unit 2 at the initial time in an
+##' SIR model). By supplying \code{unit_ivpnames}, we can get variables
+##' that can be easily indexed to reference the initial value parameters (in
+##' the previous example, \code{unit_ivpnames=c('S')} we can get a variable
+##' named \code{S_0} that we can index as \code{S_0[0]} and \code{S_0[1]} to
+##' refer to \code{S1_0} and \code{S2_0}). See examples for more details.
+##'
+##' @param unit_vfnames This argument is particularly useful when specifying the
+##' \code{skeleton} model component. For all components of the latent state,
+##' the user can assume a variable defining the time-derivative is pre-defined (e.g.
+##' \code{DS1} and \code{DS2} for the time-derivative of the quantity of the
+##' susceptibles at unit 1 and unit 2 in an SIR model). By supplying
+##' \code{unit_vfnames}, we can get variables that can be easily indexed to
+##' reference these variables (in the previous example,
+##' setting \code{unit_vfnames=c('S')} gets us a variable
+##' named \code{DS} that we can index as \code{DS[0]} and \code{DS[1]} to
+##' refer to \code{DS1} and \code{DS2}). See examples for more details.
+##'
+##' @examples
+##' # Set initial states for Brownian motion
+##' bm_rinit <- spatPomp_Csnippet(
+##'   unit_statenames = c("X"),
+##'   unit_ivpnames = c("X"),
+##'   code = "
+##'     for (int u = 0; u < U; u++) {
+##'       X[u]=X_0[u];
+##'     }
+##'   "
+##' )
+##' # Skeleton for Brownian motion
+##' bm_skel <- spatPomp_Csnippet(
+##'   unit_statenames = c("X"),
+##'   unit_vfnames = c("X"),
+##'   code = "
+##'       for (int u = 0 ; u < U ; u++) {
+##'         DX[u] = 0;
+##'       }
+##'   "
+##')
 ##' @export
 setMethod(
   "spatPomp_Csnippet",
   signature=signature(code="character"),
-  definition=function(code, unit_statenames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames, ...){
+  definition=function(code, unit_statenames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames){
     if(missing(unit_statenames) &&
        missing(unit_covarnames) &&
        missing(unit_ivpnames) &&

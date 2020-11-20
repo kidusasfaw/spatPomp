@@ -1,26 +1,23 @@
-##' Plotting
-##'
-##' Diagnostic plots.
-##'
-##' @name plot
-##' @rdname plot
-##' @include spatPomp_class.R
-##' @include igirf.R
-##' @aliases plot
-##'
-NULL
-
 setGeneric(
   "plot",
   function (x, y, ...)
     standardGeneric("plot")
 )
-
+##' Plotting output of \code{igirf()}
+##'
+##' Diagnostic plot for \code{igirf()}
+##' @name plot-igirf
+##' @rdname plot
+##' @include spatPomp_class.R igirf.R
+##' @aliases plot plot-igirf igirf-method plot igirfd_spatPomp-method plot
+##' @param x an output of \code{igirf()} with class \code{igirfd_spatPomp}
+##' @param params the names of the parameters which should be in the plot
+##' @param ncol the number of columns in the grid plot
 ##' @export
 setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
-  definition=function (x, params = names(coef(x)), ncol = 3, ...) {
+  definition=function (x, params = names(coef(x)), ncol = 3) {
     plot.df <- data.frame(x@traces[,c("loglik", params)])
     cn <- colnames(plot.df)
     plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
@@ -33,11 +30,23 @@ setMethod(
   }
 )
 
+##' Plotting \code{spatPomp} data
+##'
+##' Visualize \code{spatPomp} data
+##' @name plot-spatPomp
+##' @rdname plot
+##' @include spatPomp_class.R
+##' @aliases plot, plot-spatPomp
+##' @param x a \code{spatPomp} object
+##' @param log should the data be log-transformed before plotting?
+##' This helps in contexts where there are spikes that could take away
+##' attention from the dynamics illustrated by the rest of the data.
+##' @param ncol the number of columns in the grid plot
 ##' @export
 setMethod(
   "plot",
   signature=signature(x="spatPomp"),
-  definition=function (x, log=F, ...) {
+  definition=function (x, log=F) {
     df <- as.data.frame(x)
     if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames]+1)
     ggplot2::ggplot(data = df,

@@ -5,18 +5,14 @@
 ##' @name as.data.frame
 ##' @rdname as_data_frame
 ##' @include spatPomp_class.R
-NULL
-
-##' @name coerce-spatPomp-data.frame
 ##' @aliases coerce,spatPomp,data.frame-method
-##' @rdname as_data_frame
 ##'
 ##' @details
 ##' When \code{object} is a simple \sQuote{spatPomp} object,
 ##' \code{as(object,"data.frame")} or \code{as.data.frame(object)} results in a
 ##' data frame with the times, units, observables, states (if known), and
 ##' interpolated covariates (if any).
-##'
+##' @param x a \code{spatPomp} object.
 setAs(
   from="spatPomp",
   to="data.frame",

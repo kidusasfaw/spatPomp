@@ -2,7 +2,6 @@
 % Please edit documentation in R/as_data_frame.R
 \name{as.data.frame}
 \alias{as.data.frame}
-\alias{coerce-spatPomp-data.frame}
 \alias{coerce,spatPomp,data.frame-method}
 \alias{as.data.frame.spatPomp}
 \title{Coerce to data frame}
@@ -10,7 +9,7 @@
 \method{as.data.frame}{spatPomp}(x, ...)
 }
 \arguments{
-\item{x}{any \R object.}
+\item{x}{a \code{spatPomp} object.}
 
 \item{...}{additional arguments to be passed to or from methods.}
 }
