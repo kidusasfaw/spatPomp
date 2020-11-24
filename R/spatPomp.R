@@ -151,7 +151,7 @@ setMethod(
     if (anyDuplicated(names(data)))
       pomp:::pStop_("names of data variables must be unique.")
 
-    if (missing(t0)) reqd_arg(NULL,"t0")
+    if (missing(t0)) pomp:::reqd_arg(NULL,"t0")
 
     tpos <- match(times,names(data),nomatch=0L)
     upos <- match(units,names(data),nomatch=0L)
