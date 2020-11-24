@@ -398,9 +398,9 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
       log_guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
-        if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
-        else discount_denom_init = times[nt+1+l - lookahead_steps]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)
+        if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
+        else discount_denom_init = times[nt+1+l - lookahead]
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
         log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
@@ -612,9 +612,9 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       log_guide_fun = vector(mode = "numeric", length = Np[1]) + 1
 
       for(l in 1:lookahead_steps){
-        if(nt+1+l-lookahead_steps <= 0) discount_denom_init = object@t0
-        else discount_denom_init = times[nt+1+l - lookahead_steps]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/max(times[nt+1+l] - discount_denom_init, 2*(times[nt+2]-times[nt+1])) ## the denominator is at least twice the observation interval, to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function.
+        if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
+        else discount_denom_init = times[nt+1+l - lookahead]
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
 
         # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
         pseudosims <- skel[,rep(1:Np[1], each=Nguide),l,drop=FALSE] + resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),l,drop=FALSE] * sqrt((times[nt+1+l]-tt[s+1])/(times[nt+1+l]-times[nt+1]))
