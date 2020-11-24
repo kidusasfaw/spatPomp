@@ -60,7 +60,7 @@ setMethod(
         size = 11-(2*floor(length(unit_names(x))/10)),
         vjust = 0.5,
         hjust=1)) +
-      ggplot2::scale_fill_gradientn(colours = terrain.colors(10)) +
+      ggplot2::scale_fill_gradient(low = "#000000", high = "#FFFFFF") +
       ggplot2::labs(x = "time", y = "unit", fill = ifelse(log,
                                                  paste("log(",x@unit_obsnames,"+1)",sep=""),
                                                  x@unit_obsnames))

@@ -202,18 +202,17 @@ setMethod(
 
     if (missing(params)) params <- numeric(0)
     if (is.list(params)) params <- unlist(params)
-
     # Make data into a dataframe that pomp would expect
     tmp <- 1:length(unit_names)
     names(tmp) <- unit_names
     pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,unitname], names(tmp))])
-    pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange(pomp_data[,timename], obsname, ui)
+    pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange_at(c(timename,'obsname','ui'))
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
     dat_col_order <- vector(length = U*length(unit_obsnames))
-    for(ot in unit_obsnames){
+    for(oti in seq(length(unit_obsnames))){
       for(i in 1:U){
-        dat_col_order[i] = paste0(ot, i)
+        dat_col_order[(oti-1)*U + i] = paste0(unit_obsnames[oti], i)
       }
     }
     pomp_data <- pomp_data[, c(timename, dat_col_order)]
