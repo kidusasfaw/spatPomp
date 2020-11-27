@@ -206,7 +206,6 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
              conditionMessage(e),call.=FALSE)
       }
     )
-
     #weights[weights == 0] <- tol
     log_cond_densities[,,nt] <- log_weights[,,1]
     log_resamp_weights <- apply(log_weights[,,1,drop=FALSE], 2, function(x) sum(x))
