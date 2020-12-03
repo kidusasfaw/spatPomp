@@ -7,6 +7,7 @@
 \S4method{spatPomp_Csnippet}{character}(
   code,
   unit_statenames,
+  unit_obsnames,
   unit_covarnames,
   unit_ivpnames,
   unit_paramnames,
@@ -17,6 +18,11 @@
 \item{code}{encodes a component of a spatiotemporal POMP model using \proglang{C} code}
 
 \item{unit_statenames}{a subset of the \code{unit_statenames} slot of
+the \code{spatPomp} object for which we are writing a model. This argument
+allows the user to get variables that can be indexed conveniently to update
+states and measurements in a loop. See examples for more details.}
+
+\item{unit_obsnames}{a subset of the \code{unit_obsnames} slot of
 the \code{spatPomp} object for which we are writing a model. This argument
 allows the user to get variables that can be indexed conveniently to update
 states and measurements in a loop. See examples for more details.}

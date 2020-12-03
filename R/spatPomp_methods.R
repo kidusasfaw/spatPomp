@@ -235,6 +235,10 @@ setGeneric("spatPomp_Csnippet", function(code,...)standardGeneric("spatPomp_Csni
 ##' the \code{spatPomp} object for which we are writing a model. This argument
 ##' allows the user to get variables that can be indexed conveniently to update
 ##' states and measurements in a loop. See examples for more details.
+##' @param unit_obsnames a subset of the \code{unit_obsnames} slot of
+##' the \code{spatPomp} object for which we are writing a model. This argument
+##' allows the user to get variables that can be indexed conveniently to update
+##' states and measurements in a loop. See examples for more details.
 ##' @param unit_covarnames if the model has covariate information for each unit,
 ##' the names of the covariates for each unit can be supplied to this argument.
 ##' This allows the user to get variables that can be indexed conveniently to
@@ -287,19 +291,26 @@ setGeneric("spatPomp_Csnippet", function(code,...)standardGeneric("spatPomp_Csni
 setMethod(
   "spatPomp_Csnippet",
   signature=signature(code="character"),
-  definition=function(code, unit_statenames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames){
+  definition=function(code, unit_statenames, unit_obsnames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames){
     if(missing(unit_statenames) &&
+       missing(unit_obsnames) &&
        missing(unit_covarnames) &&
        missing(unit_ivpnames) &&
        missing(unit_paramnames) &&
        missing(unit_vfnames))
       return(pomp::Csnippet(code))
-    sn_inits <- cn_inits <- in_inits <- pn_inits <- vn_inits <- character()
+    sn_inits <- on_inits <- cn_inits <- in_inits <- pn_inits <- vn_inits <- character()
     if(!missing(unit_statenames)){
       sn_inits_lhs <- paste("double *",unit_statenames, sep = "")
       sn_inits_rhs <- paste("&", unit_statenames,"1;",sep="")
       sn_inits_vec <- paste(sn_inits_lhs, sn_inits_rhs, sep = " = ")
       sn_inits <- paste0(sn_inits_vec, collapse = "\n")
+    }
+    if(!missing(unit_obsnames)){
+      on_inits_lhs <- paste("const double *",unit_obsnames, sep = "")
+      on_inits_rhs <- paste("&", unit_obsnames,"1;",sep="")
+      on_inits_vec <- paste(on_inits_lhs, on_inits_rhs, sep = " = ")
+      on_inits <- paste0(on_inits_vec, collapse = "\n")
     }
     if(!missing(unit_covarnames)){
       cn_inits_lhs <- paste("const double *",unit_covarnames, sep = "")
@@ -326,7 +337,7 @@ setMethod(
       vn_inits_vec <- paste(vn_inits_lhs, vn_inits_rhs, sep = " = ")
       vn_inits <- paste0(vn_inits_vec, collapse = "\n")
     }
-    all_inits <- paste(sn_inits, cn_inits, in_inits, pn_inits, vn_inits, sep = "\n")
+    all_inits <- paste(sn_inits, on_inits, cn_inits, in_inits, pn_inits, vn_inits, sep = "\n")
     full_csnippet <- paste(all_inits, code, sep = "\n")
     return(pomp::Csnippet(full_csnippet))
   }

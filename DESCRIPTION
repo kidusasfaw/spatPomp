@@ -1,7 +1,7 @@
 Package: spatPomp
 Type: Package
 Title: Methods for Spatiotemporal POMPs
-Version: 0.11.9.0
+Version: 0.11.10.0
 Date: 2020-10-12
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
              person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
@@ -24,8 +24,8 @@ Collate:
     'bm.R'
     'bpfilter.R'
     'spatPomp.R'
-    'enkf.R'
     'dunit_measure.R'
+    'enkf.R'
     'eunit_measure.R'
     'gbm.R'
     'girf.R'
