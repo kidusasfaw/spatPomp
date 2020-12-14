@@ -48,6 +48,8 @@ extern SEXP abfir_resample(SEXP x, SEXP Np, SEXP weights, SEXP gps, SEXP tol);
 extern SEXP bpfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP doparRS, SEXP resamp_weights);
 // girf.c
 extern SEXP girf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, SEXP doparRS, SEXP weights, SEXP gps, SEXP fsv, SEXP tol);
+//hippie.c
+extern SEXP iabf_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights);
 // fcstsampvar.c
 extern SEXP do_fcst_samp_var(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
 // v_to_theta.c

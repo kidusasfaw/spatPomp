@@ -182,9 +182,9 @@ setMethod(
 )
 
 
-##' @name logLik-abfd.spatPomp
+##' @name logLik-abfd_spatPomp
 ##' @title loglik
-##' @aliases logLik,abfd.spatPomp-method
+##' @aliases logLik,abfd_spatPomp-method
 ##' @rdname loglik
 ##' @export
 setMethod(
@@ -192,6 +192,18 @@ setMethod(
   signature=signature(object="abfd_spatPomp"),
   definition=function(object)object@loglik
 )
+
+##' @name logLik-iabfd_spatPomp
+##' @title loglik
+##' @aliases logLik,iabfd_spatPomp-method
+##' @rdname loglik
+##' @export
+setMethod(
+  "logLik",
+  signature=signature(object="iabfd_spatPomp"),
+  definition=function(object)object@loglik
+)
+
 
 ##' @name logLik-abfird_spatPomp
 ##' @title loglik

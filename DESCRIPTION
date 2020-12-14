@@ -29,6 +29,7 @@ Collate:
     'eunit_measure.R'
     'gbm.R'
     'girf.R'
+    'iabf.R'
     'ienkf.R'
     'igirf.R'
     'lorenz.R'
