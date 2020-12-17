@@ -388,6 +388,12 @@ measles_skel <- Csnippet('
   }
 ')
 
+measles_partrans <- parameter_trans(
+  log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
+  logit=c("cohort","amplitude", "rho"),
+  barycentric=measles_IVPnames,
+)
+
 
 spatPomp(measles_cases,
         units = "city",
@@ -399,6 +405,7 @@ spatPomp(measles_cases,
         skeleton=vectorfield(measles_skel),
         unit_accumvars = c("C","W"),
         paramnames=measles_paramnames,
+        partrans=measles_partrans,
         globals=measles_globals,
         rinit=measles_rinit,
         dmeasure=measles_dmeasure,
