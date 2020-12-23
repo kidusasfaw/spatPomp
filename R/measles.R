@@ -297,12 +297,10 @@ measles_rinit <- Csnippet("
   double *R = &R1;
   double *C = &C1;
   double *W = &W1;
-  //double *Acc = &Acc1;
   const double *S_0 = &S1_0;
   const double *E_0 = &E1_0;
   const double *I_0 = &I1_0;
   const double *R_0 = &R1_0;
-  //const double *Acc_0 = &Acc1_0;
   const double *pop = &pop1;
   double m;
   int u;
@@ -314,7 +312,6 @@ measles_rinit <- Csnippet("
     R[u] = nearbyint(m*R_0[u]);
     W[u] = 0;
     C[u] = 0;
-    //Acc[u] = Acc_0[u];
   }
 ")
 
@@ -330,11 +327,9 @@ measles_skel <- Csnippet('
   double *DE = &DE1;
   double *DI = &DI1;
   double *DR = &DR1;
-  //double *DAcc = &DAcc1;
   double *DC = &DC1;
   double *DW = &DW1;
   double powVec[U];
-  //double *Acc = &Acc1;
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
   int u,v;
@@ -359,9 +354,6 @@ measles_skel <- Csnippet('
   }
 
   for (u = 0 ; u < U ; u++) {
-    //if(obstime != 1){
-       //C[u] = Acc[u];
-    //}
     // cannot readily put the cohort effect into a vectorfield for the skeleton
     // therefore, we ignore it here.
     // this is okay as long as the skeleton is being used for short-term forecasts
@@ -390,8 +382,7 @@ measles_skel <- Csnippet('
 
 measles_partrans <- parameter_trans(
   log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
-  logit=c("cohort","amplitude", "rho"),
-  barycentric=measles_IVPnames,
+  logit=c("cohort","amplitude", "rho")
 )
 
 

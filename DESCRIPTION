@@ -34,6 +34,7 @@ Collate:
     'igirf.R'
     'lorenz.R'
     'measles.R'
+    'measles_iabf.R'
     'munit_measure.R'
     'package.R'
     'plot.R'
