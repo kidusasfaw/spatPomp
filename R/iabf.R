@@ -214,10 +214,10 @@ h_abf_internal <- function (object, params, Np,
 }
 
 iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
-                           cooling.type, cooling.fraction.50,
-                           tol = (1e-18)^17, max.fail = Inf, rep_bound = 10000,
+                           cooling.type, cooling.fraction.50,reps_per_batch,
+                           tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
-                           .indices = vector(mode="list", length = Nrep),
+                           .indices = integer(0),
                            .paramMatrix = NULL,
                            .gnsi = TRUE, ...) {
 
@@ -273,28 +273,6 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
   ntimes = length(time(object))
   nunits = length(unit_names(object))
   for (n in seq_len(Nabf)) {
-    # begin multi-threaded
-    mult_rep_output <- list()
-    pmag_init <- cooling.fn(1,n)$alpha*rw.sd[,1]*2
-    rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag_init,PACKAGE = 'pomp')
-    mult_rep_output <- foreach::foreach(i=1:Nrep,
-                                        .packages=c("pomp","spatPomp"),
-                                        .options.multicore=mcopts) %dopar%  {
-      spatPomp:::h_abf_internal(
-        object=object,
-        params=rep_param_init[,i],
-        Np=Np,
-        nbhd=nbhd,
-        abfiter=.ndone+n,
-        cooling.fn=cooling.fn,
-        rw.sd=rw.sd,
-        tol=tol,
-        max.fail=max.fail,
-        .indices=.indices,
-        verbose=verbose
-      )
-    }
-    # end multi-threaded
     # begin single-threaded
     # mult_rep_output <- list()
     # for(i in 1:Nrep){
@@ -313,44 +291,96 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
     #   )
     # }
     # end single threaded
-    gnsi <- FALSE
-    ## for log-likelihood computation
-    cond_loglik <- foreach::foreach(u=seq_len(nunits),
-      .combine = 'rbind',
-      .packages=c("pomp", "spatPomp"),
-      .options.multicore=mcopts) %dopar%
-    {
-      cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
-      for (n in seq_len(ntimes)){
-        log_mp_sum = logmeanexp(vapply(mult_rep_output,
-                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-                                       FUN.VALUE = 1.0))
-        log_p_sum = logmeanexp(vapply(mult_rep_output,
-                                      FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-                                      FUN.VALUE = 1.0))
-        cond_loglik_u[n] = log_mp_sum - log_p_sum
-      }
-      cond_loglik_u
+
+    # begin multi-threaded
+    pmag_init <- cooling.fn(1,n)$alpha*rw.sd[,1]*2
+    rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag_init,PACKAGE = 'pomp')
+    param_swarm <- rep_param_init*0
+    num_batches <- ceiling(Nrep/reps_per_batch)
+    reps_in_batch <- c(rep(reps_per_batch, Nrep%/%reps_per_batch),Nrep%%reps_per_batch)
+    if(Nrep%%reps_per_batch != 0) {
+      cum_reps_in_batch <- c(0,cumsum(reps_in_batch))
+      batch_weight <- reps_in_batch/Nrep
+    } else {
+      # no need for last element of reps_per_batch since it is 0
+      cum_reps_in_batch <- c(0,cumsum(reps_in_batch)[-length(reps_in_batch)])
+      batch_weight <- reps_in_batch[-length(reps_in_batch)]/Nrep
     }
-    # for parameter estimation
-    rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
-                                    .combine = function(...) abind::abind(..., along=3),
-                                    .packages=c("pomp", "spatPomp"),
-                                    .options.multicore=mcopts) %dopar%
-      {
-        cond_loglik_u <- array(data = numeric(0), dim=c(ntimes,Nrep))
-        for (n in seq_len(ntimes)){
-          rep_filt_weight_un_rep = vapply(mult_rep_output,
-                                          FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-                                          FUN.VALUE = 1.0) -
-                                   vapply(mult_rep_output,
+    cond_loglik_un_batch <- array(dim=c(nunits,ntimes,num_batches))
+    loglik_rep <- vector(length=Nrep)
+    for(k in seq_len(num_batches)){
+      mult_rep_output <- foreach::foreach(i=(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]),
+                                          .packages=c("pomp","spatPomp"),
+                                          .options.multicore=mcopts) %dopar%  {
+                                            spatPomp:::h_abf_internal(
+                                              object=object,
+                                              params=rep_param_init[,i],
+                                              Np=Np,
+                                              nbhd=nbhd,
+                                              abfiter=.ndone+n,
+                                              cooling.fn=cooling.fn,
+                                              rw.sd=rw.sd,
+                                              tol=tol,
+                                              max.fail=max.fail,
+                                              .indices=.indices,
+                                              verbose=verbose
+                                            )
+                                          }
+      ## for log-likelihood computation
+      cond_loglik <- foreach::foreach(u=seq_len(nunits),
+                                      .combine = 'rbind',
+                                      .packages=c("pomp", "spatPomp"),
+                                      .options.multicore=mcopts) %dopar%
+        {
+          cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
+          for (n in seq_len(ntimes)){
+            log_mp_sum = logmeanexp(vapply(mult_rep_output,
+                                           FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+                                           FUN.VALUE = 1.0))
+            log_p_sum = logmeanexp(vapply(mult_rep_output,
                                           FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-                                          FUN.VALUE = 1.0)
-          cond_loglik_u[n,] = rep_filt_weight_un_rep
+                                          FUN.VALUE = 1.0))
+            cond_loglik_u[n] = log_mp_sum - log_p_sum
+          }
+          cond_loglik_u
         }
-        cond_loglik_u
-      }
-    loglik_rep <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
+      cond_loglik_un_batch[,,k] <- cond_loglik
+      rm(cond_loglik)
+
+      # for parameter estimation
+      rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
+                                        .combine = function(...) abind::abind(..., along=3),
+                                        .packages=c("pomp", "spatPomp"),
+                                        .options.multicore=mcopts) %dopar%
+        {
+          cond_loglik_u <- array(data = numeric(0), dim=c(ntimes,length((cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]))))
+          for (n in seq_len(ntimes)){
+            rep_filt_weight_un_rep = vapply(mult_rep_output,
+                                            FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+                                            FUN.VALUE = 1.0) -
+              vapply(mult_rep_output,
+                     FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
+                     FUN.VALUE = 1.0)
+            cond_loglik_u[n,] = rep_filt_weight_un_rep
+          }
+          cond_loglik_u
+        }
+      loglik_rep[(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1])] <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
+      rm(rep_loglik_un)
+
+      # for parameter swarm
+      param_swarm[,(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1])] <- foreach::foreach(
+        i=seq_len(length((cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]))),
+        .combine = 'cbind',
+        .packages=c("pomp", "spatPomp"),
+        .options.multicore=mcopts) %dopar%
+        {
+          mult_rep_output[[i]]@param
+        }
+    }
+    gnsi <- FALSE
+    # combining log-likelihood components
+    cond_loglik <- apply(cond_loglik_un_batch, MARGIN = c(1,2), FUN=weighted.mean, w = batch_weight)
 
     ## parameter selection
     max_loglik_rep <- max(loglik_rep)
@@ -358,13 +388,7 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
     if(all(is.infinite(loglik_rep))) loglik_rep <- rep(log(tol), Nrep)
     else loglik_rep <- loglik_rep - max_loglik_rep
 
-    param_swarm <- foreach::foreach(i=seq_len(Nrep),
-                                    .combine = 'cbind',
-                                    .packages=c("pomp", "spatPomp"),
-                                    .options.multicore=mcopts) %dopar%
-      {
-        mult_rep_output[[i]]@param
-      }
+
     top_indices <- which(loglik_rep > quantile(loglik_rep, p = 1-prop[n]))
     new_indices <- rep_len(top_indices, length.out = Nrep)
     rep_param_init <- param_swarm[,new_indices]
@@ -379,9 +403,11 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
     if (n != Nabf){
       rm(param_swarm)
       rm(mult_rep_output)
-      rm(top_indices)
+      rm(top_indices,new_indices)
       rm(cond_loglik)
-      rm(rep_loglik_un)
+    } else{
+      rm(mult_rep_output)
+      rm(top_indices,new_indices)
     }
 
     if (verbose) cat("iabf iteration",n,"of",Nabf,"completed\n")
@@ -425,7 +451,7 @@ setMethod(
   definition = function (object, Nabf = 1, Nrep, nbhd, prop, Np,
                          rw.sd, cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
-                         max.fail = Inf, rep_bound = 10000,
+                         max.fail = Inf, reps_per_batch = 100,
                          verbose = getOption("verbose"),...) {
 
     ep <- paste0("in ",sQuote("iabf"),": ")
@@ -484,7 +510,7 @@ setMethod(
       cooling.fraction.50=cooling.fraction.50,
       tol=tol,
       max.fail=max.fail,
-      rep_bound = rep_bound,
+      reps_per_batch = reps_per_batch,
       verbose=verbose,
       ...
     )

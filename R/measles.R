@@ -305,13 +305,15 @@ measles_rinit <- Csnippet("
   double m;
   int u;
   for (u = 0; u < U; u++) {
-    m = pop[u]/(S_0[u]+E_0[u]+I_0[u]+R_0[u]);
-    S[u] = nearbyint(m*S_0[u]);
-    E[u] = nearbyint(m*E_0[u]);
-    I[u] = nearbyint(m*I_0[u]);
-    R[u] = nearbyint(m*R_0[u]);
-    W[u] = 0;
-    C[u] = 0;
+      m = (float)(pop[u]);
+      S[u] = nearbyint(m*S_0[u]);
+      I[u] = nearbyint(m*I_0[u]);
+      // Use I[u] and the two relvant rates to
+      // compute E[u]. (γ/σ)*I[u]
+      E[u] = nearbyint((gamma/sigma)*(float)(I[u]));
+      R[u] = pop[u]-S[u]-E[u]-I[u];
+      W[u] = 0;
+      C[u] = 0;
   }
 ")
 
@@ -382,7 +384,7 @@ measles_skel <- Csnippet('
 
 measles_partrans <- parameter_trans(
   log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
-  logit=c("cohort","amplitude", "rho")
+  logit=c("amplitude", "rho")
 )
 
 
