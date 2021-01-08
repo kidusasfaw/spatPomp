@@ -264,7 +264,7 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
 
   rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   if(within_iter_cooling){
-    rw.sd[,(within_iter_cooling_after:max(time(object)))] <- rw.sd[,(within_iter_cooling_after:max(time(object)))]*within_iter_cooling_frac
+    rw.sd[,(within_iter_cooling_after:length(time(object)))] <- rw.sd[,(within_iter_cooling_after:length(time(object)))]*within_iter_cooling_frac
   }
 
   traces <- array(dim=c(Nabf+1,length(start)+1),
