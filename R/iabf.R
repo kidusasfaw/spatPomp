@@ -215,6 +215,9 @@ h_abf_internal <- function (object, params, Np,
 
 iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
                            cooling.type, cooling.fraction.50,reps_per_batch,
+                           within_iter_cooling,
+                           within_iter_cooling_after,
+                           within_iter_cooling_frac,
                            tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
                            .indices = integer(0),
@@ -260,6 +263,9 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
                           dimnames = list(param = names(rep_param_init), rep = NULL))
 
   rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  if(within_iter_cooling){
+    rw.sd[,(within_iter_cooling_after:max(time(object)))] <- rw.sd[,(within_iter_cooling_after:max(time(object)))]*within_iter_cooling_frac
+  }
 
   traces <- array(dim=c(Nabf+1,length(start)+1),
                     dimnames=list(iteration=seq.int(.ndone,.ndone+Nabf),
@@ -399,6 +405,8 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
 
     traces[n+1,-c(1)] <- coef(object)
     traces[n+1,c(1)] <- sum(cond_loglik)
+    if (verbose) cat("iabf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(cond_loglik),"\n")
+
 
     if (n != Nabf){
       rm(param_swarm)
@@ -409,8 +417,6 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
       rm(mult_rep_output)
       rm(top_indices,new_indices)
     }
-
-    if (verbose) cat("iabf iteration",n,"of",Nabf,"completed\n")
   }
 
   # parameter swarm to be outputted
@@ -449,7 +455,10 @@ setMethod(
   "iabf",
   signature=signature(object="spatPomp"),
   definition = function (object, Nabf = 1, Nrep, nbhd, prop, Np,
-                         rw.sd, cooling.type = c("geometric","hyperbolic"),
+                         rw.sd, within_iter_cooling=FALSE,
+                         within_iter_cooling_after=time(object)[floor(length(time(object))/2)],
+                         within_iter_cooling_frac=0.5,
+                         cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
                          max.fail = Inf, reps_per_batch = 100,
                          verbose = getOption("verbose"),...) {
@@ -498,6 +507,13 @@ setMethod(
       stop(ep,sQuote("cooling.fraction.50"),
            " must be in (0,1]",call.=FALSE)
 
+    if((within_iter_cooling) &&
+       (missing(within_iter_cooling_after) || missing(within_iter_cooling_frac))){
+      stop(ep,sQuote("within_iter_cooling"),
+           " set TRUE but", sQuote("within_iter_cooling_after")," or",sQuote("within_iter_cooling_frac"),
+           " not set",call.=FALSE)
+    }
+
     iabf_internal(
       object=object,
       Nrep=Nrep,
@@ -506,6 +522,9 @@ setMethod(
       nbhd=nbhd,
       Np=Np,
       rw.sd=rw.sd,
+      within_iter_cooling=within_iter_cooling,
+      within_iter_cooling_after=within_iter_cooling_after,
+      within_iter_cooling_frac=within_iter_cooling_frac,
       cooling.type=cooling.type,
       cooling.fraction.50=cooling.fraction.50,
       tol=tol,
