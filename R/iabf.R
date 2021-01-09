@@ -399,13 +399,16 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
     new_indices <- rep_len(top_indices, length.out = Nrep)
     rep_param_init <- param_swarm[,new_indices]
 
-    coef(object) <- partrans(object,
-                             apply(rep_param_init, 1, mean),
-                             dir="fromEst", .gnsi = .gnsi)
+    coef(object) <- apply(partrans(object,
+                                   rep_param_init,
+                                   dir="fromEst", .gnsi=.gnsi), 1, mean)
 
     traces[n+1,-c(1)] <- coef(object)
     traces[n+1,c(1)] <- sum(cond_loglik)
-    if (verbose) cat("iabf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(cond_loglik),"\n")
+    if (verbose) {
+      cat("iabf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(cond_loglik),"\n")
+      print(coef(object))
+    }
 
 
     if (n != Nabf){
