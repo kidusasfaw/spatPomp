@@ -299,8 +299,8 @@ iabf_internal <- function (object, Nrep, nbhd, prop, Nabf, Np, rw.sd,
     # end single threaded
 
     # begin multi-threaded
-    pmag_init <- cooling.fn(1,n)$alpha*rw.sd[,1]*2
-    rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag_init,PACKAGE = 'pomp')
+    # pmag_init <- cooling.fn(1,n)$alpha*rw.sd[,1]*2
+    # rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag_init,PACKAGE = 'pomp')
     param_swarm <- rep_param_init*0
     num_batches <- ceiling(Nrep/reps_per_batch)
     reps_in_batch <- c(rep(reps_per_batch, Nrep%/%reps_per_batch),Nrep%%reps_per_batch)
