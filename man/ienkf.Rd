@@ -124,10 +124,12 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
+\code{\link{iabf2}()},
 \code{\link{iabf}()},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
+\code{\link{iabf2}()},
 \code{\link{iabf}()},
 \code{\link{igirf}()}
 }

@@ -30,6 +30,7 @@ Collate:
     'gbm.R'
     'girf.R'
     'iabf.R'
+    'iabf2.R'
     'ienkf.R'
     'igirf.R'
     'lorenz.R'
