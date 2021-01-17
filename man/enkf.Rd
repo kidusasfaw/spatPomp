@@ -47,6 +47,7 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{girf}()},
 \code{\link{iabf2}()},
+\code{\link{iabf3}()},
 \code{\link{iabf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}

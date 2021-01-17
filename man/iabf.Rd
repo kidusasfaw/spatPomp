@@ -96,11 +96,13 @@ Other particle filter methods:
 \code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{iabf2}()},
+\code{\link{iabf3}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
 \code{\link{iabf2}()},
+\code{\link{iabf3}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 }

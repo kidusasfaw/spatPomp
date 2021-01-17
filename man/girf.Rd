@@ -90,6 +90,7 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{iabf2}()},
+\code{\link{iabf3}()},
 \code{\link{iabf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
