@@ -251,7 +251,6 @@ iabf_internal3 <- function (object, Nrep, nbhd, Nabf, Np, prop,rw.sd,
   ntimes = length(time(object))
   nunits = length(unit_names(object))
   for (n in seq_len(Nabf)) {
-    # begin single-threaded
     prev_weights <- NULL
     cond_loglik <- array(dim=c(nunits,ntimes))
     states <- NULL
@@ -260,24 +259,49 @@ iabf_internal3 <- function (object, Nrep, nbhd, Nabf, Np, prop,rw.sd,
       ## perturb parameters
       pmag <- cooling.fn(nt,n)$alpha*rw.sd[,nt]
       rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag,PACKAGE = 'pomp')
-      for(i in seq_len(Nrep)){
-        mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal3(
-          object=object,
-          params=rep_param_init[,i],
-          states=(if(is.null(states)) NULL else states[,i]),
-          obs_num=nt,
-          prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-          Np=Np,
-          nbhd=nbhd,
-          abfiter=.ndone+n,
-          cooling.fn=cooling.fn,
-          rw.sd=rw.sd,
-          tol=tol,
-          max.fail=max.fail,
-          .indices=.indices,
-          verbose=verbose
-        ))
-      }
+      # begin multi-threaded
+      mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
+                                          .packages=c("pomp","spatPomp"),
+                                          .options.multicore=mcopts) %dopar%  {
+                                            spatPomp:::h_abf_internal3(
+                                              object=object,
+                                              params=rep_param_init[,i],
+                                              states=(if(is.null(states)) NULL else states[,i]),
+                                              obs_num=nt,
+                                              prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+                                              Np=Np,
+                                              nbhd=nbhd,
+                                              abfiter=.ndone+n,
+                                              cooling.fn=cooling.fn,
+                                              rw.sd=rw.sd,
+                                              tol=tol,
+                                              max.fail=max.fail,
+                                              .indices=.indices,
+                                              verbose=verbose
+                                            )
+                                          }
+      # end multi-threaded
+      # begin single-threaded
+      # for(i in seq_len(Nrep)){
+      #   mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal3(
+      #     object=object,
+      #     params=rep_param_init[,i],
+      #     states=(if(is.null(states)) NULL else states[,i]),
+      #     obs_num=nt,
+      #     prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+      #     Np=Np,
+      #     nbhd=nbhd,
+      #     abfiter=.ndone+n,
+      #     cooling.fn=cooling.fn,
+      #     rw.sd=rw.sd,
+      #     tol=tol,
+      #     max.fail=max.fail,
+      #     .indices=.indices,
+      #     verbose=verbose
+      #   ))
+      # }
+      # end single-threaded
+
       # for the next observation time, how far back do we need
       # to provide the conditional densities, f_{Y_{u,n}|X_{u,n}}?
       max_lookback <- 0
@@ -359,95 +383,6 @@ iabf_internal3 <- function (object, Nrep, nbhd, Nabf, Np, prop,rw.sd,
       rm(param_swarm,resampled_idx)
       rm(mult_rep_output)
     } # end time loop
-    # end single threaded
-
-    # begin multi-threaded
-    # pmag_init <- cooling.fn(1,n)$alpha*rw.sd[,1]*2
-    # rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag_init,PACKAGE = 'pomp')
-    # param_swarm <- rep_param_init*0
-    # num_batches <- ceiling(Nrep/reps_per_batch)
-    # reps_in_batch <- c(rep(reps_per_batch, Nrep%/%reps_per_batch),Nrep%%reps_per_batch)
-    # if(Nrep%%reps_per_batch != 0) {
-    #   cum_reps_in_batch <- c(0,cumsum(reps_in_batch))
-    #   batch_weight <- reps_in_batch/Nrep
-    # } else {
-    #   # no need for last element of reps_per_batch since it is 0
-    #   cum_reps_in_batch <- c(0,cumsum(reps_in_batch)[-length(reps_in_batch)])
-    #   batch_weight <- reps_in_batch[-length(reps_in_batch)]/Nrep
-    # }
-    # cond_loglik_un_batch <- array(dim=c(nunits,ntimes,num_batches))
-    # loglik_rep <- vector(length=Nrep)
-    # for(k in seq_len(num_batches)){
-    #   mult_rep_output <- foreach::foreach(i=(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]),
-    #                                       .packages=c("pomp","spatPomp"),
-    #                                       .options.multicore=mcopts) %dopar%  {
-    #                                         spatPomp:::h_abf_internal(
-    #                                           object=object,
-    #                                           params=rep_param_init[,i],
-    #                                           Np=Np,
-    #                                           nbhd=nbhd,
-    #                                           abfiter=.ndone+n,
-    #                                           cooling.fn=cooling.fn,
-    #                                           rw.sd=rw.sd,
-    #                                           tol=tol,
-    #                                           max.fail=max.fail,
-    #                                           .indices=.indices,
-    #                                           verbose=verbose
-    #                                         )
-    #                                       }
-    #   ## for log-likelihood computation
-    #   cond_loglik <- foreach::foreach(u=seq_len(nunits),
-    #                                   .combine = 'rbind',
-    #                                   .packages=c("pomp", "spatPomp"),
-    #                                   .options.multicore=mcopts) %dopar%
-    #     {
-    #       cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
-    #       for (n in seq_len(ntimes)){
-    #         log_mp_sum = logmeanexp(vapply(mult_rep_output,
-    #                                        FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-    #                                        FUN.VALUE = 1.0))
-    #         log_p_sum = logmeanexp(vapply(mult_rep_output,
-    #                                       FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-    #                                       FUN.VALUE = 1.0))
-    #         cond_loglik_u[n] = log_mp_sum - log_p_sum
-    #       }
-    #       cond_loglik_u
-    #     }
-    #   cond_loglik_un_batch[,,k] <- cond_loglik
-    #   rm(cond_loglik)
-    #
-    #   # for parameter estimation
-    #   rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
-    #                                     .combine = function(...) abind::abind(..., along=3),
-    #                                     .packages=c("pomp", "spatPomp"),
-    #                                     .options.multicore=mcopts) %dopar%
-    #     {
-    #       cond_loglik_u <- array(data = numeric(0), dim=c(ntimes,length((cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]))))
-    #       for (n in seq_len(ntimes)){
-    #         rep_filt_weight_un_rep = vapply(mult_rep_output,
-    #                                         FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-    #                                         FUN.VALUE = 1.0) -
-    #           vapply(mult_rep_output,
-    #                  FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-    #                  FUN.VALUE = 1.0)
-    #         cond_loglik_u[n,] = rep_filt_weight_un_rep
-    #       }
-    #       cond_loglik_u
-    #     }
-    #   loglik_rep[(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1])] <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
-    #   rm(rep_loglik_un)
-    #
-    #   # for parameter swarm
-    #   param_swarm[,(cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1])] <- foreach::foreach(
-    #     i=seq_len(length((cum_reps_in_batch[k]+1):(cum_reps_in_batch[k+1]))),
-    #     .combine = 'cbind',
-    #     .packages=c("pomp", "spatPomp"),
-    #     .options.multicore=mcopts) %dopar%
-    #     {
-    #       mult_rep_output[[i]]@param
-    #     }
-    # }
-    # end multi-threaded
     gnsi <- FALSE
     coef(object) <- apply(partrans(object,
                              rep_param_init,
