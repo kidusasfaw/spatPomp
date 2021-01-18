@@ -344,7 +344,7 @@ iabf_internal3 <- function (object, Nrep, nbhd, Nabf, Np, prop,rw.sd,
       selection_weights <- as.integer(loglik_rep >= quantile(loglik_rep, 1-prop))
       resampled_idx <- sample(selection_idx, size = Nrep, replace = TRUE, prob = selection_weights)
       rep_param_init <- param_swarm[,resampled_idx]
-      rm(selection_idx,selection_weights,resampled_idx)
+      rm(selection_idx,selection_weights)
 
       #  states
       states <- foreach::foreach(
@@ -355,8 +355,8 @@ iabf_internal3 <- function (object, Nrep, nbhd, Nabf, Np, prop,rw.sd,
         {
           mult_rep_output[[i]]@state
         }
-
-      rm(param_swarm)
+      states <- states[,resampled_idx]
+      rm(param_swarm,resampled_idx)
       rm(mult_rep_output)
     } # end time loop
     # end single threaded
