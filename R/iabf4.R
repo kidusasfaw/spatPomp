@@ -267,7 +267,12 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
     prev_weights <- NULL
     cond_loglik <- array(dim=c(nunits,ntimes))
     states <- NULL
+    x <- 1
     for (b in block_list){
+      x <- x + 1
+      if(x %% 20){
+        if(verbose) cat("working on observation times ", b, " in iteration ", n, "\n")
+      }
       mult_rep_output <- list()
       ## perturb parameters
       pmag <- cooling.fn(min(b),n)$alpha*rw.sd[,min(b)]
