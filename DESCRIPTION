@@ -32,6 +32,7 @@ Collate:
     'iabf.R'
     'iabf2.R'
     'iabf3.R'
+    'iabf4.R'
     'ienkf.R'
     'igirf.R'
     'lorenz.R'
