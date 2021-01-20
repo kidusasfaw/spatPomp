@@ -278,46 +278,46 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
       pmag <- cooling.fn(min(b),n)$alpha*rw.sd[,min(b)]
       rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag,PACKAGE = 'pomp')
       # begin multi-threaded
-      # mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
-      #                                     .packages=c("pomp","spatPomp"),
-      #                                     .options.multicore=mcopts) %dopar%  {
-      #                                       spatPomp:::h_abf_internal4(
-      #                                         object=object,
-      #                                         params=rep_param_init[,i],
-      #                                         states=(if(is.null(states)) NULL else states[,i]),
-      #                                         obs_nums=b,
-      #                                         prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-      #                                         Np=Np,
-      #                                         nbhd=nbhd,
-      #                                         abfiter=.ndone+n,
-      #                                         cooling.fn=cooling.fn,
-      #                                         rw.sd=rw.sd,
-      #                                         tol=tol,
-      #                                         max.fail=max.fail,
-      #                                         .indices=.indices,
-      #                                         verbose=verbose
-      #                                       )
-      #                                     }
+      mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
+                                          .packages=c("pomp","spatPomp"),
+                                          .options.multicore=mcopts) %dopar%  {
+                                            spatPomp:::h_abf_internal4(
+                                              object=object,
+                                              params=rep_param_init[,i],
+                                              states=(if(is.null(states)) NULL else states[,i]),
+                                              obs_nums=b,
+                                              prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+                                              Np=Np,
+                                              nbhd=nbhd,
+                                              abfiter=.ndone+n,
+                                              cooling.fn=cooling.fn,
+                                              rw.sd=rw.sd,
+                                              tol=tol,
+                                              max.fail=max.fail,
+                                              .indices=.indices,
+                                              verbose=verbose
+                                            )
+                                          }
       # end multi-threaded
       # begin single-threaded
-      for(i in seq_len(Nrep)){
-        mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
-          object=object,
-          params=rep_param_init[,i],
-          states=(if(is.null(states)) NULL else states[,i]),
-          obs_nums=b,
-          prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-          Np=Np,
-          nbhd=nbhd,
-          abfiter=.ndone+n,
-          cooling.fn=cooling.fn,
-          rw.sd=rw.sd,
-          tol=tol,
-          max.fail=max.fail,
-          .indices=.indices,
-          verbose=verbose
-        ))
-      }
+      # for(i in seq_len(Nrep)){
+      #   mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
+      #     object=object,
+      #     params=rep_param_init[,i],
+      #     states=(if(is.null(states)) NULL else states[,i]),
+      #     obs_nums=b,
+      #     prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+      #     Np=Np,
+      #     nbhd=nbhd,
+      #     abfiter=.ndone+n,
+      #     cooling.fn=cooling.fn,
+      #     rw.sd=rw.sd,
+      #     tol=tol,
+      #     max.fail=max.fail,
+      #     .indices=.indices,
+      #     verbose=verbose
+      #   ))
+      # }
       # end single-threaded
 
       # for the next observation time, how far back do we need
