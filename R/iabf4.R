@@ -126,25 +126,19 @@ h_abf_internal4 <- function (object,
     gnsi <- FALSE
     xx <- tryCatch(
       .Call(
-        "iabf_computations",
+        "abf_computations",
         x=X,
         params=params,
         Np=Np[nt+1],
-        rw_sd=numeric(0),
-        predmean=FALSE,
-        predvar=FALSE,
-        filtmean=FALSE,
         trackancestry=FALSE,
-        onepar=FALSE,
         weights=resamp_weights
       ),
       error = function (e) {
-        stop(ep,"iabf resampling computation error: ",conditionMessage(e),call.=FALSE)
+        stop(ep,conditionMessage(e),call.=FALSE) # nocov
       }
     )
 
     x <- xx$states
-    params <- xx$params
   }
 
   log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits,Np[1L], n_obs_times))
@@ -270,7 +264,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
     x <- 1
     for (b in block_list){
       x <- x + 1
-      if(x %% 20){
+      if(x %% 20 == 0){
         if(verbose) cat("working on observation times ", b, " in iteration ", n, "\n")
       }
       mult_rep_output <- list()
@@ -278,46 +272,46 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
       pmag <- cooling.fn(min(b),n)$alpha*rw.sd[,min(b)]
       rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag,PACKAGE = 'pomp')
       # begin multi-threaded
-      mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
-                                          .packages=c("pomp","spatPomp"),
-                                          .options.multicore=mcopts) %dopar%  {
-                                            spatPomp:::h_abf_internal4(
-                                              object=object,
-                                              params=rep_param_init[,i],
-                                              states=(if(is.null(states)) NULL else states[,i]),
-                                              obs_nums=b,
-                                              prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-                                              Np=Np,
-                                              nbhd=nbhd,
-                                              abfiter=.ndone+n,
-                                              cooling.fn=cooling.fn,
-                                              rw.sd=rw.sd,
-                                              tol=tol,
-                                              max.fail=max.fail,
-                                              .indices=.indices,
-                                              verbose=verbose
-                                            )
-                                          }
+      # mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
+      #                                     .packages=c("pomp","spatPomp"),
+      #                                     .options.multicore=mcopts) %dopar%  {
+      #                                       spatPomp:::h_abf_internal4(
+      #                                         object=object,
+      #                                         params=rep_param_init[,i],
+      #                                         states=(if(is.null(states)) NULL else states[,i]),
+      #                                         obs_nums=b,
+      #                                         prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+      #                                         Np=Np,
+      #                                         nbhd=nbhd,
+      #                                         abfiter=.ndone+n,
+      #                                         cooling.fn=cooling.fn,
+      #                                         rw.sd=rw.sd,
+      #                                         tol=tol,
+      #                                         max.fail=max.fail,
+      #                                         .indices=.indices,
+      #                                         verbose=verbose
+      #                                       )
+      #                                     }
       # end multi-threaded
       # begin single-threaded
-      # for(i in seq_len(Nrep)){
-      #   mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
-      #     object=object,
-      #     params=rep_param_init[,i],
-      #     states=(if(is.null(states)) NULL else states[,i]),
-      #     obs_nums=b,
-      #     prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-      #     Np=Np,
-      #     nbhd=nbhd,
-      #     abfiter=.ndone+n,
-      #     cooling.fn=cooling.fn,
-      #     rw.sd=rw.sd,
-      #     tol=tol,
-      #     max.fail=max.fail,
-      #     .indices=.indices,
-      #     verbose=verbose
-      #   ))
-      # }
+      for(i in seq_len(Nrep)){
+        mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
+          object=object,
+          params=rep_param_init[,i],
+          states=(if(is.null(states)) NULL else states[,i]),
+          obs_nums=b,
+          prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+          Np=Np,
+          nbhd=nbhd,
+          abfiter=.ndone+n,
+          cooling.fn=cooling.fn,
+          rw.sd=rw.sd,
+          tol=tol,
+          max.fail=max.fail,
+          .indices=.indices,
+          verbose=verbose
+        ))
+      }
       # end single-threaded
 
       # for the next observation time, how far back do we need
@@ -403,6 +397,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
           mult_rep_output[[i]]@state
         }
       states <- states[,resampled_idx]
+      prev_weights <- prev_weights[,,,resampled_idx,drop=FALSE]
       rm(param_swarm,resampled_idx)
       rm(mult_rep_output)
     } # end block loop
