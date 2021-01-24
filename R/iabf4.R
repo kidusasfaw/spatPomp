@@ -29,6 +29,22 @@ NULL
 
 rw.sd <- pomp:::safecall
 
+setClass(
+  "adapted_replicate_extended3",
+  contains='adapted_replicate',
+  slots=c(
+    param = 'numeric',
+    state = 'numeric',
+    prev_weights = 'array',
+    island_weight = "numeric"
+  ),
+  prototype=prototype(
+    param=numeric(0),
+    state=numeric(0),
+    prev_weights = array(data=numeric(0),dim=c(0,0,0)),
+    island_weight = numeric(0)
+  )
+)
 
 
 h_abf_internal4 <- function (object,
@@ -159,9 +175,13 @@ h_abf_internal4 <- function (object,
           log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,num_old_times + num_new_times]
         else{
           # means prev_meas_weights was non-null
-          if(dim(log_cond_densities)[3]>length(obs_nums))
+          if(dim(log_cond_densities)[3]>length(obs_nums)){
             log_prod_cond_dens_not_nt[, nt-neighbor_n] <- log_prod_cond_dens_not_nt[, nt-neighbor_n] +
               log_cond_densities[neighbor_u,,num_old_times+num_new_times-(nt-neighbor_n)]
+          } else {
+            log_prod_cond_dens_not_nt[, nt-neighbor_n] <- log_prod_cond_dens_not_nt[, nt-neighbor_n] +
+              log_cond_densities[neighbor_u, ,neighbor_n]
+          }
         }
       }
       log_loc_comb_pred_weights[unit, ,num_new_times]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
@@ -181,12 +201,13 @@ h_abf_internal4 <- function (object,
   log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
   pompUnload(object,verbose=FALSE)
   new(
-    "adapted_replicate_extended2",
+    "adapted_replicate_extended3",
     log_wm_times_wp_avg = log_wm_times_wp_avg,
     log_wp_avg = log_wp_avg,
     param=params_last,
     state=x[,1],
     prev_weights=prev_meas_weights,
+    island_weight = sum(log_wm_times_wp_avg - log_wp_avg),
     Np=as.integer(Np),
     tol=tol
   )
@@ -351,34 +372,30 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
           cond_loglik_u
         }
       #  for parameter swarm
-      param_swarm <- foreach::foreach(
-        i=seq_len(Nrep),
-        .combine = 'cbind',
-        .packages=c("pomp", "spatPomp"),
-        .options.multicore=mcopts) %dopar%
-        {
-          mult_rep_output[[i]]@param
-        }
+      param_swarm <- lapply(mult_rep_output, slot, name="param")
+      param_swarm <- do.call(cbind, param_swarm)
+      rownames(param_swarm) <- rownames(rep_param_init)
       #  for parameter estimation
-      rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
-                                        .combine = function(...) abind::abind(..., along=3),
-                                        .packages=c("pomp", "spatPomp"),
-                                        .options.multicore=mcopts) %dopar%
-        {
-          cond_loglik_u <- array(data = numeric(0), dim=c(length(b),Nrep))
-          for (n in seq_len(length(b))){
-            rep_filt_weight_un_rep = vapply(mult_rep_output,
-                                            FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-                                            FUN.VALUE = 1.0) -
-              vapply(mult_rep_output,
-                     FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-                     FUN.VALUE = 1.0)
-            cond_loglik_u[n,] = rep_filt_weight_un_rep
-          }
-          cond_loglik_u
-        }
-      loglik_rep <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
-      rm(rep_loglik_un)
+      # rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
+      #                                   .combine = function(...) abind::abind(..., along=3),
+      #                                   .packages=c("pomp", "spatPomp"),
+      #                                   .options.multicore=mcopts) %dopar%
+      #   {
+      #     cond_loglik_u <- array(data = numeric(0), dim=c(length(b),Nrep))
+      #     for (n in seq_len(length(b))){
+      #       rep_filt_weight_un_rep = vapply(mult_rep_output,
+      #                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+      #                                       FUN.VALUE = 1.0) -
+      #         vapply(mult_rep_output,
+      #                FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
+      #                FUN.VALUE = 1.0)
+      #       cond_loglik_u[n,] = rep_filt_weight_un_rep
+      #     }
+      #     cond_loglik_u
+      #   }
+      # loglik_rep <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
+      # rm(rep_loglik_un)
+      loglik_rep <- sapply(mult_rep_output, slot, "island_weight")
 
       # parameter selection
       selection_idx <- 1:Nrep
@@ -388,14 +405,8 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
       rm(selection_idx,selection_weights)
 
       #  states
-      states <- foreach::foreach(
-        i=seq_len(Nrep),
-        .combine = 'cbind',
-        .packages=c("pomp", "spatPomp"),
-        .options.multicore=mcopts) %dopar%
-        {
-          mult_rep_output[[i]]@state
-        }
+      states <- lapply(mult_rep_output, slot, name="state")
+      states <- do.call(cbind, states)
       states <- states[,resampled_idx]
       prev_weights <- prev_weights[,,,resampled_idx,drop=FALSE]
       rm(param_swarm,resampled_idx)
