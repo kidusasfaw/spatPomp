@@ -75,16 +75,14 @@ h_abf_internal4 <- function (object,
                   dim = c(length(params),Np[1L]),
                   dimnames = list(param = names(params), rep = NULL))
 
-  if(!is.null(prev_meas_weights))
-    # prev_meas_weights came as U*N*J so change it to U*J*N to
-    # agree with log_cond_densities
+  if(!is.null(prev_meas_weights)){
     prev_meas_weights <- array(data = prev_meas_weights,
                                dim = c(dim(prev_meas_weights)[1],
-                                       dim(prev_meas_weights)[3],
-                                       dim(prev_meas_weights)[2]),
+                                       dim(prev_meas_weights)[2],
+                                       dim(prev_meas_weights)[3]),
                                )
+  }
   if(!is.null(states)) x <- states
-
   if(!is.null(prev_meas_weights)) num_old_times <- dim(prev_meas_weights)[3]
   else num_old_times <- 0
   num_new_times <- 0
@@ -187,14 +185,14 @@ h_abf_internal4 <- function (object,
       log_loc_comb_pred_weights[unit, ,num_new_times]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
     }
   }
-  if(dim(log_cond_densities)[3]>length(obs_nums))
-    # log_cond_densities comes as a U*J*N so flip it back to U*N*J for iabf_internal
-    prev_meas_weights <- array(log_cond_densities, dim=c(dim(log_cond_densities)[1],
-                                                         dim(log_cond_densities)[3],
-                                                         dim(log_cond_densities)[2]))
-  else
-    prev_meas_weights <- array(log_cond_densities, dim=c(nunits, num_new_times, Np[1]))
-
+  # if(dim(log_cond_densities)[3]>length(obs_nums))
+  #   # log_cond_densities comes as a U*J*N so flip it back to U*N*J for iabf_internal
+  #   prev_meas_weights <- array(log_cond_densities, dim=c(dim(log_cond_densities)[1],
+  #                                                        dim(log_cond_densities)[3],
+  #                                                        dim(log_cond_densities)[2]))
+  # else
+  #   prev_meas_weights <- array(log_cond_densities, dim=c(nunits, num_new_times, Np[1]))
+  prev_meas_weights <- log_cond_densities
   params_last = params[,1]
   log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities[,,(num_old_times+1):
                                                                                (dim(log_cond_densities)[3]),drop=FALSE], c(1,3), FUN = logmeanexp)
@@ -213,7 +211,7 @@ h_abf_internal4 <- function (object,
   )
 }
 
-iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,rw.sd,
+iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, parallel, rw.sd,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
@@ -292,49 +290,51 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
       ## perturb parameters
       pmag <- cooling.fn(min(b),n)$alpha*rw.sd[,min(b)]
       rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag,PACKAGE = 'pomp')
-      # begin multi-threaded
-      # mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
-      #                                     .packages=c("pomp","spatPomp"),
-      #                                     .options.multicore=mcopts) %dopar%  {
-      #                                       spatPomp:::h_abf_internal4(
-      #                                         object=object,
-      #                                         params=rep_param_init[,i],
-      #                                         states=(if(is.null(states)) NULL else states[,i]),
-      #                                         obs_nums=b,
-      #                                         prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-      #                                         Np=Np,
-      #                                         nbhd=nbhd,
-      #                                         abfiter=.ndone+n,
-      #                                         cooling.fn=cooling.fn,
-      #                                         rw.sd=rw.sd,
-      #                                         tol=tol,
-      #                                         max.fail=max.fail,
-      #                                         .indices=.indices,
-      #                                         verbose=verbose
-      #                                       )
-      #                                     }
-      # end multi-threaded
-      # begin single-threaded
-      for(i in seq_len(Nrep)){
-        mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
-          object=object,
-          params=rep_param_init[,i],
-          states=(if(is.null(states)) NULL else states[,i]),
-          obs_nums=b,
-          prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
-          Np=Np,
-          nbhd=nbhd,
-          abfiter=.ndone+n,
-          cooling.fn=cooling.fn,
-          rw.sd=rw.sd,
-          tol=tol,
-          max.fail=max.fail,
-          .indices=.indices,
-          verbose=verbose
-        ))
+      if(parallel){
+        # begin multi-threaded
+        mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
+                                            .packages=c("pomp","spatPomp"),
+                                            .options.multicore=mcopts) %dopar%  {
+                                              spatPomp:::h_abf_internal4(
+                                                object=object,
+                                                params=rep_param_init[,i],
+                                                states=(if(is.null(states)) NULL else states[,i]),
+                                                obs_nums=b,
+                                                prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+                                                Np=Np,
+                                                nbhd=nbhd,
+                                                abfiter=.ndone+n,
+                                                cooling.fn=cooling.fn,
+                                                rw.sd=rw.sd,
+                                                tol=tol,
+                                                max.fail=max.fail,
+                                                .indices=.indices,
+                                                verbose=verbose
+                                              )
+                                            }
+        # end multi-threaded
+      } else{
+        # begin single-threaded
+        for(i in seq_len(Nrep)){
+          mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
+            object=object,
+            params=rep_param_init[,i],
+            states=(if(is.null(states)) NULL else states[,i]),
+            obs_nums=b,
+            prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
+            Np=Np,
+            nbhd=nbhd,
+            abfiter=.ndone+n,
+            cooling.fn=cooling.fn,
+            rw.sd=rw.sd,
+            tol=tol,
+            max.fail=max.fail,
+            .indices=.indices,
+            verbose=verbose
+          ))
+        }
+        # end single-threaded
       }
-      # end single-threaded
-
       # for the next observation time, how far back do we need
       # to provide the conditional densities, f_{Y_{u,n}|X_{u,n}}?
       max_lookback <- 0
@@ -352,7 +352,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop,r
         {
           mult_rep_output[[i]]@prev_weights
         }
-      prev_weights <- prev_prev_weights[,(dim(prev_prev_weights)[2]-max_lookback+1):dim(prev_prev_weights)[2],,,drop=FALSE]
+      prev_weights <- prev_prev_weights[,,(dim(prev_prev_weights)[3]-max_lookback+1):dim(prev_prev_weights)[3],,drop=FALSE]
       #  for log-likelihood computation
       cond_loglik[,b] <- foreach::foreach(u=seq_len(nunits),
                                       .combine = 'rbind',
@@ -458,7 +458,7 @@ setMethod(
   "iabf4",
   signature=signature(object="spatPomp"),
   definition = function (object, Nabf = 1, Nrep, nbhd, Np,resample_every,prop,
-                         rw.sd,
+                         parallel = TRUE, rw.sd,
                          cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
                          max.fail = Inf,
@@ -506,6 +506,7 @@ setMethod(
       Np=Np,
       resample_every=resample_every,
       prop=prop,
+      parallel=parallel,
       rw.sd=rw.sd,
       cooling.type=cooling.type,
       cooling.fraction.50=cooling.fraction.50,
