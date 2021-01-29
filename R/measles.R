@@ -112,7 +112,7 @@ measles_unit_statenames <- c('S','E','I','R','C','W')
 
 measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
 measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
-measles_RPnames <- c("alpha","iota","R0","cohort","amplitude","gamma","sigma","mu","sigmaSE","rho","psi","g")
+measles_RPnames <- c("alpha","iota","psi","R0","gamma","sigma","sigmaSE","cohort","amplitude","mu","rho","g")
 measles_paramnames <- c(measles_RPnames,measles_IVPnames)
 
 measles_rprocess <- Csnippet('
@@ -384,8 +384,9 @@ measles_skel <- Csnippet('
 
 measles_partrans <- parameter_trans(
   log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
-  logit=c("amplitude", "rho")
+  logit=c("amplitude", "rho",measles_IVPnames)
 )
+
 
 
 spatPomp(measles_cases,

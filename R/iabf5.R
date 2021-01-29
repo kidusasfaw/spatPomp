@@ -1,4 +1,4 @@
-##' Iterated Adapted Bagged Filter 4 (IABF4)
+##' Iterated Adapted Bagged Filter 5 (IABF5)
 ##'
 ##' An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.
 ##' Running \code{iabf} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
@@ -7,8 +7,8 @@
 ##' This extra variability introduced through parameter perturbation effectively smooths the likelihood surface and combats particle depletion by introducing diversity into particle population.
 ##' As the iterations progress, the magnitude of the perturbations is diminished according to a user-specified cooling schedule.
 ##'
-##' @name iabf4
-##' @rdname iabf4
+##' @name iabf5
+##' @rdname iabf5
 ##' @include spatPomp_class.R abf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
@@ -47,7 +47,7 @@ setClass(
 )
 
 
-h_abf_internal4 <- function (object,
+h_abf_internal5 <- function (object,
                              params,
                              states,
                              obs_nums,
@@ -211,7 +211,7 @@ h_abf_internal4 <- function (object,
   )
 }
 
-iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, parallel, rw.sd,
+iabf_internal5 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, resample_every, prop, parallel, rw.sd,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17, max.fail = Inf,
                            verbose = FALSE, .ndone = 0L,
@@ -219,7 +219,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
                            .paramMatrix = NULL,
                            .gnsi = TRUE, ...) {
 
-  ep <- paste0("in ",sQuote("iabf4"),": ")
+  ep <- paste0("in ",sQuote("iabf5"),": ")
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
@@ -264,7 +264,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
 
   rep_param_init <- partrans(object,rep_param_init,dir="toEst",.gnsi=gnsi)
   rep_param_init <- array(data = rep_param_init,
-                          dim = c(length(rep_param_init), Nrep),
+                          dim = c(length(rep_param_init), Nparam),
                           dimnames = list(param = names(rep_param_init), rep = NULL))
 
 
@@ -286,14 +286,16 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
       ## perturb parameters
       pmag <- cooling.fn(min(b),n)$alpha*rw.sd[,min(b)]
       rep_param_init <- .Call('randwalk_perturbation',rep_param_init,pmag,PACKAGE = 'pomp')
+      if(Nparam > 50) print(mean(partrans(object,rep_param_init,dir="fromEst",.gnsi=gnsi)['psi',]))
+      all_params <- rep_param_init[,rep(1:Nparam, each=Nrep_per_param)]
       if(parallel){
         # begin multi-threaded
-        mult_rep_output <- foreach::foreach(i=seq_len(Nrep),
+        mult_rep_output <- foreach::foreach(i=seq_len(Nparam*Nrep_per_param),
                                             .packages=c("pomp","spatPomp"),
                                             .options.multicore=mcopts) %dopar%  {
-                                              spatPomp:::h_abf_internal4(
+                                              spatPomp:::h_abf_internal5(
                                                 object=object,
-                                                params=rep_param_init[,i],
+                                                params=all_params[,i],
                                                 states=(if(is.null(states)) NULL else states[,i]),
                                                 obs_nums=b,
                                                 prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
@@ -311,10 +313,10 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
         # end multi-threaded
       } else{
         # begin single-threaded
-        for(i in seq_len(Nrep)){
-          mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal4(
+        for(i in seq_len(Nparam*Nrep_per_param)){
+          mult_rep_output <- c(mult_rep_output, spatPomp:::h_abf_internal5(
             object=object,
-            params=rep_param_init[,i],
+            params=all_params[,i],
             states=(if(is.null(states)) NULL else states[,i]),
             obs_nums=b,
             prev_meas_weights=(if(is.null(prev_weights)) NULL else prev_weights[,,,i,drop=FALSE]),
@@ -341,7 +343,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
       # update prev_weights for the next observation time
       # THIS NEEDS TIGHTENING UP FOR DIFFERENT KINDS OF NEIGHBORHOODS
       prev_prev_weights <- foreach::foreach(
-        i=seq_len(Nrep),
+        i=seq_len(Nparam*Nrep_per_param),
         .combine = function(...) abind::abind(..., along=4),
         .packages=c("pomp", "spatPomp"),
         .options.multicore=mcopts) %dopar%
@@ -367,45 +369,49 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
           }
           cond_loglik_u
         }
-      #  for parameter swarm
-      param_swarm <- lapply(mult_rep_output, slot, name="param")
-      param_swarm <- do.call(cbind, param_swarm)
-      rownames(param_swarm) <- rownames(rep_param_init)
-      #  for parameter estimation
-      # rep_loglik_un <- foreach::foreach(u=seq_len(nunits),
-      #                                   .combine = function(...) abind::abind(..., along=3),
-      #                                   .packages=c("pomp", "spatPomp"),
-      #                                   .options.multicore=mcopts) %dopar%
-      #   {
-      #     cond_loglik_u <- array(data = numeric(0), dim=c(length(b),Nrep))
-      #     for (n in seq_len(length(b))){
-      #       rep_filt_weight_un_rep = vapply(mult_rep_output,
-      #                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
-      #                                       FUN.VALUE = 1.0) -
-      #         vapply(mult_rep_output,
-      #                FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
-      #                FUN.VALUE = 1.0)
-      #       cond_loglik_u[n,] = rep_filt_weight_un_rep
-      #     }
-      #     cond_loglik_u
-      #   }
-      # loglik_rep <- apply(rep_loglik_un, MARGIN = 2, FUN = sum)
-      # rm(rep_loglik_un)
-      loglik_rep <- sapply(mult_rep_output, slot, "island_weight")
+      #  for param_weights. think i'm calculating parameter weights for all times in b and then adding them up???
+      param_weights <- foreach::foreach(u=seq_len(nunits),
+                                          .combine = function(...) abind::abind(..., along=3),
+                                          .packages=c("pomp", "spatPomp"),
+                                          .options.multicore=mcopts) %dopar%
+        {
+          param_weight_u <- array(data = numeric(0), dim=c(length(b), Nparam))
+          for (n in seq_len(length(b))){
+            all_log_wm_times_wp_avg <- vapply(mult_rep_output,
+                                              FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+                                              FUN.VALUE = 1.0)
+            all_log_wp_avg <- vapply(mult_rep_output,
+                                 FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
+                                 FUN.VALUE = 1.0)
 
+            all_log_wm_times_wp_avg_matrix <- matrix(all_log_wm_times_wp_avg, nrow = Nrep_per_param)
+            all_log_wp_avg_matrix <- matrix(all_log_wp_avg, nrow = Nrep_per_param)
+            avg_log_wm_times_wp_avg_by_param <- apply(all_log_wm_times_wp_avg_matrix, 2, logmeanexp)
+            avg_log_wp_avg_by_param <- apply(all_log_wp_avg_matrix, 2, logmeanexp)
+            param_weight_u[n,] = avg_log_wm_times_wp_avg_by_param - avg_log_wp_avg_by_param
+          }
+          param_weight_u
+        }
+      loglik_param <- apply(param_weights, 2, FUN = sum)
       # parameter selection
-      selection_idx <- 1:Nrep
-      selection_weights <- as.integer(loglik_rep >= quantile(loglik_rep, 1-prop))
-      resampled_idx <- sample(selection_idx, size = Nrep, replace = TRUE, prob = selection_weights)
-      rep_param_init <- param_swarm[,resampled_idx]
-      rm(selection_idx,selection_weights)
+      def_resample <- which(loglik_param > quantile(loglik_param, 1-prop))
+      length_also_resample <- Nparam - length(def_resample)
+      also_resample <- sample(def_resample, size = length_also_resample, replace = TRUE, prob = rep(1, length(def_resample)))
+      resampled_idx <- c(def_resample, also_resample)
+      rep_param_init <- rep_param_init[,resampled_idx]
+      rm(def_resample,also_resample, length_also_resample)
 
       #  states
       states <- lapply(mult_rep_output, slot, name="state")
       states <- do.call(cbind, states)
-      states <- states[,resampled_idx]
-      prev_weights <- prev_weights[,,,resampled_idx,drop=FALSE]
-      rm(param_swarm,resampled_idx)
+      resampled_idx2 <- rep(resampled_idx, each = Nrep_per_param)
+      resampled_idx2_mat <- matrix(resampled_idx2, ncol = Nparam)
+      resampled_idx3_mat <- (resampled_idx2_mat - 1)*Nrep_per_param
+      to_add_mat <- matrix(rep(1:Nrep_per_param, Nparam), nrow = Nrep_per_param)
+      resampled_idx_final <- as.integer(resampled_idx3_mat + to_add_mat)
+      states <- states[,resampled_idx_final]
+      prev_weights <- prev_weights[,,,resampled_idx_final,drop=FALSE]
+      rm(resampled_idx, resampled_idx2, resampled_idx2_mat, resampled_idx3_mat, to_add_mat, resampled_idx_final)
       rm(mult_rep_output)
     } # end block loop
     gnsi <- FALSE
@@ -429,7 +435,7 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
     "iabf2d_spatPomp",
     object,
     Nabf=as.integer(Nabf),
-    Nrep=as.integer(Nrep),
+    Nrep=as.integer(Nrep_per_param),
     Np=as.integer(Np),
     rw.sd=rw.sd,
     cooling.type=cooling.type,
@@ -441,26 +447,26 @@ iabf_internal4 <- function (object, Nrep, nbhd, Nabf, Np, resample_every, prop, 
 }
 
 setGeneric(
-  "iabf4",
+  "iabf5",
   function (object, ...)
-    standardGeneric("iabf4")
+    standardGeneric("iabf5")
 )
 
-##' @name iabf4
-##' @aliases iabf4
-##' @rdname iabf4
+##' @name iabf5
+##' @aliases iabf5
+##' @rdname iabf5
 ##' @export
 setMethod(
-  "iabf4",
+  "iabf5",
   signature=signature(object="spatPomp"),
-  definition = function (object, Nabf = 1, Nrep, nbhd, Np,resample_every,prop,
+  definition = function (object, Nabf = 1, Nrep_per_param, Nparam, nbhd, Np,resample_every,prop,
                          parallel = TRUE, rw.sd,
                          cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
                          max.fail = Inf,
                          verbose = getOption("verbose"),...) {
 
-    ep <- paste0("in ",sQuote("iabf4"),": ")
+    ep <- paste0("in ",sQuote("iabf5"),": ")
     if(missing(Nabf))
       stop(ep,sQuote("Np")," must be specified",call.=FALSE)
     if (Nabf <= 0)
@@ -483,9 +489,9 @@ setMethod(
     if (any(Np <= 0))
       stop(ep,"number of particles, ",
            sQuote("Np"),", must always be positive",call.=FALSE)
-    if(missing(Nrep))
+    if(missing(Nrep_per_param))
       stop(ep,"number of replicates, ",
-           sQuote("Nrep"),", must be specified!",call.=FALSE)
+           sQuote("Nrep_per_param"),", must be specified!",call.=FALSE)
     if (missing(rw.sd))
       stop(ep,sQuote("rw.sd")," must be specified!",call.=FALSE)
     cooling.type <- match.arg(cooling.type)
@@ -494,9 +500,10 @@ setMethod(
       stop(ep,sQuote("cooling.fraction.50"),
            " must be in (0,1]",call.=FALSE)
 
-    iabf_internal4(
+    iabf_internal5(
       object=object,
-      Nrep=Nrep,
+      Nrep_per_param=Nrep_per_param,
+      Nparam=Nparam,
       Nabf=Nabf,
       nbhd=nbhd,
       Np=Np,

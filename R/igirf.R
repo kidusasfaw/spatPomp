@@ -245,7 +245,10 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     traces[n+1,1] <- g@loglik
     .indices <- .indices
 
-    if (verbose) cat("igirf iteration",n,"of",Ngirf,"completed\n")
+    if (verbose) {
+      cat("igirf iteration",n,"of",Ngirf,"completed\n")
+      print(coef(g))
+    }
 
   }
 
