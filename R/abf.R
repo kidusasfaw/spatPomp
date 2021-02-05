@@ -175,6 +175,9 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
   dimnames(log_cond_densities) <- list(unit = 1:nunits, rep = 1:Np[1L], time = 1:ntimes)
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
+    # if(nt == 3){
+    #   print("stop")
+    # }
     X <- tryCatch(
       rprocess(
         object,
@@ -258,6 +261,7 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
                   log_prod_cond_dens_not_nt[, nt-neighbor_n] <- log_prod_cond_dens_not_nt[, nt-neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
           }
           log_loc_comb_pred_weights[unit, ,nt]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
+          # log_loc_comb_pred_weights[unit, ,nt] <- rowSums(log_prod_cond_dens_not_nt) + log_prod_cond_dens_nt
       }
   }
   log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities, c(1,3), FUN = logmeanexp)
@@ -293,27 +297,31 @@ setMethod(
      }
    }
    ## single thread for testing
-   # single_rep_output <- abf.internal(
-   #  object=object,
-   #  params=params,
-   #  Np=Np,
-   #  nbhd = nbhd,
-   #  tol=tol,
-   #  ...)
-   # return(single_rep_output)
+   mult_rep_output <- list()
+   mcopts <- list(set.seed=TRUE)
+   for(i in 1:Nrep){
+     mult_rep_output <- c(mult_rep_output,
+                          abf_internal(
+                            object=object,
+                            Np=Np,
+                            nbhd = nbhd,
+                            tol=tol,
+                            ...,
+                            verbose=verbose)
+                          )
+   }
    ## end single thread for testing
    ## begin multi-thread code
-   mcopts <- list(set.seed=TRUE)
-   mult_rep_output <- foreach::foreach(i=1:Nrep,
-       .packages=c("pomp","spatPomp"),
-       .options.multicore=mcopts) %dopar%  spatPomp:::abf_internal(
-     object=object,
-     Np=Np,
-     nbhd=nbhd,
-     tol=tol,
-     ...,
-     verbose=verbose
-     )
+   # mult_rep_output <- foreach::foreach(i=1:Nrep,
+   #     .packages=c("pomp","spatPomp"),
+   #     .options.multicore=mcopts) %dopar%  spatPomp:::abf_internal(
+   #   object=object,
+   #   Np=Np,
+   #   nbhd=nbhd,
+   #   tol=tol,
+   #   ...,
+   #   verbose=verbose
+   #   )
    ntimes = length(time(object))
    nunits = length(unit_names(object))
    rep_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
@@ -335,6 +343,7 @@ setMethod(
                       }
                       cond_loglik_u
                     }
+   print(cond_loglik)
    # end multi-threaded code
    new(
       "abfd_spatPomp",
