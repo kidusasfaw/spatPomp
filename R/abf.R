@@ -343,7 +343,7 @@ setMethod(
                       }
                       cond_loglik_u
                     }
-   print(cond_loglik)
+   # print(cond_loglik)
    # end multi-threaded code
    new(
       "abfd_spatPomp",

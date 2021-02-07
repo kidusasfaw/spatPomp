@@ -172,22 +172,22 @@ h_abf_internal6 <- function (object,
 
     log_cond_densities_by_island <- array(log_cond_densities, dim=c(nunits, Np[1L], Nrep_per_param*Nparam))
     log_wm_times_wp_avgs = apply(log_loc_comb_pred_weights + log_cond_densities_by_island, c(1,3), FUN = logmeanexp)
-    # log_wm_times_wp_avgs_sum_units = colSums(log_wm_times_wp_avgs)
-    # log_wm_times_wp_avgs_sum_units_by_param = apply(matrix(log_wm_times_wp_avgs_sum_units, nrow=Nrep_per_param),
-    #                                                 2, FUN = logmeanexp)
-    #new line
     log_wm_times_wp_avgs_by_param = apply(array(log_wm_times_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
 
     log_wp_avgs = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
-    #new line
     log_wp_avgs_by_param = apply(array(log_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
 
-    # log_wp_avgs_sum_units = colSums(log_wp_avgs)
-    # log_wp_avgs_sum_units_by_param = apply(matrix(log_wp_avgs_sum_units, nrow=Nrep_per_param),
-    #                                        2, FUN = logmeanexp)
     param_resamp_log_weights <- colSums(log_wm_times_wp_avgs_by_param - log_wp_avgs_by_param)
-    param_resamp_weights <- exp(param_resamp_log_weights - max(param_resamp_log_weights))
-    resample_ixs_raw <- sample(1:Nparam, size = Nparam, replace = TRUE, prob = param_resamp_weights)
+
+    ####### Quantile resampling
+    def_resample <- which(param_resamp_log_weights > quantile(param_resamp_log_weights, 1-prop))
+    length_also_resample <- Nparam - length(def_resample)
+    also_resample <- sample(def_resample, size = length_also_resample, replace = TRUE, prob = rep(1, length(def_resample)))
+    resample_ixs_raw <- c(def_resample, also_resample)
+    rm(def_resample,also_resample, length_also_resample)
+    ####### Resampling using parameter log-likelihood
+    # param_resamp_weights <- exp(param_resamp_log_weights - max(param_resamp_log_weights))
+    # resample_ixs_raw <- sample(1:Nparam, size = Nparam, replace = TRUE, prob = param_resamp_weights)
     resample_ixs <- (resample_ixs_raw - 1)*Np[1L]*Nrep_per_param
     resample_ixs <- rep(resample_ixs, each = Np[1L]*Nrep_per_param)
     resample_ixs <- rep(1:(Np[1L]*Nrep_per_param), Nparam) + resample_ixs
