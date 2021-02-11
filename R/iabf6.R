@@ -83,6 +83,8 @@ h_abf_internal6 <- function (object,
     all_params <- params[,rep(1:Nparam, each = Np[1L]*Nrep_per_param)]
     tparams <- pomp::partrans(object,all_params,dir="fromEst",.gnsi=gnsi)
 
+    gc()
+
     if (nt == 1L) X <- rinit(object,params=tparams)
     else X <- X[,resample_ixs]
 
@@ -101,6 +103,8 @@ h_abf_internal6 <- function (object,
              conditionMessage(e),call.=FALSE)
       }
     )
+
+    gc()
 
     ## determine the weights. returns weights which is a nunits by Np array
     log_weights <- tryCatch(
@@ -137,6 +141,8 @@ h_abf_internal6 <- function (object,
     X <- X[,rep(selections + seq(from=0, to=((Nparam*Nrep_per_param)-1)*Np[1L], by = Np[1L]),each=Np[1L]),]
     rm(log_weights, log_resamp_weights, max_positions,max_positions_vec, resamp_weights, u, cumul_w, i, choices, selections)
     gnsi <- FALSE
+
+    gc()
 
     if(!is.null(prev_meas_weights)) num_old_times <- dim(prev_meas_weights)[3]
     else num_old_times <- 0
@@ -205,6 +211,7 @@ h_abf_internal6 <- function (object,
                                         along=3)[,resample_ixs,,drop=FALSE]
     }
     cond_loglik[nt] <- logmeanexp(param_resamp_log_weights)
+    gc()
   }
   params <- params[,resample_ixs_raw]
   pompUnload(object,verbose=FALSE)
