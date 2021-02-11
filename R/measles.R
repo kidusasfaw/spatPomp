@@ -12,7 +12,9 @@
 #' spy(m)
 #' @export
 
-measles <- function(U=6,dt=2/365){
+measles <- function(U=6,dt=2/365,
+                    fixed_ivps=TRUE,shared_ivps=TRUE,
+                    S_0=0.032, E_0=0.00005, I_0=0.00004){
 
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
@@ -103,17 +105,25 @@ v_by_g_C_rows <- apply(v_by_g,1,to_C_array)
 v_by_g_C_array <- to_C_array(v_by_g_C_rows)
 v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
+if(fixed_ivps && shared_ivps){
+  ivps_C <- paste0("const double ", c("S_0_shared", "E_0_shared", "I_0_shared"), " = ", c(S_0, I_0, E_0), collapse= ";\n")
+  other_ivps_C <- paste0("const double ", c("S1_0", "E1_0", "I1_0"), " = ", c(S_0, I_0, E_0), collapse= ";\n")
+  ivps_C <- paste("const int fixed_ivps = 1", "const int shared_ivps = 1", ivps_C,other_ivps_C, ";", sep = ";\n")
+}
 measles_globals <- Csnippet(
-  paste0(v_by_g_C)
+  paste(v_by_g_C, ivps_C, sep = ";\n")
 )
 
-measles_unit_statenames <- c('S','E','I','R','C','W')
-#measles_unit_statenames <- c('S','E','I','R','Acc','C','W')
-
-measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
-measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
+measles_unit_statenames <- c('S','E','I','R','C')
 measles_RPnames <- c("alpha","iota","psi","R0","gamma","sigma","sigmaSE","cohort","amplitude","mu","rho","g")
-measles_paramnames <- c(measles_RPnames,measles_IVPnames)
+
+if(fixed_ivps && shared_ivps){
+  measles_paramnames <- c(measles_RPnames)
+} else{
+  measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
+  measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
+  measles_paramnames <- c(measles_RPnames,measles_IVPnames)
+}
 
 measles_rprocess <- Csnippet('
   double beta, br, seas, foi, dw, births;
@@ -123,7 +133,7 @@ measles_rprocess <- Csnippet('
   double *I = &I1;
   double *R = &R1;
   double *C = &C1;
-  double *W = &W1;
+  //double *W = &W1;
   double powVec[U];
   //double *Acc = &Acc1;
   const double *pop = &pop1;
@@ -158,6 +168,13 @@ measles_rprocess <- Csnippet('
     powVec[u] = pow(I[u]/pop[u],alpha);
   }
 
+  // These rates could be inside the u loop if some parameters arent shared between units
+  rate[1] = mu;			    // natural S death
+  rate[2] = sigma;		  // rate of ending of latent stage
+  rate[3] = mu;			    // natural E death
+  rate[4] = gamma;		  // recovery
+  rate[5] = mu;			    // natural I death
+
   for (u = 0 ; u < U ; u++) {
 
     // cohort effect
@@ -167,7 +184,10 @@ measles_rprocess <- Csnippet('
       br = (1.0-cohort)*lag_birthrate[u];
 
     // expected force of infection
-    foi = pow( (I[u]+iota)/pop[u],alpha);
+    if(alpha==1.0 && iota==0.0)
+      foi = I[u]/pop[u];
+    else
+      foi = pow( (I[u]+iota)/pop[u],alpha);
     // we follow Park and Ionides (2019) and raise pop to the alpha power
     // He et al (2010) did not do this.
 
@@ -175,21 +195,13 @@ measles_rprocess <- Csnippet('
       if(v != u)
         foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
     }
+
     // white noise (extrademographic stochasticity)
     dw = rgammawn(sigmaSE,dt);
-
     rate[0] = beta*foi*dw/dt;  // stochastic force of infection
-
-    // These rates could be outside the u loop if all parameters are shared between units
-    rate[1] = mu;			    // natural S death
-    rate[2] = sigma;		  // rate of ending of latent stage
-    rate[3] = mu;			    // natural E death
-    rate[4] = gamma;		  // recovery
-    rate[5] = mu;			    // natural I death
 
     // Poisson births
     births = rpois(br*dt);
-
 
     // transitions between classes
     reulermultinom(2,S[u],&rate[0],dt,&trans[0]);
@@ -200,9 +212,8 @@ measles_rprocess <- Csnippet('
     E[u] += trans[0] - trans[2] - trans[3];
     I[u] += trans[2] - trans[4] - trans[5];
     R[u] = pop[u] - S[u] - E[u] - I[u];
-    W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
+    //W[u] += (dw - dt)/sigmaSE;  // standardized i.i.d. white noise
     C[u] += trans[4];           // true incidence
-
    }
 ')
 
@@ -296,15 +307,25 @@ measles_rinit <- Csnippet("
   double *I = &I1;
   double *R = &R1;
   double *C = &C1;
-  double *W = &W1;
-  const double *S_0 = &S1_0;
-  const double *E_0 = &E1_0;
-  const double *I_0 = &I1_0;
-  const double *R_0 = &R1_0;
-  const double *pop = &pop1;
+  //double *W = &W1;
   double m;
+  const double *pop = &pop1;
   int u;
-  for (u = 0; u < U; u++) {
+  if(fixed_ivps && shared_ivps){
+    for (u = 0; u < U; u++) {
+      m = (float)(pop[u]);
+      S[u] = nearbyint(m*S_0_shared);
+      I[u] = nearbyint(m*I_0_shared);
+      E[u] = nearbyint(m*E_0_shared);
+      R[u] = pop[u]-S[u]-E[u]-I[u];
+      //W[u] = 0;
+      C[u] = 0;
+    }
+  } else{
+    const double *S_0 = &S1_0;
+    const double *E_0 = &E1_0;
+    const double *I_0 = &I1_0;
+    for (u = 0; u < U; u++) {
       m = (float)(pop[u]);
       S[u] = nearbyint(m*S_0[u]);
       I[u] = nearbyint(m*I_0[u]);
@@ -312,8 +333,9 @@ measles_rinit <- Csnippet("
       // compute E[u]. (γ/σ)*I[u]
       E[u] = nearbyint((gamma/sigma)*(float)(I[u]));
       R[u] = pop[u]-S[u]-E[u]-I[u];
-      W[u] = 0;
+      //W[u] = 0;
       C[u] = 0;
+    }
   }
 ")
 
@@ -324,13 +346,13 @@ measles_skel <- Csnippet('
   double *I = &I1;
   double *R = &R1;
   double *C = &C1;
-  double *W = &W1;
+  //double *W = &W1;
   double *DS = &DS1;
   double *DE = &DE1;
   double *DI = &DI1;
   double *DR = &DR1;
   double *DC = &DC1;
-  double *DW = &DW1;
+  //double *DW = &DW1;
   double powVec[U];
   const double *pop = &pop1;
   const double *lag_birthrate = &lag_birthrate1;
@@ -377,17 +399,22 @@ measles_skel <- Csnippet('
     DE[u] = beta*foi*S[u] - (sigma+mu)*E[u];
     DI[u] = sigma*E[u] - (gamma+mu)*I[u];
     DR[u] = gamma*I[u] - mu*R[u];
-    DW[u] = 0;
+    //DW[u] = 0;
     DC[u] = gamma*I[u];
   }
 ')
 
-measles_partrans <- parameter_trans(
-  log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
-  logit=c("amplitude", "rho",measles_IVPnames)
-)
-
-
+if(fixed_ivps && shared_ivps){
+  measles_partrans <- parameter_trans(
+    log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
+    logit=c("amplitude", "rho")
+  )
+} else {
+  measles_partrans <- parameter_trans(
+    log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
+    logit=c("amplitude", "rho",measles_IVPnames)
+  )
+}
 
 spatPomp(measles_cases,
         units = "city",

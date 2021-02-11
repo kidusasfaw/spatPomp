@@ -95,6 +95,7 @@ Other particle filter methods:
 \code{\link{iabf3}()},
 \code{\link{iabf5}()},
 \code{\link{iabf6}()},
+\code{\link{iabf7}()},
 \code{\link{iabf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
@@ -104,6 +105,7 @@ Other \pkg{spatPomp} parameter estimation methods:
 \code{\link{iabf3}()},
 \code{\link{iabf5}()},
 \code{\link{iabf6}()},
+\code{\link{iabf7}()},
 \code{\link{iabf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}

@@ -72,13 +72,10 @@ h_abf_internal6 <- function (object,
 
   for(nt in seq_len(ntimes)){
     if(verbose) {
-      # cat("working on observation times ", nt, " in iteration ", abfiter, "\n")
-      # print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',]), min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['sigma',])))
-      # print(c(max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',]), max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['sigma',])))
+      cat("working on observation times ", nt, " in iteration ", abfiter, "\n")
+      print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
+      print(c(max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
     }
-    # if(nt == 27){
-    #   print("stop here")
-    # }
     params <- params[,resample_ixs_raw]
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
     params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
@@ -86,14 +83,14 @@ h_abf_internal6 <- function (object,
     all_params <- params[,rep(1:Nparam, each = Np[1L]*Nrep_per_param)]
     tparams <- pomp::partrans(object,all_params,dir="fromEst",.gnsi=gnsi)
 
-    if (nt == 1L) x <- rinit(object,params=tparams)
-    else x <- x[,resample_ixs]
+    if (nt == 1L) X <- rinit(object,params=tparams)
+    else X <- X[,resample_ixs]
 
     ## advance the state variables according to the process model
     X <- tryCatch(
       rprocess(
         object,
-        x0=x,
+        x0=X,
         t0=all_times[nt],
         times=all_times[nt+1],
         params=tparams,
@@ -127,6 +124,7 @@ h_abf_internal6 <- function (object,
     max_positions_vec <- ((1:Nislands)-1)*Np[1L] + max_positions
     max_positions_vec <- rep(max_positions_vec, each = Np[1L])
     log_resamp_weights <- log_resamp_weights - log_resamp_weights[max_positions_vec]
+    # if any particle's resampling weight is zero replace by tolerance
     log_resamp_weights[is.infinite(log_resamp_weights)] <- log(tol)
     resamp_weights <- exp(log_resamp_weights)
     resamp_weights <- matrix(resamp_weights, nrow=Np[1L])
@@ -136,8 +134,7 @@ h_abf_internal6 <- function (object,
     i <- colSums(u > cumul_w_norm) + 1L
     choices <- 1:Np[1L]
     selections <- choices[i]
-    x <- X[,rep(selections + seq(from=0, to=((Nparam*Nrep_per_param)-1)*Np[1L], by = Np[1L]),each=Np[1L]),]
-    # if any particle's resampling weight is zero replace by tolerance
+    X <- X[,rep(selections + seq(from=0, to=((Nparam*Nrep_per_param)-1)*Np[1L], by = Np[1L]),each=Np[1L]),]
     rm(log_weights, log_resamp_weights, max_positions,max_positions_vec, resamp_weights, u, cumul_w, i, choices, selections)
     gnsi <- FALSE
 
