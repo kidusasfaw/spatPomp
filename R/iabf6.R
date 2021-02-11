@@ -71,10 +71,12 @@ h_abf_internal6 <- function (object,
   resample_ixs_raw <- rep(1:Nparam)
 
   for(nt in seq_len(ntimes)){
-    if(verbose) {
-      cat("working on observation times ", nt, " in iteration ", abfiter, "\n")
-      print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
-      print(c(max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
+    if(verbose && nt %in% c(1,2)) {
+      cat("working on observation times ", nt, " in iteration ", abfiter, "at time ", Sys.time(), "\n")
+    }
+    if(verbose){
+      print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',]),
+              max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
     }
     params <- params[,resample_ixs_raw]
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
