@@ -6,6 +6,7 @@
 ##' @rdname as_data_frame
 ##' @include spatPomp_class.R
 ##' @aliases coerce,spatPomp,data.frame-method
+##' @importFrom rlang `:=` .data
 ##'
 ##' @details
 ##' When \code{object} is a simple \sQuote{spatPomp} object,
@@ -64,8 +65,8 @@ setAs(
     gathered <- dat %>%
       tidyr::gather_(key="stateobscovars", val="val", to_gather) %>%
       dplyr::mutate(ui = get_unit_index_from_name_v(stateobscovars)) %>%
-      dplyr::mutate(!!unitname := unit_names(from)[as.integer(ui)]) %>%
-      dplyr::select(-ui) %>%
+      dplyr::mutate(!!unitname := unit_names(from)[as.integer(.data$ui)]) %>%
+      dplyr::select(-.data$ui) %>%
       dplyr::arrange(!!!to_arrange)
 
     # get the type of stateobscovars from the stateobscovars column
@@ -77,7 +78,7 @@ setAs(
     # spread stateobscovartype column to get columns for all unitnames
     gathered <- gathered %>%
       dplyr::select(-stateobscovars) %>%
-      tidyr::spread(key = stateobscovarstype, value = val)%>%
+      tidyr::spread(key = stateobscovarstype, value = .data$val)%>%
       dplyr::select(to_final_select) %>%
       dplyr::arrange(!!rlang::sym(timename),
                      match(!!rlang::sym(unitname), unit_names(from)))

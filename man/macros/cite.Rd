@@ -11,6 +11,8 @@
 
 \newcommand{\Evensen2009}{G. Evensen. \emph{Data assimilation: the ensemble Kalman filter}. Springer-Verlag, 2009.}
 
+\newcommand{\geosphere}{Robert J. Hijmans (2019). The \pkg{geosphere} spherical trigonometry package. \url{https://CRAN.R-project.org/package=geosphere}.}
+
 \newcommand{\ionides2006}{Ionides, E. L., Breto, C. and King, A. A. (2006) Inference for nonlinear dynamical systems. \emph{Proceedings of the National Academy of Sciences}, \bold{103(49)}, 18438--18443. \acronym{DOI}: 10.1073/pnas.0603181103}
 
 \newcommand{\ionides2011}{Ionides, E. L., Bhadra, A., Atchade, Y. and King, A. A. (2011) Iterated filtering. \emph{Ann. Statist.}, \bold{39, no. 3}, 1776--1802. \acronym{DOI}: 10.1214/11-AOS886}

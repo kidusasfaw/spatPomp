@@ -86,7 +86,7 @@ setMethod(
   "girf",
   signature=signature(object="missing"),
   definition=function (...) {
-    reqd_arg("girf","data")
+    stop("girf: ","data"," is a required argument.")
   }
 )
 
@@ -94,7 +94,7 @@ setMethod(
   "girf",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    undef_method("girf",object)
+    stop("girf is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
   }
 )
 

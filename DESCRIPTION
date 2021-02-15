@@ -12,10 +12,10 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Contact: kasfaw at umich dot edu
-Depends: pomp (>= 2.0)
+Depends: pomp (>= 2.0), R(>= 3.5.0), methods
 LinkingTo: pomp
-Suggests: scales, geosphere, magrittr, plyr, reshape2, testthat
-Imports: doParallel (>= 1.0.11), parallel, foreach, dplyr, tidyr, stringr, ggplot2
+Suggests: testthat
+Imports: doParallel (>= 1.0.11), parallel, foreach, dplyr, tidyr, stringr, ggplot2, abind, rlang, magrittr
 Collate:
     'spatPomp_class.R'
     'abf.R'
@@ -29,20 +29,14 @@ Collate:
     'eunit_measure.R'
     'gbm.R'
     'girf.R'
-    'iabf.R'
-    'iabf2.R'
-    'iabf3.R'
-    'iabf4.R'
-    'iabf5.R'
     'iabf6.R'
-    'iabf7.R'
     'ienkf.R'
     'igirf.R'
     'lorenz.R'
     'measles.R'
-    'measles_iabf.R'
     'munit_measure.R'
     'package.R'
+    'pipe.R'
     'plot.R'
     'runit_measure.R'
     'spatPomp_methods.R'

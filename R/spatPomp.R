@@ -64,7 +64,7 @@
 ##' @rdname spatPomp
 ##'
 ##' @include spatPomp_class.R
-##'
+##' @importFrom rlang .data
 ##' @inheritParams pomp::pomp
 ##' @references \asfaw2020
 ##'
@@ -92,7 +92,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
     stop(ep,sQuote("data")," is a required argument",call.=FALSE)
 
   if (!inherits(data,what=c("data.frame","spatPomp")))
-    pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
+    pomp::pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
           "class ",sQuote("spatPomp"),".")
 
   ## return as quickly as possible if no work is to be done
@@ -103,7 +103,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
       missing(rinit) && missing(rprocess) && missing(dprocess) &&
       missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
       missing(rprior) && missing(dprior) && missing(partrans) &&
-      missing(covar) && missing(tcovar) && missing(params) && missing(accumvars) &&
+      missing(covar) && missing(params) && missing(unit_accumvars) &&
       length(list(...)) == 0)
     return(as(data,"spatPomp"))
 
@@ -124,7 +124,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
       globals=globals,cdir=cdir,cfile=cfile,shlib.args=shlib.args,
       compile=compile, verbose=verbose
     ),
-    error = function (e) pomp:::pStop_(conditionMessage(e))
+    error = function (e) stop(conditionMessage(e))
   )
 }
 # Takes care of case where times or units has been set to NULL
@@ -132,7 +132,7 @@ setMethod(
   "construct_spatPomp",
   signature=signature(data="ANY", times="ANY", units="ANY"),
   definition = function (data, times, t0, ...) {
-    pomp:::pStop_(sQuote("times")," should be a single name identifying the column of data that represents",
+    stop(sQuote("times")," should be a single name identifying the column of data that represents",
            " the observation times. ", sQuote("units"), " should be likewise for column that represents",
            " the observation units.")
   }
@@ -149,7 +149,7 @@ setMethod(
                          cdir, cfile, shlib.args, compile, verbose) {
 
     if (anyDuplicated(names(data)))
-      pomp:::pStop_("names of data variables must be unique.")
+      stop("names of data variables must be unique.")
 
     if (missing(t0)) pomp:::reqd_arg(NULL,"t0")
 
@@ -157,10 +157,10 @@ setMethod(
     upos <- match(units,names(data),nomatch=0L)
 
     if (length(times) != 1 || tpos == 0L)
-      pomp:::pStop_(sQuote("times")," does not identify a single column of ",
+      stop(sQuote("times")," does not identify a single column of ",
              sQuote("data")," by name.")
     if (length(units) != 1 || upos == 0L)
-      pomp:::pStop_(sQuote("units")," does not identify a single column of ",
+      stop(sQuote("units")," does not identify a single column of ",
              sQuote("data")," by name.")
 
     timename <- times
@@ -207,8 +207,8 @@ setMethod(
     names(tmp) <- unit_names
     pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,unitname], names(tmp))])
     pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange_at(c(timename,'obsname','ui'))
-    pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(obsname,ui)) %>% dplyr::select(-upos) %>% dplyr::select(-ui)
-    pomp_data <- pomp_data %>% tidyr::spread(key = obsname, value = val)
+    pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(.data$obsname,.data$ui)) %>% dplyr::select(-upos) %>% dplyr::select(-.data$ui)
+    pomp_data <- pomp_data %>% tidyr::spread(key = .data$obsname, value = .data$val)
     dat_col_order <- vector(length = U*length(unit_obsnames))
     for(oti in seq(length(unit_obsnames))){
       for(i in 1:U){
@@ -219,7 +219,7 @@ setMethod(
     if(!missing(covar)){
       if(timename %in% names(covar)) tcovar <- timename
       else{
-        pomp:::pStop_(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
+        stop(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
         'time column of the observation data.frame')
       }
     }
@@ -241,8 +241,8 @@ setMethod(
         names(tmp) <- unit_names
         pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
         pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
-        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(.data$covname,.data$ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-.data$ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = .data$covname, value = .data$val)
         for(cn in unit_covarnames){
           for(i in 1:U){
             cov_col_order = c(cov_col_order, paste0(cn, i))
@@ -361,7 +361,7 @@ setMethod(
     if(!missing(covar)){
       if(timename %in% names(covar)) tcovar <- timename
       else{
-        pomp:::pStop_(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
+        stop(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
                       'observation data')
       }
       upos_cov <- match(unitname, names(covar))
@@ -378,8 +378,8 @@ setMethod(
         names(tmp) <- unit_names
         pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
         pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
-        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(covname,ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-ui)
-        pomp_covar <- pomp_covar %>% tidyr::spread(key = covname, value = val)
+        pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(.data$covname,.data$ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-.data$ui)
+        pomp_covar <- pomp_covar %>% tidyr::spread(key = .data$covname, value = .data$val)
         for(cn in unit_covarnames){
           for(i in 1:U){
             cov_col_order = c(cov_col_order, paste0(cn, i))
@@ -403,7 +403,7 @@ setMethod(
     if (missing(eunit_measure)) eunit_measure <- data@eunit_measure
     if (missing(runit_measure)) runit_measure <- data@runit_measure
     if (missing(skeleton)) skeleton <- data@skeleton
-    else if (is.null(skeleton)) skeleton <- skel_plugin()
+    else if (is.null(skeleton)) skeleton <- pomp:::skel_plugin()
     if (missing(rprior)) rprior <- data@rprior
     if (missing(dprior)) dprior <- data@dprior
     if (missing(partrans)) partrans <- data@partrans

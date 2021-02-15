@@ -10,6 +10,7 @@
 ##' @aliases enkf  enkf,ANY-method enkf,missing-method
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
+##' @importFrom stats rnorm
 ##'
 ##' @param data A \code{spatPomp} object.
 ##' @param Np The number of Monte Carlo particles used to approximate the filter distribution.
@@ -64,7 +65,7 @@ setMethod(
   "enkf",
   signature=signature(data="missing"),
   definition=function (...) {
-    pomp:::reqd_arg("enkf","data")
+    stop("enkf: ","data"," is a required argument.")
   }
 )
 
@@ -72,7 +73,7 @@ setMethod(
   "enkf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    undef_method("enkf",data)
+    stop("enkf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
   }
 )
 
@@ -107,7 +108,7 @@ setMethod(
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp:::pStop("enkf",conditionMessage(e))
+      error = function (e) stop("enkf",conditionMessage(e))
     )
   }
 )
@@ -191,7 +192,7 @@ enkf.internal <- function (object,
             params=params,
             gnsi=TRUE),
       error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
+        stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
     dim(meas_var) <- c(length(unit_names(object)),  Np[1])

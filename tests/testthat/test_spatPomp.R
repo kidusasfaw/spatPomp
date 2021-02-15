@@ -22,8 +22,6 @@ if(0){
 # England and Wales data are the city of London plus the largest 39 cities that were more than 50km from London.
 # cases is reported measles cases per biweek
 # births is estimated recruitment of susceptibles per biweek
-library(magrittr)
-library(dplyr)
 read.csv("../../measles/measlesUKUS.csv",stringsAsFactors=FALSE) %>% subset(country=="UK") -> x
 library(dplyr)
 x %>%

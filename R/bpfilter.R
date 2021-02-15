@@ -91,11 +91,7 @@ setMethod(
     }
 
     if (missing(Np)) {
-      if (is.matrix(params)) {
-        Np <- ncol(params)
-      } else {
         stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-      }
     }
 
     if (missing(block_list)){

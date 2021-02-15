@@ -3,8 +3,8 @@
 \name{logLik-abfd_spatPomp}
 \alias{logLik-abfd_spatPomp}
 \alias{logLik,abfd_spatPomp-method}
-\alias{logLik-iabfd_spatPomp}
-\alias{logLik,iabfd_spatPomp-method}
+\alias{logLik-iabf6d_spatPomp}
+\alias{logLik,iabf6d_spatPomp-method}
 \alias{logLik-abfird_spatPomp}
 \alias{logLik,abfird_spatPomp-method}
 \alias{logLik-igirfd_spatPomp}
@@ -13,7 +13,7 @@
 \usage{
 \S4method{logLik}{abfd_spatPomp}(object)
 
-\S4method{logLik}{iabfd_spatPomp}(object)
+\S4method{logLik}{iabf6d_spatPomp}(object)
 
 \S4method{logLik}{abfird_spatPomp}(object)
 

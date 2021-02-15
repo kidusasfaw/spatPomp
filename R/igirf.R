@@ -10,7 +10,8 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##' @family \pkg{spatPomp} parameter estimation methods
-##'
+##' @importFrom stats weighted.mean
+##' @importFrom utils head
 ##' @inheritParams girf
 ##' @inheritParams pomp::mif2
 ##'
@@ -57,7 +58,7 @@ setMethod(
   "igirf",
   signature=signature(data="missing"),
   definition=function (...) {
-    reqd_arg("igirf","data")
+    stop("igirf: ","data"," is a required argument.")
   }
 )
 
@@ -65,7 +66,7 @@ setMethod(
   "igirf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    undef_method("igirf",data)
+    stop("igirf is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
   }
 )
 
@@ -85,7 +86,7 @@ setMethod(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,kind,tol = tol,
         ...,verbose=verbose),
-      error = function (e) pomp:::pStop("igirf",conditionMessage(e))
+      error = function (e) pomp::pStop("igirf",conditionMessage(e))
     )
   }
 )
@@ -136,12 +137,12 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                      unit_statenames=object@unit_statenames,
                      unit_obsnames = object@unit_obsnames)
   if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
-    pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+    stop(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
 
   if (length(Ngirf) != 1 || !is.numeric(Ngirf) || !is.finite(Ngirf) || Ngirf < 1)
-    pStop_(sQuote("Ngirf")," must be a positive integer.")
+    stop(sQuote("Ngirf")," must be a positive integer.")
   Ngirf <- as.integer(Ngirf)
 
   if (is.null(.paramMatrix)) {
@@ -153,17 +154,17 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   ntimes <- length(time(object))
 
   if (is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
+    stop(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
     Np <- tryCatch(
       vapply(seq_len(ntimes),Np,numeric(1)),
       error = function (e) {
-        pStop_("if ",sQuote("Np"),
+        stop("if ",sQuote("Np"),
                " is a function, it must return a single positive integer.")
       }
     )
   } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np"),
+    stop(sQuote("Np"),
            " must be a number, a vector of numbers, or a function.")
   }
 
@@ -171,32 +172,32 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     Np <- rep(Np,times=ntimes)
   } else if (length(Np) > ntimes) {
     if (Np[1L] != Np[ntimes+1] || length(Np) > ntimes+1) {
-      pWarn("igirf","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
+      warning("in igirf ","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
     }
     Np <- head(Np,ntimes)
   } else if (length(Np) < ntimes) {
-    pStop_(sQuote("Np")," must have length 1 or ",
+    stop(sQuote("Np")," must have length 1 or ",
            sQuote("length(time(object))"),".")
   }
 
   if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_(sQuote("Np")," must be a positive integer.")
+    stop(sQuote("Np")," must be a positive integer.")
 
   Np <- as.integer(Np)
   Np <- c(Np,Np[1L])
 
   if (missing(rw.sd))
-    pStop_(sQuote("rw.sd")," must be specified!")
+    stop(sQuote("rw.sd")," must be specified!")
   #rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,
                                      time=igirf_rw_sd_times(times=time(object),Ninter=Ninter),
                                      paramnames=names(start))
   if (missing(cooling.fraction.50))
-    pStop_(sQuote("cooling.fraction.50")," is a required argument.")
+    stop(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
       !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
       cooling.fraction.50 > 1)
-    pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
+    stop(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
   cooling.fn <- pomp:::mif2.cooling(
@@ -278,11 +279,11 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   ep <- paste0("in ",sQuote("igirf"),": ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    stop(sQuote("tol")," should be a small positive number.")
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
-    pStop_(sQuote(".indices")," has improper length.")
+    stop(sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
@@ -422,7 +423,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         if(any(is.na(log_dmeas_weights))){
           # find particle with the NA
           na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
-          na_ix_col <- (na_ix %/% U) + (na_ix %% U > 0)
+          na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
           illegal_dunit_measure_error(
             time=times[nt+1+l],
             lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
@@ -464,7 +465,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         if (any(log_weights>-Inf)) {
           coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=exp(log_weights))
         } else {
-          pomp:::pWarn("igirf","filtering failure at last filter iteration; using ",
+          warning("igirf: ","filtering failure at last filter iteration; using ",
                 "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
@@ -525,14 +526,15 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
   ep <- paste0("in ",sQuote("ibootgirf"),": ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    stop(ep,sQuote("tol")," should be a small positive number.",call.=FALSE)
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
-    pStop_(sQuote(".indices")," has improper length.")
+    stop(ep,sQuote(".indices")," has improper length.",call.=FALSE)
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
+  nunits <- length(unit_names(object))
 
   loglik <- rep(NA,ntimes)
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
@@ -643,7 +645,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         if(any(is.na(log_dmeas_weights))){
           # find particle with the NA
           na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
-          na_ix_col <- (na_ix %/% U) + (na_ix %% U > 0)
+          na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
           illegal_dunit_measure_error(
             time=times[nt+1+l],
             lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
@@ -652,7 +654,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             params=tp_with_guides[,na_ix_col]
           )
         }
-        ldw <- array(log_dmeas_weights, c(U,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
+        ldw <- array(log_dmeas_weights, c(nunits,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
         log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
         log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
@@ -741,7 +743,7 @@ illegal_dunit_measure_error <- function(time, lik, datvals, states, params){
   showvals <- c(time=time,lik=lik,datvals,states,params)
   m1 <- formatC(names(showvals),preserve.width="common")
   m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
-  pomp:::pStop_(
+  stop(
     sQuote("dunit_measure")," returns illegal value.\n",
     "Likelihood, data, states, and parameters are:\n",
     paste0(m1,": ",m2,collapse="\n")

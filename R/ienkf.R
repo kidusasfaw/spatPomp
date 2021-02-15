@@ -10,7 +10,7 @@
 ##' @include spatPomp_class.R spatPomp.R enkf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
-##'
+##' @importFrom stats rnorm
 ##' @inheritParams spatPomp
 ##' @inheritParams pomp::mif2
 ##' @inheritParams enkf
@@ -66,6 +66,18 @@
 ##' Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
 ##' Assimilation Monthly Weather Review 129:2884--2903
 ##' @export
+NULL
+
+setClass(
+  "ienkfd_spatPomp",
+  contains="enkfd_spatPomp",
+  slots=c(Nenkf = 'integer',
+          rw.sd = 'matrix',
+          cooling.type = 'character',
+          cooling.fraction.50 = 'numeric',
+          traces = 'matrix'
+  )
+)
 
 
 ## Ensemble: $X_t\in \mathbb{R}^{m\times q}$
@@ -79,17 +91,6 @@
 ## New observation: $y_t\in \mathbb{R}^{n\times 1}$
 ## Updated ensemble: $X^u_{t}=X_t + K_t\,(y_t - Y_t)$
 ## Filter mean: $m_t=\langle X^u_t \rangle = \frac{1}{q} \sum\limits_{i=1}^q x^{u_i}_t$
-
-setClass(
-  "ienkfd_spatPomp",
-  contains="enkfd_spatPomp",
-  slots=c(Nenkf = 'integer',
-          rw.sd = 'matrix',
-          cooling.type = 'character',
-          cooling.fraction.50 = 'numeric',
-          traces = 'matrix'
-  )
-)
 
 setGeneric("ienkf",  function (data, ...)standardGeneric("ienkf"))
 
@@ -318,7 +319,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
             params=tparams,
             gnsi=gnsi),
       error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
+        stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
     dim(meas_var) <- c(length(unit_names(object)),  Np)

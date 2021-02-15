@@ -34,7 +34,7 @@ bm <- function(U=5,N=100,delta_t=0.1){
 
   obs_names <- paste0("U",1:U)
   bm_data <- data.frame(time=rep(1:N,U),unit=rep(obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
-  bm_unitnames <- unique(bm_data$unit)
+  bm_unitnames <- unique(bm_data[["unit"]])
   bm_unitnames_level <- paste("U",sort(as.numeric(stringr::str_remove(bm_unitnames, "U"))),sep='')
 
   bm_unit_statenames <- c("X")
@@ -152,91 +152,3 @@ bm <- function(U=5,N=100,delta_t=0.1){
   test_params <- c(rho=0.4, sigma=1, tau=1, test_ivps)
   simulate(bm_spatPomp,params=test_params)
 }
-
-#' @export
-girfd_bm <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
-  b <- bm(U = U, N = N)
-  # girfd_spatPomp object creation requirements
-  bm_Ninter <- length(unit_names(b))
-  bm_lookahead <- lookahead
-  bm_Nguide <- Nguide
-  bm_Np <- Np
-  bm_tol <- 1e-300
-
-  # Output girfd_spatPomp object
-  new(
-    "girfd_spatPomp",
-    b,
-    Ninter=bm_Ninter,
-    Nguide=bm_Nguide,
-    lookahead=bm_lookahead,
-    cond.loglik = array(data=numeric(0),dim=c(0,0)),
-    Np = as.integer(bm_Np),
-    tol= bm_tol,
-    loglik=as.double(NA)
-  )
-}
-
-#' @export
-abfd_bm <- function(U=5,
-                     N = 10,
-                     Nrep = 50,
-                     Np = 10,
-                     nbhd = function(object, time, unit) {
-                       nbhd_list <- list()
-                       if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-                       if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
-                       return(nbhd_list)
-                     }){
-  b <- bm(U = U, N = N)
-  # abfd_spatPomp object creation requirements
-  bm_Np <- Np
-  bm_Nrep <- Nrep
-  bm_nbhd <- nbhd
-  bm_tol <- 1e-300
-
-  new(
-    "abfd_spatPomp",
-    b,
-    Np = as.integer(bm_Np),
-    Nrep = as.integer(Nrep),
-    nbhd = bm_nbhd,
-    tol= bm_tol,
-    loglik=as.double(NA)
-  )
-}
-
-#' @export
-abfird_bm <- function(U=5,
-                       N = 10,
-                       Nrep = 50,
-                       nbhd = function(object, time, unit){
-                         nbhd_list = list()
-                         if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-                         if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
-                         return(nbhd_list)
-                       },
-                       Np = 10,
-                       Ninter = U){
-  b <- bm(U = U, N = N)
-  # abfird_spatPomp object creation requirements
-  bm_Np <- Np
-  bm_Ninter <- Ninter
-  bm_Nrep <- Nrep
-  bm_nbhd <- nbhd
-  bm_tol <- 1e-300
-
-  new(
-    "abfird_spatPomp",
-    b,
-    Np = as.integer(bm_Np),
-    Ninter = as.integer(bm_Ninter),
-    Nrep = as.integer(bm_Nrep),
-    nbhd = bm_nbhd,
-    tol= bm_tol,
-    loglik=as.double(NA)
-  )
-
-}
-
-

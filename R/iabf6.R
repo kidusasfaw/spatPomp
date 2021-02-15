@@ -12,7 +12,8 @@
 ##' @include spatPomp_class.R abf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
-##'
+##' @importFrom stats quantile
+##' @importFrom utils head
 ##' @inheritParams pomp::mif2
 ##' @param Nabf The number of iterations to perform
 ##' @return
@@ -41,7 +42,22 @@ setClass(
   )
 )
 
-h_abf_internal6 <- function (object,
+## define the iabfd_spatPomp class
+setClass(
+  'iabf6d_spatPomp',
+  contains='abfd_spatPomp',
+  slots=c(
+    Nabf = 'integer',
+    rw.sd = 'matrix',
+    cooling.type = 'character',
+    cooling.fraction.50 = 'numeric',
+    traces = 'matrix',
+    paramMatrix = 'array'
+  )
+)
+
+
+iabf_abf <- function (object,
                              params,
                              Nrep_per_param,
                              Np,
@@ -53,7 +69,7 @@ h_abf_internal6 <- function (object,
                              tol = (1e-18)^17, max.fail = Inf,
                              .indices = integer(0), verbose,
                              .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("h_abf_internal6"),": ")
+  ep <- paste0("in ",sQuote("iabf_abf"),": ")
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   abfiter <- as.integer(abfiter)
@@ -285,7 +301,7 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
   ntimes = length(time(object))
   nunits = length(unit_names(object))
   for (n in seq_len(Nabf)) {
-    out <- spatPomp:::h_abf_internal6(
+    out <- iabf_abf(
       object=object,
       params=rep_param_init,
       Nrep_per_param=Nrep_per_param,
@@ -321,7 +337,7 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
   pompUnload(object,verbose=FALSE)
 
   new(
-    "iabf2d_spatPomp",
+    "iabf6d_spatPomp",
     object,
     Nabf=as.integer(Nabf),
     Nrep=as.integer(Nrep_per_param),

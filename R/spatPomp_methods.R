@@ -67,6 +67,7 @@ setMethod(
 ##' set to \code{'spatPomps'}, the default behavior, then the output is a
 ##' \code{list} of \code{spatPomp} objects. Options are \code{'spatPomps'}
 ##' and \code{'data.frame'}.
+##' @importFrom utils data
 ##' @examples
 ##' # Get a spatPomp object
 ##' b <- bm(U=5, N=10)
@@ -96,16 +97,16 @@ setMethod(
       to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
       gathered <- sims %>%
         tidyr::gather_(key="stateobs", val="val", to_gather) %>%
-        dplyr::mutate(ui = get_unit_index_from_statename_v(stateobs))%>%
-        dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
+        dplyr::mutate(ui = get_unit_index_from_statename_v(.data$stateobs))%>%
+        dplyr::mutate(unit = unit_names(object)[as.integer(.data$ui)]) %>%
         dplyr::select(to_select) %>%
         dplyr::arrange_(.dots = to_arrange)
       stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
       gathered$stateobstype <- stateobstype
       gathered <- gathered %>%
-        dplyr::select(-stateobs) %>%
-        tidyr::spread(key = stateobstype, value = val) %>%
-        dplyr::rename(unitname = unit)
+        dplyr::select(-.data$stateobs) %>%
+        tidyr::spread(key = stateobstype, value = .data$val) %>%
+        dplyr::rename(unitname = .data$unit)
       return(gathered)
     }
     if(format=="spatPomps"){
@@ -193,14 +194,14 @@ setMethod(
   definition=function(object)object@loglik
 )
 
-##' @name logLik-iabfd_spatPomp
+##' @name logLik-iabf6d_spatPomp
 ##' @title loglik
-##' @aliases logLik,iabfd_spatPomp-method
+##' @aliases logLik,iabf6d_spatPomp-method
 ##' @rdname loglik
 ##' @export
 setMethod(
   "logLik",
-  signature=signature(object="iabfd_spatPomp"),
+  signature=signature(object="iabf6d_spatPomp"),
   definition=function(object)object@loglik
 )
 
