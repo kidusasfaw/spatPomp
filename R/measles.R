@@ -35,18 +35,22 @@ if(0){
 # England and Wales data are the city of London plus the largest 39 cities that were more than 50km from London.
 # cases is reported measles cases per biweek
 # births is estimated recruitment of susceptibles per biweek
-read.csv("../../measles/measlesUKUS.csv",stringsAsFactors=FALSE) %>% dplyr::filter(country=="UK") -> x
+read.csv("../../measles/measlesUKUS.csv",stringsAsFactors=FALSE) %>% dplyr::filter(.data$country=="UK") -> x
 x %>%
-  dplyr::group_by(loc) %>%
-  dplyr::mutate(meanPop = mean(pop)) %>%
+  dplyr::group_by(.data$loc) %>%
+  dplyr::mutate(meanPop = mean(.data$pop)) %>%
   dplyr::ungroup() %>%
-  dplyr::arrange(desc(meanPop),decimalYear) -> x1
-x1 %>% dplyr::transmute(year=decimalYear,city=loc,cases=cases,pop=pop,births=rec) -> x2
-  # the R package csv format
-  # from https://cran.r-project.org/doc/manuals/R-exts.html#Data-in-packages
-  write.table(file="measlesUK.csv",sep = ";",row.names=F,x2)
+  dplyr::arrange(dplyr::desc(.data$meanPop),.data$decimalYear) -> x1
+x1 %>% dplyr::transmute(year=.data$decimalYear,
+                        city=.data$loc,
+                        cases=.data$cases,
+                        pop=.data$pop,
+                        births=.data$rec) -> x2
+# the R package csv format
+# from https://cran.r-project.org/doc/manuals/R-exts.html#Data-in-packages
+write.table(file="measlesUK.csv",sep = ";",row.names=F,x2)
 y <- x1[x1$decimalYear==1944,c("loc","lon","lat","meanPop")]
-y1 <- dplyr::transmute(y,city=loc,lon,lat,meanPop)
+y1 <- dplyr::transmute(y,city=.data$loc,.data$lon,.data$lat,.data$meanPop)
 write.table(file="city_data_UK.csv",sep=";",row.names=F,y1)
 }
 ####################################################################
@@ -163,7 +167,8 @@ measles_rprocess <- Csnippet('
     R[u] = R[u]>0 ? floor(R[u]) : 0;
 
     // pre-computing this saves substantial time
-    powVec[u] = pow(I[u]/pop[u],alpha);
+    //powVec[u] = pow(I[u]/pop[u],alpha);
+    powVec[u] = I[u]/pop[u];
   }
 
   // These rates could be inside the u loop if some parameters arent shared between units

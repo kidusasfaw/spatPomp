@@ -82,6 +82,10 @@ setGeneric(
     standardGeneric("girf")
 )
 
+##' @name girf-missing
+##' @aliases girf,missing-method
+##' @rdname girf
+##' @export
 setMethod(
   "girf",
   signature=signature(object="missing"),
@@ -90,6 +94,10 @@ setMethod(
   }
 )
 
+##' @name girf-any
+##' @aliases girf,any-method
+##' @rdname girf
+##' @export
 setMethod(
   "girf",
   signature=signature(object="ANY"),

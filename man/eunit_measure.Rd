@@ -2,6 +2,8 @@
 % Please edit documentation in R/eunit_measure.R
 \name{eunit_measure}
 \alias{eunit_measure}
+\alias{eunit_measure-spatPomp}
+\alias{eunit_measure,spatPomp-method}
 \title{eunit_measure}
 \usage{
 \S4method{eunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE, gnsi = TRUE)
@@ -33,4 +35,5 @@ p <- coef(b); names(p) -> rnp
 dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 eunit_measure(b, x=s, unit=2, time=1, params=p)
+
 }

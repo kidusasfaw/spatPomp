@@ -1,4 +1,3 @@
-setGeneric("eunit_measure", function(object,...)standardGeneric("eunit_measure"))
 #' eunit_measure
 #'
 #' \code{eunit_measure} evaluates the expectation of a unit's observation given the entire state
@@ -21,7 +20,15 @@ setGeneric("eunit_measure", function(object,...)standardGeneric("eunit_measure")
 #' dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 #' o <- obs(b)[,1,drop=FALSE]
 #' eunit_measure(b, x=s, unit=2, time=1, params=p)
-#' @export
+#'
+NULL
+
+setGeneric("eunit_measure", function(object,...)standardGeneric("eunit_measure"))
+
+##' @name eunit_measure-spatPomp
+##' @aliases eunit_measure,spatPomp-method
+##' @rdname eunit_measure
+##' @export
 setMethod(
   "eunit_measure",
   signature=signature(object="spatPomp"),

@@ -4,6 +4,8 @@
 \alias{abfir}
 \alias{abfir-spatPomp}
 \alias{abfir,spatPomp-method}
+\alias{abfir-abfird_spatPomp}
+\alias{abfir,abfird_spatPomp-method}
 \title{Adapted Bagged Filter with Intermediate Resampling (ABF-IR)}
 \usage{
 \S4method{abfir}{spatPomp}(
@@ -16,6 +18,8 @@
   ...,
   verbose = getOption("verbose", FALSE)
 )
+
+\S4method{abfir}{abfird_spatPomp}(object, Np, Nrep, nbhd, Ninter, tol, ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}

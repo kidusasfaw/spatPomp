@@ -54,6 +54,10 @@ setGeneric(
     standardGeneric("igirf")
 )
 
+##' @name igirf-missing
+##' @aliases igirf,missing-method
+##' @rdname igirf
+##' @export
 setMethod(
   "igirf",
   signature=signature(data="missing"),
@@ -62,11 +66,15 @@ setMethod(
   }
 )
 
+##' @name igirf-any
+##' @aliases igirf, any-method
+##' @rdname igirf
+##' @export
 setMethod(
   "igirf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    stop("igirf is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
+    stop("igirf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
   }
 )
 
@@ -287,6 +295,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
+  nunits <- length(unit_names(object))
 
   loglik <- rep(NA,ntimes)
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
@@ -578,6 +587,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
     )
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
+    rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
       tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
@@ -626,7 +636,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
           resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),l,drop=FALSE] -
           resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] +
           resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] * sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
-
+        rm(skel)
         log_dmeas_weights <- tryCatch(
           (vec_dmeasure(
             object,
@@ -724,6 +734,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       else{
         cond.loglik[nt+1, s] <- log(tol)
       }
+      gc()
     }
   }
   new(

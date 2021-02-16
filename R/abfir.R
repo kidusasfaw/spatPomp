@@ -402,6 +402,10 @@ setMethod(
   }
 )
 
+##' @name abfir-abfird_spatPomp
+##' @aliases abfir,abfird_spatPomp-method
+##' @rdname abfir
+##' @export
 setMethod(
   "abfir",
   signature=signature(object="abfird_spatPomp"),

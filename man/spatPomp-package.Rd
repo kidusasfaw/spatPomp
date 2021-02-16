@@ -46,7 +46,7 @@ and compared on a growing body of models and datasets.
 \asfaw2020
 }
 \seealso{
-\link[=pomp-package]{pomp package}, \link{panelPomp}
+\link[=pomp-package]{pomp package}
 }
 \author{
 Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron King

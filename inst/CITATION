@@ -21,8 +21,8 @@ c(
                                 family = "Ionides")),
         year={2021},
         eprint={2101.01157},
-        archivePrefix={arXiv},
-        primaryClass={stat.ME}
+        archivePrefix={"arXiv"},
+        primaryClass={"stat.ME"}
     ),
     bibentry(
         header="To cite the package itself:",

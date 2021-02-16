@@ -2,6 +2,8 @@
 % Please edit documentation in R/vunit_measure.R
 \name{vunit_measure}
 \alias{vunit_measure}
+\alias{vunit_measure-spatPomp}
+\alias{vunit_measure,spatPomp-method}
 \title{vunit_measure}
 \usage{
 \S4method{vunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE, gnsi = TRUE)
@@ -33,4 +35,5 @@ p <- coef(b); names(p) -> rnp
 dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 vunit_measure(b, x=s, unit=2, time=1, params=p)
+
 }

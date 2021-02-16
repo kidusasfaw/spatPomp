@@ -1,8 +1,5 @@
-setGeneric("dunit_measure", function(object,...)standardGeneric("dunit_measure"))
 #' dunit_measure
-#'
 #' \code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state
-#'
 #' @name dunit_measure
 #' @rdname dunit_measure
 #' @include spatPomp_class.R spatPomp.R
@@ -22,7 +19,15 @@ setGeneric("dunit_measure", function(object,...)standardGeneric("dunit_measure")
 #' dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 #' o <- obs(b)[,1,drop=FALSE]
 #' dunit_measure(b, y=o, x=s, unit=1, time=1, params=p)
-#' @export
+#'
+NULL
+
+setGeneric("dunit_measure", function(object,...)standardGeneric("dunit_measure"))
+
+##' @name dunit_measure-spatPomp
+##' @aliases dunit_measure,spatPomp-method
+##' @rdname dunit_measure
+##' @export
 setMethod(
   "dunit_measure",
   signature=signature(object="spatPomp"),

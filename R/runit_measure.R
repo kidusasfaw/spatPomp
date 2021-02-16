@@ -1,4 +1,3 @@
-setGeneric("runit_measure", function(object,...)standardGeneric("runit_measure"))
 #' runit_measure
 #'
 #' \code{runit_measure} simulates a unit's observation given the entire state
@@ -21,7 +20,14 @@ setGeneric("runit_measure", function(object,...)standardGeneric("runit_measure")
 #' dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 #' o <- obs(b)[,1,drop=FALSE]
 #' runit_measure(b, x=s, unit=2, time=1, params=p)
-#' @export
+NULL
+
+setGeneric("runit_measure", function(object,...)standardGeneric("runit_measure"))
+
+##' @name runit_measure-spatPomp
+##' @aliases runit_measure,spatPomp-method
+##' @rdname runit_measure
+##' @export
 setMethod(
   "runit_measure",
   signature=signature(object="spatPomp"),

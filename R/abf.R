@@ -354,6 +354,10 @@ setMethod(
   }
 )
 
+##' @name abf-abfd_spatPomp
+##' @aliases abf,abfd_spatPomp-method
+##' @rdname abf
+##' @export
 setMethod(
   "abf",
   signature=signature(object="abfd_spatPomp"),

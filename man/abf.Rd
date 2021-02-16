@@ -4,6 +4,8 @@
 \alias{abf}
 \alias{abf-spatPomp}
 \alias{abf,spatPomp-method}
+\alias{abf-abfd_spatPomp}
+\alias{abf,abfd_spatPomp-method}
 \title{Adapted Bagged Filter (ABF)}
 \usage{
 \S4method{abf}{spatPomp}(
@@ -15,6 +17,8 @@
   ...,
   verbose = getOption("verbose", FALSE)
 )
+
+\S4method{abf}{abfd_spatPomp}(object, Nrep, Np, nbhd, params, tol, ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}

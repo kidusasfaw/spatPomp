@@ -358,8 +358,8 @@ setGeneric(
     standardGeneric("iabf6")
 )
 
-##' @name iabf6
-##' @aliases iabf6
+##' @name iabf6-spatPomp
+##' @aliases iabf6,spatPomp-method
 ##' @rdname iabf6
 ##' @export
 setMethod(

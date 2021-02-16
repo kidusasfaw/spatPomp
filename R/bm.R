@@ -10,6 +10,7 @@
 #' @param N A length-one numeric signifying the number of observation time steps to evolve the process.
 #' @param delta_t Process simulations are performed every \code{delta_t} time units
 #' whereas observations occur every one time unit
+#' @importFrom utils data
 #' @return An object of class \sQuote{spatPomp}.
 #' @examples
 #' b <- bm(U=4, N=20)
@@ -126,7 +127,7 @@ bm <- function(U=5,N=100,delta_t=0.1){
     Y = rnorm(X,tau+tol);
   ")
 
-  bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time, factor(unit, levels = bm_unitnames_level)),
+  bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time, factor(.data$unit, levels = bm_unitnames_level)),
                  times="time",
                  t0=0,
                  units="unit",

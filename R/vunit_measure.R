@@ -1,4 +1,3 @@
-setGeneric("vunit_measure", function(object,...)standardGeneric("vunit_measure"))
 #' vunit_measure
 #'
 #' \code{vunit_measure} evaluates the variance of a unit's observation given the entire state
@@ -21,7 +20,14 @@ setGeneric("vunit_measure", function(object,...)standardGeneric("vunit_measure")
 #' dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 #' o <- obs(b)[,1,drop=FALSE]
 #' vunit_measure(b, x=s, unit=2, time=1, params=p)
-#' @export
+#'
+NULL
+setGeneric("vunit_measure", function(object,...)standardGeneric("vunit_measure"))
+
+##' @name vunit_measure-spatPomp
+##' @aliases vunit_measure,spatPomp-method
+##' @rdname vunit_measure
+##' @export
 setMethod(
   "vunit_measure",
   signature=signature(object="spatPomp"),

@@ -2,7 +2,10 @@
 % Please edit documentation in R/dunit_measure.R
 \name{dunit_measure}
 \alias{dunit_measure}
-\title{dunit_measure}
+\alias{dunit_measure-spatPomp}
+\alias{dunit_measure,spatPomp-method}
+\title{dunit_measure
+\code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state}
 \usage{
 \S4method{dunit_measure}{spatPomp}(object, y, x, unit, time, params, log = TRUE, .gnsi = TRUE, ...)
 }
@@ -21,6 +24,7 @@
 A matrix with the unit measurement density
 }
 \description{
+dunit_measure
 \code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state
 }
 \examples{
@@ -33,4 +37,5 @@ p <- coef(b); names(p) -> rnp
 dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 dunit_measure(b, y=o, x=s, unit=1, time=1, params=p)
+
 }

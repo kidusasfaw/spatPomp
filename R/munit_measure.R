@@ -1,4 +1,3 @@
-setGeneric("munit_measure", function(object,...)standardGeneric("munit_measure"))
 #' munit_measure
 #'
 #' \code{munit_measure} returns a moment-matched parameter set given an empirically calculated variance.
@@ -28,7 +27,15 @@ setGeneric("munit_measure", function(object,...)standardGeneric("munit_measure")
 #'                       dimnames = list(params = rownames(p)))
 #' vc <- c(4, 9, 16); dim(vc) <- c(length(vc), 1, 1)
 #' munit_measure(b, x=s, vc=vc, Np=1, unit = 1, time=1, params=array.params)
-#' @export
+#'
+NULL
+
+setGeneric("munit_measure", function(object,...)standardGeneric("munit_measure"))
+
+##' @name munit_measure-spatPomp
+##' @aliases munit_measure,spatPomp-method
+##' @rdname munit_measure
+##' @export
 setMethod(
   "munit_measure",
   signature=signature(object="spatPomp"),

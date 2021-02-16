@@ -1,37 +1,3 @@
-setGeneric(
-  "plot",
-  function (x, y, ...)
-    standardGeneric("plot")
-)
-##' Plotting output of \code{igirf()}
-##'
-##' Diagnostic plot for \code{igirf()}
-##' @name plot-igirf
-##' @rdname plot
-##' @include spatPomp_class.R igirf.R
-##' @aliases plot plot-igirf igirf-method plot igirfd_spatPomp-method plot
-##' @importFrom utils data
-##' @param x an output of \code{igirf()} with class \code{igirfd_spatPomp}
-##' @param params the names of the parameters which should be in the plot
-##' @param ncol the number of columns in the grid plot
-##' @export
-setMethod(
-  "plot",
-  signature=signature(x="igirfd_spatPomp"),
-  definition=function (x, params = names(coef(x)), ncol = 3) {
-    if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
-    plot.df <- data.frame(x@traces[,c("loglik", params)])
-    cn <- colnames(plot.df)
-    plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
-    names(plot.df) <- c("iteration", cn)
-    to.gather <- colnames(plot.df)[2:length(colnames(plot.df))]
-    to.plot <- plot.df %>% tidyr::gather_(key = "param", val = "value", to.gather) %>% .[-1,]
-    ggplot2::ggplot(data = to.plot) +
-      ggplot2::geom_line(mapping = ggplot2::aes(x = .data$iteration, y = .data$value)) +
-      ggplot2::facet_wrap(~param, ncol = ncol, scales = "free")
-  }
-)
-
 ##' Plotting \code{spatPomp} data
 ##'
 ##' Visualize \code{spatPomp} data
@@ -44,6 +10,42 @@ setMethod(
 ##' This helps in contexts where there are spikes that could take away
 ##' attention from the dynamics illustrated by the rest of the data.
 ##' @param ncol the number of columns in the grid plot
+NULL
+
+setGeneric(
+  "plot",
+  function (x, y, ...)
+    standardGeneric("plot")
+)
+##' Plotting output of \code{igirf()}
+##'
+##' Diagnostic plot for \code{igirf()}
+##' @name plot-igirf
+##' @rdname plot
+##' @aliases plot plot-igirf igirf-method plot igirfd_spatPomp-method plot
+setMethod(
+  "plot",
+  signature=signature(x="igirfd_spatPomp"),
+  definition=function (x, params = names(coef(x)), ncol = 3) {
+    if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+    plot.df <- data.frame(x@traces[,c("loglik", params)])
+    cn <- colnames(plot.df)
+    plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
+    names(plot.df) <- c("iteration", cn)
+    to.gather <- colnames(plot.df)[2:length(colnames(plot.df))]
+    to.plot <- plot.df %>% tidyr::gather_(key = "param", val = "value", to.gather) %>% tail(-1)
+    ggplot2::ggplot(data = to.plot) +
+      ggplot2::geom_line(mapping = ggplot2::aes(x = .data$iteration, y = .data$value)) +
+      ggplot2::facet_wrap(~param, ncol = ncol, scales = "free")
+  }
+)
+
+##' Plotting \code{spatPomp} data
+##'
+##' Visualize \code{spatPomp} data
+##' @name plot-spatPomp
+##' @rdname plot
+##' @aliases plot, plot-spatPomp
 ##' @export
 setMethod(
   "plot",

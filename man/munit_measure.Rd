@@ -2,6 +2,8 @@
 % Please edit documentation in R/munit_measure.R
 \name{munit_measure}
 \alias{munit_measure}
+\alias{munit_measure-spatPomp}
+\alias{munit_measure,spatPomp-method}
 \title{munit_measure}
 \usage{
 \S4method{munit_measure}{spatPomp}(object, x, vc, unit, time, params, Np = 1, gnsi = TRUE)
@@ -42,4 +44,5 @@ array.params <- array(p,
                       dimnames = list(params = rownames(p)))
 vc <- c(4, 9, 16); dim(vc) <- c(length(vc), 1, 1)
 munit_measure(b, x=s, vc=vc, Np=1, unit = 1, time=1, params=array.params)
+
 }

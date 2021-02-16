@@ -2,6 +2,8 @@
 % Please edit documentation in R/runit_measure.R
 \name{runit_measure}
 \alias{runit_measure}
+\alias{runit_measure-spatPomp}
+\alias{runit_measure,spatPomp-method}
 \title{runit_measure}
 \usage{
 \S4method{runit_measure}{spatPomp}(object, x, unit, time, params, log = FALSE, .gnsi = TRUE)

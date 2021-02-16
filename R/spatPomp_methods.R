@@ -161,9 +161,8 @@ setMethod(
 )
 
 ##' @name logLik-girfd_spatPomp
-##' @title logLik
 ##' @aliases logLik,girfd_spatPomp-method
-##' @rdname logLik
+##' @rdname loglik
 ##' @export
 setMethod(
   "logLik",
@@ -172,9 +171,8 @@ setMethod(
 )
 
 ##' @name logLik-bpfilterd_spatPomp
-##' @title logLik
 ##' @aliases logLik,bpfilterd_spatPomp-method
-##' @rdname logLik
+##' @rdname loglik
 ##' @export
 setMethod(
   "logLik",
@@ -184,7 +182,6 @@ setMethod(
 
 
 ##' @name logLik-abfd_spatPomp
-##' @title loglik
 ##' @aliases logLik,abfd_spatPomp-method
 ##' @rdname loglik
 ##' @export
@@ -195,7 +192,6 @@ setMethod(
 )
 
 ##' @name logLik-iabf6d_spatPomp
-##' @title loglik
 ##' @aliases logLik,iabf6d_spatPomp-method
 ##' @rdname loglik
 ##' @export
@@ -207,7 +203,6 @@ setMethod(
 
 
 ##' @name logLik-abfird_spatPomp
-##' @title loglik
 ##' @aliases logLik,abfird_spatPomp-method
 ##' @rdname loglik
 ##' @export
@@ -218,7 +213,6 @@ setMethod(
 )
 
 ##' @name logLik-igirfd_spatPomp
-##' @title loglik
 ##' @aliases logLik,igirfd_spatPomp-method
 ##' @rdname loglik
 ##' @export
