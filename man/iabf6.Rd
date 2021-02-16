@@ -2,6 +2,8 @@
 % Please edit documentation in R/iabf6.R
 \name{iabf6}
 \alias{iabf6}
+\alias{iabf6-spatPomp}
+\alias{iabf6,spatPomp-method}
 \title{Iterated Adapted Bagged Filter 6 (IABF6)}
 \usage{
 \S4method{iabf6}{spatPomp}(

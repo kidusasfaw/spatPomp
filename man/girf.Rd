@@ -2,12 +2,20 @@
 % Please edit documentation in R/girf.R
 \name{girf}
 \alias{girf}
+\alias{girf-missing}
+\alias{girf,missing-method}
+\alias{girf-any}
+\alias{girf,any-method}
 \alias{girf-spatPomp}
 \alias{girf,spatPomp-method}
 \alias{girf-girfd_spatPomp}
 \alias{girf,girfd_spatPomp-method}
 \title{Guided intermediate resampling filter (GIRF)}
 \usage{
+\S4method{girf}{missing}(object, ...)
+
+\S4method{girf}{ANY}(object, ...)
+
 \S4method{girf}{spatPomp}(
   object,
   Np,

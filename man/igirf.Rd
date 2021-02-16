@@ -2,12 +2,21 @@
 % Please edit documentation in R/igirf.R
 \name{igirf}
 \alias{igirf}
+\alias{igirf-missing}
+\alias{igirf,missing-method}
+\alias{igirf-ANY}
+\alias{igirf,}
+\alias{ANY-method}
 \alias{igirf-spatPomp}
 \alias{igirf,spatPomp-method}
 \alias{igirf-igirfd_spatPomp}
 \alias{igirf,igirfd_spatPomp-method}
 \title{Iterated guided intermediate resampling filter (IGIRF)}
 \usage{
+\S4method{igirf}{missing}(data, ...)
+
+\S4method{igirf}{ANY}(data, ...)
+
 \S4method{igirf}{spatPomp}(
   data,
   Ngirf,
@@ -43,6 +52,13 @@
 \arguments{
 \item{data}{an object of class \code{spatPomp} or \code{igirfd_spatPomp}}
 
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
+
+When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+
 \item{Ngirf}{the number of iterations of parameter-perturbed GIRF.}
 
 \item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
@@ -77,13 +93,6 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 \item{kind}{One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.}
 
 \item{tol}{If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.}
-
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }

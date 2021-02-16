@@ -66,8 +66,8 @@ setMethod(
   }
 )
 
-##' @name igirf-any
-##' @aliases igirf, any-method
+##' @name igirf-ANY
+##' @aliases igirf, ANY-method
 ##' @rdname igirf
 ##' @export
 setMethod(

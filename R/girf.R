@@ -567,6 +567,7 @@ bootgirf.internal <- function (object,
       }
     )
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
+    rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
                     params=params,.gnsi=gnsi)
@@ -695,6 +696,7 @@ bootgirf.internal <- function (object,
         x <- X
         log_filter_guide_fun <- log(tol)
       }
+      gc()
     }
   }
   new(
