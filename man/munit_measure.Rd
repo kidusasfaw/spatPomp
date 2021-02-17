@@ -6,7 +6,7 @@
 \alias{munit_measure,spatPomp-method}
 \title{munit_measure}
 \usage{
-\S4method{munit_measure}{spatPomp}(object, x, vc, unit, time, params, Np = 1, gnsi = TRUE)
+\S4method{munit_measure}{spatPomp}(object, x, vc, unit, time, params, Np = 1)
 }
 \arguments{
 \item{object}{An object of class \code{spatPomp}}

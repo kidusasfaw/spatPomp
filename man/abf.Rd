@@ -13,12 +13,20 @@
   Nrep,
   Np,
   nbhd,
-  tol = (1e-300),
+  tol = 1e-300,
   ...,
   verbose = getOption("verbose", FALSE)
 )
 
-\S4method{abf}{abfd_spatPomp}(object, Nrep, Np, nbhd, params, tol, ...)
+\S4method{abf}{abfd_spatPomp}(
+  object,
+  Nrep,
+  Np,
+  nbhd,
+  tol = 1e-300,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -33,23 +41,16 @@ which is represented by \code{c(unit,time)}. See example below for more details.
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
+\item{\dots}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
-
-\item{params}{A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}}
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{abf} returns an object of class
 \sQuote{abfd_spatPomp}.
 }
 \description{
-An algorithm for estimating the filter distribution and likelihood of a spatiotemporal partially-observed Markov process model.
+An algorithm for estimating the likelihood of a spatiotemporal partially-observed Markov process model.
 Running \code{abf} causes the algorithm to run bootstrap replicate jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
 distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each replicate close to each other through resampling down
 to one particle per replicate at each observation time point.

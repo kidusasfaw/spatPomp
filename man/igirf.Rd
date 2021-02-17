@@ -5,8 +5,7 @@
 \alias{igirf-missing}
 \alias{igirf,missing-method}
 \alias{igirf-ANY}
-\alias{igirf,}
-\alias{ANY-method}
+\alias{igirf,ANY-method}
 \alias{igirf-spatPomp}
 \alias{igirf,spatPomp-method}
 \alias{igirf-igirfd_spatPomp}
@@ -52,16 +51,11 @@
 \arguments{
 \item{data}{an object of class \code{spatPomp} or \code{igirfd_spatPomp}}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
 \item{Ngirf}{the number of iterations of parameter-perturbed GIRF.}
 
-\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
+\item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
 \item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 Parameters that are to be estimated should have positive perturbations specified here.
@@ -94,7 +88,7 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
 \item{tol}{If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.}
 
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{igirf} returns an object of class

@@ -33,6 +33,7 @@
 ##' the spatial unit column name using the \code{units} argument. The dataframe provided should be sorted in
 ##' increasing order of time and unit name respectively, i.e. observation 1 in unit A should come before observation
 ##' 1 in unit B, which should come before observation 2 in unit A.
+##' @param units when \code{data} is a \code{data.frame} this is the name of the column containing the spatial units.
 ##' @param covar An optional dataframe for supplying covariate information. If provided, there must be two
 ##' columns that provide the observation time and the observation spatial unit with the same names and arrangement as the \code{data}.
 ##' @param unit_statenames The names of the components of the latent state. E.g. if the user is constructing an joint SIR model

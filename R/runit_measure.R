@@ -8,6 +8,7 @@
 #' @param x A state vector for all units
 #' @param unit The unit for which to simulate an observation
 #' @param time The time for which to simulate an observation
+#' @param log logical; should the density be returned on log scale?
 #' @param params parameters to use to simulate an observation
 #' @return A matrix with the simulation
 #' @examples
@@ -31,7 +32,7 @@ setGeneric("runit_measure", function(object,...)standardGeneric("runit_measure")
 setMethod(
   "runit_measure",
   signature=signature(object="spatPomp"),
-  definition=function (object, x, unit, time, params, log = FALSE, .gnsi=TRUE){
+  definition=function (object, x, unit, time, params, log = FALSE){
     pompLoad(object)
     storage.mode(x) <- "double"
     storage.mode(params) <- "double"
@@ -42,7 +43,7 @@ setMethod(
                time,
                unit,
                params,
-               .gnsi)[unit,,1,drop=FALSE]
+               TRUE)[unit,,1,drop=FALSE]
     pompUnload(object)
     out
   }

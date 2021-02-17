@@ -1,5 +1,29 @@
-##' Simulate from the unit measurement model density function for each unit##' @include spatPomp_class.R
+##' Vector of simulated measurements
+##'
+##' Simulate from the unit measurement model density function for each unit
+##' @param object a \code{spatPomp} object
+##' @param x numeric; state at which measurements are simulated
+##' @param times numeric; time at which measurements are simulated
+##' @param params numeric; parameter set at which measurements are simulated
+##' @param \dots additional parameters will be ignored
+##' @name vec_rmeasure
+##' @include spatPomp_class.R
 ##' @rdname vec_rmeasure
+NULL
+
+setGeneric("vec_rmeasure", function(object,...)standardGeneric("vec_rmeasure"))
+
+##' @name vec_rmeasure-spatPomp
+##' @rdname vec_rmeasure
+##' @aliases vec_rmeasure,spatPomp-method
+##' @export
+setMethod(
+  "vec_rmeasure",
+  signature=signature(object="spatPomp"),
+  definition=function (object, x, times, params, ...){
+    vec_rmeasure.internal(object=object,x=x,times=times,params=params,...)
+  }
+)
 
 vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) {
   pompLoad(object)
@@ -20,14 +44,3 @@ vec_rmeasure.internal <- function (object, x, times, params, .gnsi = TRUE, ...) 
   pompUnload(object)
   return(weights)
 }
-
-setGeneric("vec_rmeasure", function(object,...)standardGeneric("vec_rmeasure"))
-
-##' @export
-setMethod(
-  "vec_rmeasure",
-  signature=signature(object="spatPomp"),
-  definition=function (object, x, times, params, ...){
-    vec_rmeasure.internal(object=object,x=x,times=times,params=params,...)
-  }
-)

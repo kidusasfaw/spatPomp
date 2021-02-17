@@ -12,6 +12,7 @@
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##' @importFrom stats weighted.mean
 ##' @importFrom utils head
+##' @importFrom pryr mem_used
 ##' @inheritParams girf
 ##' @inheritParams pomp::mif2
 ##'
@@ -67,7 +68,7 @@ setMethod(
 )
 
 ##' @name igirf-ANY
-##' @aliases igirf, ANY-method
+##' @aliases igirf,ANY-method
 ##' @rdname igirf
 ##' @export
 setMethod(
@@ -257,6 +258,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     if (verbose) {
       cat("igirf iteration",n,"of",Ngirf,"completed\n")
       print(coef(g))
+      print(pryr::mem_used())
     }
 
   }
@@ -734,6 +736,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       else{
         cond.loglik[nt+1, s] <- log(tol)
       }
+      pryr::mem_used()
       gc()
     }
   }

@@ -17,13 +17,19 @@
 )
 }
 \arguments{
-\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
+\item{object}{A \code{spatPomp} object.}
+
+\item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
 \item{block_size}{The number of spatial units per block. If this is provided, the method subdivides units approximately evenly
 into blocks with size \code{block_size}.}
 
 \item{block_list}{List that specifies an exact partition of the spatial units. Each partition element, or block, is
 an integer vector of neighboring units.}
+
+\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{bpfilter} returns an object of class

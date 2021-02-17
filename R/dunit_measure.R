@@ -7,6 +7,9 @@
 #' @param y A U by 1 matrix of observations for all units
 #' @param x A state vector for all units
 #' @param unit The unit for which to evaluate the unit measurement density
+#' @param time The time for which to evaluate the unit measurement density
+#' @param log logical; should the density be returned on log scale?
+#' @param \dots additional arguments will be ignored
 #' @param params parameters at which to evaluate the unit measurement density
 #' @return A matrix with the unit measurement density
 #' @examples
@@ -31,13 +34,13 @@ setGeneric("dunit_measure", function(object,...)standardGeneric("dunit_measure")
 setMethod(
   "dunit_measure",
   signature=signature(object="spatPomp"),
-  definition=function (object, y, x, unit, time, params, log = TRUE, .gnsi = TRUE, ...){
+  definition=function (object, y, x, unit, time, params, log = TRUE, ...){
     pompLoad(object)
     storage.mode(y) <- "double"
     storage.mode(x) <- "double"
     storage.mode(unit) <- "integer"
     storage.mode(params) <- "double"
-    out <- .Call(do_dunit_measure,object,y,x,time,unit,params,log,.gnsi)
+    out <- .Call(do_dunit_measure,object,y,x,time,unit,params,log,TRUE)
     pompUnload(object)
     out
   }

@@ -6,7 +6,7 @@
 \alias{runit_measure,spatPomp-method}
 \title{runit_measure}
 \usage{
-\S4method{runit_measure}{spatPomp}(object, x, unit, time, params, log = FALSE, .gnsi = TRUE)
+\S4method{runit_measure}{spatPomp}(object, x, unit, time, params, log = FALSE)
 }
 \arguments{
 \item{object}{An object of class \code{spatPomp}}
@@ -18,6 +18,8 @@
 \item{time}{The time for which to simulate an observation}
 
 \item{params}{parameters to use to simulate an observation}
+
+\item{log}{logical; should the density be returned on log scale?}
 }
 \value{
 A matrix with the simulation

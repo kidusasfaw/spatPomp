@@ -16,12 +16,26 @@ measles(
 }
 \arguments{
 \item{U}{A length-one numeric signifying the number of cities to be represented in the spatPomp object.}
+
+\item{dt}{a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.}
+
+\item{fixed_ivps}{a logical. If \code{TRUE} initial value parameters will be declared in the \code{globals} slot and
+will not be part of the parameter vector.}
+
+\item{shared_ivps}{a logical. If \code{TRUE} and \code{fixed_ivps=TRUE} the values of \code{S_0}, \code{E_0} and \code{I_0} in the
+call to \code{measles} will be used as initial value parameters for all spatial units.}
+
+\item{S_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.}
+
+\item{E_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.}
+
+\item{I_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.}
 }
 \value{
 A spatPomp object.
 }
 \description{
-Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
+Generate a spatPomp object for measles in the top-\code{U} most populous cities in England and Wales.
 The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 The data in the object is simulated using the process and measurement models of He et al. (2010).
 }

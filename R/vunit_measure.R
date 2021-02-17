@@ -8,6 +8,7 @@
 #' @param x A state vector for all units
 #' @param unit The unit for which to evaluate the variance
 #' @param time The time for which to evaluate the variance
+#' @param Np numeric; defaults to 1 and the user need not change this
 #' @param params parameters at which to evaluate the unit variance
 #' @return A matrix with the unit variance
 #' @examples
@@ -31,7 +32,7 @@ setGeneric("vunit_measure", function(object,...)standardGeneric("vunit_measure")
 setMethod(
   "vunit_measure",
   signature=signature(object="spatPomp"),
-  definition=function (object, x, unit, time, params, Np=1, log=FALSE, gnsi = TRUE){
+  definition=function (object, x, unit, time, params, Np=1){
     pompLoad(object)
     storage.mode(x) <- "double"
     storage.mode(params) <- "double"
@@ -41,7 +42,7 @@ setMethod(
           Np = as.integer(Np),
           times=time,
           params=params,
-          gnsi=gnsi)
+          gnsi=TRUE)
     pompUnload(object)
     out[unit,,,drop=FALSE]
   }

@@ -15,12 +15,24 @@ Contact: kasfaw at umich dot edu
 Depends: pomp (>= 2.0), R(>= 3.5.0), methods
 LinkingTo: pomp
 Suggests: testthat
-Imports: doParallel (>= 1.0.11), parallel, foreach, dplyr, tidyr, stringr, ggplot2, abind, rlang, magrittr
+Imports: 
+    doParallel (>= 1.0.11),
+    parallel,
+    foreach,
+    dplyr,
+    tidyr,
+    stringr,
+    ggplot2,
+    abind,
+    rlang,
+    magrittr,
+    pryr (>= 0.1.4)
 Collate:
     'spatPomp_class.R'
     'abf.R'
     'abfir.R'
     'as_data_frame.R'
+    'as_spatPomp.R'
     'bm.R'
     'bpfilter.R'
     'spatPomp.R'
@@ -44,7 +56,6 @@ Collate:
     'show.R'
     'simulate.R'
     'spatPomp_Csnippet.R'
-    'spatPomp_methods.R'
     'spatPomp_workhorses.R'
     'unit_names.R'
     'vec_dmeasure.R'

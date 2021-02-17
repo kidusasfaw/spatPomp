@@ -18,13 +18,22 @@
   cooling.type = c("geometric", "hyperbolic"),
   cooling.fraction.50,
   tol = (1e-18)^17,
-  max.fail = Inf,
   verbose = getOption("verbose"),
   ...
 )
 }
 \arguments{
+\item{object}{A \code{spatPomp} object.}
+
 \item{Nabf}{The number of iterations to perform}
+
+\item{Nrep_per_param}{The number of replicates used to estimate the likelihood at a parameter}
+
+\item{Nparam}{The number of parameters that will undergo the iterated perturbation}
+
+\item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}.
+The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
+which is represented by \code{c(unit,time)}. See example below for more details.}
 
 \item{Np}{the number of particles to use.
 This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
@@ -34,6 +43,8 @@ In the latter case, \code{Np(k)} must be a single positive integer, representing
 \code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
 and so on,
 while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
+
+\item{prop}{A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation}
 
 \item{rw.sd}{specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 Parameters that are to be estimated should have positive perturbations specified here.
@@ -56,6 +67,8 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
+\item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
+
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
@@ -71,7 +84,7 @@ Upon successful completion, \code{iabf} returns an object of class
 }
 \description{
 An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.
-Running \code{iabf} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
+Running \code{iabf6} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
 At each iteration, adapted simulations are performed on a perturbed version of the model, in which the parameters to be estimated are subjected to random perturbations at each observation.
 After cycling through the data, each replicate's weight is calculated and is used to rank the bootstrap replictates. The highest ranking replicates are recycled into the next iteration.
 This extra variability introduced through parameter perturbation effectively smooths the likelihood surface and combats particle depletion by introducing diversity into particle population.

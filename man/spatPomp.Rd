@@ -47,6 +47,8 @@ the spatial unit column name using the \code{units} argument. The dataframe prov
 increasing order of time and unit name respectively, i.e. observation 1 in unit A should come before observation
 1 in unit B, which should come before observation 2 in unit A.}
 
+\item{units}{when \code{data} is a \code{data.frame} this is the name of the column containing the spatial units.}
+
 \item{times}{the times at which observations are made.
 \code{times} must indicate the column of observation times by name or index.
 The time vector must be numeric and non-decreasing.

@@ -11,6 +11,7 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom stats rnorm
+##' @inheritParams abf
 ##'
 ##' @param data A \code{spatPomp} object.
 ##' @param Np The number of Monte Carlo particles used to approximate the filter distribution.

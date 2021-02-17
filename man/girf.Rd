@@ -4,8 +4,8 @@
 \alias{girf}
 \alias{girf-missing}
 \alias{girf,missing-method}
-\alias{girf-any}
-\alias{girf,any-method}
+\alias{girf-ANY}
+\alias{girf,ANY-method}
 \alias{girf-spatPomp}
 \alias{girf,spatPomp-method}
 \alias{girf-girfd_spatPomp}
@@ -40,7 +40,11 @@
 )
 }
 \arguments{
-\item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
+\item{object}{A \code{spatPomp} object.}
+
+\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+
+\item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
 \item{Ninter}{the number of intermediate resampling time points.}
 
@@ -51,6 +55,8 @@
 \item{kind}{One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.}
 
 \item{tol}{If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.}
+
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{girf} returns an object of class

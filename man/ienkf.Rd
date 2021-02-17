@@ -13,8 +13,6 @@
   cooling.type = c("geometric", "hyperbolic"),
   cooling.fraction.50,
   Np,
-  tol = 0,
-  max.fail = Inf,
   ...,
   verbose = getOption("verbose", FALSE)
 )
@@ -45,19 +43,11 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{Np}{the number of particles to use.
-This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-Alternatively, if one wishes the number of particles to vary across timesteps, one may specify \code{Np} either as a vector of positive integers of length \preformatted{length(time(object,t0=TRUE))} or as a function taking a positive integer argument.
-In the latter case, \code{Np(k)} must be a single positive integer, representing the number of particles to be used at the \code{k}-th timestep:
-\code{Np(0)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-\code{Np(1)}, from \code{timezero(object)} to \code{time(object)[1]},
-and so on,
-while when \code{T=length(time(object))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.}
+\item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
-\item{...}{If there are arguments that the user would like to pass to \pkg{pomp}'s basic constructor function's \dots argument,
-this argument passes them along. Not recommended for this version of \pkg{spatPomp}.}
+\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{ienkf} returns an object of class

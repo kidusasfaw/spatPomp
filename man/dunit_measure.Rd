@@ -7,7 +7,7 @@
 \title{dunit_measure
 \code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state}
 \usage{
-\S4method{dunit_measure}{spatPomp}(object, y, x, unit, time, params, log = TRUE, .gnsi = TRUE, ...)
+\S4method{dunit_measure}{spatPomp}(object, y, x, unit, time, params, log = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{spatPomp}}
@@ -18,7 +18,13 @@
 
 \item{unit}{The unit for which to evaluate the unit measurement density}
 
+\item{time}{The time for which to evaluate the unit measurement density}
+
 \item{params}{parameters at which to evaluate the unit measurement density}
+
+\item{log}{logical; should the density be returned on log scale?}
+
+\item{\dots}{additional arguments will be ignored}
 }
 \value{
 A matrix with the unit measurement density

@@ -10,7 +10,7 @@
 ##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
-##' @inheritParams bpfilter
+##' @inheritParams abf
 ##' @param Ninter the number of intermediate resampling time points.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
@@ -94,8 +94,8 @@ setMethod(
   }
 )
 
-##' @name girf-any
-##' @aliases girf,any-method
+##' @name girf-ANY
+##' @aliases girf,ANY-method
 ##' @rdname girf
 ##' @export
 setMethod(

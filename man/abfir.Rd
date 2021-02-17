@@ -36,14 +36,9 @@ which is represented by \code{c(unit,time)}. See example below for more details.
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
+\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
-
-\item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+\item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
 Upon successful completion, \code{abfir} returns an object of class

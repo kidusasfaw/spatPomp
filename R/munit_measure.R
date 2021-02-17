@@ -39,7 +39,7 @@ setGeneric("munit_measure", function(object,...)standardGeneric("munit_measure")
 setMethod(
   "munit_measure",
   signature=signature(object="spatPomp"),
-  definition=function (object, x, vc, unit, time, params, Np=1, gnsi=TRUE){
+  definition=function (object, x, vc, unit, time, params, Np=1){
     pompLoad(object)
     storage.mode(x) <- "double"
     storage.mode(params) <- "double"
@@ -52,7 +52,7 @@ setMethod(
           Np = Np,
           times=time,
           params=params,
-          gnsi=gnsi)[,unit,,,drop=FALSE]
+          gnsi=TRUE)[,unit,,,drop=FALSE]
     pompUnload(object)
     out
   }

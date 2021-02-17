@@ -11,7 +11,7 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##' @importFrom stats rnorm
-##' @inheritParams spatPomp
+##' @inheritParams abf
 ##' @inheritParams pomp::mif2
 ##' @inheritParams enkf
 ##'
@@ -104,7 +104,7 @@ setMethod(
   definition=function (data,
                        Nenkf = 1, rw.sd,
                        cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
-                       Np, tol = 0, max.fail = Inf,
+                       Np,
                        ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
       ienkf.internal(
@@ -114,7 +114,6 @@ setMethod(
         cooling.type=match.arg(cooling.type),
         cooling.fraction.50=cooling.fraction.50,
         Np=Np,
-        max.fail=max.fail,
         ...,
         verbose=verbose
       ),
@@ -125,7 +124,7 @@ setMethod(
 
 ienkf.internal <- function (object, Nenkf, rw.sd,
                            cooling.type, cooling.fraction.50,
-                           Np, max.fail = Inf,
+                           Np,
                            ..., verbose,
                            .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
                            .gnsi = TRUE) {
@@ -217,7 +216,6 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       enkfiter=.ndone+n,
       cooling.fn=cooling.fn,
       rw.sd=rw.sd,
-      max.fail=max.fail,
       verbose=verbose,
       .indices=.indices,
       .gnsi=gnsi
@@ -251,7 +249,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
 ###################ienkf.filter()##################################
 ###################################################################
 ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
-                 max.fail = Inf, verbose, .indices = integer(0),
+                 verbose, .indices = integer(0),
                  .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)

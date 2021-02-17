@@ -6,7 +6,7 @@
 \alias{vunit_measure,spatPomp-method}
 \title{vunit_measure}
 \usage{
-\S4method{vunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE, gnsi = TRUE)
+\S4method{vunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1)
 }
 \arguments{
 \item{object}{An object of class \code{spatPomp}}
@@ -18,6 +18,8 @@
 \item{time}{The time for which to evaluate the variance}
 
 \item{params}{parameters at which to evaluate the unit variance}
+
+\item{Np}{numeric; defaults to 1 and the user need not change this}
 }
 \value{
 A matrix with the unit variance

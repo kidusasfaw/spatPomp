@@ -1,7 +1,7 @@
 ##' Iterated Adapted Bagged Filter 6 (IABF6)
 ##'
 ##' An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.
-##' Running \code{iabf} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
+##' Running \code{iabf6} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
 ##' At each iteration, adapted simulations are performed on a perturbed version of the model, in which the parameters to be estimated are subjected to random perturbations at each observation.
 ##' After cycling through the data, each replicate's weight is calculated and is used to rank the bootstrap replictates. The highest ranking replicates are recycled into the next iteration.
 ##' This extra variability introduced through parameter perturbation effectively smooths the likelihood surface and combats particle depletion by introducing diversity into particle population.
@@ -15,7 +15,11 @@
 ##' @importFrom stats quantile
 ##' @importFrom utils head
 ##' @inheritParams pomp::mif2
+##' @inheritParams abf
 ##' @param Nabf The number of iterations to perform
+##' @param Nparam The number of parameters that will undergo the iterated perturbation
+##' @param Nrep_per_param The number of replicates used to estimate the likelihood at a parameter
+##' @param prop A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation
 ##' @return
 ##' Upon successful completion, \code{iabf} returns an object of class
 ##' \sQuote{iabfd_spatPomp}.
@@ -25,7 +29,6 @@
 ##' \describe{
 ##' \item{\code{\link{coef}}}{ extracts the point estimate }
 ##' }
-##'
 NULL
 
 rw.sd <- pomp:::safecall
@@ -66,7 +69,7 @@ iabf_abf <- function (object,
                              abfiter,
                              cooling.fn,
                              rw.sd,
-                             tol = (1e-18)^17, max.fail = Inf,
+                             tol = (1e-18)^17,
                              .indices = integer(0), verbose,
                              .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("iabf_abf"),": ")
@@ -242,7 +245,7 @@ iabf_abf <- function (object,
 
 iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop, rw.sd,
                            cooling.type, cooling.fraction.50,
-                           tol = (1e-18)^17, max.fail = Inf,
+                           tol = (1e-18)^17,
                            verbose = FALSE, .ndone = 0L,
                            .indices = integer(0),
                            .paramMatrix = NULL,
@@ -312,7 +315,6 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
       cooling.fn=cooling.fn,
       rw.sd=rw.sd,
       tol=tol,
-      max.fail=max.fail,
       .indices=.indices,
       verbose=verbose
     )
@@ -369,7 +371,6 @@ setMethod(
                          rw.sd,
                          cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
-                         max.fail = Inf,
                          verbose = getOption("verbose"),...) {
 
     ep <- paste0("in ",sQuote("iabf6"),": ")
@@ -418,7 +419,6 @@ setMethod(
       cooling.type=cooling.type,
       cooling.fraction.50=cooling.fraction.50,
       tol=tol,
-      max.fail=max.fail,
       verbose=verbose,
       ...
     )

@@ -6,7 +6,7 @@
 \alias{eunit_measure,spatPomp-method}
 \title{eunit_measure}
 \usage{
-\S4method{eunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE, gnsi = TRUE)
+\S4method{eunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE)
 }
 \arguments{
 \item{object}{An object of class \code{spatPomp}}
@@ -18,6 +18,10 @@
 \item{time}{The time for which to evaluate the expectation}
 
 \item{params}{parameters at which to evaluate the unit expectation}
+
+\item{Np}{numeric; defaults to 1 and the user need not change this}
+
+\item{log}{logical; should the density be returned on log scale?}
 }
 \value{
 A matrix with the unit expectation

@@ -1,12 +1,20 @@
 #' Measles in UK spatPomp generator
 #'
-#' Generate a spatPomp object for measles in the top-\code{U} most populous cities in England.
+#' Generate a spatPomp object for measles in the top-\code{U} most populous cities in England and Wales.
 #' The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #' The data in the object is simulated using the process and measurement models of He et al. (2010).
 #'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
 #' @return A spatPomp object.
 #' @importFrom utils data read.csv write.table
+#' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.
+#' @param fixed_ivps a logical. If \code{TRUE} initial value parameters will be declared in the \code{globals} slot and
+#' will not be part of the parameter vector.
+#' @param shared_ivps a logical. If \code{TRUE} and \code{fixed_ivps=TRUE} the values of \code{S_0}, \code{E_0} and \code{I_0} in the
+#' call to \code{measles} will be used as initial value parameters for all spatial units.
+#' @param S_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.
+#' @param E_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.
+#' @param I_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.
 #' @examples
 #' m <- measles(U = 7)
 #' # See all the model specifications of the object
@@ -440,167 +448,3 @@ spatPomp(measles_cases,
         dunit_measure=measles_dunit_measure
 )
 }
-
-#' @export
-girfd_measles <- function(U=5, N = 10, Np = 100, Nguide = 50, lookahead = 1){
-  # Get real data for U=40 so we can simulate using the resulting spatPomp
-  # COHORT EFFECT CHANGED FROM 0.557 to 0
-  measles_sim_U <- 40
-  measles_uk <- measles(measles_sim_U)
-  read.csv(text="
-,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.02
-BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
-LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
-MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
-LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0.0778
-SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0.0428
-BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0.0392
-NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0.038
-HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0.0636
-BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0.0451
-",stringsAsFactors=FALSE,row.names=1) -> he10_mles
-
-  # Set the parameters for the simulation
-  measles_unit_statenames <- c('S','E','I','R', 'C','W')
-  measles_statenames <- paste0(rep(measles_unit_statenames,each=measles_sim_U),1:measles_sim_U)
-  measles_IVPnames <- paste0(measles_statenames[1:(4*measles_sim_U)],"_0")
-  measles_RPnames <- c("alpha","iota","R0","cohort","amplitude",
-                       "gamma","sigma","mu","sigmaSE","rho","psi","g")
-  measles_paramnames <- c(measles_RPnames,measles_IVPnames)
-  measles_params <- rep(NA,length(measles_paramnames))
-  names(measles_params) <- measles_paramnames
-  city_params <- unlist(he10_mles["LONDON",])
-  measles_params[measles_RPnames] <- c(city_params,g=100)[measles_RPnames]
-  measles_params[paste0("S",1:measles_sim_U,"_0")] <-city_params["S_0"]
-  measles_params[paste0("E",1:measles_sim_U,"_0")] <-city_params["E_0"]
-  measles_params[paste0("I",1:measles_sim_U,"_0")] <-city_params["I_0"]
-  measles_params[paste0("R",1:measles_sim_U,"_0")] <-city_params["R_0"]
-  # measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
-
-  # Perform a 40-city simulation which will then be subsetted
-  measles_sim <- simulate(measles_uk,params=measles_params)
-
-  # Subsetting function
-  measles_subset <- function(m_U,m_N){
-    m <- measles(U=m_U)
-    m@data <- measles_sim@data[1:m_U,1:m_N]
-    time(m) <- measles_sim@times[1:m_N]
-    m_statenames <- paste0(rep(measles_unit_statenames,each=m_U),1:m_U)
-    m_IVPnames <- paste0(m_statenames[1:(4*m_U)],"_0")
-    m_paramnames <- c(measles_RPnames,m_IVPnames)
-    m_params <- measles_params[names(measles_params)%in%m_paramnames]
-    coef(m) <- m_params
-    return(m)
-  }
-
-  # Get simulated data for U cities and N times
-  m <- measles_subset(m_U=U, m_N=N)
-
-  # gird_spatPomp object creation requirements
-  measles_Ninter <- length(unit_names(m))
-  measles_lookahead <- lookahead
-  measles_Nguide <- Nguide
-  measles_Np <- Np
-  measles_tol <- 1e-300
-
-  # Output girfd_spatPomp object
-  new(
-    "girfd_spatPomp",
-    m,
-    Ninter=measles_Ninter,
-    Nguide=measles_Nguide,
-    lookahead=measles_lookahead,
-    cond.loglik = array(data=numeric(0),dim=c(0,0)),
-    Np = as.integer(measles_Np),
-    tol= measles_tol,
-    loglik=as.double(NA)
-  )
-
-}
-
-#' @export
-abfd_measles <- function(U=5,
-                         N = 10,
-                         Nrep = 50,
-                         Np = 10,
-                         nbhd = function(object, time, unit) {
-                           nbhd_list <- list()
-                           if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-                           if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
-                           return(nbhd_list)
-                         }
-){
-  # Get real data for U=40 so we can simulate using the resulting spatPomp
-  measles_sim_U <- 40
-  measles_uk <- measles(measles_sim_U)
-  read.csv(text="
-,loglik,loglik.sd,mu,delay,sigma,gamma,rho,R0,amplitude,alpha,iota,cohort,psi,S_0,E_0,I_0,R_0,sigmaSE
-LONDON,-3804.9,0.16,0.02,4,28.9,30.4,0.488,56.8,0.554,0.976,2.9,0,0.116,0.0297,5.17e-05,5.14e-05,0.97,0.0878
-BIRMINGHAM,-3239.3,1.55,0.02,4,45.6,32.9,0.544,43.4,0.428,1.01,0.343,0.331,0.178,0.0264,8.96e-05,0.000335,0.973,0.0611
-LIVERPOOL,-3403.1,0.34,0.02,4,49.4,39.3,0.494,48.1,0.305,0.978,0.263,0.191,0.136,0.0286,0.000184,0.00124,0.97,0.0533
-MANCHESTER,-3250.9,0.66,0.02,4,34.4,56.8,0.55,32.9,0.29,0.965,0.59,0.362,0.161,0.0489,2.41e-05,3.38e-05,0.951,0.0551
-LEEDS,-2918.6,0.23,0.02,4,40.7,35.1,0.666,47.8,0.267,1,1.25,0.592,0.167,0.0262,6.04e-05,3e-05,0.974,0.0778
-SHEFFIELD,-2810.7,0.21,0.02,4,54.3,62.2,0.649,33.1,0.313,1.02,0.853,0.225,0.175,0.0291,6.04e-05,8.86e-05,0.971,0.0428
-BRISTOL,-2681.6,0.5,0.02,4,64.3,82.6,0.626,26.8,0.203,1.01,0.441,0.344,0.201,0.0358,9.62e-06,5.37e-06,0.964,0.0392
-NOTTINGHAM,-2703.5,0.53,0.02,4,70.2,115,0.609,22.6,0.157,0.982,0.17,0.34,0.258,0.05,1.36e-05,1.41e-05,0.95,0.038
-HULL,-2729.4,0.39,0.02,4,42.1,73.9,0.582,38.9,0.221,0.968,0.142,0.275,0.256,0.0371,1.2e-05,1.13e-05,0.963,0.0636
-BRADFORD,-2586.6,0.68,0.02,4,45.6,129,0.599,32.1,0.236,0.991,0.244,0.297,0.19,0.0365,7.41e-06,4.59e-06,0.964,0.0451
-",stringsAsFactors=FALSE,row.names=1) -> he10_mles
-
-  # Set the parameters for the simulation
-  measles_unit_statenames <- c('S','E','I','R', 'C','W')
-  measles_statenames <- paste0(rep(measles_unit_statenames,each=measles_sim_U),1:measles_sim_U)
-  measles_IVPnames <- paste0(measles_statenames[1:(4*measles_sim_U)],"_0")
-  measles_RPnames <- c("alpha","iota","R0","cohort","amplitude",
-                       "gamma","sigma","mu","sigmaSE","rho","psi","g")
-  measles_paramnames <- c(measles_RPnames,measles_IVPnames)
-  measles_params <- rep(NA,length(measles_paramnames))
-  names(measles_params) <- measles_paramnames
-  city_params <- unlist(he10_mles["LONDON",])
-  measles_params[measles_RPnames] <- c(city_params,g=100)[measles_RPnames]
-  measles_params[paste0("S",1:measles_sim_U,"_0")] <-city_params["S_0"]
-  measles_params[paste0("E",1:measles_sim_U,"_0")] <-city_params["E_0"]
-  measles_params[paste0("I",1:measles_sim_U,"_0")] <-city_params["I_0"]
-  measles_params[paste0("R",1:measles_sim_U,"_0")] <-city_params["R_0"]
-  # measles_params[paste0("Acc",1:measles_sim_U,"_0")] <- 0
-
-  # Perform a 40-city simulation which will then be subsetted
-  measles_sim <- simulate(measles_uk,params=measles_params)
-
-  # Subsetting function
-  measles_subset <- function(m_U,m_N){
-    m <- measles(U=m_U)
-    m@data <- measles_sim@data[1:m_U,1:m_N]
-    time(m) <- measles_sim@times[1:m_N]
-    m_statenames <- paste0(rep(measles_unit_statenames,each=m_U),1:m_U)
-    m_IVPnames <- paste0(m_statenames[1:(4*m_U)],"_0")
-    m_paramnames <- c(measles_RPnames,m_IVPnames)
-    m_params <- measles_params[names(measles_params)%in%m_paramnames]
-    coef(m) <- m_params
-    return(m)
-  }
-
-  # Get simulated data for U cities and N times
-  m <- measles_subset(m_U=U, m_N=N)
-
-  # abfd_spatPomp object creation requirements
-  measles_Np <- Np
-  measles_tol <- 1e-300
-  measles_nbhd <- nbhd
-  measles_Nrep <- Nrep
-
-  # Output asifd.spatPomp object
-  new(
-    "abfd_spatPomp",
-    m,
-    Np = as.integer(measles_Np),
-    Nrep=as.integer(measles_Nrep),
-    nbhd=measles_nbhd,
-    tol= measles_tol,
-    loglik=as.double(NA)
-  )
-
-}
-
-

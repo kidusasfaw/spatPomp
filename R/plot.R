@@ -1,10 +1,9 @@
 ##' Plotting \code{spatPomp} data
 ##'
 ##' Visualize \code{spatPomp} data
-##' @name plot-spatPomp
+##' @name plot
 ##' @rdname plot
 ##' @include spatPomp_class.R
-##' @aliases plot, plot-spatPomp
 ##' @param x a \code{spatPomp} object
 ##' @param log should the data be log-transformed before plotting?
 ##' This helps in contexts where there are spikes that could take away
@@ -12,17 +11,13 @@
 ##' @param ncol the number of columns in the grid plot
 NULL
 
-setGeneric(
-  "plot",
-  function (x, y, ...)
-    standardGeneric("plot")
-)
 ##' Plotting output of \code{igirf()}
 ##'
 ##' Diagnostic plot for \code{igirf()}
-##' @name plot-igirf
+##' @param params the names of the parameters for which the user would like to see a trace plot
+##' @name plot-igirfd_spatPomp
 ##' @rdname plot
-##' @aliases plot plot-igirf igirf-method plot igirfd_spatPomp-method plot
+##' @aliases plot,igirfd_spatPomp-method
 setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
@@ -45,7 +40,7 @@ setMethod(
 ##' Visualize \code{spatPomp} data
 ##' @name plot-spatPomp
 ##' @rdname plot
-##' @aliases plot, plot-spatPomp
+##' @aliases plot,spatPomp-method
 ##' @export
 setMethod(
   "plot",

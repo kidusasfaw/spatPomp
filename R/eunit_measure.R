@@ -8,6 +8,8 @@
 #' @param x A state vector for all units
 #' @param unit The unit for which to evaluate the expectation
 #' @param time The time for which to evaluate the expectation
+#' @param log logical; should the density be returned on log scale?
+#' @param Np numeric; defaults to 1 and the user need not change this
 #' @param params parameters at which to evaluate the unit expectation
 #' @return A matrix with the unit expectation
 #' @examples
@@ -32,7 +34,7 @@ setGeneric("eunit_measure", function(object,...)standardGeneric("eunit_measure")
 setMethod(
   "eunit_measure",
   signature=signature(object="spatPomp"),
-  definition=function (object, x, unit, time, params, Np=1, log=FALSE, gnsi=TRUE){
+  definition=function (object, x, unit, time, params, Np=1, log=FALSE){
     pompLoad(object)
     storage.mode(x) <- "double"
     storage.mode(params) <- "double"
@@ -42,7 +44,7 @@ setMethod(
                  Np = as.integer(Np),
                  times=time,
                  params=params,
-                 gnsi=gnsi)
+                 gnsi=TRUE)
     pompUnload(object)
     out[unit,,,drop=FALSE]
   }

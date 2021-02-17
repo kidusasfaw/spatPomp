@@ -1,6 +1,6 @@
 ##' Adapted Bagged Filter (ABF)
 ##'
-##' An algorithm for estimating the filter distribution and likelihood of a spatiotemporal partially-observed Markov process model.
+##' An algorithm for estimating the likelihood of a spatiotemporal partially-observed Markov process model.
 ##' Running \code{abf} causes the algorithm to run bootstrap replicate jobs which each yield an imperfect adapted simulation. Simulating from the "adapted filter"
 ##' distribution runs into a curse of dimensionality (COD) problem, which is mitigated by keeping particles in each replicate close to each other through resampling down
 ##' to one particle per replicate at each observation time point.
@@ -12,18 +12,16 @@
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
-##' @inheritParams pomp::pfilter
 ##' @importFrom foreach %dopar%
-##'
-##'
 ##' @param object A \code{spatPomp} object.
-##' @param params A parameter set for the spatiotemporal POMP. If missing, \code{abf} will attempt to run using \code{coef(object)}
+##' @param \dots If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##' @param Np The number of particles used within each replicate for the adapted simulations.
 ##' @param nbhd A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}.
 ##' The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
 ##' which is represented by \code{c(unit,time)}. See example below for more details.
 ##' @param Nrep The number of bootstrap replicates for the adapted simulations.
 ##' @param tol If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.
+##' @param verbose logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.
 ##' @examples
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=3, N=10)
@@ -286,7 +284,7 @@ setMethod(
   "abf",
   signature=signature(object="spatPomp"),
   function (object, Nrep, Np, nbhd,
-           tol = (1e-300),
+           tol = 1e-300,
            ..., verbose=getOption("verbose",FALSE)) {
     if(missing(nbhd)){
      nbhd <- function(object, unit, time){
@@ -361,12 +359,12 @@ setMethod(
 setMethod(
   "abf",
   signature=signature(object="abfd_spatPomp"),
-  function (object, Nrep, Np, nbhd, params,
-            tol,
-            ...) {
+  function (object, Nrep, Np, nbhd,
+            tol=1e-300,
+            ...,
+            verbose = getOption("verbose", FALSE)) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
-    if (missing(params)) params <- coef(object)
     if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd
 
@@ -374,7 +372,6 @@ setMethod(
            Np=Np,
            Nrep=Nrep,
            nbhd=nbhd,
-           params = params,
            tol=tol,
            ...)
   }
