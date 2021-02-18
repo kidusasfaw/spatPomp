@@ -4,7 +4,7 @@ context("Test methods on simple Brownian motion")
 doParallel::registerDoParallel(3)
 # create the BM object
 set.seed(2)
-U = 10; N = 5
+U = 3; N = 30
 bm_obj <- bm(U = U, N = N)
 
 
@@ -66,39 +66,46 @@ ienkf_out <- ienkf(bm_obj,
 ## IGIRF
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(bm_obj))
-igirf_np <- 800
+igirf_np <- 1000
 igirf_nguide <- 40
-igirf_ngirf <- 30
+igirf_ngirf <- 15
 ### Use moment-matching approach
 igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     params=start_params,
-                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=0.02,
-                                  X2_0=0.02, X3_0=0.02, X4_0=0.02, X5_0=0.02,X6_0=0.02, X7_0=0.02,
-                                  X8_0=0.02, X9_0=0.02, X10_0=0.02),
+                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0),
+                                  X2_0=ivp(0), X3_0=ivp(0), X4_0=ivp(0), X5_0=ivp(0),X6_0=ivp(0), X7_0=ivp(0),
+                                  X8_0=ivp(0), X9_0=ivp(0), X10_0=ivp(0)),
                     cooling.type = "geometric",
                     cooling.fraction.50 = 0.5,
                     Np=igirf_np,
                     Ninter = igirf_ninter,
                     lookahead = igirf_lookahead,
                     Nguide = igirf_nguide,
-                    kind = 'moment')
+                    kind = 'moment',
+                    verbose = TRUE)
 ### Use quantile-based approach
+igirf_lookahead <- 1
+igirf_ninter <- length(unit_names(bm_obj))
+igirf_np <- 1000
+igirf_nguide <- 40
+igirf_ngirf <- 5
 igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     params=start_params,
-                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0.02),
-                                  X2_0=ivp(0.02), X3_0=ivp(0.02), X4_0=ivp(0.02), X5_0=ivp(0.02),X6_0=ivp(0.02), X7_0=ivp(0.02),
-                                  X8_0=ivp(0.02), X9_0=ivp(0.02), X10_0=ivp(0.02)),
+                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0),
+                                  X2_0=ivp(0), X3_0=ivp(0), X4_0=ivp(0), X5_0=ivp(0),X6_0=ivp(0), X7_0=ivp(0),
+                                  X8_0=ivp(0), X9_0=ivp(0), X10_0=ivp(0)),
                     cooling.type = "geometric",
                     cooling.fraction.50 = 0.5,
                     Np=igirf_np,
                     Ninter = igirf_ninter,
                     lookahead = igirf_lookahead,
                     Nguide = igirf_nguide,
-                    kind = 'bootstrap')
+                    kind = 'bootstrap',
+                    verbose = TRUE)
 
 test_that("IGIRF produces estimates that are not far from the MLE", {
-  expect_lt(abs(logLik(igirf_out1) - (-kfll_mle)), 20)
-  expect_lt(abs(logLik(igirf_out2) - (-kfll_mle)), 20)
+  expect_lt(abs(logLik(igirf_out1) - (-kfll_mle)), 30)
+  expect_lt(abs(logLik(igirf_out2) - (-kfll_mle)), 30)
 })
 ### IEnKF will struggle with the bm problem
 test_that("IEnKF produces rho value that is not far from the MLE", {
@@ -126,17 +133,6 @@ girf_loglik <- replicate(n = 10,
                           )
 )
 
-## GIRF with lookahead > 1
-girf_loglik2 <- replicate(n = 5,
-                         expr = logLik(
-                           girf(bm_obj,
-                                Np = 500,
-                                lookahead = 2,
-                                Nguide = 50
-                           )
-                         )
-)
-
 ## ABF
 abf_nbhd <- function(object, time, unit) {
   nbhd_list <- list()
@@ -145,21 +141,21 @@ abf_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-abf_loglik <- replicate(n=10,
+abf_loglik <- replicate(n=3,
                          expr = logLik(abf(bm_obj,
                                            Nrep = 800,
                                            Np = 50,
                                            nbhd = abf_nbhd)))
 
 ## ABFIR
-abfir_loglik <- replicate(n=10,
+abfir_loglik <- replicate(n=3,
                           expr = logLik(abfir(bm_obj,
                                                 Nrep = 800,
                                                 Np=50,
                                                 nbhd = abf_nbhd)))
 
 ## BPF
-bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 100, block_size = 3)))
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 500, block_size = 3)))
 
 test_that("ABF, ABFIR, GIRF, EnKF, BPF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)

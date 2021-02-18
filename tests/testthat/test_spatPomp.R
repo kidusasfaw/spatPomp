@@ -357,18 +357,16 @@ measles_skel <- Csnippet('
                      ')
 
 
-m <- spatPomp2(measles_cases,
+m <- spatPomp(measles_cases,
          units = "city",
          times = "year",
          t0 = min(measles_cases$year)-1/26,
          unit_statenames = measles_unit_statenames,
          covar = measles_covar,
-         tcovar = "year",
          rprocess=euler(measles_rprocess, delta.t=dt),
          skeleton=vectorfield(measles_skel),
-         accumvars = c(paste0("C",1:U),paste0("W",1:U)),
+         unit_accumvars = c("C"),
          paramnames=measles_paramnames,
-         covarnames=measles_covarnames,
          globals=measles_globals,
          rinit=measles_rinit,
          dmeasure=measles_dmeasure,
@@ -379,17 +377,15 @@ m <- spatPomp2(measles_cases,
          dunit_measure=measles_dunit_measure
 )
 
-m_partial <- spatPomp2(measles_cases,
+m_partial <- spatPomp(measles_cases,
                        units = "city",
                        times = "year",
                        t0 = min(measles_cases$year)-1/26,
                        unit_statenames = measles_unit_statenames,
                        covar = measles_covar,
-                       tcovar = "year",
                        rprocess=euler(measles_rprocess, delta.t=dt),
-                       accumvars = c(paste0("C",1:U),paste0("W",1:U)),
+                       unit_accumvars = c("C"),
                        paramnames=measles_paramnames,
-                       covarnames=measles_covarnames,
                        globals=measles_globals,
                        rinit=measles_rinit,
                        dmeasure=measles_dmeasure,
@@ -402,8 +398,6 @@ measles_eunit_measure2 <- Csnippet("
                               ey = rho*C;
                               ")
 # try with eunit_measure2
-m_partial2 <- spatPomp2(m_partial,
-                        eunit_measure=measles_eunit_measure2,
-                        paramnames = c("rho"),
-                        statenames = c("C")
-)
+m_partial2 <- spatPomp(m_partial,
+                       eunit_measure=measles_eunit_measure2)
+

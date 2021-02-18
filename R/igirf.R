@@ -256,11 +256,12 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     .indices <- .indices
 
     if (verbose) {
-      cat("igirf iteration",n,"of",Ngirf,"completed\n")
+      cat("igirf iteration",n,"of",Ngirf,"completed with likelihood ", g@loglik, "\n")
       print(coef(g))
       print(pryr::mem_used())
     }
-
+    rm(g)
+    gc()
   }
 
   g@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",

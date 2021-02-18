@@ -39,8 +39,8 @@ setMethod(
                       format = c("spatPomps", "arrays", "data.frame"),
                       include.data = FALSE,...) {
     format <- match.arg(format)
-    if(format == 'spatPomps') sims <- simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
-    if(format == 'data.frame') sims <- simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
+    if(format == 'spatPomps') sims <- pomp::simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
+    if(format == 'data.frame') sims <- pomp::simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
       unitname <- object@unitname
       unit_stateobs <- c(object@unit_obsnames, object@unit_statenames)

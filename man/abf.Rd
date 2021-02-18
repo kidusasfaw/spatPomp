@@ -79,8 +79,8 @@ bm_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-# Run ABF specified number of Monte Carlo islands and particles per island
-abfd_bm <- abf(b, islands=50, Np=10, nbhd=bm_nbhd)
+# Run ABF specified number of Monte Carlo replicates and particles per replicate
+abfd_bm <- abf(b, Nrep=50, Np=10, nbhd=bm_nbhd)
 
 # Get the likelihood estimate from ABF
 logLik(abfd_bm)
