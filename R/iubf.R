@@ -1,14 +1,14 @@
-##' Iterated Adapted Bagged Filter 6 (IABF6)
+##' Iterated Unadapted Bagged Filter (IUBF)
 ##'
 ##' An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.
-##' Running \code{iabf6} causes the algorithm to perform a specified number of iterations of adapted simulations with parameter perturbation and parameter resamplings.
-##' At each iteration, adapted simulations are performed on a perturbed version of the model, in which the parameters to be estimated are subjected to random perturbations at each observation.
+##' Running \code{iubf} causes the algorithm to perform a specified number of iterations of unadapted simulations with parameter perturbation and parameter resamplings.
+##' At each iteration, unadapted simulations are performed on a perturbed version of the model, in which the parameters to be estimated are subjected to random perturbations at each observation.
 ##' After cycling through the data, each replicate's weight is calculated and is used to rank the bootstrap replictates. The highest ranking replicates are recycled into the next iteration.
 ##' This extra variability introduced through parameter perturbation effectively smooths the likelihood surface and combats particle depletion by introducing diversity into particle population.
 ##' As the iterations progress, the magnitude of the perturbations is diminished according to a user-specified cooling schedule.
 ##'
-##' @name iabf6
-##' @rdname iabf6
+##' @name iubf
+##' @rdname iubf
 ##' @include spatPomp_class.R abf.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
@@ -21,8 +21,8 @@
 ##' @param Nrep_per_param The number of replicates used to estimate the likelihood at a parameter
 ##' @param prop A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation
 ##' @return
-##' Upon successful completion, \code{iabf} returns an object of class
-##' \sQuote{iabfd_spatPomp}.
+##' Upon successful completion, \code{iubf} returns an object of class
+##' \sQuote{iubfd_spatPomp}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -33,21 +33,9 @@ NULL
 
 rw.sd <- pomp:::safecall
 
+## define the iubfd_spatPomp class
 setClass(
-  "iabf6_iter",
-  slots=c(
-    cond_loglik = 'numeric',
-    paramMatrix = 'matrix'
-  ),
-  prototype=prototype(
-    cond_loglik = numeric(0),
-    paramMatrix = matrix(0)
-  )
-)
-
-## define the iabfd_spatPomp class
-setClass(
-  'iabf6d_spatPomp',
+  'iubfd_spatPomp',
   contains='abfd_spatPomp',
   slots=c(
     Nabf = 'integer',
@@ -60,23 +48,21 @@ setClass(
 )
 
 
-iabf_abf <- function (object,
-                             params,
-                             Nrep_per_param,
-                             Np,
-                             nbhd,
-                             prop,
-                             abfiter,
-                             cooling.fn,
-                             rw.sd,
-                             tol = (1e-18)^17,
-                             .indices = integer(0), verbose,
-                             .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("iabf_abf"),": ")
+iubf_ubf <- function (object,
+                      params,
+                      Nrep_per_param,
+                      nbhd,
+                      prop,
+                      abfiter,
+                      cooling.fn,
+                      rw.sd,
+                      tol = (1e-18)^17,
+                      .indices = integer(0), verbose,
+                      .gnsi = TRUE) {
+  ep <- paste0("in ",sQuote("iubf_ubf"),": ")
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   abfiter <- as.integer(abfiter)
-  Np <- as.integer(Np)
   Nparam <- dim(params)[2]
   Nrep_per_param <- as.integer(Nrep_per_param)
   Nislands <- as.integer(Nparam*Nrep_per_param)
@@ -91,9 +77,12 @@ iabf_abf <- function (object,
 
   for(nt in seq_len(ntimes)){
     if(verbose && nt %in% c(1,2)) {
-      cat("working on observation times ", nt, " in iteration ", abfiter, "at time ", Sys.time(), "\n")
+      cat("working on observation times ", nt, " in iteration ", abfiter, "at time ", format(Sys.time(),"%X"), "\n")
     }
     if(verbose){
+      # print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',]),
+      #         max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',])))
+
       print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',]),
               max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
     }
@@ -101,13 +90,13 @@ iabf_abf <- function (object,
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
     params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
 
-    all_params <- params[,rep(1:Nparam, each = Np[1L]*Nrep_per_param)]
+    all_params <- params[,rep(1:Nparam, each = Nrep_per_param)]
     tparams <- pomp::partrans(object,all_params,dir="fromEst",.gnsi=gnsi)
 
     gc()
 
     if (nt == 1L) X <- rinit(object,params=tparams)
-    else X <- X[,resample_ixs]
+    else X <- X[,resample_ixs,1]
 
     ## advance the state variables according to the process model
     X <- tryCatch(
@@ -143,63 +132,65 @@ iabf_abf <- function (object,
              conditionMessage(e),call.=FALSE)
       }
     )
-    log_cond_densities <- log_weights
-    log_resamp_weights <- colSums(log_weights[,,1])
-    max_positions <- max.col(t(matrix(log_resamp_weights, ncol = Nislands)))
-    max_positions_vec <- ((1:Nislands)-1)*Np[1L] + max_positions
-    max_positions_vec <- rep(max_positions_vec, each = Np[1L])
-    log_resamp_weights <- log_resamp_weights - log_resamp_weights[max_positions_vec]
+    log_cond_densities <- log_weights[,,1]
+    log_cond_densities[is.infinite(log_cond_densities)] <- log(tol)
+    # log_resamp_weights <- colSums(log_weights[,,1])
+    # max_positions <- max.col(t(matrix(log_resamp_weights, ncol = Nislands)))
+    # max_positions_vec <- ((1:Nislands)-1)*Np[1L] + max_positions
+    # max_positions_vec <- rep(max_positions_vec, each = Np[1L])
+    # log_resamp_weights <- log_resamp_weights - log_resamp_weights[max_positions_vec]
     # if any particle's resampling weight is zero replace by tolerance
-    log_resamp_weights[is.infinite(log_resamp_weights)] <- log(tol)
-    resamp_weights <- exp(log_resamp_weights)
-    resamp_weights <- matrix(resamp_weights, nrow=Np[1L])
-    u <- runif(ncol(resamp_weights))
-    cumul_w <- lower.tri(diag(nrow(resamp_weights)), diag = TRUE)%*%(resamp_weights)
-    cumul_w_norm <- cumul_w/colSums(resamp_weights)[col(cumul_w)]
-    i <- colSums(u > cumul_w_norm) + 1L
-    choices <- 1:Np[1L]
-    selections <- choices[i]
-    X <- X[,rep(selections + seq(from=0, to=((Nparam*Nrep_per_param)-1)*Np[1L], by = Np[1L]),each=Np[1L]),]
-    rm(log_weights, log_resamp_weights, max_positions,max_positions_vec, resamp_weights, u, cumul_w, i, choices, selections)
+    # log_resamp_weights[is.infinite(log_resamp_weights)] <- log(tol)
+    # resamp_weights <- exp(log_resamp_weights)
+    # resamp_weights <- matrix(resamp_weights, nrow=Np[1L])
+    # u <- runif(ncol(resamp_weights))
+    # cumul_w <- lower.tri(diag(nrow(resamp_weights)), diag = TRUE)%*%(resamp_weights)
+    # cumul_w_norm <- cumul_w/colSums(resamp_weights)[col(cumul_w)]
+    # i <- colSums(u > cumul_w_norm) + 1L
+    # choices <- 1:Np[1L]
+    # selections <- choices[i]
+    # rm(log_weights, log_resamp_weights, max_positions,max_positions_vec, resamp_weights, u, cumul_w, i, choices, selections)
     gnsi <- FALSE
 
     gc()
 
     if(!is.null(prev_meas_weights)) num_old_times <- dim(prev_meas_weights)[3]
     else num_old_times <- 0
-    prev_meas_weights <- prev_meas_weights
-    log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits,Np[1L], Nrep_per_param*Nparam))
-    log_wm_times_wp_avg = array(data = numeric(0), dim = c(nunits, Nrep_per_param*Nparam))
-    log_wp_avg = array(data = numeric(0), dim = c(nunits, Nrep_per_param*Nparam))
+    log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits, Nislands))
+    log_wm_times_wp_avg = array(data = numeric(0), dim = c(nunits, Nislands))
+    log_wp_avg = array(data = numeric(0), dim = c(nunits, Nislands))
     for (unit in seq_len(nunits)){
       full_nbhd <- nbhd(object, time = nt, unit = unit)
-      log_prod_cond_dens_nt  <- rep(0, Np[1]*Nrep_per_param*Nparam)
+      log_prod_cond_dens_nt  <- rep(0, Nislands)
       farthest_time <- nt-num_old_times
-      log_prod_cond_dens_not_nt <- matrix(0, Np[1]*Nrep_per_param*Nparam, max(1,nt-farthest_time))
+      log_prod_cond_dens_not_nt <- rep(0, Nislands)
       for (neighbor in full_nbhd){
         neighbor_u <- neighbor[1]
         neighbor_n <- neighbor[2]
         if (neighbor_n == nt)
-          log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,1]
+          log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ]
         else{
           # means prev_meas_weights was non-null, i.e. dim(prev_meas_weights)[3]>=1
-          log_prod_cond_dens_not_nt[, nt-neighbor_n] <- log_prod_cond_dens_not_nt[, nt-neighbor_n] +
+          log_prod_cond_dens_not_nt <- log_prod_cond_dens_not_nt +
             prev_meas_weights[neighbor_u, ,num_old_times+1-(nt-neighbor_n)]
         }
       }
-      log_prod_cond_dens_not_nt_by_island <- array(log_prod_cond_dens_not_nt, dim = c(Np[1], Nrep_per_param*Nparam, max(1,num_old_times)))
-      log_prod_cond_dens_nt_by_island <- matrix(log_prod_cond_dens_nt, nrow = Np[1L], ncol = Nrep_per_param*Nparam)
-      first_term <- rowSums(apply(log_prod_cond_dens_not_nt_by_island, c(2,3), logmeanexp))
-      second_term <- log_prod_cond_dens_nt_by_island
-      log_loc_comb_pred_weights[unit,,]  <- first_term[col(second_term)] + second_term
+      # log_prod_cond_dens_not_nt_by_island <- array(log_prod_cond_dens_not_nt, dim = c(Np[1], Nislands, max(1,num_old_times)))
+      # log_prod_cond_dens_nt_by_island <- matrix(log_prod_cond_dens_nt, nrow = Np[1L], ncol = Nislands)
+      # first_term <- rowSums(apply(log_prod_cond_dens_not_nt_by_island, c(2,3), logmeanexp))
+      # second_term <- log_prod_cond_dens_nt_by_island
+      log_loc_comb_pred_weights[unit,]  <- log_prod_cond_dens_not_nt + log_prod_cond_dens_nt
+
     }
-
-    log_cond_densities_by_island <- array(log_cond_densities, dim=c(nunits, Np[1L], Nrep_per_param*Nparam))
-    log_wm_times_wp_avgs = apply(log_loc_comb_pred_weights + log_cond_densities_by_island, c(1,3), FUN = logmeanexp)
-    log_wm_times_wp_avgs_by_param = apply(array(log_wm_times_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
-
-    log_wp_avgs = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
-    log_wp_avgs_by_param = apply(array(log_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
+    log_wm_times_wp_avgs_by_param = apply(array(log_loc_comb_pred_weights + log_cond_densities, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
+    log_wp_avgs_by_param = apply(array(log_loc_comb_pred_weights, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
+    #
+    # log_cond_densities_by_island <- array(log_cond_densities, dim=c(nunits, Np[1L], Nislands))
+    # log_wm_times_wp_avgs = apply(log_loc_comb_pred_weights + log_cond_densities_by_island, c(1,3), FUN = logmeanexp)
+    # log_wm_times_wp_avgs_by_param = apply(array(log_wm_times_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
+    #
+    # log_wp_avgs = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
+    # log_wp_avgs_by_param = apply(array(log_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
 
     param_resamp_log_weights <- colSums(log_wm_times_wp_avgs_by_param - log_wp_avgs_by_param)
 
@@ -212,9 +203,9 @@ iabf_abf <- function (object,
     ####### Resampling using parameter log-likelihood
     # param_resamp_weights <- exp(param_resamp_log_weights - max(param_resamp_log_weights))
     # resample_ixs_raw <- sample(1:Nparam, size = Nparam, replace = TRUE, prob = param_resamp_weights)
-    resample_ixs <- (resample_ixs_raw - 1)*Np[1L]*Nrep_per_param
-    resample_ixs <- rep(resample_ixs, each = Np[1L]*Nrep_per_param)
-    resample_ixs <- rep(1:(Np[1L]*Nrep_per_param), Nparam) + resample_ixs
+    resample_ixs <- (resample_ixs_raw - 1)*Nrep_per_param
+    resample_ixs <- rep(resample_ixs, each = Nrep_per_param)
+    resample_ixs <- rep(1:(Nrep_per_param), Nparam) + resample_ixs
 
     # for next observation time, how far back do we need
     # to provide the conditional densities, f_{Y_{u,n}|X_{u,n}}?
@@ -225,7 +216,7 @@ iabf_abf <- function (object,
       smallest_nbhd_time <- min(all_nbhd_times)
       if(nt+1-smallest_nbhd_time > max_lookback) max_lookback <- nt+1-smallest_nbhd_time
     }
-    if(max_lookback == 1) prev_meas_weights <- log_cond_densities[,resample_ixs,1,drop=FALSE]
+    if(max_lookback == 1) prev_meas_weights <- array(log_cond_densities[,resample_ixs],dim = c(dim(log_cond_densities),1))
     if(max_lookback > 1){
       prev_meas_weights <- abind::abind(prev_meas_weights[,,(dim(prev_meas_weights)[3]+2-max_lookback):dim(prev_meas_weights)[3],drop=F],
                                         log_cond_densities,
@@ -243,7 +234,7 @@ iabf_abf <- function (object,
   )
 }
 
-iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop, rw.sd,
+iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.sd,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17,
                            verbose = FALSE, .ndone = 0L,
@@ -251,7 +242,7 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
                            .paramMatrix = NULL,
                            .gnsi = TRUE, ...) {
 
-  ep <- paste0("in ",sQuote("iabf6"),": ")
+  ep <- paste0("in ",sQuote("iubf"),": ")
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
@@ -268,7 +259,6 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
                 unit_obsnames = object@unit_obsnames)
 
   gnsi <- as.logical(.gnsi)
-  Np <- c(Np,Np[1L])
   Nabf <- as.integer(Nabf)
 
   cooling.fn <- pomp:::mif2.cooling(
@@ -304,11 +294,10 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
   ntimes = length(time(object))
   nunits = length(unit_names(object))
   for (n in seq_len(Nabf)) {
-    out <- iabf_abf(
+    out <- iubf_ubf(
       object=object,
       params=rep_param_init,
       Nrep_per_param=Nrep_per_param,
-      Np=Np,
       nbhd=nbhd,
       prop=prop,
       abfiter=.ndone+n,
@@ -328,7 +317,7 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
     traces[n+1,c(1)] <- sum(out@cond_loglik)
     coef(object) <- out_params_summary
     if (verbose) {
-      cat("iabf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(out@cond_loglik),"\n")
+      cat("iubf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(out@cond_loglik),"\n")
       print(out_params_summary)
     }
   }
@@ -339,11 +328,11 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
   pompUnload(object,verbose=FALSE)
 
   new(
-    "iabf6d_spatPomp",
+    "iubfd_spatPomp",
     object,
     Nabf=as.integer(Nabf),
     Nrep=as.integer(Nrep_per_param),
-    Np=as.integer(Np),
+    Np=as.integer(1),
     rw.sd=rw.sd,
     cooling.type=cooling.type,
     cooling.fraction.50=cooling.fraction.50,
@@ -355,47 +344,30 @@ iabf_internal6 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, Np, prop
 }
 
 setGeneric(
-  "iabf6",
+  "iubf",
   function (object, ...)
-    standardGeneric("iabf6")
+    standardGeneric("iubf")
 )
 
-##' @name iabf6-spatPomp
-##' @aliases iabf6,spatPomp-method
-##' @rdname iabf6
+##' @name iubf-spatPomp
+##' @aliases iubf,spatPomp-method
+##' @rdname iubf
 ##' @export
 setMethod(
-  "iabf6",
+  "iubf",
   signature=signature(object="spatPomp"),
-  definition = function (object, Nabf = 1, Nrep_per_param, Nparam, nbhd, Np,prop,
+  definition = function (object, Nabf = 1, Nrep_per_param, Nparam, nbhd, prop,
                          rw.sd,
                          cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
                          verbose = getOption("verbose"),...) {
 
-    ep <- paste0("in ",sQuote("iabf6"),": ")
+    ep <- paste0("in ",sQuote("iubf"),": ")
     if(missing(Nabf))
       stop(ep,sQuote("Nabf")," must be specified",call.=FALSE)
     if (Nabf <= 0)
         stop(ep,sQuote("Nabf")," must be a positive integer",call.=FALSE)
     ntimes <- length(time(object))
-    if (missing(Np))
-      stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-    else if (!is.numeric(Np))
-      stop(ep,sQuote("Np"),
-           " must be a number, a vector of numbers, or a function",
-           call.=FALSE)
-    if (length(Np)==1) {
-      Np <- rep(Np,times=ntimes)
-    } else if (length(Np)>ntimes) {
-      if (Np[1L] != Np[ntimes+1] || length(Np) > ntimes+1) {
-        warning(ep,"Np[k] ignored for k > ntimes",call.=FALSE)
-      }
-      Np <- head(Np,ntimes)
-    }
-    if (any(Np <= 0))
-      stop(ep,"number of particles, ",
-           sQuote("Np"),", must always be positive",call.=FALSE)
     if(missing(Nrep_per_param))
       stop(ep,"number of replicates, ",
            sQuote("Nrep_per_param"),", must be specified!",call.=FALSE)
@@ -407,13 +379,12 @@ setMethod(
       stop(ep,sQuote("cooling.fraction.50"),
            " must be in (0,1]",call.=FALSE)
 
-    iabf_internal6(
+    iubf_internal(
       object=object,
       Nrep_per_param=Nrep_per_param,
       Nparam=Nparam,
       Nabf=Nabf,
       nbhd=nbhd,
-      Np=Np,
       prop=prop,
       rw.sd=rw.sd,
       cooling.type=cooling.type,

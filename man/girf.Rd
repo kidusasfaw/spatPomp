@@ -105,7 +105,8 @@ Other particle filter methods:
 \code{\link{enkf}()},
 \code{\link{iabf6}()},
 \code{\link{ienkf}()},
-\code{\link{igirf}()}
+\code{\link{igirf}()},
+\code{\link{iubf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abfir}()},

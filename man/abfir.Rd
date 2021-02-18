@@ -98,7 +98,8 @@ Other particle filter methods:
 \code{\link{girf}()},
 \code{\link{iabf6}()},
 \code{\link{ienkf}()},
-\code{\link{igirf}()}
+\code{\link{igirf}()},
+\code{\link{iubf}()}
 
 Other \pkg{spatPomp} filtering methods: 
 \code{\link{abf}()},

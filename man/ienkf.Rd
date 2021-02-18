@@ -114,11 +114,13 @@ Other particle filter methods:
 \code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{iabf6}()},
-\code{\link{igirf}()}
+\code{\link{igirf}()},
+\code{\link{iubf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
 \code{\link{iabf6}()},
-\code{\link{igirf}()}
+\code{\link{igirf}()},
+\code{\link{iubf}()}
 }
 \concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}
