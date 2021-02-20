@@ -95,7 +95,7 @@ setMethod(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,kind,tol = tol,
         ...,verbose=verbose),
-      error = function (e) pomp::pStop("igirf",conditionMessage(e))
+      error = function (e) stop("igirf: ", e)
     )
   }
 )
@@ -260,7 +260,6 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
       print(coef(g))
       print(pryr::mem_used())
     }
-    rm(g)
     gc()
   }
 
@@ -568,8 +567,8 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     lookahead_steps = min(lookahead, ntimes-nt)
     # Four-dimensional array: nvars by nguide by ntimes by nreps
     Xg = array(0, dim=c(length(statenames), Nguide, lookahead_steps, Np[1]), dimnames = list(nvars = statenames, ng = NULL, lookahead = 1:lookahead_steps, nreps = NULL))
-    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
-    tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
+    x_with_guides <- x[,rep(1:Np[1], each = Nguide)]
+    tp_with_guides <- tparams[,rep(1:Np[1], each = Nguide)]
     guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
                    params=tp_with_guides,.gnsi=gnsi)
@@ -707,7 +706,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
       }
-      max_log_weights <- max(log_weights)
+      max_log_weights <- max(log_weights, na.rm = TRUE)
       if(max_log_weights > -Inf){
         log_weights <- log_weights - max_log_weights
         weights <- exp(log_weights)

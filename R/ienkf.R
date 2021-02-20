@@ -221,7 +221,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       .gnsi=gnsi
     )
 
-    gnsi <- FALSE
+    gnsi <- TRUE
     paramMatrix <- es@paramMatrix
     traces[n+1,-1L] <- coef(es)
     traces[n,1L] <- es@loglik
@@ -300,7 +300,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
             Np = as.integer(Np),
             times=times[nt+1],
             params=tparams,
-            gnsi=gnsi),
+            gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
@@ -312,15 +312,15 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       .Call('do_theta_to_v',
             object=object,
             X=X,
-            Np = Np,
+            Np = as.integer(Np[1]),
             times=times[nt+1],
             params=tparams,
-            gnsi=gnsi),
+            gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    dim(meas_var) <- c(length(unit_names(object)),  Np)
+    dim(meas_var) <- c(length(unit_names(object)),  Np[1])
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R

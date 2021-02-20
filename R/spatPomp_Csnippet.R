@@ -123,7 +123,7 @@ setMethod(
     }
     if(!missing(unit_vfnames)){
       vn_inits_lhs <- paste("double *D",unit_vfnames, sep = "")
-      vn_inits_rhs <- paste("&", unit_vfnames,"1;",sep="")
+      vn_inits_rhs <- paste("&D", unit_vfnames,"1;",sep="")
       vn_inits_vec <- paste(vn_inits_lhs, vn_inits_rhs, sep = " = ")
       vn_inits <- paste0(vn_inits_vec, collapse = "\n")
     }

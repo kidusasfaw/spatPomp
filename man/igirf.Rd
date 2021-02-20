@@ -120,6 +120,7 @@ Other particle filter methods:
 \code{\link{enkf}()},
 \code{\link{girf}()},
 \code{\link{iabf6}()},
+\code{\link{ienkf2}()},
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 
@@ -132,6 +133,7 @@ Other \pkg{spatPomp} filtering methods:
 
 Other \pkg{spatPomp} parameter estimation methods: 
 \code{\link{iabf6}()},
+\code{\link{ienkf2}()},
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 }

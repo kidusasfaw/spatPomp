@@ -43,6 +43,7 @@ Collate:
     'girf.R'
     'iabf6.R'
     'ienkf.R'
+    'ienkf2.R'
     'igirf.R'
     'iubf.R'
     'loglik.R'

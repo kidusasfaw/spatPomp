@@ -46,29 +46,34 @@ kfll_mle <- -mle$value
 
 # Test inference algorithms
 start_params <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5,
-                  "X1_0"=0, "X2_0"=0, "X3_0"=0, "X4_0"=0, "X5_0"=0,
-                  "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0)
-
+                  "X1_0"=0, "X2_0"=0, "X3_0"=0
+                  # , "X4_0"=0, "X5_0"=0,
+                  # "X6_0"=0, "X7_0"=0, "X8_0"=0, "X9_0"=0, "X10_0"=0
+                  )
 ## IEnKF
+#debugonce(spatPomp:::ienkf.internal)
 ienkf_np <- 1000
 ienkf_Nenkf <- 20
-ienkf_out <- ienkf(bm_obj,
+ienkf_out <- ienkf2(bm_obj,
                    Nenkf = ienkf_Nenkf,
                    params = start_params,
                    rw.sd = rw.sd(
                      rho=0.02, sigma=0.02, tau=0.02,
-                     X1_0=0.0, X2_0=0.0, X3_0=0.0, X4_0=0.0, X5_0=0.0,
-                     X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0),
+                     X1_0=0.0, X2_0=0.0, X3_0=0.0
+                     # , X4_0=0.0, X5_0=0.0,
+                     # X6_0=0.0, X7_0=0.0, X8_0=0.0, X9_0=0.0, X10_0=0.0
+                     ),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
                    Np=ienkf_np)
+if(0){
 
 ## IGIRF
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 1000
 igirf_nguide <- 40
-igirf_ngirf <- 15
+igirf_ngirf <- 10
 ### Use moment-matching approach
 igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     params=start_params,
@@ -83,17 +88,20 @@ igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     Nguide = igirf_nguide,
                     kind = 'moment',
                     verbose = TRUE)
+
 ### Use quantile-based approach
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 1000
 igirf_nguide <- 40
-igirf_ngirf <- 5
+igirf_ngirf <- 10
 igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     params=start_params,
                     rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0),
-                                  X2_0=ivp(0), X3_0=ivp(0), X4_0=ivp(0), X5_0=ivp(0),X6_0=ivp(0), X7_0=ivp(0),
-                                  X8_0=ivp(0), X9_0=ivp(0), X10_0=ivp(0)),
+                                  X2_0=ivp(0), X3_0=ivp(0)
+                                  #, X4_0=ivp(0), X5_0=ivp(0),X6_0=ivp(0), X7_0=ivp(0),
+                                  #X8_0=ivp(0), X9_0=ivp(0), X10_0=ivp(0)
+                                  ),
                     cooling.type = "geometric",
                     cooling.fraction.50 = 0.5,
                     Np=igirf_np,
@@ -123,7 +131,7 @@ enkf_loglik <- replicate(n = 10,
 )
 
 ## GIRF
-girf_loglik <- replicate(n = 10,
+girf_loglik <- replicate(n = 3,
                          expr = logLik(
                            girf(bm_obj,
                                 Np = 500,
@@ -132,6 +140,7 @@ girf_loglik <- replicate(n = 10,
                             )
                           )
 )
+
 
 ## ABF
 abf_nbhd <- function(object, time, unit) {
@@ -168,3 +177,5 @@ test_that("ABF, ABFIR, GIRF, EnKF, BPF all yield close to true log-likelihood es
 test_that("GIRF with lookahead >= 2 yields close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik_l2) - loglik_true), 3)
 })
+
+}

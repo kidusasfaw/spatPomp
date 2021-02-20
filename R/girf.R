@@ -130,23 +130,24 @@ setMethod(
 
     if(kind == 'moment'){
       tryCatch(
-        momgirf.internal(
-          object,
-          Np=Np,
-          Ninter=Ninter,
-          lookahead=lookahead,
-          Nguide=Nguide,
-          tol=tol,
-          ...,
-          verbose=verbose
-        ),
+        g <- momgirf.internal(
+               object,
+               Np=Np,
+               Ninter=Ninter,
+               lookahead=lookahead,
+               Nguide=Nguide,
+               tol=tol,
+               ...,
+               verbose=verbose
+             ),
         error = function (e) pomp:::pStop("girf",conditionMessage(e))
       )
+      return(g)
     }
 
     if(kind == 'bootstrap'){
       tryCatch(
-        bootgirf.internal(
+        g <- bootgirf.internal(
           object,
           Np=Np,
           Ninter=Ninter,
@@ -158,6 +159,7 @@ setMethod(
         ),
         error = function (e) pomp:::pStop("girf",conditionMessage(e))
       )
+      return(g)
     }
 
   }
