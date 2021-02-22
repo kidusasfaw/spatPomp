@@ -51,7 +51,6 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{girf}()},
 \code{\link{iabf6}()},
-\code{\link{ienkf2}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}

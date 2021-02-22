@@ -105,13 +105,11 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
-\code{\link{ienkf2}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 
 Other \pkg{spatPomp} parameter estimation methods: 
-\code{\link{ienkf2}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}

@@ -4,41 +4,85 @@ doParallel::registerDoParallel(3)
 
 # create the Lorenz object
 set.seed(1)
-lorenz5 <- lorenz(U=5, N=20, dt=0.01, dt_obs=1)
-lorenz5_test <- lorenz5
-coef(lorenz5_test) <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
-                   "X3_0"=0, "X4_0"=0, "X5_0"=0)
-ienkf_Nenkf = 50
-ienkf_np = 1000
-ienkf_out <- ienkf(lorenz5_test,
-                   Nenkf = ienkf_Nenkf,
-                   rw.sd = rw.sd(
-                     F=1, sigma=1, tau=1, X1_0=0.0, X2_0=0.0,
-                     X3_0=0.0,X4_0=0.0,X5_0=0.0),
+lorenz4_test <- lorenz(U=4, N=20, delta_t=0.01, delta_obs=1)
+
+# Parameter inference test
+start_params <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
+                   "X3_0"=0, "X4_0"=0)
+## IGIRF
+igirf_lookahead <- 1
+igirf_ninter <- length(unit_names(lorenz4_test))
+igirf_np <- 1000
+igirf_nguide <- 40
+igirf_ngirf <- 10
+
+igirf_out <- igirf(lorenz4_test,
+                   Ngirf = igirf_ngirf,
+                   params=start_params,
+                   rw.sd = rw.sd(F=0.02, sigma=0.02, tau=0.02,
+                                 X1_0=ivp(0),X2_0=ivp(0), X3_0=ivp(0),X4_0=ivp(0)
+                   ),
                    cooling.type = "geometric",
                    cooling.fraction.50 = 0.5,
-                   Np=ienkf_np)
-mif2_out <- mif2(lorenz5_test,
-                 Nmif = 100,
-                 rw.sd = rw.sd(F=0.02, sigma=0.02, tau=0.02, X1_0=0, X2_0=0,
-                               X3_0=0, X4_0=0, X5_0=0),
+                   Np=igirf_np,
+                   Ninter = igirf_ninter,
+                   lookahead = igirf_lookahead,
+                   Nguide = igirf_nguide,
+                   kind = 'bootstrap',
+                   verbose = FALSE
+)
+
+## IUBF
+iubf_nbhd <- function(object, time, unit) {
+  nbhd_list <- list()
+  if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
+  if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
+  return(nbhd_list)
+}
+iubf_nubf <- 10
+iubf_nrep_per_param <- 1000
+iubf_nparam <- 100
+iubf_prop <- 0.80
+
+iubf(lorenz4_test,
+     Nabf = iubf_nubf,
+     Nrep_per_param = iubf_nrep_per_param,
+     Nparam = iubf_nparam,
+     nbhd = iubf_nbhd,
+     params=start_params,
+     prop = iubf_prop,
+     rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0),
+                   X2_0=ivp(0), X3_0=ivp(0)
+     ),
+     cooling.type = "geometric",
+     cooling.fraction.50 = 0.5,
+     verbose=FALSE
+) -> iubf_out
+
+mif2_out <- mif2(lorenz4_test,
+                 Nmif = 20,
+                 rw.sd = rw.sd(F=0.02, sigma=0.02, tau=0.02,
+                               X1_0=0, X2_0=0, X3_0=0, X4_0=0
+                 ),
                  cooling.type = 'geometric',
                  cooling.fraction.50 = 0.5,
-                 Np = 1000)
+                 Np = 1000
+)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from GIRF
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+test_that("IGIRF and IUBF produce estimates that are not far from IF2 for low dimensions", {
+  expect_lt(abs(logLik(igirf_out) - logLik(mif2_out)), 20)
+  expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 20)
+})
 
-girf_loglik <- replicate(10,logLik(girf(lorenz5,
-                    Np = 100,
+# Test filtering algorithms
+## GIRF
+girf_loglik <- replicate(3,logLik(girf(lorenz4_test,
+                    Np = 500,
                     lookahead = 1,
-                    Nguide = 50
+                    Nguide = 40
                     )))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from ABF
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ABF
 abf_nbhd <- function(object, time, unit) {
   nbhd_list <- list()
   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -49,24 +93,23 @@ abf_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-abf_loglik <- replicate(n=10,
+abf_loglik <- replicate(n=5,
                         expr=logLik(
-                          abf(lorenz5,
-                              Nrep = 100,
+                          abf(lorenz4_test,
+                              Nrep = 500,
                               Np = 20,
                               nbhd = abf_nbhd)))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from ABFIR
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-abfir_loglik <- replicate(10,logLik(abfir(lorenz5,
-                        Nrep = 100,
-                        Np=20,
-                        nbhd = abf_nbhd)))
+## ABFIR
+abfir_loglik <- replicate(5,
+                          logLik(
+                            abfir(lorenz4_test,
+                                  Nrep = 500,
+                                  Np=20,
+                                  Nguide = 40,
+                                  nbhd = abf_nbhd)))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   log-likelihood estimate from pfilter
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## PFILTER
 pfilter_loglik <- replicate(10,logLik(pfilter(lorenz5,
                                             Np = 10000
                                             )))
@@ -75,7 +118,6 @@ test_that("ABF, ABFIR, GIRF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - logmeanexp(pfilter_loglik)), 10)
   expect_lt(abs(logmeanexp(abf_loglik) - logmeanexp(pfilter_loglik)), 50)
   expect_lt(abs(logmeanexp(abfir_loglik) - logmeanexp(pfilter_loglik)), 30)
-
 })
 
 
