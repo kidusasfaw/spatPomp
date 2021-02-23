@@ -353,21 +353,12 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- tryCatch(
-          pomp::flow(object,
-                     x0=X.start,
-                     t0=tt[s+1],
-                     params=tparams,
-                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]),
-          error = function (e) {
-            pomp::flow(object,
+        skel <- pomp::flow(object,
                        x0=X.start,
                        t0=tt[s+1],
                        params=tparams,
                        times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
                        method = 'adams')
-          }
-        )
         skel.start <- skel[,,1]
         X.start.znames <- X.start[znames,]
         skel.start.znames <- skel.start[znames,]
@@ -572,22 +563,12 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
                    params=tp_with_guides,.gnsi=gnsi)
-    Xskel <- tryCatch(
-      pomp::flow(object,
-                 x0=x,
-                 t0=times[nt+1],
-                 params=tparams,
-                 times = times[(nt+2):(nt+1+lookahead_steps)],
-                 ...),
-      error = function (e) {
-        pomp::flow(object,
+    Xskel <- pomp::flow(object,
                    x0=x,
                    t0=times[nt+1],
                    params=tparams,
                    times = times[(nt+2):(nt+1+lookahead_steps)],
                    method = 'adams')
-      }
-    )
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
@@ -601,21 +582,12 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- tryCatch(
-          pomp::flow(object,
-                     x0=X.start,
-                     t0=tt[s+1],
-                     params=tparams,
-                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]),
-          error = function (e) {
-            pomp::flow(object,
-                       x0=X.start,
-                       t0=tt[s+1],
-                       params=tparams,
-                       times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-                       method = 'adams')
-          }
-        )
+        skel <- pomp::flow(object,
+                   x0=X.start,
+                   t0=tt[s+1],
+                   params=tparams,
+                   times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
+                   method = 'adams')
         if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]

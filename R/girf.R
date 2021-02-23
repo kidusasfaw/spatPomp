@@ -310,22 +310,12 @@ momgirf.internal <- function (object,
 
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- tryCatch(
-          pomp::flow(object,
-                     x0=X.start,
-                     t0=tt[s+1],
-                     params=params.matrix,
-                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-                     ...),
-          error = function (e) {
-            pomp::flow(object,
+        skel <- pomp::flow(object,
                        x0=X.start,
                        t0=tt[s+1],
                        params=params.matrix,
                        times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
                        method = 'adams')
-          }
-        )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
@@ -476,7 +466,6 @@ bootgirf.internal <- function (object,
                                .gnsi = TRUE) {
 
   ep <- paste0("in ",sQuote("girf"),": ")
-
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
                 unit_covarnames = object@unit_covarnames,
@@ -552,22 +541,12 @@ bootgirf.internal <- function (object,
     x_with_guides <- x[,rep(1:Np[1], each=Nguide)]
     guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
-    Xskel <- tryCatch( # skeleton
-      pomp::flow(object,
-                 x0=x,
-                 t0=times[nt+1],
-                 params=params.matrix,
-                 times = times[(nt+2):(nt+1+lookahead_steps)],
-                 ...),
-      error = function (e) {
-        pomp::flow(object,
+    Xskel <- pomp::flow(object,
                    x0=x,
                    t0=times[nt+1],
                    params=params.matrix,
                    times = times[(nt+2):(nt+1+lookahead_steps)],
                    method = 'adams')
-      }
-    )
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
@@ -580,22 +559,12 @@ bootgirf.internal <- function (object,
 
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- tryCatch(
-          pomp::flow(object,
-                     x0=X.start,
-                     t0=tt[s+1],
-                     params=params.matrix,
-                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-                     ...),
-          error = function (e) {
-            pomp::flow(object,
+        skel <- pomp::flow(object,
                        x0=X.start,
                        t0=tt[s+1],
                        params=params.matrix,
                        times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
                        method = 'adams')
-          }
-        )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
