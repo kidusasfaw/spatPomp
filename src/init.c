@@ -18,10 +18,22 @@ static const R_CallMethodDef callMethods[] = {
 
 SEXP (*randwalk_perturbation_pomp)(SEXP,SEXP);
 SEXP (*lookup_in_table_pomp)(SEXP,SEXP);
+SEXP (*gcn)(SEXP);
+SEXP (*lsd)(SEXP);
+SEXP (*lsi)(SEXP);
+make_covariate_table_t * mct;
+SEXP (*pfh)(SEXP, SEXP, pompfunmode *, SEXP, SEXP, SEXP, SEXP);
+void (*spu)(SEXP);
+void (*upu)(void);
+void (*tl)(lookup_table_t *, double, double *);
 
 
 void R_init_spatPomp (DllInfo *info) {
   // Register routines
+  R_registerRoutines(info,NULL,callMethods,NULL,NULL);
+  R_useDynamicSymbols(info,TRUE);
+  randwalk_perturbation_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","randwalk_perturbation");
+  lookup_in_table_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","lookup_in_table");
   lsi = (load_stack_incr_t *) R_GetCCallable("pomp", "load_stack_incr");
   lsd = (load_stack_decr_t *) R_GetCCallable("pomp", "load_stack_decr");
   pfh = (pomp_fun_handler_t *) R_GetCCallable("pomp", "pomp_fun_handler");
@@ -30,8 +42,4 @@ void R_init_spatPomp (DllInfo *info) {
   mct = (make_covariate_table_t *) R_GetCCallable("pomp", "make_covariate_table");
   spu = (set_pomp_userdata_t *) R_GetCCallable("pomp", "set_pomp_userdata");
   upu = (unset_pomp_userdata_t *) R_GetCCallable("pomp", "unset_pomp_userdata");
-  R_registerRoutines(info,NULL,callMethods,NULL,NULL);
-  R_useDynamicSymbols(info,TRUE);
-  randwalk_perturbation_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","randwalk_perturbation");
-  lookup_in_table_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","lookup_in_table");
 }

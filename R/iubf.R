@@ -134,22 +134,6 @@ iubf_ubf <- function (object,
     )
     log_cond_densities <- log_weights[,,1]
     log_cond_densities[is.infinite(log_cond_densities)] <- log(tol)
-    # log_resamp_weights <- colSums(log_weights[,,1])
-    # max_positions <- max.col(t(matrix(log_resamp_weights, ncol = Nislands)))
-    # max_positions_vec <- ((1:Nislands)-1)*Np[1L] + max_positions
-    # max_positions_vec <- rep(max_positions_vec, each = Np[1L])
-    # log_resamp_weights <- log_resamp_weights - log_resamp_weights[max_positions_vec]
-    # if any particle's resampling weight is zero replace by tolerance
-    # log_resamp_weights[is.infinite(log_resamp_weights)] <- log(tol)
-    # resamp_weights <- exp(log_resamp_weights)
-    # resamp_weights <- matrix(resamp_weights, nrow=Np[1L])
-    # u <- runif(ncol(resamp_weights))
-    # cumul_w <- lower.tri(diag(nrow(resamp_weights)), diag = TRUE)%*%(resamp_weights)
-    # cumul_w_norm <- cumul_w/colSums(resamp_weights)[col(cumul_w)]
-    # i <- colSums(u > cumul_w_norm) + 1L
-    # choices <- 1:Np[1L]
-    # selections <- choices[i]
-    # rm(log_weights, log_resamp_weights, max_positions,max_positions_vec, resamp_weights, u, cumul_w, i, choices, selections)
     gnsi <- FALSE
 
     gc()

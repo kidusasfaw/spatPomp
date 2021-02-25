@@ -164,5 +164,3 @@ SEXP randwalk_perturbation_spatPomp(SEXP params, SEXP rw_sd){
 SEXP lookup_in_table_spatPomp(SEXP covar, SEXP t){
   return(lookup_in_table_pomp(covar, t));
 }
-
-
