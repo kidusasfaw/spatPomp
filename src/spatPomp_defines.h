@@ -26,15 +26,15 @@ typedef void spatPomp_unit_measure_var (double *v, const double *x, const double
                                         const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
                                         int ncovars, const double *covars, double t, int u);
 
-load_stack_incr_t *lsi;
-load_stack_decr_t *lsd;
-pomp_fun_handler_t *pfh;
-get_covariate_names_t *gcn;
-table_lookup_t *tl;
-make_covariate_table_t *mct;
-set_pomp_userdata_t *spu;
-unset_pomp_userdata_t *upu;
-pomp_onestep_sim *pos;
+extern load_stack_incr_t *lsi;
+extern load_stack_decr_t *lsd;
+extern pomp_fun_handler_t *pfh;
+extern get_covariate_names_t *gcn;
+extern table_lookup_t *tl;
+extern make_covariate_table_t *mct;
+extern set_pomp_userdata_t *spu;
+extern unset_pomp_userdata_t *upu;
+extern pomp_onestep_sim *pos;
 extern SEXP(*randwalk_perturbation_pomp)(SEXP,SEXP);
 extern SEXP (*lookup_in_table_pomp)(SEXP,SEXP);
 
