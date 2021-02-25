@@ -19,7 +19,7 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
 SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nreps, nrepsx, nrepsp;
+  int ntimes, nunits, nvars, npars, ncovars, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfunthetatov;
   SEXP fnthetatov, args;
@@ -30,7 +30,6 @@ SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP 
   lookup_table_t covariate_table;
   double *cov;
   PROTECT(Np = AS_INTEGER(Np)); nprotect++;
-  nparticles = *INTEGER(Np);
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
   ntimes = length(times);
   if (ntimes < 1) errorcall(R_NilValue,"length('times') = 0, no work to do.");
