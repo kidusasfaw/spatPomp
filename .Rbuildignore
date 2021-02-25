@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 TODO\.md$
 Makefile
+^(.+?)\.tar\.gz
