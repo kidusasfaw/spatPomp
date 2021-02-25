@@ -22,10 +22,10 @@ SEXP iabf_computations (SEXP x, SEXP params, SEXP Np,
   SEXP newstates = R_NilValue, newparams = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
-  double *xpm = 0, *xpv = 0, *xfm = 0, *xw = 0, *xx = 0, *xp = 0;
+  double *xx = 0, *xp = 0;
   int *xanc = 0;
   SEXP dimX, dimP, Xnames, Pnames, pindex;
-  int *dim, *pidx, lv, np;
+  int *dim, lv, np;
   int nvars, npars = 0, nrw = 0, nreps;
   int do_rw, do_pm, do_pv, do_fm, do_ta, do_par_resamp;
   //double sum, sumsq, vsq, ws, w, toler;
@@ -70,27 +70,21 @@ SEXP iabf_computations (SEXP x, SEXP params, SEXP Np,
   PROTECT(loglik = NEW_NUMERIC(1)); nprotect++; // log likelihood
   PROTECT(fail = NEW_LOGICAL(1)); nprotect++;	// particle failure?
 
-  xw = REAL(resamp_weights);
-
   if (do_rw) {
     // indices of parameters undergoing random walk
     PROTECT(pindex = matchnames(Pnames,rw_names,"parameters")); nprotect++;
     xp = REAL(params);
-    pidx = INTEGER(pindex);
     lv = nvars+nrw;
   } else {
-    pidx = NULL;
     lv = nvars;
   }
 
   if (do_pm || do_pv) {
     PROTECT(pm = NEW_NUMERIC(lv)); nprotect++;
-    xpm = REAL(pm);
   }
 
   if (do_pv) {
     PROTECT(pv = NEW_NUMERIC(lv)); nprotect++;
-    xpv = REAL(pv);
   }
 
   if (do_fm) {
@@ -99,7 +93,6 @@ SEXP iabf_computations (SEXP x, SEXP params, SEXP Np,
     } else {
       PROTECT(fm = NEW_NUMERIC(nvars)); nprotect++;
     }
-    xfm = REAL(fm);
   }
 
   if (do_ta) {
@@ -163,4 +156,13 @@ SEXP iabf_computations (SEXP x, SEXP params, SEXP Np,
   UNPROTECT(nprotect);
   return(retval);
 }
+
+SEXP randwalk_perturbation_spatPomp(SEXP params, SEXP rw_sd){
+  return(randwalk_perturbation_pomp(params, rw_sd));
+}
+
+SEXP lookup_in_table_spatPomp(SEXP covar, SEXP t){
+  return(lookup_in_table_pomp(covar, t));
+}
+
 

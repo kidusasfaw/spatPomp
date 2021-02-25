@@ -144,7 +144,7 @@ This will be coerced internally to storage mode \code{double}.}
 \item{cdir}{optional character variable.
 \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
 By default, this is in a temporary directory specific to the \R session.
-One can also set this directory using the \code{pomp_cdir} option.}
+One can also set this directory using the \code{pomp_cdir} global option.}
 
 \item{cfile}{optional character variable.
 \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.

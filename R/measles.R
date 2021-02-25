@@ -28,8 +28,9 @@ measles <- function(U=6,dt=2/365,
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
 # pre-vaccine biweekly measles reports for the largest 40 UK cities, sorted by size
-data(measlesUK)
+measlesUK <- spatPomp::measlesUK
 measlesUK$city<-as.character(measlesUK$city)
+city_data_UK <- spatPomp::city_data_UK
 
 # Note: check for outliers, c.f. He et al (2010)
 
@@ -74,7 +75,6 @@ measles_covar$births<- NULL
 measles_covarnames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
 measles_unit_covarnames <- c("pop","lag_birthrate")
 
-data(city_data_UK)
 # Distance between two points on a sphere radius R
 # Adapted from geosphere package, which has been cited in the package
 distHaversine <- function (p1, p2, r = 6378137)

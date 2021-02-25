@@ -1,7 +1,20 @@
 library(spatPomp)
 context("Test methods on simple Brownian motion")
 
-doParallel::registerDoParallel(3)
+# For CRAN tests, need to limit to two cores
+# https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
+chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+
+if (nzchar(chk) && chk == "TRUE") {
+  # use 2 cores for CRAN
+  num_workers <- 2L
+} else {
+  # use all cores when testing
+  num_workers <- parallel::detectCores()
+}
+num_workers <- 2L
+doParallel::registerDoParallel(num_workers)
+
 # create the BM object
 set.seed(2)
 U = 3; N = 30
@@ -151,7 +164,7 @@ abf_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
-abf_runs <- 3
+abf_runs <- 2
 abf_loglik <- vector(length = abf_runs)
 for(i in seq_len(abf_runs)){
   abf_loglik[i] <- logLik(abf(bm_obj,
@@ -173,9 +186,9 @@ for(i in seq_len(abf_runs)){
 bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 500, block_size = 3)))
 
 test_that("ABF, ABFIR, GIRF, EnKF, BPF all yield close to true log-likelihood estimates", {
-  expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(abf_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(abfir_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 3)
-  expect_lt(abs(logmeanexp(bpfilter_loglik) - loglik_true), 3)
+  expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 10)
+  expect_lt(abs(logmeanexp(abf_loglik) - loglik_true), 10)
+  expect_lt(abs(logmeanexp(abfir_loglik) - loglik_true), 10)
+  expect_lt(abs(logmeanexp(enkf_loglik) - loglik_true), 10)
+  expect_lt(abs(logmeanexp(bpfilter_loglik) - loglik_true), 10)
 })

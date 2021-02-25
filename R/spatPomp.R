@@ -64,7 +64,7 @@
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'
-##' @include spatPomp_class.R
+##' @include spatPomp_class.R get_covariate_names.R pstop.R
 ##' @importFrom rlang .data
 ##' @inheritParams pomp::pomp
 ##' @references \asfaw2020
@@ -93,7 +93,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
     stop(ep,sQuote("data")," is a required argument",call.=FALSE)
 
   if (!inherits(data,what=c("data.frame","spatPomp")))
-    pomp::pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
+    pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
           "class ",sQuote("spatPomp"),".")
 
   ## return as quickly as possible if no work is to be done
@@ -420,7 +420,7 @@ setMethod(
 
     # Get all names before call to hitch()
     if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
-    else  pomp_covarnames <- pomp:::get_covariate_names(data@covar)
+    else  pomp_covarnames <- get_covariate_names(data@covar)
     if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),1:U)
     else pomp_accumvars <- data@accumvars
     mparamnames <- paste("M_", paramnames, sep = "")

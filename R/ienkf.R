@@ -7,7 +7,7 @@
 ##'
 ##' @name ienkf
 ##' @rdname ienkf
-##' @include spatPomp_class.R spatPomp.R enkf.R
+##' @include spatPomp_class.R spatPomp.R enkf.R iter_filter.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##' @importFrom stats rnorm
@@ -117,13 +117,13 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
                 unit_statenames=object@unit_statenames,
                 unit_obsnames = object@unit_obsnames)
 
-  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@eunit_measure) || pomp:::undefined(object@vunit_measure))
-    pomp:::pStop_(paste(sQuote(c("rprocess","eunit_measure","vunit_measure")),collapse=", ")," are needed basic components.")
+  if (undefined(object@rprocess) || undefined(object@eunit_measure) || undefined(object@vunit_measure))
+    pStop_(paste(sQuote(c("rprocess","eunit_measure","vunit_measure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
 
   if (length(Nenkf) != 1 || !is.numeric(Nenkf) || !is.finite(Nenkf) || Nenkf < 1)
-    pomp:::pStop_(sQuote("Nenkf")," must be a positive integer.")
+    pStop_(sQuote("Nenkf")," must be a positive integer.")
   Nenkf <- as.integer(Nenkf)
 
   if (is.null(.paramMatrix)) {
@@ -135,27 +135,27 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   ntimes <- length(time(object))
 
   if (is.null(Np)) {
-    pomp:::pStop_(sQuote("Np")," must be specified.")
+    pStop_(sQuote("Np")," must be specified.")
   }  else if (!is.numeric(Np)) {
-    pomp:::pStop_(sQuote("Np"),
+    pStop_(sQuote("Np"),
            " must be a number, a vector of numbers, or a function.")
   }
 
   Np <- as.integer(Np)
 
   if (missing(rw.sd))
-    pomp:::pStop_(sQuote("rw.sd")," must be specified!")
-  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+    pStop_(sQuote("rw.sd")," must be specified!")
+  rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
   if (missing(cooling.fraction.50))
-    pomp:::pStop_(sQuote("cooling.fraction.50")," is a required argument.")
+    pStop_(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
       !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
       cooling.fraction.50 > 1)
-    pomp:::pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
+    pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
-  cooling.fn <- pomp:::mif2.cooling(
+  cooling.fn <- mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -232,7 +232,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np)
-    pomp:::pStop_(sQuote(".indices")," has improper length.")
+    pStop_(sQuote(".indices")," has improper length.")
 
   times <- tt <- time(object,t0=TRUE)
   t <- time(object)
@@ -246,7 +246,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   for (nt in seq_len(ntimes)) {
     ## perturb parameters
     pmag <- cooling.fn(nt,enkfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call('randwalk_perturbation_spatPomp',params,pmag,PACKAGE = 'spatPomp')
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
 
     ## get initial states
@@ -298,7 +298,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
       error = function (e) {
-        pomp:::pStop_("degenerate ",sQuote("R"), "at time ", sQuote(nt), ": ",conditionMessage(e))
+        pStop_("degenerate ",sQuote("R"), "at time ", sQuote(nt), ": ",conditionMessage(e))
       }
     )
 

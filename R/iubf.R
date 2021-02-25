@@ -9,7 +9,7 @@
 ##'
 ##' @name iubf
 ##' @rdname iubf
-##' @include spatPomp_class.R abf.R
+##' @include spatPomp_class.R abf.R iter_filter.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##' @importFrom stats quantile
@@ -88,7 +88,7 @@ iubf_ubf <- function (object,
     }
     params <- params[,resample_ixs_raw]
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call('randwalk_perturbation_spatPomp',params,pmag,PACKAGE = 'spatPomp')
 
     all_params <- params[,rep(1:Nparam, each = Nrep_per_param)]
     tparams <- pomp::partrans(object,all_params,dir="fromEst",.gnsi=gnsi)
@@ -261,7 +261,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
   gnsi <- as.logical(.gnsi)
   Nabf <- as.integer(Nabf)
 
-  cooling.fn <- pomp:::mif2.cooling(
+  cooling.fn <- mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -276,7 +276,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
     start <- apply(.paramMatrix,1L,mean)
   }
 
-  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
   traces <- array(dim=c(Nabf+1,length(start)+1),
                     dimnames=list(iteration=seq.int(.ndone,.ndone+Nabf),

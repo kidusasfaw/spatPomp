@@ -9,7 +9,7 @@
 SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
-  int ntimes, nunits, nvars, npars, ncovars, nparticles, nguides, nreps, nrepsx, nrepsp;
+  int ntimes, nunits, nvars, npars, ncovars, nparticles, nreps, nrepsx, nrepsp;
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
   SEXP fn, args;
@@ -28,7 +28,7 @@ SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP param
 
   PROTECT(x = as_state_array(X)); nprotect++;
   dim = INTEGER(GET_DIM(x));
-  nvars = dim[0]; nrepsx = dim[1]; nguides = nrepsx/nparticles;
+  nvars = dim[0]; nrepsx = dim[1];
 
   if (ntimes != dim[2])
     errorcall(R_NilValue,"length of 'times' and 3rd dimension of 'x' do not agree.");

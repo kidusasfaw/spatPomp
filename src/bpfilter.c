@@ -12,7 +12,7 @@ SEXP bpfilter_computations (SEXP x, SEXP params, SEXP Np,
   SEXP newstates = R_NilValue,newparams = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
-  double *xw = 0, *xp = 0, *xx = 0;
+  double *xp = 0, *xx = 0;
   int *xanc = 0;
   SEXP dimX, dimP, Xnames, Pnames;
   int *dim, np;
@@ -38,8 +38,6 @@ SEXP bpfilter_computations (SEXP x, SEXP params, SEXP Np,
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
   // Do we need to do parameter resampling?
   do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
-
-  xw = REAL(resamp_weights);
 
   if (do_ta) {
     PROTECT(anc = NEW_INTEGER(np)); nprotect++;

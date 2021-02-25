@@ -293,7 +293,7 @@ setMethod(
        if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
        return(nbhd_list)
      }
-   }
+    }
    ## single thread for testing
    mult_rep_output <- list()
    mcopts <- list(set.seed=TRUE)
@@ -324,7 +324,7 @@ setMethod(
    nunits = length(unit_names(object))
    rep_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))
    rep_p_sums = array(data = numeric(0), dim = c(nunits, ntimes))
-   cond_loglik <- foreach::foreach(u=seq_len(nunits),
+   cond_loglik <- foreach::foreach(i=seq_len(nunits),
                     .combine = 'rbind',
                     .packages=c("pomp", "spatPomp"),
                     .options.multicore=mcopts) %dopar%
@@ -332,10 +332,10 @@ setMethod(
                       cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
                       for (n in seq_len(ntimes)){
                         log_mp_sum = logmeanexp(vapply(mult_rep_output,
-                                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+                                                       FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[i,n]),
                                                        FUN.VALUE = 1.0))
                         log_p_sum = logmeanexp(vapply(mult_rep_output,
-                                                      FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
+                                                      FUN = function(rep_output) return(rep_output@log_wp_avg[i,n]),
                                                       FUN.VALUE = 1.0))
                         cond_loglik_u[n] = log_mp_sum - log_p_sum
                       }

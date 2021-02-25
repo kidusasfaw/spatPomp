@@ -12,11 +12,11 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
   SEXP newstates = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
-  double *xw = 0, *xx = 0;
+  double *xx = 0;
   int *xanc = 0;
   SEXP dimX, dimP, Xnames, Pnames;
   int *dim, np;
-  int nvars, npars = 0, nreps;
+  int nvars, nreps;
   int do_ta;
   int j, k, l;
 
@@ -28,7 +28,6 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
 
   PROTECT(dimP = GET_DIM(params)); nprotect++;
   dim = INTEGER(dimP);
-  npars = dim[0];
   if (nreps % dim[1] != 0)
     errorcall(R_NilValue,"ncol('states') should be a multiple of ncol('params')"); // # nocov
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -36,8 +35,6 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
   np = 1;       // number of particles to resample for abf is just one
 
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-
-  xw = REAL(resamp_weights);
 
   if (do_ta) {
     PROTECT(anc = NEW_INTEGER(np)); nprotect++;

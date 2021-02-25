@@ -6,7 +6,7 @@
 ##'
 ##' @name enkf
 ##' @rdname enkf
-##' @include spatPomp_class.R spatPomp.R
+##' @include spatPomp_class.R spatPomp.R undefined.R pstop.R
 ##' @aliases enkf  enkf,ANY-method enkf,missing-method
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
@@ -134,12 +134,12 @@ enkf.internal <- function (object,
                 unit_obsnames = object@unit_obsnames,
                 unit_accumvars = object@unit_accumvars)
 
-  if (pomp:::undefined(object@rprocess))
-    pomp:::pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@eunit_measure))
-    pomp:::pStop_(paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
-  if (pomp:::undefined(object@vunit_measure))
-    pomp:::pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
+  if (undefined(object@rprocess))
+    pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
+  if (undefined(object@eunit_measure))
+    pStop_(paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
+  if (undefined(object@vunit_measure))
+    pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
   params <- coef(object)
@@ -201,7 +201,7 @@ enkf.internal <- function (object,
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
       error = function (e) {
-        pomp:::pStop_("degenerate ",sQuote("R"), "at time ", sQuote(k), ": ",conditionMessage(e))
+        pStop_("degenerate ",sQuote("R"), "at time ", sQuote(k), ": ",conditionMessage(e))
       }
     )
     X <- X[,,1]

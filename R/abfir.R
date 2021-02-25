@@ -336,6 +336,8 @@ setMethod(
   function (object, Np, Nrep, nbhd,
             Ninter, tol = (1e-300), ...,
             verbose=getOption("verbose",FALSE)) {
+  # declare global variable since foreach's u uses non-standard evaluation
+  i <- 1
   if (missing(Ninter)) Ninter <- length(unit_names(object))
   if(missing(nbhd)){
     nbhd <- function(object, unit, time){
@@ -372,7 +374,7 @@ setMethod(
    # compute sum (over all Nrep) of w_{d,n,i}^{P} for each (d,n)
    N <- length(object@times)
    U <- length(unit_names(object))
-   cond_loglik <- foreach::foreach(u=seq_len(U),
+   cond_loglik <- foreach::foreach(i=seq_len(U),
                                    .combine = 'rbind',
                                    .packages=c("pomp", "spatPomp"),
                                    .options.multicore=mcopts) %dopar%
@@ -380,10 +382,10 @@ setMethod(
                                      cond_loglik_u <- array(data = numeric(0), dim=c(N))
                                      for (n in seq_len(N)){
                                        log_mp_sum = logmeanexp(vapply(mult_rep_output,
-                                                                      FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[u,n]),
+                                                                      FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[i,n]),
                                                                       FUN.VALUE = 1.0))
                                        log_p_sum = logmeanexp(vapply(mult_rep_output,
-                                                                     FUN = function(rep_output) return(rep_output@log_wp_avg[u,n]),
+                                                                     FUN = function(rep_output) return(rep_output@log_wp_avg[i,n]),
                                                                      FUN.VALUE = 1.0))
                                        cond_loglik_u[n] = log_mp_sum - log_p_sum
                                      }

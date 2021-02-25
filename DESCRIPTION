@@ -4,7 +4,7 @@ Title: Methods for Spatiotemporal POMPs
 Version: 0.11.10.0
 Date: 2020-10-12
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
-             person("Aaron", "King", email = "kingaa@umich.edu", role = c("aut")),
+             person("Aaron A.", "King", email = "kingaa@umich.edu", role = c("aut")),
              person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
 URL: https://github.com/kidusasfaw/spatPomp
 Description: The spatPomp package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. To do so, it relies on and extends a number of facilities that the pomp package provides for inference on time series data using partially-observed Markov process (POMP) models.
@@ -12,7 +12,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Contact: kasfaw at umich dot edu
-Depends: pomp (>= 2.0), R(>= 3.5.0), methods
+Depends: pomp (>= 3.2.0.2), R(>= 3.5.0), methods
 LinkingTo: pomp
 Suggests: testthat
 Imports: 
@@ -31,16 +31,21 @@ Collate:
     'spatPomp_class.R'
     'abf.R'
     'abfir.R'
+    'get_covariate_names.R'
     'as_data_frame.R'
     'as_spatPomp.R'
     'bm.R'
     'bpfilter.R'
+    'city_data_UK.R'
+    'pstop.R'
     'spatPomp.R'
     'dunit_measure.R'
+    'undefined.R'
     'enkf.R'
     'eunit_measure.R'
     'gbm.R'
     'girf.R'
+    'iter_filter.R'
     'iabf6.R'
     'ienkf.R'
     'igirf.R'
@@ -48,6 +53,7 @@ Collate:
     'loglik.R'
     'lorenz.R'
     'measles.R'
+    'measlesUK.R'
     'munit_measure.R'
     'package.R'
     'pipe.R'

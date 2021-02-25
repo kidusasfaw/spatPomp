@@ -3,9 +3,11 @@
 
 \newcommand{\arulampalam2002}{Arulampalam, M. S., Maskell, S., Gordon, N. and Clapp, T. (2002) A Tutorial on Particle Filters for Online Nonlinear/Non-Gaussian Bayesian Tracking. \emph{IEEE Trans. Sig. Proc.}, \bold{50(2)}, 174--188.}
 
-\newcommand{\asfaw2020}{Asfaw, K. et al. (2020) Statistical inference for spatiotemporal partially observed Markov processes via the R package spatpomp. \emph{Manuscript in preparation}.}
+\newcommand{\asfaw2020}{Asfaw, K. et al. (2020) Statistical inference for spatiotemporal partially observed Markov processes via the R package spatPomp. \emph{Manuscript in preparation}.}
 
 \newcommand{\breto2019}{Breto, C., Ionides, E. L. and King, A. A. (2019) Panel Data Analysis via Mechanistic Models. \emph{To appear in Journal of the American Statistical Association}.}
+
+\newcommand{\dalziel2016}{Dalziel, Benjamin D. et al. (2016) Persistent chaos of measles epidemics in the prevaccination United States caused by a small change in seasonal transmission patterns. \emph{PLoS computational biology}, \bold{12(2)}, e1004655. \acronym{DOI}: 10.5061/dryad.r4q34}
 
 \newcommand{\Evensen1994}{G. Evensen. Sequential data assimilation with a nonlinear quasi-geostrophic model using Monte Carlo methods to forecast error statistics. \emph{Journal of Geophysical Research: Oceans} \bold{99}, 10143--10162, 1994.}
 

@@ -6,7 +6,7 @@
 ##'
 ##' @name igirf
 ##' @rdname igirf
-##' @include spatPomp_class.R spatPomp.R girf.R
+##' @include spatPomp_class.R spatPomp.R girf.R iter_filter.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##' @family \pkg{spatPomp} parameter estimation methods
@@ -145,7 +145,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
                      unitname=object@unitname,
                      unit_statenames=object@unit_statenames,
                      unit_obsnames = object@unit_obsnames)
-  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
+  if (undefined(object@rprocess) || undefined(object@dmeasure))
     stop(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
@@ -197,8 +197,8 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
 
   if (missing(rw.sd))
     stop(sQuote("rw.sd")," must be specified!")
-  #rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
-  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,
+  #rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  rw.sd <- perturbn.kernel.sd(rw.sd,
                                      time=igirf_rw_sd_times(times=time(object),Ninter=Ninter),
                                      paramnames=names(start))
   if (missing(cooling.fraction.50))
@@ -209,7 +209,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     stop(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
-  cooling.fn <- pomp:::mif2.cooling(
+  cooling.fn <- mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -308,7 +308,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) {
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call("randwalk_perturbation_spatPomp",params,pmag,PACKAGE="spatPomp")
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
     if (nt == 0) {
       x <- rinit(object,params=tparams)
@@ -546,7 +546,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) {
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call("randwalk_perturbation_spatPomp",params,pmag,PACKAGE="spatPomp")
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
     if (nt == 0) {
       x <- rinit(object,params=tparams)
@@ -673,7 +673,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         if (any(log_weights>-Inf)) {
           coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=exp(log_weights))
         } else {
-          pomp:::pWarn("ibootgirf","filtering failure at last filter iteration; using ",
+          pWarn("ibootgirf","filtering failure at last filter iteration; using ",
                        "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }

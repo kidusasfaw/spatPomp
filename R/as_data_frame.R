@@ -4,7 +4,7 @@
 ##'
 ##' @name as.data.frame
 ##' @rdname as_data_frame
-##' @include spatPomp_class.R
+##' @include spatPomp_class.R get_covariate_names.R
 ##' @aliases coerce,spatPomp,data.frame-method
 ##' @importFrom rlang `:=` .data
 ##'
@@ -19,7 +19,7 @@ setAs(
   to="data.frame",
   def = function (from) {
     # get all names
-    cnames <- pomp:::get_covariate_names(from@covar)
+    cnames <- get_covariate_names(from@covar)
     unitname <- from@unitname
     timename <- from@timename
 
@@ -36,7 +36,7 @@ setAs(
     }
     if (length(cnames) > 0) {
       nm <- c(colnames(dat),cnames)
-      y <- .Call('lookup_in_table',from@covar,from@times,PACKAGE = 'pomp')
+      y <- .Call('lookup_in_table_spatPomp',from@covar,from@times,PACKAGE = 'spatPomp')
       dat <- cbind(dat,t(y))
       colnames(dat) <- nm
       unit_stateobscovars <- c(unit_stateobscovars, from@unit_covarnames)

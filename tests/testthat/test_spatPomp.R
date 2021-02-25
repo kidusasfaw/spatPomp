@@ -422,6 +422,7 @@ measles_eunit_measure2 <- Csnippet("
 
 # swap out old eunit_measure for new one
 m_partial2 <- spatPomp(m_partial,
+                       paramnames=measles_paramnames,
                        eunit_measure=measles_eunit_measure2)
 
 test_that("spatPomp object is created when all and some model components are provided",{

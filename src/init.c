@@ -16,6 +16,10 @@ static const R_CallMethodDef callMethods[] = {
   {NULL, NULL, 0}
 };
 
+SEXP (*randwalk_perturbation_pomp)(SEXP,SEXP);
+SEXP (*lookup_in_table_pomp)(SEXP,SEXP);
+
+
 void R_init_spatPomp (DllInfo *info) {
   // Register routines
   lsi = (load_stack_incr_t *) R_GetCCallable("pomp", "load_stack_incr");
@@ -28,4 +32,6 @@ void R_init_spatPomp (DllInfo *info) {
   upu = (unset_pomp_userdata_t *) R_GetCCallable("pomp", "unset_pomp_userdata");
   R_registerRoutines(info,NULL,callMethods,NULL,NULL);
   R_useDynamicSymbols(info,TRUE);
+  randwalk_perturbation_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","randwalk_perturbation");
+  lookup_in_table_pomp = (SEXP(*) (SEXP, SEXP)) R_GetCCallable("pomp","lookup_in_table");
 }
