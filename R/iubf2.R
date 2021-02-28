@@ -48,7 +48,7 @@ setClass(
 )
 
 
-iubf_ubf <- function (object,
+iubf_ubf2 <- function (object,
                       params,
                       Nrep_per_param,
                       nbhd,
@@ -56,11 +56,10 @@ iubf_ubf <- function (object,
                       abfiter,
                       cooling.fn,
                       rw.sd,
-                      block_size = 10000,
                       tol = (1e-18)^17,
                       .indices = integer(0), verbose,
                       .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("iubf_ubf"),": ")
+  ep <- paste0("in ",sQuote("iubf_ubf2"),": ")
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   abfiter <- as.integer(abfiter)
@@ -76,10 +75,6 @@ iubf_ubf <- function (object,
   pompLoad(object,verbose=FALSE)
   resample_ixs_raw <- rep(1:Nparam)
 
-  all_particles = 1:Nislands
-  nblocks = round(length(all_particles)/block_size)
-  block_list = split(all_particles, sort(all_particles %% nblocks))
-  rm(all_particles)
   i <- 1
   mcopts <- list(set.seed=TRUE)
 
@@ -91,8 +86,8 @@ iubf_ubf <- function (object,
       # print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',]),
       #         max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['tau',])))
 
-      print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',]),
-              max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
+      # print(c(min(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',]),
+      #         max(pomp::partrans(object,params,dir="fromEst",.gnsi=gnsi)['psi',])))
     }
     params <- params[,resample_ixs_raw]
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
@@ -101,93 +96,77 @@ iubf_ubf <- function (object,
     all_params <- params[,rep(1:Nparam, each = Nrep_per_param)]
     tparams <- pomp::partrans(object,all_params,dir="fromEst",.gnsi=gnsi)
 
-    gc()
+    if(!is.null(prev_meas_weights)) num_old_times <- dim(prev_meas_weights)[3]
+    else num_old_times <- 0
 
     if (nt == 1L) {
       X <- rinit(object,params=tparams)
       rn <- rownames(X)
     }
-    else X <- X[,resample_ixs,1]
+    else X <- X[,resample_ixs]
 
-    ## advance the state variables according to the process model
-    X <- tryCatch(
-      rprocess(
-        object,
-        x0=X,
-        t0=all_times[nt],
-        times=all_times[nt+1],
-        params=tparams,
-        .gnsi=gnsi
-      ),
-      error = function (e) {
-        stop(ep,"process simulation error: ",
-             conditionMessage(e),call.=FALSE)
-      }
-    )
+    jobs_by_param <- foreach::foreach(i=1:Nparam,
+                          .packages=c("pomp","spatPomp"),
+                          .options.multicore=mcopts
+                          ) %dopar%
+      {
+        X <- rprocess(object,
+                      x0=X[,((i-1)*Nrep_per_param+1):(i*Nrep_per_param)],
+                      t0=all_times[nt],
+                      times=all_times[nt+1],
+                      params=tparams[,((i-1)*Nrep_per_param+1):(i*Nrep_per_param)],
+                      .gnsi=gnsi)
+        ## determine the weights. returns weights which is a nunits by Np array
+        log_weights <- tryCatch(
+          vec_dmeasure(
+            object,
+            y=object@data[,nt,drop=FALSE],
+            x=X,
+            times=all_times[nt+1],
+            params=tparams[,((i-1)*Nrep_per_param+1):(i*Nrep_per_param)],
+            log=TRUE,
+            .gnsi=gnsi
+          ),
+          error = function (e) {
+            stop(ep,"error in calculation of weights: ",
+                 conditionMessage(e),call.=FALSE)
+          }
+        )
+        log_cond_densities <- log_weights[,,1]
+        log_cond_densities[is.infinite(log_cond_densities)] <- log(tol)
+        gnsi <- FALSE
 
-    gc()
+        log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits, Nrep_per_param))
+        log_wm_times_wp_avg = array(data = numeric(0), dim = c(nunits, Nrep_per_param))
+        log_wp_avg = array(data = numeric(0), dim = c(nunits, Nrep_per_param))
 
-    ## determine the weights. returns weights which is a nunits by Np array
-    log_weights <- tryCatch(
-      vec_dmeasure(
-        object,
-        y=object@data[,nt,drop=FALSE],
-        x=X,
-        times=all_times[nt+1],
-        params=tparams,
-        log=TRUE,
-        .gnsi=gnsi
-      ),
-      error = function (e) {
-        stop(ep,"error in calculation of weights: ",
-             conditionMessage(e),call.=FALSE)
-      }
-    )
-    log_cond_densities <- log_weights[,,1]
-    log_cond_densities[is.infinite(log_cond_densities)] <- log(tol)
-    gnsi <- FALSE
-
-    gc()
-
-    if(!is.null(prev_meas_weights)) num_old_times <- dim(prev_meas_weights)[3]
-    else num_old_times <- 0
-    log_loc_comb_pred_weights = array(data = numeric(0), dim=c(nunits, Nislands))
-    log_wm_times_wp_avg = array(data = numeric(0), dim = c(nunits, Nislands))
-    log_wp_avg = array(data = numeric(0), dim = c(nunits, Nislands))
-    for (unit in seq_len(nunits)){
-      full_nbhd <- nbhd(object, time = nt, unit = unit)
-      log_prod_cond_dens_nt  <- rep(0, Nislands)
-      farthest_time <- nt-num_old_times
-      log_prod_cond_dens_not_nt <- rep(0, Nislands)
-      for (neighbor in full_nbhd){
-        neighbor_u <- neighbor[1]
-        neighbor_n <- neighbor[2]
-        if (neighbor_n == nt)
-          log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ]
-        else{
-          # means prev_meas_weights was non-null, i.e. dim(prev_meas_weights)[3]>=1
-          log_prod_cond_dens_not_nt <- log_prod_cond_dens_not_nt +
-            prev_meas_weights[neighbor_u, ,num_old_times+1-(nt-neighbor_n)]
+        for (unit in seq_len(nunits)){
+          full_nbhd <- nbhd(object, time = nt, unit = unit)
+          log_prod_cond_dens_nt  <- rep(0, Nrep_per_param)
+          farthest_time <- nt-num_old_times
+          log_prod_cond_dens_not_nt <- rep(0, Nrep_per_param)
+          for (neighbor in full_nbhd){
+            neighbor_u <- neighbor[1]
+            neighbor_n <- neighbor[2]
+            if (neighbor_n == nt)
+              log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ]
+            else{
+              # means prev_meas_weights was non-null, i.e. dim(prev_meas_weights)[3]>=1
+              log_prod_cond_dens_not_nt <- log_prod_cond_dens_not_nt +
+                prev_meas_weights[neighbor_u,((i-1)*Nrep_per_param+1):(i*Nrep_per_param) ,num_old_times+1-(nt-neighbor_n)]
+            }
+          }
+          log_loc_comb_pred_weights[unit,]  <- log_prod_cond_dens_not_nt + log_prod_cond_dens_nt
         }
+        log_wm_times_wp_avgs_by_param = apply(log_loc_comb_pred_weights + log_cond_densities, c(1), FUN = logmeanexp)
+        log_wp_avgs_by_param = apply(log_loc_comb_pred_weights, c(1), FUN = logmeanexp)
+        param_resamp_log_weights <- sum(log_wm_times_wp_avgs_by_param - log_wp_avgs_by_param)
+        list(X[,,1],log_cond_densities,param_resamp_log_weights)
       }
-      # log_prod_cond_dens_not_nt_by_island <- array(log_prod_cond_dens_not_nt, dim = c(Np[1], Nislands, max(1,num_old_times)))
-      # log_prod_cond_dens_nt_by_island <- matrix(log_prod_cond_dens_nt, nrow = Np[1L], ncol = Nislands)
-      # first_term <- rowSums(apply(log_prod_cond_dens_not_nt_by_island, c(2,3), logmeanexp))
-      # second_term <- log_prod_cond_dens_nt_by_island
-      log_loc_comb_pred_weights[unit,]  <- log_prod_cond_dens_not_nt + log_prod_cond_dens_nt
-
-    }
-    log_wm_times_wp_avgs_by_param = apply(array(log_loc_comb_pred_weights + log_cond_densities, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
-    log_wp_avgs_by_param = apply(array(log_loc_comb_pred_weights, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
-    #
-    # log_cond_densities_by_island <- array(log_cond_densities, dim=c(nunits, Np[1L], Nislands))
-    # log_wm_times_wp_avgs = apply(log_loc_comb_pred_weights + log_cond_densities_by_island, c(1,3), FUN = logmeanexp)
-    # log_wm_times_wp_avgs_by_param = apply(array(log_wm_times_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
-    #
-    # log_wp_avgs = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
-    # log_wp_avgs_by_param = apply(array(log_wp_avgs, dim = c(nunits, Nrep_per_param, Nparam)), c(1,3), FUN = logmeanexp)
-
-    param_resamp_log_weights <- colSums(log_wm_times_wp_avgs_by_param - log_wp_avgs_by_param)
+    X <- do.call('cbind', lapply(seq_along(jobs_by_param), function(j) jobs_by_param[[j]][[1]]))
+    log_cond_densities <- do.call('cbind', lapply(seq_along(jobs_by_param), function(j) jobs_by_param[[j]][[2]]))
+    param_resamp_log_weights <- do.call('c', lapply(seq_along(jobs_by_param), function(j) jobs_by_param[[j]][[3]]))
+    rownames(X) <- rn
 
     ####### Quantile resampling
     def_resample <- which(param_resamp_log_weights > quantile(param_resamp_log_weights, 1-prop))
@@ -218,7 +197,6 @@ iubf_ubf <- function (object,
                                         along=3)[,resample_ixs,,drop=FALSE]
     }
     cond_loglik[nt] <- logmeanexp(param_resamp_log_weights)
-    gc()
   }
   params <- params[,resample_ixs_raw]
   pompUnload(object,verbose=FALSE)
@@ -229,7 +207,7 @@ iubf_ubf <- function (object,
   )
 }
 
-iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.sd,
+iubf_internal2 <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.sd,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17,
                            verbose = FALSE, .ndone = 0L,
@@ -289,7 +267,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
   ntimes = length(time(object))
   nunits = length(unit_names(object))
   for (n in seq_len(Nabf)) {
-    out <- iubf_ubf(
+    out <- iubf_ubf2(
       object=object,
       params=rep_param_init,
       Nrep_per_param=Nrep_per_param,
@@ -339,17 +317,17 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
 }
 
 setGeneric(
-  "iubf",
+  "iubf2",
   function (object, ...)
-    standardGeneric("iubf")
+    standardGeneric("iubf2")
 )
 
-##' @name iubf-spatPomp
-##' @aliases iubf,spatPomp-method
-##' @rdname iubf
+##' @name iubf2-spatPomp
+##' @aliases iubf2,spatPomp-method
+##' @rdname iubf2
 ##' @export
 setMethod(
-  "iubf",
+  "iubf2",
   signature=signature(object="spatPomp"),
   definition = function (object, Nabf = 1, Nrep_per_param, Nparam, nbhd, prop,
                          rw.sd,
@@ -374,7 +352,7 @@ setMethod(
       stop(ep,sQuote("cooling.fraction.50"),
            " must be in (0,1]",call.=FALSE)
 
-    iubf_internal(
+    iubf_internal2(
       object=object,
       Nrep_per_param=Nrep_per_param,
       Nparam=Nparam,

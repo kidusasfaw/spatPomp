@@ -296,30 +296,31 @@ setMethod(
     }
    ## single thread for testing
    mult_rep_output <- list()
-   mcopts <- list(set.seed=TRUE)
-   for(i in 1:Nrep){
-     mult_rep_output <- c(mult_rep_output,
-                          abf_internal(
-                            object=object,
-                            Np=Np,
-                            nbhd = nbhd,
-                            tol=tol,
-                            ...,
-                            verbose=verbose)
-                          )
-   }
+   # for(i in 1:Nrep){
+   #   mult_rep_output <- c(mult_rep_output,
+   #                        abf_internal(
+   #                          object=object,
+   #                          Np=Np,
+   #                          nbhd = nbhd,
+   #                          tol=tol,
+   #                          ...,
+   #                          verbose=verbose)
+   #                        )
+   # }
    ## end single thread for testing
    ## begin multi-thread code
-   # mult_rep_output <- foreach::foreach(i=1:Nrep,
-   #     .packages=c("pomp","spatPomp"),
-   #     .options.multicore=mcopts) %dopar%  spatPomp:::abf_internal(
-   #   object=object,
-   #   Np=Np,
-   #   nbhd=nbhd,
-   #   tol=tol,
-   #   ...,
-   #   verbose=verbose
-   #   )
+   i <- 1
+   mcopts <- list(set.seed=TRUE)
+   mult_rep_output <- foreach::foreach(i=1:Nrep,
+       .packages=c("pomp","spatPomp"),
+       .options.multicore=mcopts) %dopar%  spatPomp:::abf_internal(
+     object=object,
+     Np=Np,
+     nbhd=nbhd,
+     tol=tol,
+     ...,
+     verbose=verbose
+     )
    ntimes = length(time(object))
    nunits = length(unit_names(object))
    rep_mp_sums = array(data = numeric(0), dim = c(nunits,ntimes))

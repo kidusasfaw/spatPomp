@@ -51,6 +51,7 @@ Collate:
     'ienkf.R'
     'igirf.R'
     'iubf.R'
+    'iubf2.R'
     'loglik.R'
     'lorenz.R'
     'measles.R'
