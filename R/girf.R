@@ -280,6 +280,9 @@ momgirf.internal <- function (object,
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
+    if(verbose){
+      cat("girf iteration ",nt, " of ",ntimes, "\n")
+    }
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # Get a matrix with nguides times nreps columns to propagate using rprocess
@@ -437,7 +440,7 @@ momgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X
+        x <- X[,,1]
         log_filter_guide_fun <- log(tol)
       }
     }
@@ -535,6 +538,9 @@ bootgirf.internal <- function (object,
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
+    if(verbose){
+        cat("girf iteration ",nt, " of ",ntimes, "\n")
+    }
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # Get a matrix with nguides times nreps columns to propagate using rprocess
@@ -664,7 +670,7 @@ bootgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X
+        x <- X[,,1]
         log_filter_guide_fun <- log(tol)
       }
       gc()
