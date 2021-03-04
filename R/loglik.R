@@ -5,7 +5,7 @@
 ##' @name logLik
 ##' @rdname loglik
 ##' @aliases logLik logLik,ANY-method logLik,missing-method
-##' @include girf.R bpfilter.R abf.R iabf6.R abfir.R igirf.R
+##' @include girf.R bpfilter.R abf.R iubf.R abfir.R igirf.R
 ##'
 ##' @param object fitted model object
 ##'
@@ -49,7 +49,7 @@ setMethod(
 ##' @export
 setMethod(
   "logLik",
-  signature=signature(object="iabf6d_spatPomp"),
+  signature=signature(object="iubfd_spatPomp"),
   definition=function(object)object@loglik
 )
 

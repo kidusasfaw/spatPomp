@@ -24,7 +24,7 @@
 
 \S4method{logLik}{abfd_spatPomp}(object)
 
-\S4method{logLik}{iabf6d_spatPomp}(object)
+\S4method{logLik}{iubfd_spatPomp}(object)
 
 \S4method{logLik}{abfird_spatPomp}(object)
 

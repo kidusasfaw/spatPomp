@@ -12,7 +12,6 @@
 ##' @family \pkg{spatPomp} parameter estimation methods
 ##' @importFrom stats weighted.mean
 ##' @importFrom utils head
-##' @importFrom pryr mem_used
 ##' @inheritParams girf
 ##' @inheritParams pomp::mif2
 ##'
@@ -258,9 +257,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     if (verbose) {
       cat("igirf iteration",n,"of",Ngirf,"completed with likelihood ", g@loglik, "\n")
       print(coef(g))
-      print(pryr::mem_used())
     }
-    gc()
   }
 
   g@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",
@@ -500,6 +497,9 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
       else{
         cond.loglik[nt+1, s] <- log(tol)
+        x <- X[,,1]
+        log_filter_guide_fun <- log(tol)
+
       }
     }
   }
@@ -707,9 +707,9 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
       else{
         cond.loglik[nt+1, s] <- log(tol)
+        x <- X[,,1]
+        log_filter_guide_fun <- log(tol)
       }
-      pryr::mem_used()
-      gc()
     }
   }
   new(

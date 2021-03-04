@@ -673,7 +673,6 @@ bootgirf.internal <- function (object,
         x <- X[,,1]
         log_filter_guide_fun <- log(tol)
       }
-      gc()
     }
   }
   new(
