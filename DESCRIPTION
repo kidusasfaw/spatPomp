@@ -51,6 +51,7 @@ Collate:
     'iubf.R'
     'loglik.R'
     'lorenz.R'
+    'mcap.R'
     'measles.R'
     'measlesUK.R'
     'munit_measure.R'
