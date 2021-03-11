@@ -31,7 +31,7 @@
 ##' }
 NULL
 
-rw.sd <- pomp:::safecall
+rw.sd <- safecall
 
 setClass(
   "iubf_iter",

@@ -33,7 +33,7 @@
 ##' \asfaw2020
 NULL
 
-rw.sd <- pomp:::safecall
+rw.sd <- safecall
 
 setClass(
   "igirfd_spatPomp",

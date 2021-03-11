@@ -49,15 +49,6 @@ setClass(
     eunit_measure = 'pomp_fun',
     vunit_measure = 'pomp_fun',
     munit_measure = 'pomp_fun'
-  ),
-  prototype=prototype(
-    paramMatrix=array(data=numeric(0),dim=c(0,0)),
-    indices=integer(0),
-    dunit_measure = pomp:::pomp_fun(slotname="dunit_measure"),
-    runit_measure = pomp:::pomp_fun(slotname="runit_measure"),
-    eunit_measure = pomp:::pomp_fun(slotname="eunit_measure"),
-    vunit_measure = pomp:::pomp_fun(slotname="vunit_measure"),
-    munit_measure = pomp:::pomp_fun(slotname="munit_measure")
   )
 )
 

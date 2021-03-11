@@ -3,12 +3,24 @@
 \name{show-spatPomp}
 \alias{show-spatPomp}
 \alias{show,spatPomp-method}
+\alias{show-skelPlugin}
+\alias{show,skelPlugin-method}
+\alias{show-vectorfieldPlugin}
+\alias{show,vectorfieldPlugin-method}
+\alias{show-mapPlugin}
+\alias{show,mapPlugin-method}
 \title{Show methods}
 \usage{
 \S4method{show}{spatPomp}(object)
+
+\S4method{show}{skelPlugin}(object)
+
+\S4method{show}{vectorfieldPlugin}(object)
+
+\S4method{show}{mapPlugin}(object)
 }
 \arguments{
-\item{object}{a \code{spatPomp} object}
+\item{object}{a \code{mapPlugin} object}
 }
 \description{
 Display the object, according to its class.

@@ -64,7 +64,9 @@
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'
-##' @include spatPomp_class.R get_covariate_names.R pstop.R
+##' @include pstop.R undefined.R
+##' @include rprocess_spec.R safecall.R skeleton_spec.R
+##' @include spatPomp_class.R get_covariate_names.R
 ##' @importFrom rlang .data
 ##' @inheritParams pomp::pomp
 ##' @references \asfaw2020
@@ -152,7 +154,7 @@ setMethod(
     if (anyDuplicated(names(data)))
       stop("names of data variables must be unique.")
 
-    if (missing(t0)) pomp:::reqd_arg(NULL,"t0")
+    if (missing(t0)) reqd_arg(NULL,"t0")
 
     tpos <- match(times,names(data),nomatch=0L)
     upos <- match(units,names(data),nomatch=0L)
@@ -182,7 +184,7 @@ setMethod(
     # if missing workhorses, set to default
     if (missing(rinit)) rinit <- NULL
     if (missing(rprocess) || is.null(rprocess)) {
-      rprocess <- pomp:::rproc_plugin()
+      rprocess <- rproc_plugin()
     }
     if (missing(dprocess)) dprocess <- NULL
     if (missing(rmeasure)) rmeasure <- NULL
@@ -193,7 +195,7 @@ setMethod(
     if (missing(munit_measure)) munit_measure <- NULL
     if (missing(runit_measure)) runit_measure <- NULL
     if (missing(skeleton) || is.null(skeleton)) {
-      skeleton <- pomp:::skel_plugin()
+      skeleton <- skel_plugin()
     }
     if (missing(rprior)) rprior <- NULL
     if (missing(dprior)) dprior <- NULL
@@ -320,7 +322,7 @@ setMethod(
       verbose=verbose
     )
 
-    pomp:::solibs(po) <- hitches$lib
+    pomp::solibs(po) <- hitches$lib
     new("spatPomp",po,
         eunit_measure=hitches$funs$eunit_measure,
         munit_measure=hitches$funs$munit_measure,
@@ -394,7 +396,7 @@ setMethod(
     if (missing(t0)) t0 <- data@t0
     if (missing(rinit)) rinit <- data@rinit
     if (missing(rprocess)) rprocess <- data@rprocess
-    else if (is.null(rprocess)) rprocess <- pomp:::rproc_plugin()
+    else if (is.null(rprocess)) rprocess <- rproc_plugin()
     if (missing(dprocess)) dprocess <- data@dprocess
     if (missing(rmeasure)) rmeasure <- data@rmeasure
     if (missing(dmeasure)) dmeasure <- data@dmeasure
@@ -404,7 +406,7 @@ setMethod(
     if (missing(eunit_measure)) eunit_measure <- data@eunit_measure
     if (missing(runit_measure)) runit_measure <- data@runit_measure
     if (missing(skeleton)) skeleton <- data@skeleton
-    else if (is.null(skeleton)) skeleton <- pomp:::skel_plugin()
+    else if (is.null(skeleton)) skeleton <- skel_plugin()
     if (missing(rprior)) rprior <- data@rprior
     if (missing(dprior)) dprior <- data@dprior
     if (missing(partrans)) partrans <- data@partrans
@@ -467,7 +469,7 @@ setMethod(
       shlib.args=shlib.args,
       verbose=verbose
     )
-    pomp:::solibs(po) <- hitches$lib
+    pomp::solibs(po) <- hitches$lib
     new(
       "spatPomp",
       po,

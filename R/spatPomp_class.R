@@ -23,19 +23,5 @@ setClass(
     vunit_measure = 'pomp_fun',
     dunit_measure = 'pomp_fun',
     runit_measure = 'pomp_fun'
-  ),
-  prototype=prototype(
-    unit_names = as.character(NA),
-    unit_statenames = as.character(NA),
-    unit_obsnames = as.character(NA),
-    unitname = as.character(NA),
-    unit_covarnames = as.character(NA),
-    shared_covarnames = as.character(NA),
-    unit_accumvars = as.character(NA),
-    eunit_measure = pomp:::pomp_fun(slotname="eunit_measure"),
-    munit_measure = pomp:::pomp_fun(slotname="munit_measure"),
-    vunit_measure = pomp:::pomp_fun(slotname="vunit_measure"),
-    dunit_measure = pomp:::pomp_fun(slotname="dunit_measure"),
-    runit_measure = pomp:::pomp_fun(slotname="runit_measure")
   )
 )

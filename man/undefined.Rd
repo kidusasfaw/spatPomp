@@ -2,14 +2,31 @@
 % Please edit documentation in R/undefined.R
 \name{undefined}
 \alias{undefined}
+\alias{undefined,NULL-method}
+\alias{undefined,ANY-method}
+\alias{undefined,missing-method}
 \alias{undefined,pomp_fun-method}
+\alias{undefined,partransPlugin-method}
 \alias{undefined,rprocPlugin-method}
+\alias{undefined,covartable-method}
 \alias{undefined,skelPlugin-method}
 \title{Undefined}
 \usage{
+undefined(object, ...)
+
+\S4method{undefined}{`NULL`}(object, ...)
+
+\S4method{undefined}{ANY}(object, ...)
+
+\S4method{undefined}{missing}(object, ...)
+
 \S4method{undefined}{pomp_fun}(object, ...)
 
+\S4method{undefined}{partransPlugin}(object, ...)
+
 \S4method{undefined}{rprocPlugin}(object, ...)
+
+\S4method{undefined}{covartable}(object)
 
 \S4method{undefined}{skelPlugin}(object, ...)
 }

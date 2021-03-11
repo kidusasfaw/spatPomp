@@ -90,7 +90,7 @@ setMethod(
         ...,
         verbose=verbose
       ),
-      error = function (e) pomp:::pStop("ienkf",conditionMessage(e))
+      error = function (e) pStop("ienkf",conditionMessage(e))
     )
   }
 )

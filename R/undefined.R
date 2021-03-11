@@ -19,31 +19,30 @@
 NULL
 pompfunmode <- list(undef=0L,Rfun=1L,native=2L,regNative=3L)
 skeletontype <- list(undef=0L,vectorfield=1L,map=2L)
-
+##' @rdname undefined
 setGeneric(
   "undefined",
   function (object, ...)
     standardGeneric("undefined")
 )
-
+##' @rdname undefined
 setMethod(
   "undefined",
   signature=signature(object="NULL"),
   definition=function (object, ...) TRUE
 )
-
+##' @rdname undefined
 setMethod(
   "undefined",
   signature=signature(object="ANY"),
   definition=function (object, ...) NA
 )
-
+##' @rdname undefined
 setMethod(
   "undefined",
   signature=signature(object="missing"),
   definition=function (...) NA
 )
-
 ##' @rdname undefined
 setMethod(
   "undefined",
@@ -52,7 +51,7 @@ setMethod(
     object@mode == pompfunmode$undef
   }
 )
-
+##' @rdname undefined
 setMethod(
   "undefined",
   signature=signature(object="partransPlugin"),
@@ -69,7 +68,7 @@ setMethod(
     undefined(object@step.fn) && undefined(object@rate.fn)
   }
 )
-
+##' @rdname undefined
 setMethod(
   "undefined",
   signature=signature(object="covartable"),
@@ -86,4 +85,3 @@ setMethod(
     object@type==skeletontype$undef || undefined(object@skel.fn)
   }
 )
-
