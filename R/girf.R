@@ -7,7 +7,6 @@
 ##' @rdname girf
 ##' @include spatPomp_class.R spatPomp.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
 ##'
 ##'
 ##' @inheritParams abf

@@ -107,5 +107,4 @@ Other particle filter methods:
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 }
-\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}
