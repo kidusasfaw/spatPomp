@@ -8,8 +8,7 @@
 ##' @rdname igirf
 ##' @include spatPomp_class.R spatPomp.R girf.R iter_filter.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
-##' @family \pkg{spatPomp} parameter estimation methods
+##' @family spatPomp parameter estimation methods
 ##' @importFrom stats weighted.mean
 ##' @importFrom utils head
 ##' @inheritParams girf

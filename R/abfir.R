@@ -14,7 +14,6 @@
 ##' @rdname abfir
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom foreach %dopar%
 ##'
 ##' @inheritParams abf

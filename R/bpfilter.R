@@ -12,7 +12,6 @@
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
 ##' @inheritParams abf
 ##'
 ##' @param block_size The number of spatial units per block. If this is provided, the method subdivides units approximately evenly

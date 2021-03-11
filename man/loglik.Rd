@@ -10,8 +10,8 @@
 \alias{logLik,bpfilterd_spatPomp-method}
 \alias{logLik-abfd_spatPomp}
 \alias{logLik,abfd_spatPomp-method}
-\alias{logLik-iabf6d_spatPomp}
-\alias{logLik,iabf6d_spatPomp-method}
+\alias{logLik-iubfd_spatPomp}
+\alias{logLik,iubfd_spatPomp-method}
 \alias{logLik-abfird_spatPomp}
 \alias{logLik,abfird_spatPomp-method}
 \alias{logLik-igirfd_spatPomp}

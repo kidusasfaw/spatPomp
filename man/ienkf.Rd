@@ -88,9 +88,9 @@ Other particle filter methods:
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 
-Other \pkg{spatPomp} parameter estimation methods: 
+Other spatPomp parameter estimation methods: 
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 }
-\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}
+\concept{spatPomp parameter estimation methods}

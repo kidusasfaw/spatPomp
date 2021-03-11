@@ -122,17 +122,9 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 
-Other \pkg{spatPomp} filtering methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{girf}()}
-
-Other \pkg{spatPomp} parameter estimation methods: 
+Other spatPomp parameter estimation methods: 
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 }
-\concept{\pkg{spatPomp} filtering methods}
-\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}
+\concept{spatPomp parameter estimation methods}

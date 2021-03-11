@@ -53,13 +53,5 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
-
-Other \pkg{spatPomp} filtering methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{girf}()},
-\code{\link{igirf}()}
 }
-\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

@@ -9,7 +9,6 @@
 ##' @include spatPomp_class.R spatPomp.R undefined.R pstop.R
 ##' @aliases enkf  enkf,ANY-method enkf,missing-method
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom stats rnorm
 ##' @inheritParams abf
 ##'

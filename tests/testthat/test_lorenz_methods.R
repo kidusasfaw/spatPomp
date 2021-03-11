@@ -59,7 +59,7 @@ iubf_nparam <- 50
 iubf_prop <- 0.80
 
 iubf(lorenz4_test,
-     Nabf = iubf_nubf,
+     Nubf = iubf_nubf,
      Nrep_per_param = iubf_nrep_per_param,
      Nparam = iubf_nparam,
      nbhd = iubf_nbhd,
@@ -73,6 +73,23 @@ iubf(lorenz4_test,
      verbose=FALSE
 ) -> iubf_out
 
+# ienkf does well on  non-noise parameters
+start_params <- c('F' = 6,
+                  'sigma' = coef(lorenz4_test)[['sigma']],
+                  'tau' = coef(lorenz4_test)[['tau']],
+                  "X1_0"=0, "X2_0"=0,"X3_0"=0, "X4_0"=0.01)
+ienkf_out <- ienkf(lorenz4_test,
+                   params=start_params,
+                   Nenkf = 20,
+                   rw.sd = rw.sd(F=0.02, sigma=0.0, tau=0.0,
+                               X1_0=0, X2_0=0, X3_0=0, X4_0=0
+                 ),
+                 cooling.type = 'geometric',
+                 cooling.fraction.50 = 0.5,
+                 Np = 1000
+)
+
+
 mif2_out <- mif2(lorenz4_test,
                  params=start_params,
                  Nmif = 20,
@@ -84,55 +101,11 @@ mif2_out <- mif2(lorenz4_test,
                  Np = 1000
 )
 
-test_that("IGIRF and IUBF produce estimates that are not far from IF2 for low dimensions", {
+test_that("IGIRF, IUBF and IEnKF produce estimates that are not far from IF2 for low dimensions", {
   expect_lt(abs(logLik(igirf_out) - logLik(mif2_out)), 20)
+  expect_lt(abs(logLik(ienkf_out) - logLik(mif2_out)), 30)
   expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 35)
 })
 
-# Test filtering algorithms
-## GIRF
-girf_loglik <- replicate(3,logLik(girf(lorenz4_test,
-                    Np = 500,
-                    lookahead = 1,
-                    Nguide = 40
-                    )))
-
-## ABF
-abf_nbhd <- function(object, time, unit) {
-  nbhd_list <- list()
-  if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
-  if(time>2) nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
-  if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
-  if(unit>2) nbhd_list <- c(nbhd_list, list(c(unit-2, time)))
-
-  return(nbhd_list)
-}
-
-abf_loglik <- replicate(n=5,
-                        expr=logLik(
-                          abf(lorenz4_test,
-                              Nrep = 500,
-                              Np = 20,
-                              nbhd = abf_nbhd)))
-
-## ABFIR
-abfir_loglik <- replicate(5,
-                          logLik(
-                            abfir(lorenz4_test,
-                                  Nrep = 500,
-                                  Np=20,
-                                  Nguide = 40,
-                                  nbhd = abf_nbhd)))
-
-## PFILTER
-pfilter_loglik <- replicate(10,logLik(pfilter(lorenz4_test,
-                                            Np = 10000
-                                            )))
-
-test_that("ABF, ABFIR, GIRF all yield close to true log-likelihood estimates", {
-  expect_lt(abs(logmeanexp(girf_loglik) - logmeanexp(pfilter_loglik)), 10)
-  expect_lt(abs(logmeanexp(abf_loglik) - logmeanexp(pfilter_loglik)), 50)
-  expect_lt(abs(logmeanexp(abfir_loglik) - logmeanexp(pfilter_loglik)), 30)
-})
 
 

@@ -9,7 +9,7 @@
 ##' @rdname ienkf
 ##' @include spatPomp_class.R spatPomp.R enkf.R iter_filter.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} parameter estimation methods
+##' @family spatPomp parameter estimation methods
 ##' @importFrom stats rnorm
 ##' @inheritParams abf
 ##' @inheritParams pomp::mif2

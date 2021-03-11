@@ -11,7 +11,6 @@
 ##' @rdname abf
 ##' @include spatPomp_class.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
 ##' @importFrom foreach %dopar%
 ##' @param object A \code{spatPomp} object.
 ##' @param \dots If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.

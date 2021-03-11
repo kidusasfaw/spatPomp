@@ -43,8 +43,8 @@ setMethod(
   definition=function(object)object@loglik
 )
 
-##' @name logLik-iabf6d_spatPomp
-##' @aliases logLik,iabf6d_spatPomp-method
+##' @name logLik-iubfd_spatPomp
+##' @aliases logLik,iubfd_spatPomp-method
 ##' @rdname loglik
 ##' @export
 setMethod(

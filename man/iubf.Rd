@@ -8,7 +8,7 @@
 \usage{
 \S4method{iubf}{spatPomp}(
   object,
-  Nabf = 1,
+  Nubf = 1,
   Nrep_per_param,
   Nparam,
   nbhd,
@@ -24,7 +24,7 @@
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
-\item{Nabf}{The number of iterations to perform}
+\item{Nubf}{The number of iterations to perform}
 
 \item{Nrep_per_param}{The number of replicates used to estimate the likelihood at a parameter}
 
@@ -98,9 +98,9 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 
-Other \pkg{spatPomp} parameter estimation methods: 
+Other spatPomp parameter estimation methods: 
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 }
-\concept{\pkg{spatPomp} parameter estimation methods}
 \concept{particle filter methods}
+\concept{spatPomp parameter estimation methods}

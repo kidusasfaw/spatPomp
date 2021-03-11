@@ -6,21 +6,15 @@
 ##' Monte Carlo error in the profile and statistical uncertainty present
 ##' in the likelihood function.
 ##'
+##' @importFrom stats lm loess predict qchisq vcov
 ##' @param lp a vector of profile likelihood evaluations.
-##'
 ##' @param parameter the corresponding values of the focal parameter.
-##'
 ##' @param confidence the required level of the confidence interval.
-##'
 ##' @param lambda the loess parameter used to smooth the profile.
-##'
 ##' @param Ngrid the number of points to evaluate the smoothed profile.
-##'
 ##' @return mcap returns a list including the smoothed profile,
 ##' a quadratic approximation, and the constructed confidence interval.
-##'
 ##' @author Edward L. Ionides
-##'
 ##' @export
 ##'
 mcap <- function(lp,parameter,confidence=0.95,lambda=0.75,Ngrid=1000){

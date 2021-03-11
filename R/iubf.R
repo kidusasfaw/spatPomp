@@ -11,12 +11,12 @@
 ##' @rdname iubf
 ##' @include spatPomp_class.R abf.R iter_filter.R
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} parameter estimation methods
+##' @family spatPomp parameter estimation methods
 ##' @importFrom stats quantile
 ##' @importFrom utils head
 ##' @inheritParams pomp::mif2
 ##' @inheritParams abf
-##' @param Nabf The number of iterations to perform
+##' @param Nubf The number of iterations to perform
 ##' @param Nparam The number of parameters that will undergo the iterated perturbation
 ##' @param Nrep_per_param The number of replicates used to estimate the likelihood at a parameter
 ##' @param prop A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation
@@ -50,7 +50,7 @@ setClass(
   'iubfd_spatPomp',
   contains='abfd_spatPomp',
   slots=c(
-    Nabf = 'integer',
+    Nubf = 'integer',
     rw.sd = 'matrix',
     cooling.type = 'character',
     cooling.fraction.50 = 'numeric',
@@ -210,7 +210,7 @@ iubf_ubf <- function (object,
   )
 }
 
-iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.sd,
+iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nubf, prop, rw.sd,
                            cooling.type, cooling.fraction.50,
                            tol = (1e-18)^17,
                            verbose = FALSE, .ndone = 0L,
@@ -235,7 +235,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
                 unit_obsnames = object@unit_obsnames)
 
   gnsi <- as.logical(.gnsi)
-  Nabf <- as.integer(Nabf)
+  Nubf <- as.integer(Nubf)
 
   cooling.fn <- mif2.cooling(
     type=cooling.type,
@@ -254,8 +254,8 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
 
   rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
-  traces <- array(dim=c(Nabf+1,length(start)+1),
-                    dimnames=list(iteration=seq.int(.ndone,.ndone+Nabf),
+  traces <- array(dim=c(Nubf+1,length(start)+1),
+                    dimnames=list(iteration=seq.int(.ndone,.ndone+Nubf),
                                   variable=c('loglik',names(start))))
   traces[1L,] <- c(NA,start)
 
@@ -269,7 +269,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
   times = time(object)
   ntimes = length(time(object))
   nunits = length(unit_names(object))
-  for (n in seq_len(Nabf)) {
+  for (n in seq_len(Nubf)) {
     out <- iubf_ubf(
       object=object,
       params=rep_param_init,
@@ -293,7 +293,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
     traces[n+1,c(1)] <- sum(out@cond_loglik)
     coef(object) <- out_params_summary
     if (verbose) {
-      cat("iubf iteration",n,"of",Nabf,"completed","with log-likelihood",sum(out@cond_loglik),"\n")
+      cat("iubf iteration",n,"of",Nubf,"completed","with log-likelihood",sum(out@cond_loglik),"\n")
       print(out_params_summary)
     }
   }
@@ -306,7 +306,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nabf, prop, rw.
   new(
     "iubfd_spatPomp",
     object,
-    Nabf=as.integer(Nabf),
+    Nubf=as.integer(Nubf),
     Nrep=as.integer(Nrep_per_param),
     Np=as.integer(1),
     rw.sd=rw.sd,
@@ -332,17 +332,17 @@ setGeneric(
 setMethod(
   "iubf",
   signature=signature(object="spatPomp"),
-  definition = function (object, Nabf = 1, Nrep_per_param, Nparam, nbhd, prop,
+  definition = function (object, Nubf = 1, Nrep_per_param, Nparam, nbhd, prop,
                          rw.sd,
                          cooling.type = c("geometric","hyperbolic"),
                          cooling.fraction.50, tol = (1e-18)^17,
                          verbose = getOption("verbose"),...) {
 
     ep <- paste0("in ",sQuote("iubf"),": ")
-    if(missing(Nabf))
-      stop(ep,sQuote("Nabf")," must be specified",call.=FALSE)
-    if (Nabf <= 0)
-        stop(ep,sQuote("Nabf")," must be a positive integer",call.=FALSE)
+    if(missing(Nubf))
+      stop(ep,sQuote("Nubf")," must be specified",call.=FALSE)
+    if (Nubf <= 0)
+        stop(ep,sQuote("Nubf")," must be a positive integer",call.=FALSE)
     ntimes <- length(time(object))
     if(missing(Nrep_per_param))
       stop(ep,"number of replicates, ",
@@ -359,7 +359,7 @@ setMethod(
       object=object,
       Nrep_per_param=Nrep_per_param,
       Nparam=Nparam,
-      Nabf=Nabf,
+      Nubf=Nubf,
       nbhd=nbhd,
       prop=prop,
       rw.sd=rw.sd,

@@ -68,8 +68,7 @@ igirf_ninter <- length(unit_names(bm_obj))
 igirf_np <- 1000
 igirf_nguide <- 40
 igirf_ngirf <- 10
-### Use moment-matching approach
-igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
+igirf_out <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     params=start_params,
                     rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02,
                                   X1_0=ivp(0), X2_0=ivp(0), X3_0=ivp(0)
@@ -83,24 +82,8 @@ igirf_out1 <- igirf(bm_obj, Ngirf = igirf_ngirf,
                     kind = 'moment',
                     verbose = FALSE)
 
-### Use quantile-based approach
-igirf_out2 <- igirf(bm_obj, Ngirf = igirf_ngirf,
-                    params=start_params,
-                    rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02, X1_0=ivp(0),
-                                  X2_0=ivp(0), X3_0=ivp(0)
-                                 ),
-                    cooling.type = "geometric",
-                    cooling.fraction.50 = 0.5,
-                    Np=igirf_np,
-                    Ninter = igirf_ninter,
-                    lookahead = igirf_lookahead,
-                    Nguide = igirf_nguide,
-                    kind = 'bootstrap',
-                    verbose = FALSE)
-
 test_that("IGIRF produces estimates that are not far from the MLE", {
-  expect_lt(abs(logLik(igirf_out1) - kfll_mle), 20)
-  expect_lt(abs(logLik(igirf_out2) - kfll_mle), 20)
+  expect_lt(abs(logLik(igirf_out) - kfll_mle), 20)
 })
 
 ## IUBF
@@ -116,7 +99,7 @@ iubf_nparam <- 100
 iubf_prop <- 0.80
 
 iubf(bm_obj,
-     Nabf = iubf_nubf,
+     Nubf = iubf_nubf,
      Nrep_per_param = iubf_nrep_per_param,
      Nparam = iubf_nparam,
      nbhd = iubf_nbhd,

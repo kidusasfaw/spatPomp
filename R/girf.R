@@ -5,7 +5,7 @@
 ##'
 ##' @name girf
 ##' @rdname girf
-##' @include spatPomp_class.R spatPomp.R undefined.R pstop.R
+##' @include spatPomp_class.R spatPomp.R
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##'
@@ -227,8 +227,8 @@ momgirf.internal <- function (object,
   ep <- paste0("in ",sQuote("girf"),": ")
   params <- coef(object)
 
-  if (undefined(object@rprocess) || undefined(object@dmeasure))
-    pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
+    pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   if (length(params)==0)
     stop(ep,sQuote("params")," must be specified",call.=FALSE)
@@ -243,31 +243,31 @@ momgirf.internal <- function (object,
   ntimes <- length(times)-1
 
   if (missing(Np) || is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
+    pomp:::pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
     Np <- tryCatch(
       vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
       error = function (e) {
-        pStop_("if ",sQuote("Np")," is a function, it must return ",
+        pomp:::pStop_("if ",sQuote("Np")," is a function, it must return ",
           "a single positive integer.")
       }
     )
   } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
+    pomp:::pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
   }
 
   if (length(Np) == 1)
     Np <- rep(Np,times=ntimes+1)
   else if (length(Np) != (ntimes+1))
-    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
+    pomp:::pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
 
   if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
+    pomp:::pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
 
   Np <- as.integer(Np)
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    pomp:::pStop_(sQuote("tol")," should be a small positive number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
@@ -280,9 +280,6 @@ momgirf.internal <- function (object,
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
-    if(verbose){
-      cat("girf iteration ",nt, " of ",ntimes, "\n")
-    }
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # Get a matrix with nguides times nreps columns to propagate using rprocess
@@ -313,12 +310,22 @@ momgirf.internal <- function (object,
 
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp::flow(object,
+        skel <- tryCatch(
+          pomp::flow(object,
+                     x0=X.start,
+                     t0=tt[s+1],
+                     params=params.matrix,
+                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
+                     ...),
+          error = function (e) {
+            pomp::flow(object,
                        x0=X.start,
                        t0=tt[s+1],
                        params=params.matrix,
                        times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
                        method = 'adams')
+          }
+        )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
@@ -440,7 +447,7 @@ momgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X[,,1]
+        x <- X
         log_filter_guide_fun <- log(tol)
       }
     }
@@ -469,6 +476,7 @@ bootgirf.internal <- function (object,
                                .gnsi = TRUE) {
 
   ep <- paste0("in ",sQuote("girf"),": ")
+
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
                 unit_covarnames = object@unit_covarnames,
@@ -485,8 +493,8 @@ bootgirf.internal <- function (object,
                 unit_accumvars = object@unit_accumvars)
   params <- coef(object)
 
-  if (undefined(object@rprocess) || undefined(object@dmeasure))
-    pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dmeasure))
+    pomp:::pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   if (length(params)==0)
     stop(ep,sQuote("params")," must be specified",call.=FALSE)
@@ -501,31 +509,31 @@ bootgirf.internal <- function (object,
   ntimes <- length(times)-1
   U <- length(unit_names(object))
   if (missing(Np) || is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
+    pomp:::pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
     Np <- tryCatch(
       vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
       error = function (e) {
-        pStop_("if ",sQuote("Np")," is a function, it must return ",
+        pomp:::pStop_("if ",sQuote("Np")," is a function, it must return ",
                       "a single positive integer.")
       }
     )
   } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
+    pomp:::pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
   }
 
   if (length(Np) == 1)
     Np <- rep(Np,times=ntimes+1)
   else if (length(Np) != (ntimes+1))
-    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
+    pomp:::pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
 
   if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
+    pomp:::pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
 
   Np <- as.integer(Np)
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    pomp:::pStop_(sQuote("tol")," should be a small positive number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
@@ -538,21 +546,28 @@ bootgirf.internal <- function (object,
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) { ## main loop
-    if(verbose){
-        cat("girf iteration ",nt, " of ",ntimes, "\n")
-    }
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
     # Get a matrix with nguides times nreps columns to propagate using rprocess
     x_with_guides <- x[,rep(1:Np[1], each=Nguide)]
     guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
-    Xskel <- pomp::flow(object,
+    Xskel <- tryCatch( # skeleton
+      pomp::flow(object,
+                 x0=x,
+                 t0=times[nt+1],
+                 params=params.matrix,
+                 times = times[(nt+2):(nt+1+lookahead_steps)],
+                 ...),
+      error = function (e) {
+        pomp::flow(object,
                    x0=x,
                    t0=times[nt+1],
                    params=params.matrix,
                    times = times[(nt+2):(nt+1+lookahead_steps)],
                    method = 'adams')
+      }
+    )
     resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
@@ -565,12 +580,22 @@ bootgirf.internal <- function (object,
 
       X.start <- X[,,1]
       if(tt[s+1] < times[nt + 1 + lookahead_steps]){
-        skel <- pomp::flow(object,
+        skel <- tryCatch(
+          pomp::flow(object,
+                     x0=X.start,
+                     t0=tt[s+1],
+                     params=params.matrix,
+                     times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
+                     ...),
+          error = function (e) {
+            pomp::flow(object,
                        x0=X.start,
                        t0=tt[s+1],
                        params=params.matrix,
                        times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
                        method = 'adams')
+          }
+        )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
           X.start.znames <- X.start[znames,]
@@ -670,9 +695,10 @@ bootgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X[,,1]
+        x <- X
         log_filter_guide_fun <- log(tol)
       }
+      gc()
     }
   }
   new(
