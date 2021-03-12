@@ -1,6 +1,6 @@
 Package: spatPomp
 Type: Package
-Title: Methods for Spatiotemporal POMPs
+Title: Statistical Inference for Spatiotemporal Partially Observed Markov Processes
 Version: 0.11.10.0
 Date: 2021-03-01
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
@@ -13,7 +13,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Contact: kasfaw at umich dot edu
-Depends: pomp (>= 3.2.0.2), R(>= 3.5.0), methods
+Depends: pomp (>= 3.2.0.2), R(>= 4.0.0), methods
 LinkingTo: pomp
 Suggests: testthat
 Imports: 

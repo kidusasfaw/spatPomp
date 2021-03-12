@@ -79,12 +79,14 @@ setClass(
     nbhd="function",
     Np="integer",
     tol="numeric",
+    cond_loglik="array",
     loglik="numeric"
   ),
   prototype=prototype(
     Nrep=as.integer(NA),
     Np=as.integer(NA),
     tol=as.double(NA),
+    cond_loglik=array(data=numeric(0),dim=c(0,0)),
     loglik=as.double(NA)
   )
 )
@@ -347,6 +349,7 @@ setMethod(
       object,
       Np=as.integer(Np),
       tol=tol,
+      cond_loglik=cond_loglik,
       loglik=sum(cond_loglik)
      )
   }
