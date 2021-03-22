@@ -52,6 +52,9 @@ $(PKGVERS).tar.gz: $(SOURCE) $(TESTS) includes
 win: dist
 	curl -T $(PKGVERS).tar.gz ftp://win-builder.r-project.org/R-release/
 
+wind: dist
+	curl -T $(PKGVERS).tar.gz ftp://win-builder.r-project.org/R-devel/
+
 xcheck: dist
 	mkdir -p check library
 	$(RCMD_ALT) check --no-stop-on-test-error --as-cran --library=library -o check $(PKGVERS).tar.gz

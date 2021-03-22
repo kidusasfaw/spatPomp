@@ -13,7 +13,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Contact: kasfaw at umich dot edu
-Depends: pomp (>= 3.2.0.2), R(>= 4.0.0), methods
+Depends: pomp (>= 3.3), R(>= 4.0.0), methods
 LinkingTo: pomp
 Suggests: testthat
 Imports: 
