@@ -25,7 +25,7 @@ start_params <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
 ## IGIRF
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(lorenz4_test))
-igirf_np <- 1000
+igirf_np <- 500
 igirf_nguide <- 40
 igirf_ngirf <- 10
 
@@ -41,7 +41,7 @@ igirf_out <- igirf(lorenz4_test,
                    Ninter = igirf_ninter,
                    lookahead = igirf_lookahead,
                    Nguide = igirf_nguide,
-                   kind = 'bootstrap',
+                   kind = 'moment',
                    verbose = FALSE
 )
 
@@ -54,7 +54,7 @@ iubf_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 iubf_nubf <- 10
-iubf_nrep_per_param <- 1000
+iubf_nrep_per_param <- 500
 iubf_nparam <- 50
 iubf_prop <- 0.80
 
@@ -80,7 +80,7 @@ start_params <- c('F' = 6,
                   "X1_0"=0, "X2_0"=0,"X3_0"=0, "X4_0"=0.01)
 ienkf_out <- ienkf(lorenz4_test,
                    params=start_params,
-                   Nenkf = 20,
+                   Nenkf = 10,
                    rw.sd = rw.sd(F=0.02, sigma=0.0, tau=0.0,
                                X1_0=0, X2_0=0, X3_0=0, X4_0=0
                  ),

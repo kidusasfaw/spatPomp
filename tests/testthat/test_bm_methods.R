@@ -65,7 +65,7 @@ start_params <- c("rho" = 0.7, "sigma"=0.5, "tau"=0.5,
 ## IGIRF
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(bm_obj))
-igirf_np <- 1000
+igirf_np <- 500
 igirf_nguide <- 40
 igirf_ngirf <- 10
 igirf_out <- igirf(bm_obj, Ngirf = igirf_ngirf,
@@ -95,7 +95,7 @@ iubf_nbhd <- function(object, time, unit) {
 }
 iubf_nubf <- 10
 iubf_nrep_per_param <- 500
-iubf_nparam <- 100
+iubf_nparam <- 50
 iubf_prop <- 0.80
 
 iubf(bm_obj,
@@ -134,7 +134,8 @@ girf_loglik <- replicate(n = 3,
                            girf(bm_obj,
                                 Np = 500,
                                 lookahead = 1,
-                                Nguide = 50
+                                Nguide = 50,
+                                kind = 'moment'
                             )
                           )
 )
@@ -160,7 +161,7 @@ for(i in seq_len(abf_runs)){
 abfir_loglik <- vector(length = abf_runs)
 for(i in seq_len(abf_runs)){
   abfir_loglik[i] <- logLik(abfir(bm_obj,
-                                  Nrep = 800,
+                                  Nrep = 500,
                                   Np = 50,
                                   nbhd = abf_nbhd))
 }

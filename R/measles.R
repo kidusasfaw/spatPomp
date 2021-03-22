@@ -15,48 +15,39 @@
 #' @param S_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.
 #' @param E_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.
 #' @param I_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.
-#' @note this function goes through a typical workflow of constructing
+#' @references
+#'
+#' \geosphere
+#'
+#' @note This function goes through a typical workflow of constructing
 #' a typical spatPomp object (1-4 below). This allows the user to have a
 #' file that replicates the exercise of model building as well as function
 #' that creates a typical nonlinear model in epidemiology in case they want
 #' to test a new inference methodology. We purposely do not modularize this
 #' function because it is not an operational piece of the package and is
-#' instead useful as an example.
+#' instead useful as an example.\cr
 #' 1. Getting a measurements data.frame with columns for times,
-#'    times, spatial units and measurements.
+#'    spatial units and measurements.\cr
 #' 2. Getting a covariates data.frame with columns for times,
-#'    spatial units and covariate data.
+#'    spatial units and covariate data.\cr
 #' 3. Constructing model components (latent state initializer,
-#'    latent state transition simulator and measurement model. Depending
+#'    latent state transition simulator and measurement model). Depending
 #'    on the methods used, the user may have to supply a vectorfield to
 #'    be integrated that represents the deterministic skeleton of the latent
-#'    process).
+#'    process.\cr
 #' 4. Bringing all the data and model components together to form a
-#'    spatPomp object via a call to spatPomp()
+#'    spatPomp object via a call to spatPomp().
 #' @examples
 #' m <- measles(U = 5)
 #' # See all the model specifications of the object
 #' spy(m)
 #' @export
 
-# NOTE: this function goes through a typical workflow of constructing
-# a typical spatPomp object (1-4 below). This allows the user to have a
-# file that replicates the exercise of model building as well as function
-# that creates a typical nonlinear model in epidemiology in case they are
-# creating new inference methodology and want a non-trivial test. We
-# purposely do not modularize this function because it is not an
-# operational piece of the package and is instead useful as an example.
-# 1. Getting a measurements data.frame with columns for times,
-#    times, spatial units and measurements.
-# 2. Getting a covariates data.frame with columns for times,
-#    spatial units and covariate data.
-# 3. Constructing model components (latent state initializer,
-#    latent state transition simulator and measurement model. Depending
-#    on the methods used, the user may have to supply a vectorfield to
-#    be integrated that represents the deterministic skeleton of the latent
-#    process).
-# 4. Bringing all the data and model components together to form a
-#    spatPomp object via a call to spatPomp()
+# NOTE: As indicated in the Note section of the documentation, this
+# this function goes through a typical workflow of constructing
+# a spatPomp object (1-4 below). It is not meant to be operational, but
+# instead an example of how one goes about going from getting data to creating
+# a spatPomp object.
 measles <- function(U=6,dt=2/365,
                     fixed_ivps=TRUE,shared_ivps=TRUE,
                     S_0=0.032, E_0=0.00005, I_0=0.00004){

@@ -40,27 +40,30 @@ The model is adapted from He et al. (2010) with gravity transport following Park
 The data in the object is simulated using the process and measurement models of He et al. (2010).
 }
 \note{
-this function goes through a typical workflow of constructing
+This function goes through a typical workflow of constructing
 a typical spatPomp object (1-4 below). This allows the user to have a
 file that replicates the exercise of model building as well as function
 that creates a typical nonlinear model in epidemiology in case they want
 to test a new inference methodology. We purposely do not modularize this
 function because it is not an operational piece of the package and is
-instead useful as an example.
+instead useful as an example.\cr
 1. Getting a measurements data.frame with columns for times,
-   times, spatial units and measurements.
+   spatial units and measurements.\cr
 2. Getting a covariates data.frame with columns for times,
-   spatial units and covariate data.
+   spatial units and covariate data.\cr
 3. Constructing model components (latent state initializer,
-   latent state transition simulator and measurement model. Depending
+   latent state transition simulator and measurement model). Depending
    on the methods used, the user may have to supply a vectorfield to
    be integrated that represents the deterministic skeleton of the latent
-   process).
+   process.\cr
 4. Bringing all the data and model components together to form a
-   spatPomp object via a call to spatPomp()
+   spatPomp object via a call to spatPomp().
 }
 \examples{
 m <- measles(U = 5)
 # See all the model specifications of the object
 spy(m)
+}
+\references{
+\geosphere
 }
