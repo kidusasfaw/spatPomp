@@ -116,7 +116,7 @@ setMethod(
     object,
     Np,
     Ninter,
-    lookahead,
+    lookahead=1,
     Nguide,
     kind=c('bootstrap','moment'),
     tol,

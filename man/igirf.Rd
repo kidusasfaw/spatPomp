@@ -24,7 +24,7 @@
   cooling.type,
   cooling.fraction.50,
   Ninter,
-  lookahead,
+  lookahead = 1,
   Nguide,
   kind = c("bootstrap", "moment"),
   tol = 1e-300,

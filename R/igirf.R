@@ -85,10 +85,11 @@ setMethod(
   "igirf",
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
-                        Ninter,lookahead,Nguide,kind=c('bootstrap', 'moment'),
+                        Ninter,lookahead=1,Nguide,kind=c('bootstrap', 'moment'),
                         tol = 1e-300,
                         ..., verbose = getOption("verbose", FALSE)) {
-
+    if(missing(Ninter)) Ninter <- length(unit_names(data))
+    kind = match.arg(kind)
     tryCatch(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,kind,tol = tol,

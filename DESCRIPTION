@@ -1,13 +1,13 @@
 Package: spatPomp
 Type: Package
 Title: Statistical Inference for Spatiotemporal Partially Observed Markov Processes
-Version: 0.12.0.0
+Version: 0.17.0.0
 Date: 2021-03-22
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
              person("Aaron A.", "King", email = "kingaa@umich.edu", role = c("aut")),
              person("Edward", "Ionides", email = "ionides@umich.edu", role = c("aut")))
 URL: https://github.com/kidusasfaw/spatPomp
-Description: The spatPomp package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. To do so, it relies on and extends a number of facilities that the pomp package provides for inference on time series data using partially-observed Markov process (POMP) models.
+Description: Inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. To do so, it relies on and extends a number of facilities that the pomp package provides for inference on time series data using partially-observed Markov process (POMP) models. Implemented methods include filtering and inference methods in Park and Ionides (2020) <doi:10.1007/s11222-020-09957-3>, Rebeschini and van Handel (2015) <doi:10.1214/14-AAP1061>, Evensen and van Leeuwen (1996) <doi:10.1175/1520-0493(1996)124<0085:AOGADF>2.0.CO;2> and Ionides et al. (2021) <arXiv:2002.05211v2>. Pre-print statistical software article: Asfaw et al. (2021) <	arXiv:2101.01157>.
 SystemRequirements: For Windows users, Rtools (see https://cran.r-project.org/bin/windows/Rtools/).
 License: GPL-3
 Encoding: UTF-8

@@ -12,7 +12,7 @@ I_0=0.00004
 birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
 
 # pre-vaccine biweekly measles reports for the largest 40 UK cities, sorted by size
-data(measlesUK)
+measlesUK <- spatPomp::measlesUK
 measlesUK$city<-as.character(measlesUK$city)
 cities <- unique(measlesUK$city)[1:U]
 measles_cases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]

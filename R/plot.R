@@ -11,6 +11,7 @@
 ##' @param ncol the number of columns in the grid plot
 NULL
 
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 ##' Plotting output of \code{igirf()}
 ##'
 ##' Diagnostic plot for \code{igirf()}
@@ -22,7 +23,6 @@ setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
   definition=function (x, params = names(coef(x)), ncol = 3) {
-    if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
     plot.df <- data.frame(x@traces[,c("loglik", params)])
     cn <- colnames(plot.df)
     plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)

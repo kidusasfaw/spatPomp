@@ -13,11 +13,12 @@ if (nzchar(chk) && chk == "TRUE") {
   num_workers <- parallel::detectCores()
 }
 num_workers <- 2L
-doParallel::registerDoParallel(num_workers)
+if(.Platform$OS.type != "windows")
+  doParallel::registerDoParallel(num_workers)
 
 # create the BM object
 set.seed(2)
-U = 3; N = 30
+U = 2; N = 10
 bm_obj <- bm(U = U, N = N)
 
 
@@ -86,7 +87,7 @@ test_that("IGIRF produces estimates that are not far from the MLE", {
   expect_lt(abs(logLik(igirf_out) - kfll_mle), 20)
 })
 
-## IUBF
+# IUBF
 iubf_nbhd <- function(object, time, unit) {
   nbhd_list <- list()
   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -152,7 +153,7 @@ abf_runs <- 2
 abf_loglik <- vector(length = abf_runs)
 for(i in seq_len(abf_runs)){
   abf_loglik[i] <- logLik(abf(bm_obj,
-                              Nrep = 800,
+                              Nrep = 200,
                               Np = 50,
                               nbhd = abf_nbhd))
 }
@@ -161,13 +162,13 @@ for(i in seq_len(abf_runs)){
 abfir_loglik <- vector(length = abf_runs)
 for(i in seq_len(abf_runs)){
   abfir_loglik[i] <- logLik(abfir(bm_obj,
-                                  Nrep = 500,
+                                  Nrep = 200,
                                   Np = 50,
                                   nbhd = abf_nbhd))
 }
 
 ## BPF
-bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 500, block_size = 3)))
+bpfilter_loglik <- replicate(10,logLik(bpfilter(bm_obj, Np = 500, block_size = 1)))
 
 test_that("ABF, ABFIR, GIRF, EnKF, BPF all yield close to true log-likelihood estimates", {
   expect_lt(abs(logmeanexp(girf_loglik) - loglik_true), 10)

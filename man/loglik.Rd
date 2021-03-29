@@ -2,8 +2,6 @@
 % Please edit documentation in R/loglik.R
 \name{logLik}
 \alias{logLik}
-\alias{logLik,ANY-method}
-\alias{logLik,missing-method}
 \alias{logLik-girfd_spatPomp}
 \alias{logLik,girfd_spatPomp-method}
 \alias{logLik-bpfilterd_spatPomp}

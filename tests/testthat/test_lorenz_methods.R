@@ -13,11 +13,12 @@ if (nzchar(chk) && chk == "TRUE") {
   num_workers <- parallel::detectCores()
 }
 num_workers <- 2L
-doParallel::registerDoParallel(num_workers)
+if(.Platform$OS.type != "windows")
+  doParallel::registerDoParallel(num_workers)
 
 # create the Lorenz object
 set.seed(1)
-lorenz4_test <- lorenz(U=4, N=20, delta_t=0.01, delta_obs=1)
+lorenz4_test <- lorenz(U=4, N=5, delta_t=0.01, delta_obs=1)
 
 # Parameter inference test
 start_params <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
@@ -25,7 +26,7 @@ start_params <- c('F' = 6, 'sigma' = 0.5, 'tau' = 0.5, "X1_0"=0, "X2_0"=0,
 ## IGIRF
 igirf_lookahead <- 1
 igirf_ninter <- length(unit_names(lorenz4_test))
-igirf_np <- 500
+igirf_np <- 200
 igirf_nguide <- 40
 igirf_ngirf <- 10
 
@@ -45,7 +46,7 @@ igirf_out <- igirf(lorenz4_test,
                    verbose = FALSE
 )
 
-## IUBF
+# IUBF
 iubf_nbhd <- function(object, time, unit) {
   nbhd_list <- list()
   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
@@ -54,8 +55,8 @@ iubf_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 iubf_nubf <- 10
-iubf_nrep_per_param <- 500
-iubf_nparam <- 50
+iubf_nrep_per_param <- 400
+iubf_nparam <- 25
 iubf_prop <- 0.80
 
 iubf(lorenz4_test,
@@ -103,8 +104,8 @@ mif2_out <- mif2(lorenz4_test,
 
 test_that("IGIRF, IUBF and IEnKF produce estimates that are not far from IF2 for low dimensions", {
   expect_lt(abs(logLik(igirf_out) - logLik(mif2_out)), 20)
-  expect_lt(abs(logLik(ienkf_out) - logLik(mif2_out)), 30)
-  expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 35)
+  expect_lt(abs(logLik(ienkf_out) - logLik(mif2_out)), 20)
+  expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 25)
 })
 
 

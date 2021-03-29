@@ -17,7 +17,7 @@
 ##' @author Edward L. Ionides
 ##' @export
 ##'
-mcap <- function(lp,parameter,confidence=0.95,lambda=0.75,Ngrid=1000){
+mcap <- function(lp,parameter,confidence=0.95,lambda=1,Ngrid=1000){
   smooth_fit <- loess(lp ~ parameter,span=lambda)
   parameter_grid <- seq(min(parameter), max(parameter), length.out = Ngrid)
   smoothed_loglik <- predict(smooth_fit,newdata=parameter_grid)

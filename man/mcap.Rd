@@ -4,7 +4,7 @@
 \alias{mcap}
 \title{Monte Carlo adjusted profile}
 \usage{
-mcap(lp, parameter, confidence = 0.95, lambda = 0.75, Ngrid = 1000)
+mcap(lp, parameter, confidence = 0.95, lambda = 1, Ngrid = 1000)
 }
 \arguments{
 \item{lp}{a vector of profile likelihood evaluations.}
