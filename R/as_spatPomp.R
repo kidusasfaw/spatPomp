@@ -5,6 +5,7 @@
 ##' @name as_spatPomp
 ##' @rdname as_spatPomp
 ##' @include spatPomp_class.R
+##' @return a class \sQuote{spatPomp} representation of the object.
 NULL
 
 ##' @name coerce-pomp-spatPomp
@@ -19,10 +20,19 @@ setAs(
   from="pomp",
   to="spatPomp",
   def = function (from) {
-    new("spatPomp",from,
-        dunit_measure=from@dmeasure,
-        unit_names="unit",
-        unit_statenames=character(0),
-        unit_obsnames = rownames(from@data))
+    unit_sn <- character(0)
+    if(dim(from@states)[1] > 0) unit_sn <- rownames(from@states)
+    unit_on <- character(0)
+    if(dim(from@data)[1] > 0) unit_on <- rownames(from@data)
+    unit_cn <- character(0)
+    if(length(get_covariate_names(from@covar))>0) unit_cn <- get_covariate_names(from@covar)
+
+    new("spatPomp",
+        from,
+        unit_names="unit1",
+        unitname="unit",
+        unit_statenames=unit_sn,
+        unit_obsnames = unit_on,
+        unit_covarnames = unit_cn)
   }
 )

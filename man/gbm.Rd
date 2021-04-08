@@ -18,7 +18,8 @@ gbm(U = 5, N = 100, delta_t = 0.1, IVP_values = 1, delta_obs = 1)
 \item{delta_obs}{observations occur every \code{delta_obs} time units}
 }
 \value{
-An object of class \sQuote{spatPomp}.
+An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+geometric Brownian motion
 }
 \description{
 Generate a spatPomp object representing a \code{U}-dimensional

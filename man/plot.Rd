@@ -23,6 +23,13 @@
 This helps in contexts where there are spikes that could take away
 attention from the dynamics illustrated by the rest of the data.}
 }
+\value{
+a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
+the convergence record of running \code{igirf()} with respect to the likelihood and the parameters of the model.
+
+a \code{ggplot} plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
+the time series data over multiple spatial units via a tile-plot.
+}
 \description{
 Visualize \code{spatPomp} data
 

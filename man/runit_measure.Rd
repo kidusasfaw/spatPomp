@@ -22,7 +22,8 @@
 \item{log}{logical; should the density be returned on log scale?}
 }
 \value{
-A matrix with the simulation
+A matrix with the simulated observation corresponding to state
+\code{x} and unit \code{unit} with parameter set \code{params}.
 }
 \description{
 \code{runit_measure} simulates a unit's observation given the entire state

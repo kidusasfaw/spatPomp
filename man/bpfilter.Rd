@@ -32,8 +32,9 @@ an integer vector of neighboring units.}
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
-Upon successful completion, \code{bpfilter} returns an object of class
-\sQuote{bpfilterd_spatPomp}.
+Upon successful completion, \code{bpfilter()} returns an object of class
+\sQuote{bpfilterd_spatPomp} containing the algorithmic parameters used to run \code{bpfilter()}
+and the estimated likelihood.
 }
 \description{
 An implementation of the block particle filter algorithm of Rebeschini and van Handel (2015), which is used to estimate the filter distribution

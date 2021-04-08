@@ -173,6 +173,9 @@ if \code{FALSE}, compilation of the C snippets will be postponed until they are 
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
+\value{
+An object of class \sQuote{spatPomp} representing observations and model components from the spatiotemporal POMP model.
+}
 \description{
 This function constructs a class \sQuote{spatPomp} object, encoding a spatiotemporal partially observed Markov process (\acronym{SpatPOMP}) model together with a uni- or multi-variate time series on a collection of units.
 Users will typically develop a POMP model for a single unit before embarking on a coupled SpatPOMP analysis.

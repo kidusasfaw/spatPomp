@@ -10,7 +10,8 @@
 #' @param time The time for which to simulate an observation
 #' @param log logical; should the density be returned on log scale?
 #' @param params parameters to use to simulate an observation
-#' @return A matrix with the simulation
+#' @return A matrix with the simulated observation corresponding to state
+#' \code{x} and unit \code{unit} with parameter set \code{params}.
 #' @examples
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]

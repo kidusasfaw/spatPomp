@@ -12,7 +12,8 @@
 #' \code{sigma} and \code{tau} parameters.
 #' \code{F=8} is a common value that causes chaotic behavior.
 #' @references \lorenz96
-#' @return An object of class \sQuote{spatPomp}.
+#' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+#' Lorenz 96 model
 #'
 #' @examples
 #' l <- lorenz(U=5, N=100, delta_t=0.01, delta_obs=1)

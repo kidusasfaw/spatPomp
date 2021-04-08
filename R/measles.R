@@ -5,7 +5,6 @@
 #' The data in the object is simulated using the process and measurement models of He et al. (2010).
 #'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
-#' @return A spatPomp object.
 #' @importFrom utils data read.csv write.table
 #' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.
 #' @param fixed_ivps a logical. If \code{TRUE} initial value parameters will be declared in the \code{globals} slot and
@@ -15,6 +14,7 @@
 #' @param S_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.
 #' @param E_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.
 #' @param I_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.
+#' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
 #'
 #' \geosphere
@@ -45,7 +45,7 @@
 
 # NOTE: As indicated in the Note section of the documentation, this
 # this function goes through a typical workflow of constructing
-# a spatPomp object (1-4 below). It is not meant to be operational, but
+# a spatPomp object. It is not meant to be operational, but
 # instead an example of how one goes about going from getting data to creating
 # a spatPomp object.
 measles <- function(U=6,dt=2/365,

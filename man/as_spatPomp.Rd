@@ -5,6 +5,9 @@
 \alias{coerce-pomp-spatPomp}
 \alias{coerce,pomp,spatPomp-method}
 \title{Coerce to spatPomp}
+\value{
+a class \sQuote{spatPomp} representation of the object.
+}
 \description{
 Convert to class spatPomp object
 }

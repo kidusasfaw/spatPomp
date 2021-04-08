@@ -10,7 +10,7 @@
   object,
   nsim = 1,
   seed = NULL,
-  format = c("spatPomps", "arrays", "data.frame"),
+  format = c("spatPomps", "data.frame"),
   include.data = FALSE,
   ...
 )
@@ -38,6 +38,11 @@ See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
 When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
+}
+\value{
+if \code{format='spatPomps'} and \code{nsim=1} an object of class \sQuote{spatPomp} representing a simulation from the model in \code{object} is returned.
+If \code{format='spatPomps'} and \code{nsim>1} a list of class \sQuote{spatPomp} objects is returned.
+If \code{format='data.frame'} then a class \sQuote{data.frame} object is returned.
 }
 \description{
 \code{simulate} generates simulations of the latent and measurement

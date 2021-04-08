@@ -11,9 +11,12 @@
 \arguments{
 \item{x}{a \code{spatPomp} object}
 }
+\value{
+A character vector with the unit names used to create the \sQuote{spatPomp} object.
+}
 \description{
 \code{unit_names} outputs the contents of the \code{unit_names} slot
-of a \code{spatPomp} object. The order in which the spatial units
+of a \code{spatPomp} object. The order in which the units
 appear in the output vector determines the order in which latent
 states and observations for the spatial units are stored.
 }

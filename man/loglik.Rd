@@ -32,7 +32,7 @@
 \item{object}{fitted model object}
 }
 \value{
-a numeric which is an estimated log likelihood
+a numeric which is the estimated log likelihood
 }
 \description{
 Extract the estimated log likelihood.

@@ -31,12 +31,15 @@ setGeneric(
 ##' @name simulate-spatPomp
 ##' @aliases simulate,spatPomp-method
 ##' @rdname simulate
+##' @return if \code{format='spatPomps'} and \code{nsim=1} an object of class \sQuote{spatPomp} representing a simulation from the model in \code{object} is returned.
+##' If \code{format='spatPomps'} and \code{nsim>1} a list of class \sQuote{spatPomp} objects is returned.
+##' If \code{format='data.frame'} then a class \sQuote{data.frame} object is returned.
 ##' @export
 setMethod(
   "simulate",
   signature=signature(object="spatPomp"),
   definition=function(object, nsim = 1, seed = NULL,
-                      format = c("spatPomps", "arrays", "data.frame"),
+                      format = c("spatPomps", "data.frame"),
                       include.data = FALSE,...) {
     format <- match.arg(format)
     if(format == 'spatPomps') sims <- pomp::simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)

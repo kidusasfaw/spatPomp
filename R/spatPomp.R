@@ -61,6 +61,7 @@
 ##' For more information, see the examples section below.
 ##' @param \dots If there are arguments that the user would like to pass to \pkg{pomp}'s basic constructor function's \dots argument,
 ##' this argument passes them along. Not recommended for this version of \pkg{spatPomp}.
+##' @return An object of class \sQuote{spatPomp} representing observations and model components from the spatiotemporal POMP model.
 ##' @name spatPomp
 ##' @rdname spatPomp
 ##'

@@ -26,7 +26,8 @@ lorenz(
 \code{F=8} is a common value that causes chaotic behavior.}
 }
 \value{
-An object of class \sQuote{spatPomp}.
+An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+Lorenz 96 model
 }
 \description{
 Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz '96 process with

@@ -46,8 +46,9 @@ which is represented by \code{c(unit,time)}. See example below for more details.
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
-Upon successful completion, \code{abf} returns an object of class
-\sQuote{abfd_spatPomp}.
+Upon successful completion, \code{abf()} returns an object of class
+\sQuote{abfd_spatPomp} containing the algorithmic parameters used to run \code{abf()}
+and the estimated likelihood.
 }
 \description{
 An algorithm for estimating the likelihood of a spatiotemporal partially-observed Markov process model.

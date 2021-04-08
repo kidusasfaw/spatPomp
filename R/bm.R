@@ -11,7 +11,8 @@
 #' @param delta_t Process simulations are performed every \code{delta_t} time units
 #' whereas observations occur every one time unit
 #' @importFrom utils data
-#' @return An object of class \sQuote{spatPomp}.
+#' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+#' Brownian motion
 #' @examples
 #' b <- bm(U=4, N=20)
 #' # See all the model specifications of the object

@@ -14,6 +14,8 @@
 ##' data frame with the times, units, observables, states (if known), and
 ##' interpolated covariates (if any).
 ##' @param x a \code{spatPomp} object.
+##' @return A \sQuote{data.frame} with columns for time, spatial unit and observations.
+
 setAs(
   from="spatPomp",
   to="data.frame",

@@ -24,7 +24,8 @@
 \item{log}{logical; should the density be returned on log scale?}
 }
 \value{
-A matrix with the unit expectation
+A class \sQuote{matrix} with the unit expected observation for spatial unit \code{unit}
+corresponding to the corresponding states in \code{x}.
 }
 \description{
 \code{eunit_measure} evaluates the expectation of a unit's observation given the entire state

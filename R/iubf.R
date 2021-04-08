@@ -20,9 +20,11 @@
 ##' @param Nparam The number of parameters that will undergo the iterated perturbation
 ##' @param Nrep_per_param The number of replicates used to estimate the likelihood at a parameter
 ##' @param prop A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation
-##' @return
-##' Upon successful completion, \code{iubf} returns an object of class
-##' \sQuote{iubfd_spatPomp}.
+##' @return Upon successful completion, \code{iubf()} returns an object of class
+##' \sQuote{iubfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+##' respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+##' attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}. The
+##' algorithmic parameters used to run \code{iubf()} are also included.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

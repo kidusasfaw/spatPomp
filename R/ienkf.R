@@ -14,13 +14,13 @@
 ##' @inheritParams abf
 ##' @inheritParams pomp::mif2
 ##' @inheritParams enkf
-##'
 ##' @param data an object of class \code{spatPomp}
 ##' @param Nenkf number of iterations of perturbed EnKF.
 ##'
-##' @return
-##' Upon successful completion, \code{ienkf} returns an object of class
-##' \sQuote{ienkfd_spatPomp}.
+##' @return Upon successful completion, \code{ienkf} returns an object of class
+##' \sQuote{ienkfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+##' respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+##' attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

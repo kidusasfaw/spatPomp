@@ -91,8 +91,11 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
-Upon successful completion, \code{igirf} returns an object of class
-\sQuote{igirfd_spatPomp}.
+Upon successful completion, \code{igirf()} returns an object of class
+\sQuote{igirfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}. The
+algorithmic parameters used to run \code{igirf()} are also included.
 }
 \description{
 An implementation of a parameter estimation algorithm combining

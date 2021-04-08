@@ -34,9 +34,9 @@
 ##' # Get a likelihood estimate
 ##' logLik(bpfilterd_b2)
 ##'
-##' @return
-##' Upon successful completion, \code{bpfilter} returns an object of class
-##' \sQuote{bpfilterd_spatPomp}.
+##' @return Upon successful completion, \code{bpfilter()} returns an object of class
+##' \sQuote{bpfilterd_spatPomp} containing the algorithmic parameters used to run \code{bpfilter()}
+##' and the estimated likelihood.
 ##'
 ##' @section Details:
 ##' Only one of \code{block_size} or \code{block_list} should be specified.

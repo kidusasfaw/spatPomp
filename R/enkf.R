@@ -11,7 +11,6 @@
 ##' @family particle filter methods
 ##' @importFrom stats rnorm
 ##' @inheritParams abf
-##'
 ##' @param data A \code{spatPomp} object.
 ##' @param Np The number of Monte Carlo particles used to approximate the filter distribution.
 ##' @examples
@@ -25,7 +24,9 @@
 ##' logLik(enkfd_bm)
 
 ##' @return
-##' An object of class \sQuote{enkfd_spatPomp}.
+##' An object of class \sQuote{enkfd_spatPomp} that contains the estimate of the log likelihood
+##' (via the \code{loglik} attribute), algorithmic parameters used to run \code{enkf()}. Also included
+##' are estimated filter means, prediction means and forecasts that are generated during an \code{enkf()} run.
 ##'
 ##' @references \Evensen1994
 ##'

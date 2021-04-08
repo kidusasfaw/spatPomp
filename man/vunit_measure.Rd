@@ -22,7 +22,8 @@
 \item{Np}{numeric; defaults to 1 and the user need not change this}
 }
 \value{
-A matrix with the unit variance
+A matrix with the unit measurement variance implied by the state, \code{x},
+and the parameter set \code{params} for unit \code{unit}.
 }
 \description{
 \code{vunit_measure} evaluates the variance of a unit's observation given the entire state
@@ -37,5 +38,4 @@ p <- coef(b); names(p) -> rnp
 dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 vunit_measure(b, x=s, unit=2, time=1, params=p)
-
 }

@@ -60,6 +60,9 @@ setting \code{unit_vfnames=c('S')} gets us a variable
 named \code{DS} that we can index as \code{DS[0]} and \code{DS[1]} to
 refer to \code{DS1} and \code{DS2}). See examples for more details.}
 }
+\value{
+An object of class \sQuote{Csnippet} which represents a model specification in C code.
+}
 \description{
 \code{spatPomp_Csnippet()} is used to provide snippets of \proglang{C}
 code that specify model components. It functions similarly to \code{Csnippet()} from

@@ -8,7 +8,7 @@
 ##'
 ##' @param object fitted model object
 ##'
-##' @return a numeric which is an estimated log likelihood
+##' @return a numeric which is the estimated log likelihood
 NULL
 
 ##' @name logLik-girfd_spatPomp

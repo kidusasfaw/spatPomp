@@ -19,6 +19,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 ##' @name plot-igirfd_spatPomp
 ##' @rdname plot
 ##' @aliases plot,igirfd_spatPomp-method
+##' @return a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
+##' the convergence record of running \code{igirf()} with respect to the likelihood and the parameters of the model.
 setMethod(
   "plot",
   signature=signature(x="igirfd_spatPomp"),
@@ -41,6 +43,8 @@ setMethod(
 ##' @name plot-spatPomp
 ##' @rdname plot
 ##' @aliases plot,spatPomp-method
+##' @return a \code{ggplot} plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
+##' the time series data over multiple spatial units via a tile-plot.
 ##' @export
 setMethod(
   "plot",

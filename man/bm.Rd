@@ -15,7 +15,8 @@ bm(U = 5, N = 100, delta_t = 0.1)
 whereas observations occur every one time unit}
 }
 \value{
-An object of class \sQuote{spatPomp}.
+An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+Brownian motion
 }
 \description{
 Generate a class \sQuote{spatPomp} object representing a \code{U}-dimensional

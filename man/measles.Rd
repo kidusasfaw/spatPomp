@@ -32,7 +32,7 @@ call to \code{measles} will be used as initial value parameters for all spatial 
 \item{I_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.}
 }
 \value{
-A spatPomp object.
+An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 }
 \description{
 Generate a spatPomp object for measles in the top-\code{U} most populous cities in England and Wales.

@@ -44,9 +44,9 @@
 ##' # Compare with the likelihood estimate from Particle Filter
 ##' pfd_bm <- pfilter(b, Np = 500)
 ##' logLik(pfd_bm)
-##' @return
-##' Upon successful completion, \code{abf} returns an object of class
-##' \sQuote{abfd_spatPomp}.
+##' @return Upon successful completion, \code{abf()} returns an object of class
+##' \sQuote{abfd_spatPomp} containing the algorithmic parameters used to run \code{abf()}
+##' and the estimated likelihood.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

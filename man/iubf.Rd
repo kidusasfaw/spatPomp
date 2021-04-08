@@ -69,8 +69,11 @@ This allows the user to pass information to the basic components outside of the 
 See \link[pomp:userdata]{?userdata} for information on how to use this facility.}
 }
 \value{
-Upon successful completion, \code{iubf} returns an object of class
-\sQuote{iubfd_spatPomp}.
+Upon successful completion, \code{iubf()} returns an object of class
+\sQuote{iubfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}. The
+algorithmic parameters used to run \code{iubf()} are also included.
 }
 \description{
 An algorithm for estimating the parameters of a spatiotemporal partially-observed Markov process.

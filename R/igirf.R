@@ -17,9 +17,11 @@
 ##' @param data an object of class \code{spatPomp} or \code{igirfd_spatPomp}
 ##' @param Ngirf the number of iterations of parameter-perturbed GIRF.
 ##'
-##' @return
-##' Upon successful completion, \code{igirf} returns an object of class
-##' \sQuote{igirfd_spatPomp}.
+##' @return Upon successful completion, \code{igirf()} returns an object of class
+##' \sQuote{igirfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+##' respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+##' attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}. The
+##' algorithmic parameters used to run \code{igirf()} are also included.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

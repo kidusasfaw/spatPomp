@@ -33,9 +33,9 @@
 ##' # Compare with the likelihood estimate from particle filter
 ##' pfd_bm <- pfilter(b, Np = 500)
 ##' logLik(pfd_bm)
-##' @return
-##' Upon successful completion, \code{girf} returns an object of class
-##' \sQuote{girfd_spatPomp}.
+##' @return Upon successful completion, \code{girf()} returns an object of class
+##' \sQuote{girfd_spatPomp} which contains the algorithmic parameters that were used to
+##' run \code{girf()} and the resulting log likelihood estimate.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:

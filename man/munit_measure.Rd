@@ -24,10 +24,12 @@
 \item{Np}{Number of particle replicates for which to get parameter sets}
 }
 \value{
-A matrix with the simulation
+An array with dimensions \code{dim(array.params)[1]} by \code{dim(x)[2]} by \code{length(unit)} by\code{length(time)}
+representing the moment-matched parameter set(s) corresponding to the variance of the measurements, \code{vc}, and the states, \code{x}.
 }
 \description{
-\code{munit_measure} returns a moment-matched parameter set given an empirically calculated variance.
+\code{munit_measure} returns a moment-matched parameter set given an empirically calculated measurement variance and latent states.
+This is used in \code{girf()} and \code{igirf()} when they are run with \code{kind='moment'}.
 }
 \examples{
 b <- bm(U=3)

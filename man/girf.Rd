@@ -59,8 +59,9 @@
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
 \value{
-Upon successful completion, \code{girf} returns an object of class
-\sQuote{girfd_spatPomp}.
+Upon successful completion, \code{girf()} returns an object of class
+\sQuote{girfd_spatPomp} which contains the algorithmic parameters that were used to
+run \code{girf()} and the resulting log likelihood estimate.
 }
 \description{
 An implementation of the algorithm of Park and Ionides (2020),

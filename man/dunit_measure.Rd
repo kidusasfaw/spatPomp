@@ -27,7 +27,8 @@
 \item{\dots}{additional arguments will be ignored}
 }
 \value{
-A matrix with the unit measurement density
+A class \sQuote{matrix} with the unit measurement density for spatial unit \code{unit}
+corresponding to the corresponding measurement in \code{y} and states in \code{x}.
 }
 \description{
 dunit_measure

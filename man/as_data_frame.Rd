@@ -13,6 +13,9 @@
 
 \item{...}{additional arguments to be passed to or from methods.}
 }
+\value{
+A \sQuote{data.frame} with columns for time, spatial unit and observations.
+}
 \description{
 \pkg{spatPomp} objects can be recast as data frames.
 }

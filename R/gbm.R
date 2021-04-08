@@ -10,7 +10,8 @@
 #' @param delta_t process simulations are performed every \code{delta_t} time units
 #' @param delta_obs observations occur every \code{delta_obs} time units
 #' @param IVP_values initial value parameters for the latent states
-#' @return An object of class \sQuote{spatPomp}.
+#' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
+#' geometric Brownian motion
 #' @examples
 #' g <- gbm(U=4, N=20)
 #' # See all the model specifications of the object

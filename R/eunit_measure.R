@@ -11,7 +11,9 @@
 #' @param log logical; should the density be returned on log scale?
 #' @param Np numeric; defaults to 1 and the user need not change this
 #' @param params parameters at which to evaluate the unit expectation
-#' @return A matrix with the unit expectation
+#' @return A class \sQuote{matrix} with the unit expected observation for spatial unit \code{unit}
+#' corresponding to the corresponding states in \code{x}.
+
 #' @examples
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]

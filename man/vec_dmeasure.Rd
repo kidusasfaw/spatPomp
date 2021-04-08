@@ -25,6 +25,11 @@
 
 \item{\dots}{additional parameters will be ignored}
 }
+\value{
+An array of dimension \code{length(unit_names(object))} by \code{dim(x)[2]} by \code{dim(x)[3]}
+representing each unit's measurement density assessed for each replicate in \code{x} for each observation time.
+}
 \description{
-Evaluate the unit measurement model density function for each unit
+Evaluate the unit measurement model density function for each unit.
+This method is used primarily as part of likelihood evaluation and parameter inference algorithms.
 }

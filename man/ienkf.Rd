@@ -51,7 +51,9 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 }
 \value{
 Upon successful completion, \code{ienkf} returns an object of class
-\sQuote{ienkfd_spatPomp}.
+\sQuote{ienkfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
+respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
+attribute) as well as a final parameter estimate, which can be accessed using the \code{coef()}.
 }
 \description{
 An implementation of a parameter estimation algorithm that uses
