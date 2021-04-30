@@ -8,6 +8,8 @@
 ##' @aliases city_data_UK
 ##' @rdname city_data_UK
 ##' @family datasets
+##' @return a \sQuote{data.frame} of the 40 largest cities and towns in the UK and Wales, their latitude, longitude and
+##' mean population during the measles pre-vaccine period.
 ##'
 ##' @references
 ##'

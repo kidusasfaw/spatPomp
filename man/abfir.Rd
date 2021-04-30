@@ -80,16 +80,12 @@ bm_nbhd <- function(object, time, unit) {
 }
 # Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
 abfird_bm <- abfir(b,
-                  Nrep = 50,
+                  Nrep = 2,
                   Np=20,
                   nbhd = bm_nbhd,
                   Ninter = length(unit_names(b)))
 # Get the likelihood estimate from ABFIR
 logLik(abfird_bm)
-
-# Compare with the likelihood estimate from a particle filter
-pfd_bm <- pfilter(b, Np = 500)
-logLik(pfd_bm)
 }
 \seealso{
 Other particle filter methods: 

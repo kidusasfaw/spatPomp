@@ -18,7 +18,7 @@ mcap(lp, parameter, confidence = 0.95, lambda = 1, Ngrid = 1000)
 \item{Ngrid}{the number of points to evaluate the smoothed profile.}
 }
 \value{
-mcap returns a list including the smoothed profile,
+\code{mcap()} returns a list including the smoothed profile,
 a quadratic approximation, and the constructed confidence interval.
 }
 \description{

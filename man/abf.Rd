@@ -81,14 +81,10 @@ bm_nbhd <- function(object, time, unit) {
 }
 
 # Run ABF specified number of Monte Carlo replicates and particles per replicate
-abfd_bm <- abf(b, Nrep=50, Np=10, nbhd=bm_nbhd)
+abfd_bm <- abf(b, Nrep=2, Np=10, nbhd=bm_nbhd)
 
 # Get the likelihood estimate from ABF
 logLik(abfd_bm)
-
-# Compare with the likelihood estimate from Particle Filter
-pfd_bm <- pfilter(b, Np = 500)
-logLik(pfd_bm)
 }
 \seealso{
 Other particle filter methods: 

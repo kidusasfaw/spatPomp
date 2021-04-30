@@ -20,6 +20,9 @@ pWarn_(...)
 
 \item{\dots}{message}
 }
+\value{
+No return value as this is simply a custom error function.
+}
 \description{
 Custom error function
 }

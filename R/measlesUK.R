@@ -8,7 +8,8 @@
 ##' @aliases measlesUK
 ##' @rdname measlesUK
 ##' @family datasets
-##'
+##' @return a \sQuote{data.frame} of the 40 largest cities and towns in the UK and Wales, their latitude, longitude and
+##' bi-weekly measles case counts, population and birthrates.
 ##' @references
 ##'
 ##' \dalziel2016

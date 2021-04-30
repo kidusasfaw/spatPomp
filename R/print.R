@@ -16,7 +16,8 @@ setGeneric(
 ##' @aliases print,spatPomp-method
 ##' @rdname print
 ##' @param x a \code{spatPomp} object
-##' @return An object of class \sQuote{spatPomp} is returned *invisibly*. The user is notified on the console only the class of the object. Use \code{spy()} to see model components.
+##' @return An object of class \sQuote{spatPomp} is returned *invisibly*. The user is notified on the console only the class of the object.
+##' @note Use \code{spy()} to see model components of \code{x} instead.
 ##' @export
 setMethod(
   "print",

@@ -3,6 +3,10 @@
 \name{measlesUK}
 \alias{measlesUK}
 \title{Measles in the United Kingdom}
+\value{
+a \sQuote{data.frame} of the 40 largest cities and towns in the UK and Wales, their latitude, longitude and
+bi-weekly measles case counts, population and birthrates.
+}
 \description{
 Measles case data from various cities and towns in England and Wales during the pre-vaccine era.
 }

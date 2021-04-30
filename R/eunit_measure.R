@@ -13,7 +13,6 @@
 #' @param params parameters at which to evaluate the unit expectation
 #' @return A class \sQuote{matrix} with the unit expected observation for spatial unit \code{unit}
 #' corresponding to the corresponding states in \code{x}.
-
 #' @examples
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]

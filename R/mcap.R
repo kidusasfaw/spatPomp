@@ -12,7 +12,7 @@
 ##' @param confidence the required level of the confidence interval.
 ##' @param lambda the loess parameter used to smooth the profile.
 ##' @param Ngrid the number of points to evaluate the smoothed profile.
-##' @return mcap returns a list including the smoothed profile,
+##' @return \code{mcap()} returns a list including the smoothed profile,
 ##' a quadratic approximation, and the constructed confidence interval.
 ##' @author Edward L. Ionides
 ##' @export

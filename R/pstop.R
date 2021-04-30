@@ -6,6 +6,7 @@
 ##'
 ##' @param fn name of function (will be enclosed in single quotes)
 ##' @param \dots message
+##' @return No return value as this is simply a custom error function.
 ##'
 pStop <- function (fn, ...) {
   fn <- as.character(fn)

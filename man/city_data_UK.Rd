@@ -3,6 +3,10 @@
 \name{city_data_UK}
 \alias{city_data_UK}
 \title{City data in the United Kingdom}
+\value{
+a \sQuote{data.frame} of the 40 largest cities and towns in the UK and Wales, their latitude, longitude and
+mean population during the measles pre-vaccine period.
+}
 \description{
 Population and birth information about cities in England and Wales during the measles pre-vaccine era.
 }
