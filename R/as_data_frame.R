@@ -43,8 +43,9 @@ setAs(
       colnames(dat) <- nm
       unit_stateobscovars <- c(unit_stateobscovars, from@unit_covarnames)
     }
-    # function to split unit name and unit index
-    unit_stateobscovars_pat <- paste0(paste("^",unit_stateobscovars,sep=""), collapse = "|")
+    # function to split unit name and unit index. pattern matching via:
+    # https://stackoverflow.com/questions/7124778/how-to-match-anything-up-until-this-sequence-of-characters-in-a-regular-expres
+    unit_stateobscovars_pat <- paste0(paste("^",unit_stateobscovars,"(?=[0-9])",sep=""), collapse = "|")
     get_unit_index_from_name <- function(name){
       stringr::str_split(name,unit_stateobscovars_pat)[[1]][2]
     }
@@ -66,7 +67,7 @@ setAs(
     to_final_select <- c(timename, unitname, unit_stateobscovars)
     gathered <- dat %>%
       tidyr::gather_(key="stateobscovars", val="val", to_gather) %>%
-      dplyr::mutate(ui = get_unit_index_from_name_v(.data$stateobscovars)) %>%
+      dplyr::mutate(ui = get_unit_index_from_name_v(.data$stateobscovars))%>%
       dplyr::mutate(!!unitname := unit_names(from)[as.integer(.data$ui)]) %>%
       dplyr::select(-.data$ui) %>%
       dplyr::arrange(!!!to_arrange)
