@@ -105,7 +105,7 @@ mif2_out <- mif2(lorenz4_test,
 test_that("IGIRF, IUBF and IEnKF produce estimates that are not far from IF2 for low dimensions", {
   expect_lt(abs(logLik(igirf_out) - logLik(mif2_out)), 20)
   expect_lt(abs(logLik(ienkf_out) - logLik(mif2_out)), 20)
-  expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 25)
+  expect_lt(abs(logLik(iubf_out) - logLik(mif2_out)), 30)
 })
 
 
