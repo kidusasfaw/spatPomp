@@ -10,7 +10,7 @@
 \usage{
 \S4method{plot}{igirfd_spatPomp}(x, params = names(coef(x)), ncol = 3)
 
-\S4method{plot}{spatPomp}(x, log = F)
+\S4method{plot}{spatPomp}(x, type = c("l", "h"), log = F, ...)
 }
 \arguments{
 \item{x}{a \code{spatPomp} object}
@@ -19,9 +19,17 @@
 
 \item{ncol}{the number of columns in the grid plot}
 
+\item{type}{for visualizing an object of class \code{spatPomp}, the user
+can obtain a grid of line plots by default (\code{'l'}) or a heat map by
+supplying argument \code{'h'}.}
+
 \item{log}{should the data be log-transformed before plotting?
 This helps in contexts where there are spikes that could take away
 attention from the dynamics illustrated by the rest of the data.}
+
+\item{...}{for visualizing an object of class \code{spatPomp}, the user
+can add arguments like \code{nrow} to specify the number of rows in the
+grid.}
 }
 \value{
 a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
