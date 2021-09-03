@@ -49,10 +49,9 @@ increasing order of time and unit name respectively, i.e. observation 1 in unit 
 
 \item{units}{when \code{data} is a \code{data.frame} this is the name of the column containing the spatial units.}
 
-\item{times}{the times at which observations are made.
+\item{times}{the sequence of observation times.
 \code{times} must indicate the column of observation times by name or index.
-The time vector must be numeric and non-decreasing.
-Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
+The time vector must be numeric and non-decreasing.}
 
 \item{covar}{An optional dataframe for supplying covariate information. If provided, there must be two
 columns that provide the observation time and the observation spatial unit with the same names and arrangement as the \code{data}.}
@@ -86,45 +85,45 @@ For more information, see the examples section below.}
 
 \item{rprocess}{simulator of the latent state process, specified using one of the \link[pomp:rprocess_spec]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, \link[pomp:rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
+For more information, see \link[pomp:rprocess_spec]{rprocess specification for the documentation on these plugins}.}
 
 \item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rmeasure=NULL} removes the measurement model simulator.
-For more information, see \link[pomp:rmeasure_spec]{?rmeasure_spec}.}
+For more information, see \link[pomp:rmeasure_spec]{rmeasure specification}.}
 
 \item{dprocess}{optional;
 specification of the probability density evaluation function of the unobserved state process.
 Setting \code{dprocess=NULL} removes the latent-state density evaluator.
-For more information, see \link[pomp:dprocess_spec]{?dprocess_spec}.}
+For more information, see \link[pomp:dprocess_spec]{dprocess specification}.}
 
 \item{dmeasure}{evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{dmeasure=NULL} removes the measurement density evaluator.
-For more information, see \link[pomp:dmeasure_spec]{?dmeasure_spec}.}
+For more information, see \link[pomp:dmeasure_spec]{dmeasure specification}.}
 
 \item{skeleton}{optional; the deterministic skeleton of the unobserved state process.
 Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
 Accordingly, this is supplied using either the \code{\link[pomp:skeleton_spec]{vectorfield}} or \code{\link[pomp:skeleton_spec]{map}} fnctions.
-For more information, see \link[pomp:skeleton_spec]{?skeleton_spec}.
+For more information, see \link[pomp:skeleton_spec]{skeleton specification}.
 Setting \code{skeleton=NULL} removes the deterministic skeleton.}
 
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[pomp:rinit_spec]{?rinit_spec}.}
+For more information, see \link[pomp:rinit_spec]{rinit specification}.}
 
 \item{rprior}{optional; prior distribution sampler, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
-For more information, see \link[pomp:prior_spec]{?prior_spec}.
+For more information, see \link[pomp:prior_spec]{prior specification}.
 Setting \code{rprior=NULL} removes the prior distribution sampler.}
 
 \item{dprior}{optional; prior distribution density evaluator, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
-For more information, see \link[pomp:prior_spec]{?prior_spec}.
+For more information, see \link[pomp:prior_spec]{prior specification}.
 Setting \code{dprior=NULL} resets the prior distribution to its default, which is a flat improper prior.}
 
 \item{unit_statenames}{The names of the components of the latent state. E.g. if the user is constructing an joint SIR model
 over many spatial units, \code{c('S','I','R')} would be passed.}
 
-\item{unit_accumvars}{a subset of the \code{unit_statenames} argument that are accumulator variables. See \link[=accumulators]{?pomp::accumulators}
-for more on the concept of \pkg{pomp} accumulators.}
+\item{unit_accumvars}{a subset of the \code{unit_statenames} argument that are accumulator variables. See \link[pomp]{accumulator variables}
+for more on the concept of \pkg{pomp} accumulator variables.}
 
 \item{shared_covarnames}{If \code{covar} is supplied, covariates that are shared must still be specified for each unit, i.e.,
 rows with equal values for the same time over all units must be supplied. However, if such covariates exists, supply the names
@@ -165,7 +164,7 @@ it is not used for any component specified using C snippets.
 Many algorithms for parameter estimation search an unconstrained space of parameters.
 When working with such an algorithm and a model for which the parameters are constrained, it can be useful to transform parameters.
 One should supply the \code{partrans} argument via a call to \code{\link[pomp]{parameter_trans}}.
-For more information, see \link[pomp:parameter_trans]{?parameter_trans}.
+For more information, see \link[pomp:parameter_trans]{parameter_trans}.
 Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.}
 
 \item{compile}{logical;

@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 TODO\.md$
+rules.mk
 Makefile
 ^(.+?)\.tar\.gz
