@@ -33,27 +33,25 @@ for(u in 1:U) {
 
 # compute the true log-likelihood
 rootQ = coef(bm_obj)["rho"]^dmat * coef(bm_obj)["sigma"]
-loglik_true <- pomp:::kalmanFilter(
-  t=1:N,
-  y=obs(bm_obj),
+loglik_true <- kalmanFilter(
+  bm_obj,
   X0=rinit(bm_obj),
   A= diag(length(unit_names(bm_obj))),
   Q=rootQ%*%rootQ,
   C=diag(1,nrow=nrow(dmat)),
   R=diag(coef(bm_obj)["tau"]^2, nrow=nrow(dmat))
-)$loglik
+)$logLik
 
 fun_to_optim <- function(cf){
   rootQ = cf["rho"]^dmat * cf["sigma"]
-  -pomp:::kalmanFilter(
-    t=1:N,
-    y=obs(bm_obj),
+  -kalmanFilter(
+    bm_obj,
     X0=rinit(bm_obj),
     A=diag(length(unit_names(bm_obj))),
     Q=rootQ%*%rootQ,
     C=diag(1,nrow=nrow(dmat)),
     R=diag(cf["tau"]^2, nrow=nrow(dmat))
-  )$loglik
+  )$logLik
 }
 mle <- optim(coef(bm_obj), fun_to_optim)
 kfll_mle <- -mle$value
