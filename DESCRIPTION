@@ -1,7 +1,7 @@
 Package: spatPomp
 Type: Package
 Title: Inference for Spatiotemporal Partially Observed Markov Processes
-Version: 0.27.0.0
+Version: 0.28.0.0
 Date: 2021-09-04
 Authors@R: c(person("Kidus", "Asfaw", email = "kasfaw@umich.edu", role = c("aut", "cre")),
              person("Aaron A.", "King", email = "kingaa@umich.edu", role = c("aut")),
@@ -17,7 +17,7 @@ LazyData: true
 Contact: kasfaw at umich dot edu
 Depends: pomp (>= 3.3), R(>= 4.0.0), methods
 LinkingTo: pomp
-Suggests: testthat, doParallel (>= 1.0.11), parallel,
+Suggests: testthat, doParallel (>= 1.0.11), parallel
 Imports: foreach, dplyr, tidyr, stringr, ggplot2, abind, rlang, magrittr
 Collate:
     'spatPomp_class.R'
