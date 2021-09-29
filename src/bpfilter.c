@@ -88,7 +88,12 @@ SEXP bpfilter_computations (SEXP x, SEXP params, SEXP Np,
   SET_STRING_ELT(retvalnames,2,mkChar("ancestry"));
   SET_NAMES(retval,retvalnames);
   SET_ELEMENT(retval,0,newstates);
-  SET_ELEMENT(retval,1,params);
+  if (!do_pr) {
+    SET_ELEMENT(retval,1,params);
+  } else {
+    SET_ELEMENT(retval,1,newparams);
+  }
+
 
   if (do_ta) {
     SET_ELEMENT(retval,2,anc);
