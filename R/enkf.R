@@ -91,10 +91,10 @@ setMethod(
   "enkf",
   signature=signature(data="spatPomp"),
   function (data,
-            Np,
-            ..., verbose = getOption("verbose", FALSE)) {
+    Np,
+    ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
-      sp <- enkf.internal(
+      enkf.internal(
         data,
         Np=Np,
         ...,
@@ -106,24 +106,24 @@ setMethod(
 )
 
 enkf.internal <- function (object,
-                           Np,
-                           ..., verbose) {
+  Np,
+  ..., verbose) {
 
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
-                unit_covarnames = object@unit_covarnames,
-                shared_covarnames = object@shared_covarnames,
-                runit_measure = object@runit_measure,
-                dunit_measure = object@dunit_measure,
-                eunit_measure = object@eunit_measure,
-                munit_measure = object@munit_measure,
-                vunit_measure = object@vunit_measure,
-                unit_names=object@unit_names,
-                unitname=object@unitname,
-                unit_statenames=object@unit_statenames,
-                unit_obsnames = object@unit_obsnames,
-                unit_accumvars = object@unit_accumvars)
+    unit_covarnames = object@unit_covarnames,
+    shared_covarnames = object@shared_covarnames,
+    runit_measure = object@runit_measure,
+    dunit_measure = object@dunit_measure,
+    eunit_measure = object@eunit_measure,
+    munit_measure = object@munit_measure,
+    vunit_measure = object@vunit_measure,
+    unit_names=object@unit_names,
+    unitname=object@unitname,
+    unit_statenames=object@unit_statenames,
+    unit_obsnames = object@unit_obsnames,
+    unit_accumvars = object@unit_accumvars)
 
   if (undefined(object@rprocess))
     pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
@@ -159,30 +159,28 @@ enkf.internal <- function (object,
     ## advance ensemble according to state process
     X <- rprocess(object,x0=X,t0=tt[k],times=tt[k+1],params=params)
 
-    # data
-    yk <- y[,k]
-    # ensemble of forecasts
+                                        # ensemble of forecasts
     Y <- tryCatch(
-      .Call('do_theta_to_e',
-            object=object,
-            X=X,
-            Np = as.integer(Np[1]),
-            times=tt[k+1],
-            params=params,
-            gnsi=TRUE),
+      .Call(do_theta_to_e,
+        object=object,
+        X=X,
+        Np = as.integer(Np[1]),
+        times=tt[k+1],
+        params=params,
+        gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
-    # variance of artificial noise (i.e. R) computed using vmeasure
+                                        # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
-      .Call('do_theta_to_v',
-            object=object,
-            X=X,
-            Np = as.integer(Np[1]),
-            times=tt[k+1],
-            params=params,
-            gnsi=TRUE),
+      .Call(do_theta_to_v,
+        object=object,
+        X=X,
+        Np = as.integer(Np[1]),
+        times=tt[k+1],
+        params=params,
+        gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
@@ -199,7 +197,7 @@ enkf.internal <- function (object,
     predMeans[,k] <- pm <- rowMeans(X) # prediction mean
     dim(Y) <- c(length(unit_names(object)), Np[1])
 
-    # forecast mean
+                                        # forecast mean
     ym <- rowMeans(Y)
     X <- X-pm
     Y <- Y-ym
@@ -219,22 +217,19 @@ enkf.internal <- function (object,
     forecast[,k] <- ym
   }
   new("enkfd_spatPomp", object,
-      paramMatrix=array(data=numeric(0),dim=c(0,0)),
-      Np=Np,
-      filter.mean=filterMeans,
-      pred.mean=predMeans,
-      forecast=forecast,
-      cond.logLik=condlogLik,
-      loglik=sum(condlogLik),
-      runit_measure = object@runit_measure,
-      dunit_measure = object@dunit_measure,
-      eunit_measure = object@eunit_measure,
-      vunit_measure = object@vunit_measure,
-      munit_measure = object@munit_measure,
-      unit_names=object@unit_names,
-      unit_statenames=object@unit_statenames,
-      unit_obsnames = object@unit_obsnames)
+    paramMatrix=array(data=numeric(0),dim=c(0,0)),
+    Np=Np,
+    filter.mean=filterMeans,
+    pred.mean=predMeans,
+    forecast=forecast,
+    cond.logLik=condlogLik,
+    loglik=sum(condlogLik),
+    runit_measure = object@runit_measure,
+    dunit_measure = object@dunit_measure,
+    eunit_measure = object@eunit_measure,
+    vunit_measure = object@vunit_measure,
+    munit_measure = object@munit_measure,
+    unit_names=object@unit_names,
+    unit_statenames=object@unit_statenames,
+    unit_obsnames = object@unit_obsnames)
 }
-
-
-

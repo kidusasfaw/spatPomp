@@ -1,7 +1,17 @@
 #include <R_ext/Rdynload.h>
 #include "spatPomp_defines.h"
 
+SEXP randwalk_perturbation_spatPomp(SEXP params, SEXP rw_sd) {
+  return(randwalk_perturbation_pomp(params, rw_sd));
+}
+
+SEXP lookup_in_table_spatPomp(SEXP covar, SEXP t) {
+  return(lookup_in_table_pomp(covar, t));
+}
+
 static const R_CallMethodDef callMethods[] = {
+  {"randwalk_perturbation_spatPomp", (DL_FUNC) &randwalk_perturbation_spatPomp,2},
+  {"lookup_in_table_spatPomp", (DL_FUNC) &lookup_in_table_spatPomp,2},
   {"do_dunit_measure", (DL_FUNC) &do_dunit_measure, 8},
   {"do_runit_measure", (DL_FUNC) &do_runit_measure, 6},
   {"abf_computations", (DL_FUNC) &abf_computations, 5},

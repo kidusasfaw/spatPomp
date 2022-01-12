@@ -84,11 +84,11 @@ setGeneric(
 ##' @rdname spatPomp
 ##' @export
 spatPomp <- function (data, units, times, covar, t0, ...,
-                      eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure,
-                      rprocess, rmeasure, dprocess, dmeasure, skeleton, rinit, rprior, dprior,
-                      unit_statenames, unit_accumvars, shared_covarnames, globals, paramnames, params,
-                      cdir,cfile, shlib.args, PACKAGE,
-                      partrans, compile=TRUE, verbose = getOption("verbose",FALSE)) {
+  eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure,
+  rprocess, rmeasure, dprocess, dmeasure, skeleton, rinit, rprior, dprior,
+  unit_statenames, unit_accumvars, shared_covarnames, globals, paramnames, params,
+  cdir,cfile, shlib.args, PACKAGE,
+  partrans, compile=TRUE, verbose = getOption("verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatPomp"),": ")
 
@@ -97,18 +97,18 @@ spatPomp <- function (data, units, times, covar, t0, ...,
 
   if (!inherits(data,what=c("data.frame","spatPomp")))
     pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
-          "class ",sQuote("spatPomp"),".")
+      "class ",sQuote("spatPomp"),".")
 
   ## return as quickly as possible if no work is to be done
   if (is(data,"spatPomp") && missing(times) && missing(t0) &&
-      missing(dunit_measure) && missing(eunit_measure) &&
-      missing(vunit_measure) && missing(munit_measure) &&
-      missing(runit_measure) &&
-      missing(rinit) && missing(rprocess) && missing(dprocess) &&
-      missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
-      missing(rprior) && missing(dprior) && missing(partrans) &&
-      missing(covar) && missing(params) && missing(unit_accumvars) &&
-      length(list(...)) == 0)
+        missing(dunit_measure) && missing(eunit_measure) &&
+        missing(vunit_measure) && missing(munit_measure) &&
+        missing(runit_measure) &&
+        missing(rinit) && missing(rprocess) && missing(dprocess) &&
+        missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
+        missing(rprior) && missing(dprior) && missing(partrans) &&
+        missing(covar) && missing(params) && missing(unit_accumvars) &&
+        length(list(...)) == 0)
     return(as(data,"spatPomp"))
 
   if (missing(times)) times <- NULL
@@ -131,14 +131,15 @@ spatPomp <- function (data, units, times, covar, t0, ...,
     error = function (e) stop(conditionMessage(e))
   )
 }
-# Takes care of case where times or units has been set to NULL
+
+## Takes care of case where times or units has been set to NULL
 setMethod(
   "construct_spatPomp",
   signature=signature(data="ANY", times="ANY", units="ANY"),
   definition = function (data, times, t0, ...) {
     stop(sQuote("times")," should be a single name identifying the column of data that represents",
-           " the observation times. ", sQuote("units"), " should be likewise for column that represents",
-           " the observation units.")
+      " the observation times. ", sQuote("units"), " should be likewise for column that represents",
+      " the observation units.")
   }
 )
 
@@ -146,11 +147,11 @@ setMethod(
   "construct_spatPomp",
   signature=signature(data="data.frame", times="character", units="character"),
   definition = function (data, times, units, t0, ...,
-                         rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
-                         partrans, params, covar, unit_accumvars, dunit_measure, eunit_measure,
-                         vunit_measure, munit_measure, runit_measure, unit_statenames,
-                         paramnames, shared_covarnames, PACKAGE, globals,
-                         cdir, cfile, shlib.args, compile, verbose) {
+    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    partrans, params, covar, unit_accumvars, dunit_measure, eunit_measure,
+    vunit_measure, munit_measure, runit_measure, unit_statenames,
+    paramnames, shared_covarnames, PACKAGE, globals,
+    cdir, cfile, shlib.args, compile, verbose) {
 
     if (anyDuplicated(names(data)))
       stop("names of data variables must be unique.")
@@ -162,27 +163,27 @@ setMethod(
 
     if (length(times) != 1 || tpos == 0L)
       stop(sQuote("times")," does not identify a single column of ",
-             sQuote("data")," by name.")
+        sQuote("data")," by name.")
     if (length(units) != 1 || upos == 0L)
       stop(sQuote("units")," does not identify a single column of ",
-             sQuote("data")," by name.")
+        sQuote("data")," by name.")
 
     timename <- times
     unitname <- units
 
-    # units slot contains unique units. unit_names is an "ordering" of units
+    ## units slot contains unique units. unit_names is an "ordering" of units
     unit_names <- unique(data[[upos]]); U <- length(unit_names)
 
-    # get observation types
+    ## get observation types
     unit_obsnames <- names(data)[-c(upos,tpos)]
     if(missing(unit_statenames)) unit_statenames <- as.character(NULL)
-    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),1:U)
+    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),seq_len(U))
     else {
       pomp_accumvars <- NULL
       unit_accumvars <- as.character(NULL)
     }
 
-    # if missing workhorses, set to default
+    ## if missing workhorses, set to default
     if (missing(rinit)) rinit <- NULL
     if (missing(rprocess) || is.null(rprocess)) {
       rprocess <- rproc_plugin()
@@ -206,16 +207,16 @@ setMethod(
 
     if (missing(params)) params <- numeric(0)
     if (is.list(params)) params <- unlist(params)
-    # Make data into a dataframe that pomp would expect
-    tmp <- 1:length(unit_names)
+    ## Make data into a dataframe that pomp would expect
+    tmp <- seq_along(unit_names)
     names(tmp) <- unit_names
     pomp_data <- data %>% dplyr::mutate(ui = tmp[match(data[,unitname], names(tmp))])
     pomp_data <- pomp_data %>% tidyr::gather(unit_obsnames, key = 'obsname', value = 'val') %>% dplyr::arrange_at(c(timename,'obsname','ui'))
     pomp_data <- pomp_data %>% dplyr::mutate(obsname = paste0(.data$obsname,.data$ui)) %>% dplyr::select(-upos) %>% dplyr::select(-.data$ui)
     pomp_data <- pomp_data %>% tidyr::spread(key = .data$obsname, value = .data$val)
     dat_col_order <- vector(length = U*length(unit_obsnames))
-    for(oti in seq(length(unit_obsnames))){
-      for(i in 1:U){
+    for(oti in seq_along(unit_obsnames)){
+      for(i in seq_len(U)){
         dat_col_order[(oti-1)*U + i] = paste0(unit_obsnames[oti], i)
       }
     }
@@ -224,11 +225,11 @@ setMethod(
       if(timename %in% names(covar)) tcovar <- timename
       else{
         stop(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
-        'time column of the observation data.frame')
+          'time column of the observation data.frame')
       }
     }
-    # make covariates into a dataframe that pomp would expect
-    unit_covarnames <- NULL # could get overwritten soon
+    ## make covariates into a dataframe that pomp would expect
+    unit_covarnames <- NULL ## could get overwritten soon
     if(missing(shared_covarnames)) shared_covarnames <- NULL
     if(!missing(covar)){
       upos_cov <- match(unitname, names(covar))
@@ -241,14 +242,14 @@ setMethod(
         cov_col_order <- c(cov_col_order, shared_covarnames)
       }
       if(length(unit_covarnames) > 0){
-        tmp <- 1:length(unit_names)
+        tmp <- seq_along(unit_names)
         names(tmp) <- unit_names
         pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
         pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
         pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(.data$covname,.data$ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-.data$ui)
         pomp_covar <- pomp_covar %>% tidyr::spread(key = .data$covname, value = .data$val)
         for(cn in unit_covarnames){
-          for(i in 1:U){
+          for(i in seq_len(U)){
             cov_col_order = c(cov_col_order, paste0(cn, i))
           }
         }
@@ -261,82 +262,82 @@ setMethod(
       pomp_covar <- pomp::covariate_table()
     }
 
-    # Get all names before call to pomp().
-    if(!missing(unit_statenames)) pomp_statenames <- paste0(rep(unit_statenames,each=U),1:U)
+    ## Get all names before call to pomp().
+    if(!missing(unit_statenames)) pomp_statenames <- paste0(rep(unit_statenames,each=U),seq_len(U))
     else pomp_statenames <- NULL
-    pomp_obsnames <- paste0(rep(unit_obsnames,each=U),1:U)
     if (!missing(covar)){
-      if(missing(shared_covarnames)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
+      if(missing(shared_covarnames)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
       else {
         if(length(unit_covarnames) == 0) pomp_covarnames <- shared_covarnames
-        else pomp_covarnames <- c(shared_covarnames, paste0(rep(unit_covarnames,each=U),1:U))
+        else pomp_covarnames <- c(shared_covarnames, paste0(rep(unit_covarnames,each=U),seq_len(U)))
       }
     }
     else pomp_covarnames <- NULL
     if (missing(paramnames)) paramnames <- NULL
     if (!missing(paramnames)) mparamnames <- paste("M_", paramnames, sep = "")
 
-    # We will always have a global giving us the number of spatial units
+    ## We will always have a global giving us the number of spatial units
     if(missing(globals)) globals <- Csnippet(paste0("const int U = ",length(unit_names),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int U = ",length(unit_names),";\n"),globals@text))
 
-    # create the pomp object
+    ## create the pomp object
     po <- pomp(data = pomp_data,
-               times=times,
-               t0 = t0,
-               rprocess = rprocess,
-               rmeasure = rmeasure,
-               dprocess = dprocess,
-               dmeasure = dmeasure,
-               skeleton = skeleton,
-               rinit = rinit,
-               statenames=pomp_statenames,
-               accumvars=pomp_accumvars,
-               covar = pomp_covar,
-               paramnames = paramnames,
-               globals = globals,
-               cdir = cdir,
-               cfile = cfile,
-               shlib.args = shlib.args,
-               partrans = partrans,
-               ...,
-               verbose=verbose
-    )
-
-    # Hitch the spatPomp components
-    hitches <- pomp::hitch(
-      eunit_measure=eunit_measure,
-      munit_measure=munit_measure,
-      vunit_measure=vunit_measure,
-      dunit_measure=dunit_measure,
-      runit_measure=runit_measure,
-      templates=eval(spatPomp_workhorse_templates),
-      obsnames = paste0(unit_obsnames,"1"),
-      statenames = paste0(unit_statenames,"1"),
-      paramnames=paramnames,
-      covarnames=pomp_covarnames,
-      PACKAGE=PACKAGE,
-      globals=globals,
-      cfile=cfile,
-      cdir=cdir,
-      shlib.args=shlib.args,
+      times=times,
+      t0 = t0,
+      rprocess = rprocess,
+      rmeasure = rmeasure,
+      dprocess = dprocess,
+      dmeasure = dmeasure,
+      skeleton = skeleton,
+      rinit = rinit,
+      statenames=pomp_statenames,
+      accumvars=pomp_accumvars,
+      covar = pomp_covar,
+      paramnames = paramnames,
+      globals = globals,
+      cdir = cdir,
+      cfile = cfile,
+      shlib.args = shlib.args,
+      partrans = partrans,
+      ...,
       verbose=verbose
     )
 
+    ## Hitch the spatPomp components
+    hitches <- pomp::hitch(
+                       eunit_measure=eunit_measure,
+                       munit_measure=munit_measure,
+                       vunit_measure=vunit_measure,
+                       dunit_measure=dunit_measure,
+                       runit_measure=runit_measure,
+                       templates=eval(spatPomp_workhorse_templates),
+                       obsnames = paste0(unit_obsnames,"1"),
+                       statenames = paste0(unit_statenames,"1"),
+                       paramnames=paramnames,
+                       mparamnames=mparamnames,
+                       covarnames=pomp_covarnames,
+                       PACKAGE=PACKAGE,
+                       globals=globals,
+                       cfile=cfile,
+                       cdir=cdir,
+                       shlib.args=shlib.args,
+                       verbose=verbose
+                     )
+
     pomp::solibs(po) <- hitches$lib
     new("spatPomp",po,
-        eunit_measure=hitches$funs$eunit_measure,
-        munit_measure=hitches$funs$munit_measure,
-        vunit_measure=hitches$funs$vunit_measure,
-        dunit_measure=hitches$funs$dunit_measure,
-        runit_measure=hitches$funs$runit_measure,
-        unit_names=unit_names,
-        unit_statenames=unit_statenames,
-        unit_accumvars=unit_accumvars,
-        unit_obsnames=unit_obsnames,
-        unitname=unitname,
-        unit_covarnames=as.character(unit_covarnames),
-        shared_covarnames=as.character(shared_covarnames))
+      eunit_measure=hitches$funs$eunit_measure,
+      munit_measure=hitches$funs$munit_measure,
+      vunit_measure=hitches$funs$vunit_measure,
+      dunit_measure=hitches$funs$dunit_measure,
+      runit_measure=hitches$funs$runit_measure,
+      unit_names=unit_names,
+      unit_statenames=unit_statenames,
+      unit_accumvars=unit_accumvars,
+      unit_obsnames=unit_obsnames,
+      unitname=unitname,
+      unit_covarnames=as.character(unit_covarnames),
+      shared_covarnames=as.character(shared_covarnames))
   }
 )
 
@@ -344,15 +345,15 @@ setMethod(
   "construct_spatPomp",
   signature=signature(data="spatPomp", times="NULL", units="NULL"),
   definition = function (data, times, units, t0, timename, unitname, ...,
-                         rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
-                         partrans, params, paramnames, unit_statenames, covar, shared_covarnames, unit_accumvars,
-                         dunit_measure, eunit_measure, vunit_measure, munit_measure, runit_measure,
-                         globals, verbose, PACKAGE, cfile, cdir, shlib.args) {
+    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    partrans, params, paramnames, unit_statenames, covar, shared_covarnames, unit_accumvars,
+    dunit_measure, eunit_measure, vunit_measure, munit_measure, runit_measure,
+    globals, verbose, PACKAGE, cfile, cdir, shlib.args) {
     times <- data@times
     unit_names <- data@unit_names; U <- length(unit_names)
     if(missing(unit_statenames)) unit_statenames <- data@unit_statenames
     if(length(unit_statenames) == 0) pomp_statenames <- NULL
-    else pomp_statenames <- paste0(rep(unit_statenames,each=U),1:U)
+    else pomp_statenames <- paste0(rep(unit_statenames,each=U),seq_len(U))
     unit_obsnames <- data@unit_obsnames
     if(missing(timename)) timename <- data@timename
     else timename <- as.character(timename)
@@ -366,7 +367,7 @@ setMethod(
       if(timename %in% names(covar)) tcovar <- timename
       else{
         stop(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
-                      'observation data')
+          'observation data')
       }
       upos_cov <- match(unitname, names(covar))
       tpos_cov <- match(tcovar, names(covar))
@@ -378,14 +379,14 @@ setMethod(
         cov_col_order <- c(cov_col_order, shared_covarnames)
       }
       if(length(unit_covarnames) > 0){
-        tmp <- 1:length(unit_names)
+        tmp <- seq_along(unit_names)
         names(tmp) <- unit_names
         pomp_covar <- covar %>% dplyr::mutate(ui = match(covar[,unitname], names(tmp)))
         pomp_covar <- pomp_covar %>% tidyr::gather(unit_covarnames, key = 'covname', value = 'val')
         pomp_covar <- pomp_covar %>% dplyr::mutate(covname = paste0(.data$covname,.data$ui)) %>% dplyr::select(-upos_cov) %>% dplyr::select(-.data$ui)
         pomp_covar <- pomp_covar %>% tidyr::spread(key = .data$covname, value = .data$val)
         for(cn in unit_covarnames){
-          for(i in 1:U){
+          for(i in seq_len(U)){
             cov_col_order = c(cov_col_order, paste0(cn, i))
           }
         }
@@ -418,58 +419,58 @@ setMethod(
     } else{
       if (!missing(params)) paramnames <- names(params)
     }
-    if (missing(unit_accumvars)) accumvars <- data@accumvars
-    .solibs <- data@solibs
+    if (missing(unit_accumvars)) unit_accumvars <- data@accumvars
 
-    # Get all names before call to hitch()
-    if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),1:U)
+    ## Get all names before call to hitch()
+    if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
     else  pomp_covarnames <- get_covariate_names(data@covar)
-    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),1:U)
+    if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),seq_len(U))
     else pomp_accumvars <- data@accumvars
     mparamnames <- paste("M_", paramnames, sep = "")
 
-    # We will always have a global giving us the number of spatial units
+    ## We will always have a global giving us the number of spatial units
     if(missing(globals)) globals <- Csnippet(paste0("const int U = ",length(unit_names),";\n"))
     else globals <- Csnippet(paste0(paste0("\nconst int U = ",length(unit_names),";\n"),globals@text))
     po <- pomp(data = data,
-               t0 = t0,
-               rprocess = rprocess,
-               rmeasure = rmeasure,
-               dprocess = dprocess,
-               dmeasure = dmeasure,
-               skeleton = skeleton,
-               rinit = rinit,
-               covar = pomp_covar,
-               statenames=pomp_statenames,
-               accumvars=pomp_accumvars,
-               paramnames = paramnames,
-               globals = globals,
-               cdir = cdir,
-               cfile = cfile,
-               shlib.args = shlib.args,
-               partrans = partrans,
-               ...,
-               verbose=verbose
+      t0 = t0,
+      rprocess = rprocess,
+      rmeasure = rmeasure,
+      dprocess = dprocess,
+      dmeasure = dmeasure,
+      skeleton = skeleton,
+      rinit = rinit,
+      covar = pomp_covar,
+      statenames=pomp_statenames,
+      accumvars=pomp_accumvars,
+      paramnames = paramnames,
+      globals = globals,
+      cdir = cdir,
+      cfile = cfile,
+      shlib.args = shlib.args,
+      partrans = partrans,
+      ...,
+      verbose=verbose
     )
 
     hitches <- pomp::hitch(
-      eunit_measure=eunit_measure,
-      munit_measure=munit_measure,
-      vunit_measure=vunit_measure,
-      dunit_measure=dunit_measure,
-      runit_measure=runit_measure,
-      templates=eval(spatPomp_workhorse_templates),
-      obsnames = paste0(unit_obsnames,"1"),
-      statenames = paste0(unit_statenames,"1"),
-      paramnames=paramnames,
-      covarnames=pomp_covarnames,
-      PACKAGE=PACKAGE,
-      globals=globals,
-      cfile=cfile,
-      cdir=cdir,
-      shlib.args=shlib.args,
-      verbose=verbose
-    )
+                       eunit_measure=eunit_measure,
+                       munit_measure=munit_measure,
+                       vunit_measure=vunit_measure,
+                       dunit_measure=dunit_measure,
+                       runit_measure=runit_measure,
+                       templates=eval(spatPomp_workhorse_templates),
+                       obsnames = paste0(unit_obsnames,"1"),
+                       statenames = paste0(unit_statenames,"1"),
+                       paramnames=paramnames,
+                       mparamnames=mparamnames,
+                       covarnames=pomp_covarnames,
+                       PACKAGE=PACKAGE,
+                       globals=globals,
+                       cfile=cfile,
+                       cdir=cdir,
+                       shlib.args=shlib.args,
+                       verbose=verbose
+                     )
     pomp::solibs(po) <- hitches$lib
     new(
       "spatPomp",

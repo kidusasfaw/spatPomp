@@ -36,7 +36,7 @@ setMethod(
     pompLoad(object)
     storage.mode(x) <- "double"
     storage.mode(params) <- "double"
-    out <- .Call('do_theta_to_v',
+    out <- .Call(do_theta_to_v,
           object=object,
           X=x,
           Np = as.integer(Np),

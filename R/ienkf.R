@@ -45,10 +45,10 @@ setClass(
   "ienkfd_spatPomp",
   contains="enkfd_spatPomp",
   slots=c(Nenkf = 'integer',
-          rw.sd = 'matrix',
-          cooling.type = 'character',
-          cooling.fraction.50 = 'numeric',
-          traces = 'matrix'
+    rw.sd = 'matrix',
+    cooling.type = 'character',
+    cooling.fraction.50 = 'numeric',
+    traces = 'matrix'
   )
 )
 
@@ -75,10 +75,10 @@ setMethod(
   "ienkf",
   signature=signature(data="spatPomp"),
   definition=function (data,
-                       Nenkf = 1, rw.sd,
-                       cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
-                       Np,
-                       ..., verbose = getOption("verbose", FALSE)) {
+    Nenkf = 1, rw.sd,
+    cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
+    Np,
+    ..., verbose = getOption("verbose", FALSE)) {
     tryCatch(
       ienkf.internal(
         data,
@@ -96,26 +96,26 @@ setMethod(
 )
 
 ienkf.internal <- function (object, Nenkf, rw.sd,
-                           cooling.type, cooling.fraction.50,
-                           Np,
-                           ..., verbose,
-                           .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
-                           .gnsi = TRUE) {
+  cooling.type, cooling.fraction.50,
+  Np,
+  ..., verbose,
+  .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
+  .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
-                unit_covarnames = object@unit_covarnames,
-                shared_covarnames = object@shared_covarnames,
-                runit_measure = object@runit_measure,
-                dunit_measure = object@dunit_measure,
-                eunit_measure = object@eunit_measure,
-                munit_measure = object@munit_measure,
-                vunit_measure = object@vunit_measure,
-                unit_names=object@unit_names,
-                unitname=object@unitname,
-                unit_statenames=object@unit_statenames,
-                unit_obsnames = object@unit_obsnames)
+    unit_covarnames = object@unit_covarnames,
+    shared_covarnames = object@shared_covarnames,
+    runit_measure = object@runit_measure,
+    dunit_measure = object@dunit_measure,
+    eunit_measure = object@eunit_measure,
+    munit_measure = object@munit_measure,
+    vunit_measure = object@vunit_measure,
+    unit_names=object@unit_names,
+    unitname=object@unitname,
+    unit_statenames=object@unit_statenames,
+    unit_obsnames = object@unit_obsnames)
 
   if (undefined(object@rprocess) || undefined(object@eunit_measure) || undefined(object@vunit_measure))
     pStop_(paste(sQuote(c("rprocess","eunit_measure","vunit_measure")),collapse=", ")," are needed basic components.")
@@ -132,13 +132,11 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
     start <- apply(.paramMatrix,1L,mean)
   }
 
-  ntimes <- length(time(object))
-
   if (is.null(Np)) {
     pStop_(sQuote("Np")," must be specified.")
   }  else if (!is.numeric(Np)) {
     pStop_(sQuote("Np"),
-           " must be a number, a vector of numbers, or a function.")
+      " must be a number, a vector of numbers, or a function.")
   }
 
   Np <- as.integer(Np)
@@ -150,8 +148,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   if (missing(cooling.fraction.50))
     pStop_(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
-      !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
-      cooling.fraction.50 > 1)
+        !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
+          cooling.fraction.50 > 1)
     pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
@@ -163,21 +161,21 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
 
   if (is.null(.paramMatrix)) {
     paramMatrix <- array(data=start,dim=c(length(start),Np),
-                         dimnames=list(variable=names(start),rep=NULL))
+      dimnames=list(variable=names(start),rep=NULL))
   } else {
     paramMatrix <- .paramMatrix
   }
 
   traces <- array(dim=c(Nenkf+1,length(start)+1),
-                  dimnames=list(iteration=seq.int(.ndone,.ndone+Nenkf),
-                                variable=c("loglik",names(start))))
+    dimnames=list(iteration=seq.int(.ndone,.ndone+Nenkf),
+      variable=c("loglik",names(start))))
   traces[1L,] <- c(NA,start)
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
 
   paramMatrix <- partrans(object,paramMatrix,dir="toEst",
-                          .gnsi=gnsi)
+    .gnsi=gnsi)
 
   ## iterate the filtering
   for (n in seq_len(Nenkf)) {
@@ -205,7 +203,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   }
 
   es@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",
-                              .gnsi=gnsi)
+    .gnsi=gnsi)
 
   new(
     "ienkfd_spatPomp",
@@ -222,8 +220,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
 ###################ienkf.filter()##################################
 ###################################################################
 ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
-                 verbose, .indices = integer(0),
-                 .gnsi = TRUE) {
+  verbose, .indices = integer(0),
+  .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
   gnsi <- as.logical(.gnsi)
@@ -234,7 +232,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   if (do_ta && length(.indices)!=Np)
     pStop_(sQuote(".indices")," has improper length.")
 
-  times <- tt <- time(object,t0=TRUE)
+  times <- time(object,t0=TRUE)
   t <- time(object)
   ntimes <- length(times)-1
 
@@ -246,49 +244,45 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   for (nt in seq_len(ntimes)) {
     ## perturb parameters
     pmag <- cooling.fn(nt,enkfiter)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation_spatPomp',params,pmag,PACKAGE = 'spatPomp')
+    params <- .Call(randwalk_perturbation_spatPomp,params,pmag)
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
 
     ## get initial states
     if (nt == 1L) {
       X <- rinit(object,params=tparams)
       xnames <- rownames(X)
-      tpnames <- rownames(tparams)
       pnames <- rownames(params)
     }
 
-    ######################ENKF FROM HERE ON DOWN #################
+######################ENKF FROM HERE ON DOWN #################
 
     ## advance ensemble according to state process
     X <- rprocess(object,x0=X,t0=times[nt],times=times[nt+1],params=tparams,.gnsi=gnsi)
 
-    # data
-    yk <- y[,nt]
-
-    # ensemble of forecasts
+                                        # ensemble of forecasts
     Y <- tryCatch(
-      .Call('do_theta_to_e',
-            object=object,
-            X=X,
-            Np = as.integer(Np),
-            times=times[nt+1],
-            params=tparams,
-            gnsi=TRUE),
+      .Call(do_theta_to_e,
+        object=object,
+        X=X,
+        Np = as.integer(Np),
+        times=times[nt+1],
+        params=tparams,
+        gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
     )
     Y <- Y[,,1]
 
-    # variance of artificial noise (i.e. R) computed using vmeasure
+                                        # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
-      .Call('do_theta_to_v',
-            object=object,
-            X=X,
-            Np = as.integer(Np[1]),
-            times=times[nt+1],
-            params=tparams,
-            gnsi=TRUE),
+      .Call(do_theta_to_v,
+        object=object,
+        X=X,
+        Np = as.integer(Np[1]),
+        times=times[nt+1],
+        params=tparams,
+        gnsi=TRUE),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
@@ -302,14 +296,14 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
       }
     )
 
-    # expand the state space
+                                        # expand the state space
     XT <- rbind(X[,,1],params)
     pm <- rowMeans(XT) # prediction mean
 
-    # forecast mean
+                                        # forecast mean
     ym <- rowMeans(Y)
 
-    # center prediction and forecast ensembles
+                                        # center prediction and forecast ensembles
     XT <- XT-pm
     Y <- Y-ym
 
@@ -325,7 +319,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
     loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
-    # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
+                                        # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
 
     ## compute mean at last timestep
     if (nt == ntimes) {
@@ -333,20 +327,20 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     }
   }
   new("enkfd_spatPomp",
-      object,
-      Np=Np,
-      cond.logLik=loglik,
-      loglik=sum(loglik),
-      indices=.indices,
-      paramMatrix=params,
-      runit_measure = object@runit_measure,
-      dunit_measure = object@dunit_measure,
-      eunit_measure = object@eunit_measure,
-      vunit_measure = object@vunit_measure,
-      munit_measure = object@munit_measure,
-      unit_names=object@unit_names,
-      unit_statenames=object@unit_statenames,
-      unit_obsnames = object@unit_obsnames)
+    object,
+    Np=Np,
+    cond.logLik=loglik,
+    loglik=sum(loglik),
+    indices=.indices,
+    paramMatrix=params,
+    runit_measure = object@runit_measure,
+    dunit_measure = object@dunit_measure,
+    eunit_measure = object@eunit_measure,
+    vunit_measure = object@vunit_measure,
+    munit_measure = object@munit_measure,
+    unit_names=object@unit_names,
+    unit_statenames=object@unit_statenames,
+    unit_obsnames = object@unit_obsnames)
 }
 
 
