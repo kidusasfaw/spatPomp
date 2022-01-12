@@ -419,7 +419,7 @@ setMethod(
     } else{
       if (!missing(params)) paramnames <- names(params)
     }
-    if (missing(unit_accumvars)) accumvars <- data@accumvars
+    if (missing(unit_accumvars)) unit_accumvars <- data@accumvars
 
     ## Get all names before call to hitch()
     if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
