@@ -21,10 +21,10 @@
 #' spy(l)
 #' @export
 lorenz <- function(U=5,
-                   N=100,
-                   delta_t=0.01,
-                   delta_obs=0.5,
-                   regular_params=c(F=8, sigma=1, tau=1)){
+  N=100,
+  delta_t=0.01,
+  delta_obs=0.5,
+  regular_params=c(F=8, sigma=1, tau=1)){
 
   if(U<3.5)stop("Please use U >= 4")
   lorenz_globals <- Csnippet(paste0("#define U ", U, "\n"))
@@ -32,7 +32,6 @@ lorenz <- function(U=5,
   lorenz_obs_names <- paste0("U",1:U)
   lorenz_data <- data.frame(time=rep((1:N)*delta_obs,U),
     unit=rep(lorenz_obs_names,each=N),Y=rep(NA,U*N),stringsAsFactors=F)
-  lorenz_state_names <- paste0("X",1:U)
 
   ## initial value parameters
   lorenz_IVPnames <- paste0(lorenz_unit_statenames,1:U,"_0")
@@ -130,23 +129,23 @@ lorenz <- function(U=5,
   ")
 
   lorenz <- spatPomp(lorenz_data,
-                 times="time",
-                 t0=0,
-                 units="unit",
-                 unit_statenames = lorenz_unit_statenames,
-                 rprocess=euler(lorenz_rprocess,delta.t=delta_t),
-                 skeleton=vectorfield(lorenz_skel),
-                 paramnames=lorenz_paramnames,
-                 globals=lorenz_globals,
-                 rmeasure=lorenz_rmeasure,
-                 dmeasure=lorenz_dmeasure,
-                 eunit_measure=lorenz_eunit_measure,
-                 munit_measure=lorenz_munit_measure,
-                 vunit_measure=lorenz_vunit_measure,
-                 dunit_measure=lorenz_dunit_measure,
-                 runit_measure=lorenz_runit_measure,
-                 partrans = parameter_trans(log = c("F", "sigma", "tau")),
-                 rinit=lorenz_rinit)
+    times="time",
+    t0=0,
+    units="unit",
+    unit_statenames = lorenz_unit_statenames,
+    rprocess=euler(lorenz_rprocess,delta.t=delta_t),
+    skeleton=vectorfield(lorenz_skel),
+    paramnames=lorenz_paramnames,
+    globals=lorenz_globals,
+    rmeasure=lorenz_rmeasure,
+    dmeasure=lorenz_dmeasure,
+    eunit_measure=lorenz_eunit_measure,
+    munit_measure=lorenz_munit_measure,
+    vunit_measure=lorenz_vunit_measure,
+    dunit_measure=lorenz_dunit_measure,
+    runit_measure=lorenz_runit_measure,
+    partrans = parameter_trans(log = c("F", "sigma", "tau")),
+    rinit=lorenz_rinit)
 
   ## We need a parameter vector. For now, we initialize the process at zero,
   ## with a small perturbation for state U.

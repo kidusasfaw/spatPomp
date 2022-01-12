@@ -39,20 +39,19 @@ setMethod(
   "simulate",
   signature=signature(object="spatPomp"),
   definition=function(object, nsim = 1, seed = NULL,
-                      format = c("spatPomps", "data.frame"),
-                      include.data = FALSE,...) {
+    format = c("spatPomps", "data.frame"),
+    include.data = FALSE,...) {
     format <- match.arg(format)
     if(format == 'spatPomps') sims <- pomp::simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format == 'data.frame') sims <- pomp::simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
-      unitname <- object@unitname
       unit_stateobs <- c(object@unit_obsnames, object@unit_statenames)
       unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
       get_unit_index_from_statename <- function(statename){
         stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
       }
       get_unit_index_from_statename_v <- Vectorize(get_unit_index_from_statename)
-      # convert to long format and output
+                                        # convert to long format and output
       to_gather <- colnames(sims)[3:length(colnames(sims))][!c(colnames(sims)[3:length(colnames(sims))]%in%object@shared_covarnames)] # all columns except time and .id
       to_select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
       to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
@@ -71,40 +70,40 @@ setMethod(
       return(gathered)
     }
     if(format=="spatPomps"){
-      # add back spatPomp components into a list of spatPomps
+                                        # add back spatPomp components into a list of spatPomps
       if(nsim > 1){
         sp.list <- vector(mode="list", length = nsim)
         for(i in 1:length(sims)){
           sp <- new("spatPomp",sims[[i]],
-                    unit_covarnames = object@unit_covarnames,
-                    shared_covarnames = object@shared_covarnames,
-                    runit_measure = object@runit_measure,
-                    dunit_measure = object@dunit_measure,
-                    eunit_measure = object@eunit_measure,
-                    munit_measure = object@munit_measure,
-                    vunit_measure = object@vunit_measure,
-                    unit_names=object@unit_names,
-                    unitname=object@unitname,
-                    unit_statenames=object@unit_statenames,
-                    unit_accumvars = object@unit_accumvars,
-                    unit_obsnames = object@unit_obsnames)
+            unit_covarnames = object@unit_covarnames,
+            shared_covarnames = object@shared_covarnames,
+            runit_measure = object@runit_measure,
+            dunit_measure = object@dunit_measure,
+            eunit_measure = object@eunit_measure,
+            munit_measure = object@munit_measure,
+            vunit_measure = object@vunit_measure,
+            unit_names=object@unit_names,
+            unitname=object@unitname,
+            unit_statenames=object@unit_statenames,
+            unit_accumvars = object@unit_accumvars,
+            unit_obsnames = object@unit_obsnames)
           sp.list[[i]] <- sp
         }
         return(sp.list)
       } else{
         sp <- new("spatPomp",sims,
-                  unit_covarnames = object@unit_covarnames,
-                  shared_covarnames = object@shared_covarnames,
-                  dunit_measure = object@dunit_measure,
-                  runit_measure = object@runit_measure,
-                  eunit_measure = object@eunit_measure,
-                  munit_measure = object@munit_measure,
-                  vunit_measure = object@vunit_measure,
-                  unit_names=object@unit_names,
-                  unitname=object@unitname,
-                  unit_statenames=object@unit_statenames,
-                  unit_accumvars = object@unit_accumvars,
-                  unit_obsnames = object@unit_obsnames)
+          unit_covarnames = object@unit_covarnames,
+          shared_covarnames = object@shared_covarnames,
+          dunit_measure = object@dunit_measure,
+          runit_measure = object@runit_measure,
+          eunit_measure = object@eunit_measure,
+          munit_measure = object@munit_measure,
+          vunit_measure = object@vunit_measure,
+          unit_names=object@unit_names,
+          unitname=object@unitname,
+          unit_statenames=object@unit_statenames,
+          unit_accumvars = object@unit_accumvars,
+          unit_obsnames = object@unit_obsnames)
         return(sp)
       }
     }

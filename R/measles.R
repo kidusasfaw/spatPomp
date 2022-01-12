@@ -66,9 +66,7 @@ measles <- function(U=6,dt=2/365,
   u <- split(measles_covar$births,measles_covar$city)
   v <- sapply(u,function(x){c(rep(NA,birth_lag),x[1:(length(x)-birth_lag)])})
   measles_covar$lag_birthrate <- as.vector(v[,cities])*26
-  measles_covar$births<- NULL
-  measles_covarnames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
-  measles_unit_covarnames <- c("pop","lag_birthrate")
+  measles_covar$births <- NULL
 
   # Distance between two points on a sphere radius R
   # Adapted from geosphere package, which has been cited in the package

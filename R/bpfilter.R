@@ -111,6 +111,7 @@ setMethod(
      verbose=verbose)
   }
 )
+
 bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("bpfilter"),": ")
   verbose <- as.logical(verbose)
@@ -134,7 +135,6 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
   gnsi <- as.logical(.gnsi)
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
-  nunits <- length(unit_names(object))
   nblocks <- length(block_list)
 
   if (length(Np)==1)
@@ -152,7 +152,6 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
            sQuote("Np"),"!",call.=FALSE)
   }
   if (NCOL(params)==1) {
-    one.par <- TRUE
     coef(object) <- params
     params <- as.matrix(params)
   }
@@ -163,7 +162,6 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
   ## returns an nvars by nsim matrix
   init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
   statenames <- rownames(init.x)
-  nvars <- nrow(init.x)
   x <- init.x
 
   # create array to store weights per particle per block_list

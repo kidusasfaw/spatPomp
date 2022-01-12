@@ -38,7 +38,7 @@ setAs(
     }
     if (length(cnames) > 0) {
       nm <- c(colnames(dat),cnames)
-      y <- .Call('lookup_in_table_spatPomp',from@covar,from@times,PACKAGE = 'spatPomp')
+      y <- .Call(lookup_in_table_spatPomp,from@covar,from@times)
       dat <- cbind(dat,t(y))
       colnames(dat) <- nm
       unit_stateobscovars <- c(unit_stateobscovars, from@unit_covarnames)
@@ -62,7 +62,6 @@ setAs(
       to_gather <- no_time_colnames[-shared_covnames_ix]
     else
       to_gather <- no_time_colnames
-    to_select <- c(timename, unitname, "stateobscovars", "val")
     to_arrange <- rlang::syms(c(timename, unitname, "stateobscovars"))
     to_final_select <- c(timename, unitname, unit_stateobscovars)
     gathered <- dat %>%
