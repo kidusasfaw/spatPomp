@@ -59,6 +59,7 @@ setClass(
     Np="integer",
     paramMatrix="array",
     cond.loglik="numeric",
+    block.cond.loglik="array",
     loglik="numeric"
   ),
   prototype=prototype(
@@ -66,6 +67,7 @@ setClass(
     Np=as.integer(NA),
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
     cond.loglik=as.double(NA),
+    block.cond.loglik=array(data=numeric(0),dim=c(0,0)),
     loglik=as.double(NA)
   )
 )
@@ -167,6 +169,7 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
   # create array to store weights per particle per block_list
   weights <- array(data = numeric(0), dim=c(nblocks,Np[1L]))
   loglik <- rep(NA,ntimes)
+  block.loglik <- matrix(NA,nblocks,ntimes)
 
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
@@ -236,7 +239,9 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
       params <- xx$params
     }
     log_weights = max_log_d + log(weights)
-    loglik[nt] = sum(apply(log_weights,1,logmeanexp))
+    block_log_weights <- apply(log_weights,1,logmeanexp)
+    loglik[nt] = sum(block_log_weights)
+    block.loglik[,nt] <- block_log_weights 
   } ## end of main loop
   new(
     "bpfilterd_spatPomp",
@@ -244,6 +249,7 @@ bpfilter.internal <- function (object, Np, block_list,...,verbose, .gnsi = TRUE)
     block_list=block_list,
     Np=as.integer(Np),
     cond.loglik=loglik,
+    block.cond.loglik=block.loglik,
     loglik=sum(loglik)
   )
 }
