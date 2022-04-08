@@ -12,5 +12,5 @@ To install the package from this GitHub source, type the following command into 
 `devtools::install_github('kidusasfaw/spatPomp')`
 
 ## Documentation
-Details on the motivation and use of this package can be found in Asfaw et al. (2020) (In preparation).
+Details on the motivation and use of this package can be found in Asfaw et al. (2021) (https://arxiv.org/abs/2101.01157).
 
