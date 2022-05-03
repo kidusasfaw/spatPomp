@@ -45,28 +45,26 @@ setMethod(
     if(format == 'spatPomps') sims <- pomp::simulate(pomp(object), format = 'pomps', nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format == 'data.frame') sims <- pomp::simulate(pomp(object), format = format, nsim = nsim, include.data = include.data, seed = seed, ...)
     if(format=="data.frame"){
-      unit_stateobs <- c(object@unit_obsnames, object@unit_statenames)
-      unit_stateobs_pat <- paste0(paste("^",unit_stateobs,sep=""), collapse = "|")
       get_unit_index_from_statename <- function(statename){
-        stringr::str_split(statename,unit_stateobs_pat)[[1]][2]
+        stringr::str_extract(statename, "[[:digit:]]+$")
       }
-      get_unit_index_from_statename_v <- Vectorize(get_unit_index_from_statename)
-                                        # convert to long format and output
+      get_state_obs_type_from_statename <- function(statename) {
+        gsub("[[:digit:]]+$", "", statename)
+      }
+      # convert to long format and output
       to_gather <- colnames(sims)[3:length(colnames(sims))][!c(colnames(sims)[3:length(colnames(sims))]%in%object@shared_covarnames)] # all columns except time and .id
       to_select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
       to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
       gathered <- sims %>%
-        tidyr::gather_(key="stateobs", val="val", to_gather) %>%
-        dplyr::mutate(ui = get_unit_index_from_statename_v(.data$stateobs))%>%
-        dplyr::mutate(unit = unit_names(object)[as.integer(.data$ui)]) %>%
+        tidyr::pivot_longer(cols = all_of(to_gather), names_to = "stateobs", values_to = "val") %>%
+        dplyr::mutate(ui = get_unit_index_from_statename(stateobs)) %>%
+        dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
         dplyr::select(to_select) %>%
-        dplyr::arrange_(.dots = to_arrange)
-      stateobstype <- sapply(gathered$stateobs,FUN=function(x) stringr::str_extract(x,unit_stateobs_pat))
-      gathered$stateobstype <- stateobstype
-      gathered <- gathered %>%
-        dplyr::select(-.data$stateobs) %>%
-        tidyr::spread(key = stateobstype, value = .data$val) %>%
-        dplyr::rename(unitname = .data$unit)
+        dplyr::arrange(dplyr::across(to_arrange)) %>%
+        dplyr::mutate(stateobstype = get_state_obs_type_from_statename(stateobs)) %>%
+        dplyr::select(-stateobs) %>%
+        tidyr::pivot_wider(names_from = stateobstype, values_from = 'val') %>%
+        dplyr::rename(unitname = unit)
       return(gathered)
     }
     if(format=="spatPomps"){
