@@ -1,4 +1,5 @@
 REXE = R --vanilla
+RSESSION = emacs -f R
 RCMD = $(REXE) CMD
 RCMD_ALT = R --no-save --no-restore CMD
 RSCRIPT = Rscript --vanilla
@@ -37,6 +38,7 @@ dist revdeps session tests check xcheck xxcheck: export R_KEEP_PKG_SOURCE=yes
 revdeps xcheck tests: export R_PROFILE_USER=$(CURDIR)/.Rprofile
 revdeps session xxcheck htmldocs vignettes data tests manual: export R_LIBS=$(CURDIR)/library
 session: export R_DEFAULT_PACKAGES=datasets,utils,grDevices,graphics,stats,methods,tidyverse,$(PKG)
+xcheck: export _R_CHECK_DEPENDS_ONLY_=true
 
 inst/include/%.h: src/%.h
 	$(CP) $^ $@
@@ -48,7 +50,7 @@ htmlhelp: install news manual
 	rsync --delete --exclude=aliases.rds --exclude=paths.rds --exclude=$(PKG).rdb --exclude=$(PKG).rdx --exclude=macros -a library/$(PKG)/help/ $(MANUALDIR)/help
 	(cd $(MANUALDIR); (cat links.ed && echo w ) | ed - html/00Index.html)
 	$(CP) $(PKG).pdf $(MANUALDIR)
-	$(CP) ../www/assets/R.css $(MANUALDIR)/html
+	$(CP) $(REPODIR)/assets/R.css $(MANUALDIR)/html
 
 vignettes: manual install
 	$(MAKE)	-C www/vignettes
@@ -64,12 +66,15 @@ library/$(PKG)/html/NEWS.html: inst/NEWS.Rd
 	$(RCMD) Rdconv -t html $^ -o $@
 
 session: install
-	exec $(REXE)
+	exec $(RSESSION)
+
+debug: RSESSION = R -d gdb
+debug: session
 
 revdeps: install
 	mkdir -p library check
 	$(REXE) -e "pkgs <- strsplit('$(REVDEPS)',' ')[[1]]; download.packages(pkgs,destdir='library',repos='https://mirrors.nics.utk.edu/cran/')"
-	$(RCMD) check --library=library -o check library/*.tar.gz
+	$(RCMD) check --as-cran --library=library -o check library/*.tar.gz
 
 roxy: $(SOURCE) headers
 	$(REXE) -e "pkgbuild::compile_dll(); devtools::document(roclets=c('rd','collate','namespace'))"
@@ -88,7 +93,6 @@ publish: dist manual htmlhelp
 	$(RSCRIPT) -e 'drat::insertPackage("$(PKGVERS).tar.gz",repodir="$(REPODIR)",action="prune")'
 	-$(RSCRIPT) -e 'drat::insertPackage("$(PKGVERS).tgz",repodir="$(REPODIR)",action="prune")'
 	-$(RSCRIPT) -e 'drat::insertPackage("$(PKGVERS).zip",repodir="$(REPODIR)",action="prune")'
-	$(CP) $(PKG).pdf $(MANUALDIR)
 
 rhub:
 	$(REXE) -e 'library(rhub); check_for_cran(); check_on_windows(); check(platform="macos-highsierra-release-cran");'
