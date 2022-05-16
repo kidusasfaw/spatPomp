@@ -1,4 +1,7 @@
 # The `spatPomp` package
+
+[![R-CMD-check](https://github.com/kingaa/spatPomp/actions/workflows/r-cmd-check.yml/badge.svg)](https://github.com/kingaa/spatPomp/actions/workflows/r-cmd-check.yml)[![test-coverage](https://github.com/kingaa/spatPomp/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/kingaa/spatPomp/actions/workflows/test-coverage.yml)
+
 ## What is this package?
 The `spatPomp` package provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models.
 To do so, it relies on and extends a number of facilities that the `pomp` package provides for inference on time series data using partially-observed Markov process (POMP) models.
