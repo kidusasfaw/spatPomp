@@ -109,8 +109,8 @@ measles <- function(U=6,dt=2/365,
   v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
   if(fixed_ivps && shared_ivps){
-    ivps_C <- paste0("const double ", c("S_0_shared", "E_0_shared", "I_0_shared"), " = ", c(S_0, I_0, E_0), collapse= ";\n")
-    other_ivps_C <- paste0("const double ", c("S1_0", "E1_0", "I1_0"), " = ", c(S_0, I_0, E_0), collapse= ";\n")
+    ivps_C <- paste0("const double ", c("S_0_shared", "E_0_shared", "I_0_shared"), " = ", c(S_0, E_0, I_0), collapse= ";\n")
+    other_ivps_C <- paste0("const double ", c("S1_0", "E1_0", "I1_0"), " = ", c(S_0, E_0, I_0), collapse= ";\n")
     ivps_C <- paste("const int fixed_ivps = 1", "const int shared_ivps = 1", ivps_C,other_ivps_C, ";", sep = ";\n")
   }
   measles_globals <- Csnippet(

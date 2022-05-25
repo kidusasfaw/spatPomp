@@ -180,7 +180,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
   loglik <- rep(NA,ntimes)
   block.loglik <- matrix(NA,nblocks,ntimes)
   if (save_states) {
-    saved.states <- setNames(vector(mode="list",length=ntimes), time(mod3))
+    saved.states <- setNames(vector(mode="list",length=ntimes), time(object))
   } else {
     saved.states <- list()
   }
