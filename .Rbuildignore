@@ -4,3 +4,4 @@ TODO\.md$
 rules.mk
 Makefile
 ^(.+?)\.tar\.gz
+\.github
