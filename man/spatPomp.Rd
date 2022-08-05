@@ -83,40 +83,40 @@ The \code{unit} variable is pre-defined, which allows the user to specify differ
 Only Csnippets are accepted. The Csnippet should assign the scalar measurement density to the pre-defined which corresponds to the name of the observation for each unit (e.g. \code{cases} for the measles spatPomp example).
 For more information, see the examples section below.}
 
-\item{rprocess}{simulator of the latent state process, specified using one of the \link[pomp:rprocess_spec]{rprocess plugins}.
+\item{rprocess}{simulator of the latent state process, specified using one of the \link[pomp:rprocess specification]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, see \link[pomp:rprocess_spec]{rprocess specification for the documentation on these plugins}.}
+For more information, see \link[pomp:rprocess specification]{rprocess specification for the documentation on these plugins}.}
 
 \item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rmeasure=NULL} removes the measurement model simulator.
-For more information, see \link[pomp:rmeasure_spec]{rmeasure specification}.}
+For more information, see \link[pomp:rmeasure specification]{rmeasure specification}.}
 
 \item{dprocess}{optional;
 specification of the probability density evaluation function of the unobserved state process.
 Setting \code{dprocess=NULL} removes the latent-state density evaluator.
-For more information, see \link[pomp:dprocess_spec]{dprocess specification}.}
+For more information, see \link[pomp:dprocess specification]{dprocess specification}.}
 
 \item{dmeasure}{evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{dmeasure=NULL} removes the measurement density evaluator.
-For more information, see \link[pomp:dmeasure_spec]{dmeasure specification}.}
+For more information, see \link[pomp:dmeasure specification]{dmeasure specification}.}
 
 \item{skeleton}{optional; the deterministic skeleton of the unobserved state process.
 Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
-Accordingly, this is supplied using either the \code{\link[pomp:skeleton_spec]{vectorfield}} or \code{\link[pomp:skeleton_spec]{map}} fnctions.
-For more information, see \link[pomp:skeleton_spec]{skeleton specification}.
+Accordingly, this is supplied using either the \code{\link[pomp:skeleton specification]{vectorfield}} or \code{\link[pomp:skeleton specification]{map}} fnctions.
+For more information, see \link[pomp:skeleton specification]{skeleton specification}.
 Setting \code{skeleton=NULL} removes the deterministic skeleton.}
 
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[pomp:rinit_spec]{rinit specification}.}
+For more information, see \link[pomp:rinit specification]{rinit specification}.}
 
 \item{rprior}{optional; prior distribution sampler, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
-For more information, see \link[pomp:prior_spec]{prior specification}.
+For more information, see \link[pomp:prior specification]{prior specification}.
 Setting \code{rprior=NULL} removes the prior distribution sampler.}
 
 \item{dprior}{optional; prior distribution density evaluator, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
-For more information, see \link[pomp:prior_spec]{prior specification}.
+For more information, see \link[pomp:prior specification]{prior specification}.
 Setting \code{dprior=NULL} resets the prior distribution to its default, which is a flat improper prior.}
 
 \item{unit_statenames}{The names of the components of the latent state. E.g. if the user is constructing an joint SIR model

@@ -56,7 +56,7 @@ setMethod(
       to_select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
       to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
       gathered <- sims %>%
-        tidyr::pivot_longer(cols = all_of(to_gather), names_to = "stateobs", values_to = "val") %>%
+        tidyr::pivot_longer(cols = tidyr::all_of(to_gather), names_to = "stateobs", values_to = "val") %>%
         dplyr::mutate(ui = get_unit_index_from_statename(stateobs)) %>%
         dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
         dplyr::select(to_select) %>%

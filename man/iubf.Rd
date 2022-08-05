@@ -47,12 +47,7 @@ See below for some examples.
 The perturbations that are applied are normally distributed with the specified s.d.
 If parameter transformations have been supplied, then the perturbations are applied on the transformed (estimation) scale.}
 
-\item{cooling.type}{specifications for the cooling schedule,
-i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
-\code{cooling.type} specifies the nature of the cooling schedule.
-See below (under \dQuote{Specifying the perturbations}) for more detail.}
-
-\item{cooling.fraction.50}{specifications for the cooling schedule,
+\item{cooling.type, cooling.fraction.50}{specifications for the cooling schedule,
 i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}

@@ -8,7 +8,6 @@ measles(
   U = 6,
   dt = 2/365,
   fixed_ivps = TRUE,
-  shared_ivps = TRUE,
   S_0 = 0.032,
   E_0 = 5e-05,
   I_0 = 4e-05
@@ -19,17 +18,15 @@ measles(
 
 \item{dt}{a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.}
 
-\item{fixed_ivps}{a logical. If \code{TRUE} initial value parameters will be declared in the \code{globals} slot and
+\item{fixed_ivps}{a logical. If \code{TRUE} initial value parameters will be
+declared in the \code{globals} slot, shared for each unit, and
 will not be part of the parameter vector.}
 
-\item{shared_ivps}{a logical. If \code{TRUE} and \code{fixed_ivps=TRUE} the values of \code{S_0}, \code{E_0} and \code{I_0} in the
-call to \code{measles} will be used as initial value parameters for all spatial units.}
+\item{S_0}{a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.}
 
-\item{S_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.}
+\item{E_0}{a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.}
 
-\item{E_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.}
-
-\item{I_0}{a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.}
+\item{I_0}{a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.}
 }
 \value{
 An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
