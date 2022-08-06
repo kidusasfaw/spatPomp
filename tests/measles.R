@@ -35,3 +35,10 @@ set.seed(1)
 m2_pf <- pfilter(m2,Np=20,params=m2_params)
 logLik(m2_pf)
 
+##
+## Note: the measles skeleton is correct only when there is no cohort effect,
+## i.e., cohort=0.
+##
+
+
+

@@ -1,0 +1,15 @@
+
+The unit tests here are designed to check whether code is broken.
+
+Longer tests are needed to check whether the code provides numerically correct answers in situations where these are available. Some of those validations are carried out by Asfaw et al (2021). This code, and other examples, may be added later as package vignettes.
+
+For code-generated code (e.g., R code which writes C functions that are then compiled) covr checks whether the generating code was run, but not whether the generated code was run. In the context of spatPomp, full testing necessitates running all the compiled code.
+
+A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+
+22-08-06: covr ran on an intel Mac but threw a compiler error on an M1 Mac. Not sure yet if this is an architecture thing, or some other issue.
+
+References
+
+Asfaw, K., Park, J., Ho, A., King, A. A., and Ionides, E. L. (2021). Partially observed Markov processes with spatial structure via the R package spatPomp. (https://arxiv.org/abs/2101.01157)
+
