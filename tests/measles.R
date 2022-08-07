@@ -3,6 +3,8 @@
 library(spatPomp)
 set.seed(1)
 
+extended <- FALSE
+
 ## a default measles model with fixed shared initial value parameters (IVPs)
 ## compiled into the object
 
@@ -35,10 +37,36 @@ set.seed(1)
 m2_pf <- pfilter(m2,Np=20,params=m2_params)
 logLik(m2_pf)
 
+
+if(extended){
+
 ##
 ## Note: the measles skeleton is correct only when there is no cohort effect,
 ## i.e., cohort=0.
 ##
 
+## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
 
+## 22-08-07 this code fails (at least on my M1 Mac). more checking needed.
 
+m3_params <- m_params
+m3_params["cohort"] <- 0
+m3_igirf_lookahead <- 1
+m3_igirf_ninter <- 2
+m3_igirf_np <- 5
+m3_igirf_nguide <- 5
+m3_igirf_ngirf <- 2
+m3_igirf_out <- igirf(m, Ngirf = m3_igirf_ngirf,
+  params=m3_params,
+  rw.sd=rw.sd(R0=0.02,amplitude=0.02,gamma=0.02,sigma=0.02,mu=0.02,sigmaSE=0.02,rho=0.02,psi=0.02,g=0.02,iota=0.02),
+  cooling.type = "geometric",
+  cooling.fraction.50 = 0.5,
+  Np=m3_igirf_np,
+  Ninter = m3_igirf_ninter,
+  lookahead = m3_igirf_lookahead,
+  Nguide = m3_igirf_nguide,
+  kind = 'moment',
+  verbose = FALSE
+)
+
+}

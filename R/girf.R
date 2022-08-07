@@ -10,7 +10,7 @@
 ##'
 ##'
 ##' @inheritParams abf
-##' @param Ninter the number of intermediate resampling time points.
+##' @param Ninter the number of intermediate resampling time points. By default, this is set equal to the number of units.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
 ##' @param kind One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.
