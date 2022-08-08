@@ -17,21 +17,24 @@
 ##' @param tol If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.
 ##'
 ##' @examples
+##' # This is a quick demonstration. Larger Monte Carlo effort is needed for
+##' # useful results.
+##' #
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=3, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Run GIRF
 ##' girfd_bm <- girf(b,
-##'                  Np = 100,
+##'                  Np = 10,
 ##'                  Ninter = length(unit_names(b)),
 ##'                  lookahead = 1,
-##'                  Nguide = 50
+##'                  Nguide = 10
 ##' )
 ##' # Get the likelihood estimate from GIRF
 ##' logLik(girfd_bm)
 ##'
 ##' # Compare with the likelihood estimate from particle filter
-##' pfd_bm <- pfilter(b, Np = 500)
+##' pfd_bm <- pfilter(b, Np = 10)
 ##' logLik(pfd_bm)
 ##' @return Upon successful completion, \code{girf()} returns an object of class
 ##' \sQuote{girfd_spatPomp} which contains the algorithmic parameters that were used to

@@ -3,27 +3,25 @@
 library(spatPomp)
 set.seed(1)
 
-extended <- FALSE
-
 ## a default measles model with fixed shared initial value parameters (IVPs)
 ## compiled into the object
 
 m_U <- 2 
-m <- measles(U=m_U)
+m_model <- measles(U=m_U)
 
-range(time(m))
+range(time(m_model))
 
-m <- window(m,1950,1955)
+m <- window(m_model,1950,1955)
 
 m_params <- c(R0=56.8,amplitude=0.554,gamma=30.4,sigma=28.9,mu=0.02,sigmaSE=0.02,rho=0.488,psi=0.116,g=100,alpha=1,iota=0,cohort=0.1)
 
-m_pf <- pfilter(m,Np=20,params=m_params)
+m_pf <- pfilter(m_model,Np=20,params=m_params)
 logLik(m_pf)
 
 ## setting IVPs
 
-m2 <- measles(U=m_U,fixed_ivps=FALSE)
-m2 <- window(m2,1950,1955)
+m2_model <- measles(U=m_U,fixed_ivps=FALSE)
+m2_model <- window(m2_model,1950,1955)
 
 m2_shared_params <- c(R0=56.8,amplitude=0.554,gamma=30.4,sigma=28.9,mu=0.02,sigmaSE=0.02,rho=0.488,psi=0.116,g=100,alpha=1,iota=0,cohort=0.1)
 m2_unit_ivp_names <- c('S','E','I')
@@ -34,11 +32,8 @@ names(m2_ivps) <- m2_ivp_names
 m2_params <- c(m2_shared_params,m2_ivps)
 
 set.seed(1)
-m2_pf <- pfilter(m2,Np=20,params=m2_params)
+m2_pf <- pfilter(m2_model,Np=20,params=m2_params)
 logLik(m2_pf)
-
-
-if(extended){
 
 ##
 ## Note: the measles skeleton is correct only when there is no cohort effect,
@@ -47,8 +42,6 @@ if(extended){
 
 ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
 
-## 22-08-07 this code fails (at least on my M1 Mac). more checking needed.
-
 m3_params <- m_params
 m3_params["cohort"] <- 0
 m3_igirf_lookahead <- 1
@@ -56,9 +49,10 @@ m3_igirf_ninter <- 2
 m3_igirf_np <- 5
 m3_igirf_nguide <- 5
 m3_igirf_ngirf <- 2
-m3_igirf_out <- igirf(m, Ngirf = m3_igirf_ngirf,
+
+m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
   params=m3_params,
-  rw.sd=rw.sd(R0=0.02,amplitude=0.02,gamma=0.02,sigma=0.02,mu=0.02,sigmaSE=0.02,rho=0.02,psi=0.02,g=0.02,iota=0.02),
+  rw.sd=rw.sd(g=0.02),
   cooling.type = "geometric",
   cooling.fraction.50 = 0.5,
   Np=m3_igirf_np,
@@ -68,5 +62,6 @@ m3_igirf_out <- igirf(m, Ngirf = m3_igirf_ngirf,
   kind = 'moment',
   verbose = FALSE
 )
+logLik(m3_igirf_out)
 
-}
+

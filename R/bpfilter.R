@@ -24,15 +24,15 @@
 ##'
 ##' @examples
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=6, N=10)
+##' b <- bm(U=4, N=2)
 ##'
 ##' # Run BPF with the specified number of units per block
-##' bpfilterd_b1 <- bpfilter(b, Np = 100, block_size = 2)
+##' bpfilterd_b1 <- bpfilter(b, Np = 10, block_size = 2)
 ##'
 ##' # Run BPF with the specified partition
 ##' bpfilterd_b2 <- bpfilter(b,
-##'                          Np = 20,
-##'                          block_list = list(c(1,2), c(3,4), c(5,6)))
+##'                          Np = 10,
+##'                          block_list = list(c(1,2),c(3,4)) )
 ##'
 ##' # Get a likelihood estimate
 ##' logLik(bpfilterd_b2)

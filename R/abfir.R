@@ -21,7 +21,7 @@
 ##' @inheritParams pomp::pfilter
 ##' @examples
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=3, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Create a neighborhood function mapping a point in space-time
 ##' # to a list of ``neighboring points" in space-time
@@ -35,7 +35,7 @@
 ##' # Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
 ##' abfird_bm <- abfir(b,
 ##'                   Nrep = 2,
-##'                   Np=20,
+##'                   Np=10,
 ##'                   nbhd = bm_nbhd,
 ##'                   Ninter = length(unit_names(b)))
 ##' # Get the likelihood estimate from ABFIR

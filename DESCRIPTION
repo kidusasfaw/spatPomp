@@ -2,7 +2,7 @@ Package: spatPomp
 Type: Package
 Title: Inference for Spatiotemporal Partially Observed Markov Processes
 Version: 0.30.0.0
-Date: 2022-08-04
+Date: 2022-08-08
 Authors@R: c(person("Kidus", "Asfaw", email = "kidusasfaw1990@gmail.com", role = c("aut")),
              person("Aaron A.", "King", email = "kingaa@umich.edu", role = c("aut")),
              person("Edward", "Ionides", email = "ionides@umich.edu", role = c("cre","aut")),
@@ -46,7 +46,6 @@ Collate:
     'iubf.R'
     'loglik.R'
     'lorenz.R'
-    'mcap.R'
     'measles.R'
     'measlesUK.R'
     'munit_measure.R'

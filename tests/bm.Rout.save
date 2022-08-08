@@ -19,13 +19,6 @@ Type 'q()' to quit R.
 
 > library(spatPomp)
 Loading required package: pomp
-
-Attaching package: ‘spatPomp’
-
-The following object is masked from ‘package:pomp’:
-
-    mcap
-
 > set.seed(2)
 > 
 > b_U <- 3

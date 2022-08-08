@@ -73,7 +73,7 @@ i.e., the manner and rate with which the intensity of the parameter perturbation
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{Ninter}{the number of intermediate resampling time points.}
+\item{Ninter}{the number of intermediate resampling time points. By default, this is set equal to the number of units.}
 
 \item{lookahead}{The number of future observations included in the guide function.}
 

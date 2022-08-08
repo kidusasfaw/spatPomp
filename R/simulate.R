@@ -17,9 +17,9 @@
 ##' @importFrom utils data
 ##' @examples
 ##' # Get a spatPomp object
-##' b <- bm(U=5, N=10)
-##' # Get 10 simulations from same model as data.frame
-##' sims <- simulate(b, nsim=10, format='data.frame')
+##' b <- bm(U=2, N=5)
+##' # Get 2 simulations from same model as data.frame
+##' sims <- simulate(b, nsim=2, format='data.frame')
 NULL
 
 setGeneric(

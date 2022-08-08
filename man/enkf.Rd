@@ -31,13 +31,14 @@ This is useful if the measurement model varies with the state.
 }
 \examples{
 # Create a simulation of a Brownian motion
-b <- bm(U=6, N=10)
+b <- bm(U=2, N=5)
 
 # Run EnKF
-enkfd_bm <- enkf(b, Np = 100)
+enkfd_bm <- enkf(b, Np = 20)
 
 # Get a likelihood estimate
 logLik(enkfd_bm)
+
 }
 \references{
 \Evensen1994

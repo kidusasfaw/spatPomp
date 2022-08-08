@@ -23,7 +23,7 @@
 ##' @param verbose logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.
 ##' @examples
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=3, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Create a neighborhood function mapping a point in space-time
 ##' # to a list of neighboring points in space-time
