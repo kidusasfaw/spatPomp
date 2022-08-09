@@ -30,6 +30,8 @@ This function is generalized to allow for an measurement covariance matrix that 
 This is useful if the measurement model varies with the state.
 }
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 # Create a simulation of a Brownian motion
 b <- bm(U=2, N=5)
 
@@ -38,7 +40,7 @@ enkfd_bm <- enkf(b, Np = 20)
 
 # Get a likelihood estimate
 logLik(enkfd_bm)
-
+}
 }
 \references{
 \Evensen1994

@@ -16,9 +16,8 @@
 ##' @param kind One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.
 ##' @param tol If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.
 ##'
-##' @examples
-##' # This is a quick demonstration. Larger Monte Carlo effort is needed for
-##' # useful results.
+##' @examples Complete examples are provided in the package tests
+##' \dontrun{
 ##' #
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=2, N=5)
@@ -36,6 +35,7 @@
 ##' # Compare with the likelihood estimate from particle filter
 ##' pfd_bm <- pfilter(b, Np = 10)
 ##' logLik(pfd_bm)
+##' }
 ##' @return Upon successful completion, \code{girf()} returns an object of class
 ##' \sQuote{girfd_spatPomp} which contains the algorithmic parameters that were used to
 ##' run \code{girf()} and the resulting log likelihood estimate.

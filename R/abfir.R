@@ -19,7 +19,8 @@
 ##' @inheritParams abf
 ##' @inheritParams girf
 ##' @inheritParams pomp::pfilter
-##' @examples
+##' @examples Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=2, N=5)
 ##'
@@ -32,7 +33,8 @@
 ##'   }
 ##'   return(nbhd_list)
 ##' }
-##' # Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
+##' # Run ABFIR with specified number of Monte Carlo replicates and particles
+##' # per replicate
 ##' abfird_bm <- abfir(b,
 ##'                   Nrep = 2,
 ##'                   Np=10,
@@ -40,6 +42,7 @@
 ##'                   Ninter = length(unit_names(b)))
 ##' # Get the likelihood estimate from ABFIR
 ##' logLik(abfird_bm)
+##' }
 ##' @return Upon successful completion, \code{abfir()} returns an object of class
 ##' \sQuote{abfird_spatPomp} containing the algorithmic parameters used to run \code{abfir()}
 ##' and the estimated likelihood.

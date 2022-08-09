@@ -12,10 +12,12 @@
 #' @param IVP_values initial value parameters for the latent states
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' geometric Brownian motion
-#' @examples
+#' @examples Complete examples are provided in the package tests
+#' \dontrun{
 #' g <- gbm(U=4, N=20)
 #' # See all the model specifications of the object
 #' spy(g)
+#' }
 #' @export
 gbm <- function(U=5, N=100, delta_t=0.1, IVP_values = 1, delta_obs = 1){
   dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))

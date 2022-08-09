@@ -22,7 +22,8 @@
 ##' block is saved.
 ##' @param \dots If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##'
-##' @examples
+##' @examples Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=4, N=2)
 ##'
@@ -36,6 +37,7 @@
 ##'
 ##' # Get a likelihood estimate
 ##' logLik(bpfilterd_b2)
+##' }
 ##'
 ##' @return Upon successful completion, \code{bpfilter()} returns an object of class
 ##' \sQuote{bpfilterd_spatPomp} containing the algorithmic parameters used to run \code{bpfilter()}

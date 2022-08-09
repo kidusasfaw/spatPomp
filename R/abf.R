@@ -21,7 +21,8 @@
 ##' @param Nrep The number of bootstrap replicates for the adapted simulations.
 ##' @param tol If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.
 ##' @param verbose logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.
-##' @examples
+##' @examples Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=2, N=5)
 ##'
@@ -40,6 +41,7 @@
 ##'
 ##' # Get the likelihood estimate from ABF
 ##' logLik(abfd_bm)
+##' }
 ##' @return Upon successful completion, \code{abf()} returns an object of class
 ##' \sQuote{abfd_spatPomp} containing the algorithmic parameters used to run \code{abf()}
 ##' and the estimated likelihood.
@@ -89,7 +91,7 @@ setClass(
 
 abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("abf"),": ")
-  p_object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=FALSE)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
     shared_covarnames = object@shared_covarnames,
@@ -104,8 +106,7 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
     unit_obsnames = object@unit_obsnames,
     unit_accumvars = object@unit_accumvars)
   params <- coef(object)
-  verbose = FALSE
-  pompLoad(object,verbose)
+  pompLoad(object,verbose=FALSE)
   gnsi <- as.logical(.gnsi)
   if (length(params)==0)
     stop(ep,sQuote("params")," must be specified",call.=FALSE)
@@ -226,8 +227,7 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
     x <- xx$states
     params <- xx$params
 
-    if (verbose && (nt%%5==0))
-      cat("abf timestep",nt,"of",ntimes,"finished\n")
+    if (verbose && (nt%%5==0)) cat("abf timestep",nt,"of",ntimes,"finished\n")
   } ## end of main loop
 
                                         # compute locally combined pred. weights for each time, unit and particle
@@ -254,7 +254,7 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
   }
   log_wm_times_wp_avg <- apply(log_loc_comb_pred_weights + log_cond_densities, c(1,3), FUN = logmeanexp)
   log_wp_avg <- apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
-  pompUnload(object,verbose=verbose)
+  pompUnload(object,verbose=FALSE)
   new(
     "adapted_replicate",
     log_wm_times_wp_avg = log_wm_times_wp_avg,

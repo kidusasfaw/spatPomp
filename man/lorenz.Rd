@@ -35,9 +35,12 @@ Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz
 with time increment \code{delta_t}.
 }
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 l <- lorenz(U=5, N=100, delta_t=0.01, delta_obs=1)
 # See all the model specifications of the object
 spy(l)
+}
 }
 \references{
 \lorenz96

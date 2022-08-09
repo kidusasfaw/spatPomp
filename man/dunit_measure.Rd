@@ -35,6 +35,8 @@ dunit_measure
 \code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state
 }
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]
 rownames(s) -> rn
@@ -44,5 +46,6 @@ p <- coef(b); names(p) -> rnp
 dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 dunit_measure(b, y=o, x=s, unit=1, time=1, params=p)
+}
 
 }

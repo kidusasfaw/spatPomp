@@ -64,6 +64,8 @@ The following methods are available for such an object:
 }
 
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 # Create a simulation of a Brownian motion
 b <- bm(U=4, N=2)
 
@@ -77,6 +79,7 @@ bpfilterd_b2 <- bpfilter(b,
 
 # Get a likelihood estimate
 logLik(bpfilterd_b2)
+}
 
 }
 \references{

@@ -66,6 +66,8 @@ the data under the model. }
 }
 
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 # Create a simulation of a Brownian motion
 b <- bm(U=2, N=5)
 
@@ -78,7 +80,8 @@ bm_nbhd <- function(object, time, unit) {
   }
   return(nbhd_list)
 }
-# Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
+# Run ABFIR with specified number of Monte Carlo replicates and particles
+# per replicate
 abfird_bm <- abfir(b,
                   Nrep = 2,
                   Np=10,
@@ -86,6 +89,7 @@ abfird_bm <- abfir(b,
                   Ninter = length(unit_names(b)))
 # Get the likelihood estimate from ABFIR
 logLik(abfird_bm)
+}
 }
 \seealso{
 Other particle filter methods: 

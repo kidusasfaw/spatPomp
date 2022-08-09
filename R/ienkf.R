@@ -103,7 +103,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
-  p_object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=FALSE)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
     shared_covarnames = object@shared_covarnames,
@@ -171,8 +171,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       variable=c("loglik",names(start))))
   traces[1L,] <- c(NA,start)
 
-  pompLoad(object,verbose=verbose)
-  on.exit(pompUnload(object,verbose=verbose))
+  pompLoad(object,verbose=FALSE)
+  on.exit(pompUnload(object,verbose=FALSE))
 
   paramMatrix <- partrans(object,paramMatrix,dir="toEst",
     .gnsi=gnsi)

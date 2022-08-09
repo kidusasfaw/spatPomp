@@ -36,10 +36,12 @@
 #'    process.\cr
 #' 4. Bringing all the data and model components together to form a
 #'    spatPomp object via a call to spatPomp().
-#' @examples
+#' @examples Complete examples are provided in the package tests
+#' \dontrun{
 #' m <- measles(U = 5)
 #' # See all the model specifications of the object
 #' spy(m)
+#' }
 #' @export
 
 # NOTE: As indicated in the Note section of the documentation, this

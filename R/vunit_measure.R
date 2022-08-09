@@ -12,7 +12,8 @@
 #' @param params parameters at which to evaluate the unit variance
 #' @return A matrix with the unit measurement variance implied by the state, \code{x},
 #' and the parameter set \code{params} for unit \code{unit}.
-#' @examples
+#' @examples Complete examples are provided in the package tests
+#' \dontrun{
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]
 #' rownames(s) -> rn
@@ -22,6 +23,7 @@
 #' dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 #' o <- obs(b)[,1,drop=FALSE]
 #' vunit_measure(b, x=s, unit=2, time=1, params=p)
+#' }
 NULL
 setGeneric("vunit_measure", function(object,...)standardGeneric("vunit_measure"))
 

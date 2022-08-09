@@ -57,9 +57,12 @@ instead useful as an example.\cr
    spatPomp object via a call to spatPomp().
 }
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 m <- measles(U = 5)
 # See all the model specifications of the object
 spy(m)
+}
 }
 \references{
 \geosphere

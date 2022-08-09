@@ -90,11 +90,11 @@ iubf_ubf <- function (object,
   params <- params[,resample_ixs_raw]
 
   i <- 1
-  mcopts <- list(set.seed=TRUE)
+#  mcopts <- list(set.seed=TRUE)
 
   for(nt in seq_len(ntimes)){
     if(verbose && nt %in% c(1,2)) {
-      cat("working on observation times ", nt, " in iteration ", abfiter, "at time ", format(Sys.time(),"%X"), "\n")
+      cat("working on observation times ", nt, " in iteration ", abfiter, "\n")
     }
     pmag <- cooling.fn(nt,abfiter)$alpha*rw.sd[,nt]
     params <- .Call(randwalk_perturbation_spatPomp,params,pmag)
@@ -111,8 +111,7 @@ iubf_ubf <- function (object,
     else X <- X[,resample_ixs]
 
     jobs_by_param <- foreach::foreach(i=1:Nparam,
-      .packages=c("pomp","spatPomp"),
-      .options.multicore=mcopts
+      .packages=c("pomp","spatPomp")
     ) %dopar%
       {
         jobX <- rprocess(object,
@@ -213,7 +212,7 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nubf, prop, rw.
   .gnsi = TRUE, ...) {
 
   verbose <- as.logical(verbose)
-  p_object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=FALSE)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
     shared_covarnames = object@shared_covarnames,

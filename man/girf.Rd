@@ -76,8 +76,8 @@ The following methods are available for such an object:
 }
 
 \examples{
-# This is a quick demonstration. Larger Monte Carlo effort is needed for
-# useful results.
+Complete examples are provided in the package tests
+\dontrun{
 #
 # Create a simulation of a Brownian motion
 b <- bm(U=2, N=5)
@@ -95,6 +95,7 @@ logLik(girfd_bm)
 # Compare with the likelihood estimate from particle filter
 pfd_bm <- pfilter(b, Np = 10)
 logLik(pfd_bm)
+}
 }
 \references{
 \park2020

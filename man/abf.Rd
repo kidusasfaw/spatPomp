@@ -67,6 +67,8 @@ The following methods are available for such an object:
 }
 
 \examples{
+Complete examples are provided in the package tests
+\dontrun{
 # Create a simulation of a Brownian motion
 b <- bm(U=2, N=5)
 
@@ -85,6 +87,7 @@ abfd_bm <- abf(b, Nrep=2, Np=10, nbhd=bm_nbhd)
 
 # Get the likelihood estimate from ABF
 logLik(abfd_bm)
+}
 }
 \seealso{
 Other particle filter methods: 
