@@ -23,10 +23,11 @@ Loading required package: pomp
 > 
 > 
 > # For CRAN tests, need to limit to two cores
-> doParallel::registerDoParallel(2)
+> # For covr, needs to be single core (https://github.com/r-lib/covr/issues/227)
+> doParallel::registerDoParallel(1)
 > doRNG::registerDoRNG(2)
 > 
-> b_model <- bm(U=2,N=4) 
+> b_model <- bm(U=2,N=2) 
 > 
 > ## ------------------------------------------------------------
 > ## The bm model provides a simple example to test other methods.
@@ -39,7 +40,7 @@ Loading required package: pomp
 > 
 > b_pf <- pfilter(b_model,Np=10)
 > paste("bm pfilter loglik: ",logLik(b_pf))
-[1] "bm pfilter loglik:  -14.0358648405769"
+[1] "bm pfilter loglik:  -10.1282113760823"
 > 
 > ##
 > ## abf tested on bm. abf uses parallelization, so we also test that
@@ -54,16 +55,26 @@ Loading required package: pomp
 > b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
 Loading required package: foreach
 Loading required package: rngtools
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
 > paste("bm abf loglik: ",logLik(b_abf))
-[1] "bm abf loglik:  -14.7001534538574"
+[1] "bm abf loglik:  -11.1757157432268"
 > 
 > ##
 > ## abfir tested on bm
 > ##
 > 
 > b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
 > paste("bm abfir loglik: ",logLik(b_abfir))
-[1] "bm abfir loglik:  -15.5879090820249"
+[1] "bm abfir loglik:  -12.3567049828198"
 > 
 > ##
 > ## bpfilter tested on bm
@@ -71,7 +82,7 @@ Loading required package: rngtools
 > 
 > b_bpfilter <- bpfilter(b_model, Np = 10, block_size = 1)
 > paste("bm bpfilter loglik: ",logLik(b_bpfilter))
-[1] "bm bpfilter loglik:  -15.476099342684"
+[1] "bm bpfilter loglik:  -11.5481233976632"
 > 
 > ##
 > ## enkf tested on bm
@@ -79,7 +90,7 @@ Loading required package: rngtools
 > 
 > b_enkf <- enkf(b_model, Np = 10)
 > paste("bm enkf loglik: ",logLik(b_enkf))
-[1] "bm enkf loglik:  -14.4533379206696"
+[1] "bm enkf loglik:  -11.881051345158"
 > 
 > ##
 > ## girf tested on bm, both moment and bootstrap methods
@@ -88,12 +99,12 @@ Loading required package: rngtools
 > b_girf_mom <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
 +   kind = 'moment')
 > paste("bm girf loglik, moment guide: ",logLik(b_girf_mom))
-[1] "bm girf loglik, moment guide:  -14.9987685378592"
+[1] "bm girf loglik, moment guide:  -10.2333104944903"
 > 
 > b_girf_boot <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
 +   kind = 'bootstrap')
 > paste("bm girf loglik, bootstrap guide: ",logLik(b_girf_boot))
-[1] "bm girf loglik, bootstrap guide:  -15.320662556085"
+[1] "bm girf loglik, bootstrap guide:  -11.5486938817766"
 > 
 > 
 > ## ------------------------------------------------------------
@@ -124,7 +135,7 @@ Loading required package: rngtools
 +   verbose = FALSE
 + )
 > paste("bm igirf loglik, geometric cooling, verbose=F: ",logLik(b_igirf_geom))
-[1] "bm igirf loglik, geometric cooling, verbose=F:  -13.5351690308575"
+[1] "bm igirf loglik, geometric cooling, verbose=F:  -9.88324157650622"
 > 
 > b_igirf_hyp <- igirf(b_model,
 +   Ngirf = 2,
@@ -138,14 +149,14 @@ Loading required package: rngtools
 +   kind = 'moment',
 +   verbose = TRUE
 + )
-igirf iteration 1 of 2 completed with likelihood  -14.31912 
-         rho        sigma          tau         X1_0         X2_0 
- 0.395980992  1.000000000  1.000000000 -0.007067913  0.000000000 
-igirf iteration 2 of 2 completed with likelihood  -14.70962 
-       rho      sigma        tau       X1_0       X2_0 
-0.39361865 1.00000000 1.00000000 0.00705597 0.00000000 
+igirf iteration 1 of 2 completed with likelihood  -10.42318 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.39838507  1.00000000  1.00000000 -0.01712033  0.00000000 
+igirf iteration 2 of 2 completed with likelihood  -10.53336 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.39909286  1.00000000  1.00000000 -0.02358064  0.00000000 
 > paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",logLik(b_igirf_hyp))
-[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -14.7096218296229"
+[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.5333644677903"
 > 
 > ##
 > ## ienkf on bm, with geometric and hyperbolic cooling
@@ -160,7 +171,7 @@ igirf iteration 2 of 2 completed with likelihood  -14.70962
 +   verbose=FALSE
 + )
 > paste("bm ienkf loglik, geometric cooling, verbose=F: ",logLik(b_ienkf_geom))
-[1] "bm ienkf loglik, geometric cooling, verbose=F:  -15.3518735966635"
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -8.67225329403963"
 > 
 > b_ienkf_hyp <- ienkf(b_model,
 +   Nenkf=2,
@@ -173,7 +184,7 @@ igirf iteration 2 of 2 completed with likelihood  -14.70962
 ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
 > paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",logLik(b_ienkf_hyp))
-[1] "bm ienkf loglik, hypoerbolic cooling, verbose=T:  -14.6596797444488"
+[1] "bm ienkf loglik, hypoerbolic cooling, verbose=T:  -12.3584256637116"
 > 
 > ##
 > ## iubf on bm, with geometric and hyperbolic cooling
@@ -190,8 +201,17 @@ ienkf iteration 2 of 2 completed
 +   cooling.fraction.50 = 0.5,
 +   verbose=FALSE
 + )
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+3: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+4: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
 > paste("bm iubf loglik, geometric cooling, verbose=F: ",logLik(b_iubf_geom))
-[1] "bm iubf loglik, geometric cooling, verbose=F:  -16.6277239344351"
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -12.0533421069986"
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
@@ -206,16 +226,25 @@ ienkf iteration 2 of 2 completed
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -14.97885 
+iubf iteration 1 of 2 completed with log-likelihood -10.15053 
        rho      sigma        tau       X1_0       X2_0 
-0.40059242 1.00000000 1.00000000 0.01278621 0.00000000 
+0.39798686 1.00000000 1.00000000 0.01860935 0.00000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -16.59906 
+iubf iteration 2 of 2 completed with log-likelihood -17.15089 
        rho      sigma        tau       X1_0       X2_0 
-0.41385997 1.00000000 1.00000000 0.04513172 0.00000000 
+0.39449768 1.00000000 1.00000000 0.03661311 0.00000000 
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+3: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+4: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",logLik(b_iubf_hyp))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -16.5990566380784"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -17.1508893465284"
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot
@@ -231,9 +260,9 @@ Warning message:
 Please use `gather()` instead.
 This warning is displayed once every 8 hours.
 Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated. 
-> plot(b_sim3[[1]],type="l",log=TRUE)
-Warning message:
-In FUN(X[[i]], ...) : NaNs produced
+> b_sim3v2 <- b_sim3[[1]]
+> b_sim3v2@data <- exp(b_sim3v2@data)
+> plot(b_sim3v2,type="l",log=TRUE)
 > plot(b_sim3[[2]],type="h")
 > 
 > ## --------------------------------------------
@@ -291,7 +320,7 @@ params  [,1]
 +   x=b_s, unit=1, time=1, params=b_p)
       time
 rep         [,1]
-  [1,] -3.356393
+  [1,] -1.112688
 > 
 > ## --------------------------------------------
 > ## using bm to test edge cases and utility functions

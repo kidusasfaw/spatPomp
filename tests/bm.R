@@ -3,10 +3,11 @@ library(spatPomp)
 
 
 # For CRAN tests, need to limit to two cores
-doParallel::registerDoParallel(2)
+# For covr, needs to be single core (https://github.com/r-lib/covr/issues/227)
+doParallel::registerDoParallel(1)
 doRNG::registerDoRNG(2)
 
-b_model <- bm(U=2,N=4) 
+b_model <- bm(U=2,N=2) 
 
 ## ------------------------------------------------------------
 ## The bm model provides a simple example to test other methods.
@@ -173,7 +174,9 @@ b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
 b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 
 plot(b_model,type="l",log=FALSE)
-plot(b_sim3[[1]],type="l",log=TRUE)
+b_sim3v2 <- b_sim3[[1]]
+b_sim3v2@data <- exp(b_sim3v2@data)
+plot(b_sim3v2,type="l",log=TRUE)
 plot(b_sim3[[2]],type="h")
 
 ## --------------------------------------------
