@@ -35,7 +35,7 @@ dunit_measure
 \code{dunit_measure} evaluates the unit measurement density of a unit's observation given the entire state
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]

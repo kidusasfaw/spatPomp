@@ -13,7 +13,8 @@
 #' @importFrom utils data
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' Brownian motion
-#' @examples Complete examples are provided in the package tests
+#' @examples
+#' # Complete examples are provided in the package tests
 #' \dontrun{
 #' b <- bm(U=4, N=20)
 #' # See all the model specifications of the object

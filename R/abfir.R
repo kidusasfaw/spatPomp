@@ -19,7 +19,8 @@
 ##' @inheritParams abf
 ##' @inheritParams girf
 ##' @inheritParams pomp::pfilter
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=2, N=5)

@@ -47,7 +47,6 @@ Loading required package: pomp
 > 
 > b_bag_nbhd <- function(object, time, unit) {
 +   nbhd_list <- list()
-+   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
 +   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
 +   return(nbhd_list)
 + }
@@ -56,7 +55,7 @@ Loading required package: pomp
 Loading required package: foreach
 Loading required package: rngtools
 > paste("bm abf loglik: ",logLik(b_abf))
-[1] "bm abf loglik:  -14.951617665324"
+[1] "bm abf loglik:  -14.7001534538574"
 > 
 > ##
 > ## abfir tested on bm
@@ -64,7 +63,7 @@ Loading required package: rngtools
 > 
 > b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
 > paste("bm abfir loglik: ",logLik(b_abfir))
-[1] "bm abfir loglik:  -15.6215558075175"
+[1] "bm abfir loglik:  -15.5879090820249"
 > 
 > ##
 > ## bpfilter tested on bm
@@ -192,7 +191,7 @@ ienkf iteration 2 of 2 completed
 +   verbose=FALSE
 + )
 > paste("bm iubf loglik, geometric cooling, verbose=F: ",logLik(b_iubf_geom))
-[1] "bm iubf loglik, geometric cooling, verbose=F:  -17.547723094567"
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -16.6277239344351"
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
@@ -207,16 +206,16 @@ ienkf iteration 2 of 2 completed
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -15.62122 
+iubf iteration 1 of 2 completed with log-likelihood -14.97885 
        rho      sigma        tau       X1_0       X2_0 
-0.39604487 1.00000000 1.00000000 0.02166638 0.00000000 
+0.40059242 1.00000000 1.00000000 0.01278621 0.00000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -14.52658 
+iubf iteration 2 of 2 completed with log-likelihood -16.59906 
        rho      sigma        tau       X1_0       X2_0 
-0.40698138 1.00000000 1.00000000 0.05845197 0.00000000 
+0.41385997 1.00000000 1.00000000 0.04513172 0.00000000 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",logLik(b_iubf_hyp))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -14.5265772400352"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -16.5990566380784"
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot
@@ -293,6 +292,15 @@ params  [,1]
       time
 rep         [,1]
   [1,] -3.356393
+> 
+> ## --------------------------------------------
+> ## using bm to test edge cases and utility functions
+> ## perhaps only of technical interest
+> ## ____________________________________________
+> 
+> print(b_model)
+<object of class ‘spatPomp’>
+> 
 > 
 > dev.off()
 null device 

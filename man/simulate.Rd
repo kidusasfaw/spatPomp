@@ -50,7 +50,7 @@ If \code{format='data.frame'} then a class \sQuote{data.frame} object is returne
 processes.
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 # Get a spatPomp object
 b <- bm(U=2, N=5)

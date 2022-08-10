@@ -15,7 +15,8 @@
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' Lorenz 96 model
 #'
-#' @examples Complete examples are provided in the package tests
+#' @examples
+#' # Complete examples are provided in the package tests
 #' \dontrun{
 #' l <- lorenz(U=5, N=100, delta_t=0.01, delta_obs=1)
 #' # See all the model specifications of the object

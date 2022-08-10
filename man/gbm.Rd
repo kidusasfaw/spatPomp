@@ -28,7 +28,7 @@ distance around a circle. The model is defined in continuous time, but
 an Euler approximation is used for this numerical implementation.
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 g <- gbm(U=4, N=20)
 # See all the model specifications of the object

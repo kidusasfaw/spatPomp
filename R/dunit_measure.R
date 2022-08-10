@@ -13,7 +13,8 @@
 #' @param params parameters at which to evaluate the unit measurement density
 #' @return A class \sQuote{matrix} with the unit measurement density for spatial unit \code{unit}
 #' corresponding to the corresponding measurement in \code{y} and states in \code{x}.
-#' @examples Complete examples are provided in the package tests
+#' @examples
+#' # Complete examples are provided in the package tests
 #' \dontrun{
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]

@@ -66,7 +66,7 @@ the data under the model. }
 }
 
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 # Create a simulation of a Brownian motion
 b <- bm(U=2, N=5)

@@ -106,7 +106,7 @@ The following methods are available for such an object:
 }
 
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 igirf(bm(U=2,N=4),Ngirf=2,rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),cooling.type="geometric",cooling.fraction.50=0.5,Np=10,Ninter=2,lookahead=1,Nguide=5)
 }

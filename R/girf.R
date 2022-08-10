@@ -16,7 +16,8 @@
 ##' @param kind One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.
 ##' @param tol If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.
 ##'
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' #
 ##' # Create a simulation of a Brownian motion

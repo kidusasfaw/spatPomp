@@ -29,7 +29,7 @@ and the parameter set \code{params} for unit \code{unit}.
 \code{vunit_measure} evaluates the variance of a unit's observation given the entire state
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]

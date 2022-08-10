@@ -17,7 +17,8 @@
 ##' @param data an object of class \code{spatPomp} or \code{igirfd_spatPomp}
 ##' @param Ngirf the number of iterations of parameter-perturbed GIRF.
 ##'
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' igirf(bm(U=2,N=4),Ngirf=2,rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),cooling.type="geometric",cooling.fraction.50=0.5,Np=10,Ninter=2,lookahead=1,Nguide=5)
 ##' }

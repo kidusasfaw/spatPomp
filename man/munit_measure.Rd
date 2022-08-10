@@ -32,7 +32,7 @@ representing the moment-matched parameter set(s) corresponding to the variance o
 This is used in \code{girf()} and \code{igirf()} when they are run with \code{kind='moment'}.
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]

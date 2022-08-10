@@ -12,7 +12,8 @@
 #' @param IVP_values initial value parameters for the latent states
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' geometric Brownian motion
-#' @examples Complete examples are provided in the package tests
+#' @examples
+#' # Complete examples are provided in the package tests
 #' \dontrun{
 #' g <- gbm(U=4, N=20)
 #' # See all the model specifications of the object

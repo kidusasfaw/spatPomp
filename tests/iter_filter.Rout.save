@@ -17,33 +17,33 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
+> 
+> ## mostly tested in various calls to iterated filter algorithms in bm.R
+> 
+> ## here, we just test edge cases
+> 
 > library(spatPomp)
 Loading required package: pomp
-> set.seed(2)
-> 
-> gbm_model <- gbm(U=3,N=2) 
-> 
-> gbm_pf <- pfilter(gbm_model,Np=10)
-> logLik(gbm_pf)
-[1] -15.25947
-> 
-> ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
-> 
-> gbm_igirf_out <- igirf(gbm_model,
-+   Ngirf = 2,
-+   rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02),
-+   cooling.type = "geometric",
-+   cooling.fraction.50 = 0.5,
-+   Np=10,
-+   Ninter = 2,
-+   lookahead = 1,
-+   Nguide = 5,
-+   kind = 'moment',
-+   verbose = FALSE
+> try(
++   spatPomp:::perturbn.kernel.sd(rw.sd=rw.sd(rho=0.02,X1_0=ivp(0.02)),1:2,
++     paramnames="testing_error")
 + )
+Error : the following parameter(s), given random walks in ‘rw.sd’, are not present in ‘params’: ‘rho’,‘X1_0’.
 > 
-> logLik(gbm_igirf_out)
-[1] -14.58847
+> spatPomp:::perturbn.kernel.sd(
++   rw.sd=matrix(c(0.01,0.02),nrow=2,ncol=2,
++     dimnames=list(c("rho","X1_0"),NULL)), 1:2, paramnames=c("rho","X1_0"))
+     [,1] [,2]
+rho  0.01 0.01
+X1_0 0.02 0.02
+> 
+> # test fraction > 1
+> frac_test <- spatPomp:::mif2.cooling("hyperbolic",fraction=1.5,ntimes=5)
+> 
+> 
+> 
+> 
+> 
 > 
 > 
 > 

@@ -14,7 +14,8 @@
 #' @param params parameters to use to obtain a moment-matched parameter set
 #' @return An array with dimensions \code{dim(array.params)[1]} by \code{dim(x)[2]} by \code{length(unit)} by\code{length(time)}
 #' representing the moment-matched parameter set(s) corresponding to the variance of the measurements, \code{vc}, and the states, \code{x}.
-#' @examples Complete examples are provided in the package tests
+#' @examples
+#' # Complete examples are provided in the package tests
 #' \dontrun{
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]

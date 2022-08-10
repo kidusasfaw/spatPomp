@@ -21,7 +21,8 @@
 ##' @param Nrep The number of bootstrap replicates for the adapted simulations.
 ##' @param tol If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.
 ##' @param verbose logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=2, N=5)
@@ -198,30 +199,21 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
           conditionMessage(e),call.=FALSE)
       }
     )
-                                        #weights[weights == 0] <- tol
     log_cond_densities[,,nt] <- log_weights[,,1]
     log_resamp_weights <- apply(log_weights[,,1,drop=FALSE], 2, function(x) sum(x))
     max_log_resamp_weights <- max(log_resamp_weights)
-                                        # if any particle's resampling weight is zero replace by tolerance
     if(all(is.infinite(log_resamp_weights))) log_resamp_weights <- rep(log(tol), Np[1L])
     else log_resamp_weights <- log_resamp_weights - max_log_resamp_weights
     resamp_weights <- exp(log_resamp_weights)
-                                        #if(all(resamp_weights == 0)) resamp_weights <- rep(tol, Np[1L])
     gnsi <- FALSE
 
-    ## do resampling if filtering has not failed
-    xx <- tryCatch(
-      .Call(
+    xx <- .Call(
         abf_computations,
         x=X,
         params=params,
         Np=Np[nt+1],
         trackancestry=FALSE,
         weights=resamp_weights
-      ),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
-      }
     )
 
     x <- xx$states

@@ -31,7 +31,7 @@ corresponding to the corresponding states in \code{x}.
 \code{eunit_measure} evaluates the expectation of a unit's observation given the entire state
 }
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]

@@ -76,7 +76,7 @@ The following methods are available for such an object:
 }
 
 \examples{
-Complete examples are provided in the package tests
+# Complete examples are provided in the package tests
 \dontrun{
 #
 # Create a simulation of a Brownian motion

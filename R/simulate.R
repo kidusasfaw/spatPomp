@@ -15,7 +15,8 @@
 ##' \code{list} of \code{spatPomp} objects. Options are \code{'spatPomps'}
 ##' and \code{'data.frame'}.
 ##' @importFrom utils data
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' # Get a spatPomp object
 ##' b <- bm(U=2, N=5)

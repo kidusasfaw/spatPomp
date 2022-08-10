@@ -22,7 +22,8 @@
 ##' block is saved.
 ##' @param \dots If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##'
-##' @examples Complete examples are provided in the package tests
+##' @examples
+##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' # Create a simulation of a Brownian motion
 ##' b <- bm(U=4, N=2)
