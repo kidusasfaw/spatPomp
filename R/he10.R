@@ -23,15 +23,16 @@
 #' studied by He et al., the 10 largest and 10 selected smaller towns.
 #' @importFrom utils data read.csv write.table
 #' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.
+#' @param Tmax Upper time for the window used to construct the object. The lower time is fixed at 1950.0. The default value matches He et al (2010).
+#' @param model_type Select from some previous choices on which parameters to make fixed or unit-specific. If set to unspecified, these are read from subsequent arguments.
 #' @param fixedParNames specifies parameters that have a shared value across
 #' units and are not being optimized so can be represented by a single value.
 #' @param sharedParNames identifies parameters that have common shared value
 #' for all units which is represented separately for each unit for optimization
 #' purposes.
 #' @param unitParNames determines which parameters take a different value for each unit. Cannot be specified if sharedParNames is specified.
-#' each unit. Other parameters are considered shared between all units.
-#' @param simulated determines whether to return a simulation from the model or the
-#' UK measles data
+#' @param town_vec A list of towns to be included in the model. If provided, this over-rules the specification of U.
+#' @param basic_params A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
 #'
@@ -64,19 +65,17 @@
 #' }
 #' @export
 
-# NOTE: As indicated in the Note section of the documentation, this
-# this function goes through a typical workflow of constructing
-# a spatPomp object when developing a data analysis.
-
 # NOTE: Code was written assuming that there are no fixed unit-specific
-# parameters. What happens in that case? It could arise if initial values
+# parameters.  That could arise if initial values
 # are estimated using some other data.
 
 # NOTE: currently assumes measles is loaded from load("data/twentycities.rda").
 # In future, this could be included in the package.
 
-he10 <- function(U=6,dt=2/365, Tmax=1964,   
-  fixedParNames, sharedParNames, unitParNames, simulated=FALSE, town_vec,
+he10 <- function(U=6,dt=2/365, Tmax=1964,
+  model_type=c("unspecified","mostly fixed","mostly shared",
+    "plausible parameters shared","all unit-specific", "he10"),
+  fixedParNames, sharedParNames, unitParNames, town_vec,
   basic_params =c(
     alpha = 1,
     iota = 0,  
@@ -96,14 +95,51 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   )
 ){
 
-# default basic parameter values based on Ionides et al (2021)
-# "Bagged filters for partially observed interacting systems. 
-
+## for debugging
+## U=6;dt=2/365; Tmax=1964;model_type=c("mostly fixed","mostly shared","plausible parameters shared","all unit-specific", "he10");basic_params =c(alpha = 1,iota = 0,  R0 = 30,cohort = 0,amplitude = 0.5,gamma = 52,sigma = 52,mu = 0.02,sigmaSE = 0.15, rho = 0.5,psi = 0.15,g = 400,S_0 = 0.032, E_0 = 0.00005, I_0 = 0.00004)
+  
+parNames <- names(basic_params)
+if(model_type[1] == "mostly fixed"){
+  sharedParNames <- c("R0","psi")
+  unitParNames <- c("rho","S_0")
+  estParNames <- c(sharedParNames,unitParNames)
+  fixedParNames <- setdiff(parNames,estParNames)
+} else if(model_type[1] == "mostly shared"){
+  sharedParNames <- c("alpha","R0","psi","g","sigma","gamma","amplitude","cohort","sigmaSE")
+  unitParNames <- c("rho","S_0","E_0","I_0")
+  estParNames <- c(sharedParNames,unitParNames)
+  fixedParNames <- setdiff(parNames,estParNames)
+} else if(model_type[1] == "plausible parameters shared"){
+  # parameters are shared when that makes mechanistic sense. 
+  sharedParNames <- c("alpha","R0","g","sigma","gamma","amplitude","cohort")
+  unitParNames <- c("sigmaSE","S_0","E_0","I_0","rho","psi")
+  estParNames <- c(sharedParNames,unitParNames)
+  fixedParNames <- setdiff(parNames,estParNames)
+} else if(model_type[1] == "all unit-specific"){
+  # all parameters estimated except life expecancy
+  # and immigration, which should not be needed when there is coupling
+  fixedParNames <- c("mu","iota")
+  sharedParNames <- NULL
+  unitParNames <- setdiff(parNames,fixedParNames)
+  estParNames <- c(sharedParNames,unitParNames)
+} else if(model_type[1] == "he10"){
+  # all the parameters estimated by He et al (2010) Table 2
+  fixedParNames <- c("mu","g")
+  sharedParNames <- NULL
+  unitParNames <- setdiff(parNames,fixedParNames)
+  estParNames <- c(sharedParNames,unitParNames)  
+} else if(model_type[1]=="unspecified"){
   if(missing(sharedParNames)) sharedParNames <- NULL
   if(missing(unitParNames)) unitParNames <- NULL
   expandedParNames = c(sharedParNames,unitParNames)
   if(length(intersect(sharedParNames,unitParNames))>0)
     stop("sharedParNames and unitParNames should be disjoint")
+} else stop("unrecognized model_type argument")
+
+ivpParNames <- c("S_0","E_0","I_0")
+ivpEstParNames <- intersect(ivpParNames,estParNames)
+regEstParNames <- setdiff(estParNames,ivpParNames)
+
   if(U>20) stop("U <= 20")
   if(Tmax>1964) stop("Tmax <= 1964")
   birth_lag <- 4 # delay until births hit susceptibles
@@ -112,55 +148,62 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   # data used for He et al 2010, following their decision
   # to remove 3 data points
 
-# > measles[13769+1:5,]
-#            town       date cases
-# 13770 Liverpool 1955-11-04    10
-# 13771 Liverpool 1955-11-11    25
-# 13772 Liverpool 1955-11-18   116
-# 13773 Liverpool 1955-11-25    17
-# 13774 Liverpool 1955-12-02    18
+  he10measles %>%
+    dplyr::mutate(date=as.Date(date)) %>%
+    dplyr::mutate(town=as.character(town)) -> measles_data
 
-  measles[13772,"cases"] <- NA
+  he10demography %>% 
+    dplyr::mutate(town=as.character(town)) -> demog
 
-# > measles[13949+1:5,]
-#            town       date cases
-# 13950 Liverpool 1959-04-17   143
-# 13951 Liverpool 1959-04-24   115
-# 13952 Liverpool 1959-05-01   450
-# 13953 Liverpool 1959-05-08    96
-# 13954 Liverpool 1959-05-15   157
+  # > measles_data[13769+1:5,]
+  #            town       date cases
+  # 13770 Liverpool 1955-11-04    10
+  # 13771 Liverpool 1955-11-11    25
+  # 13772 Liverpool 1955-11-18   116
+  # 13773 Liverpool 1955-11-25    17
+  # 13774 Liverpool 1955-12-02    18
 
-  measles[13952,"cases"] <- NA
+  measles_data[13772,"cases"] <- NA
 
-# > measles[19551+1:5,]
-#             town       date cases
-# 19552 Nottingham 1961-08-18     6
-# 19553 Nottingham 1961-08-25     7
-# 19554 Nottingham 1961-09-01    66
-# 19555 Nottingham 1961-09-08     8
-# 19556 Nottingham 1961-09-15     7
+  # > measles_data[13949+1:5,]
+  #            town       date cases
+  # 13950 Liverpool 1959-04-17   143
+  # 13951 Liverpool 1959-04-24   115
+  # 13952 Liverpool 1959-05-01   450
+  # 13953 Liverpool 1959-05-08    96
+  # 13954 Liverpool 1959-05-15   157
 
-  measles[19554,"cases"] <- NA
+  measles_data[13952,"cases"] <- NA
+
+  # > measles_data[19551+1:5,]
+  #             town       date cases
+  # 19552 Nottingham 1961-08-18     6
+  # 19553 Nottingham 1961-08-25     7
+  # 19554 Nottingham 1961-09-01    66
+  # 19555 Nottingham 1961-09-08     8
+  # 19556 Nottingham 1961-09-15     7
+
+  measles_data[19554,"cases"] <- NA
 
   mean_pop <- sapply(split(demog,demog$town),function(x) mean(x$pop))
-  measles <- measles[order(mean_pop[measles$town],
-    -as.numeric(measles$date),decreasing=T),]
+  measles_data <- measles_data[order(mean_pop[measles_data$town],
+    -as.numeric(measles_data$date),decreasing=T),]
   if(missing(town_vec)){
     towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
   } else {
     towns <-names(sort(mean_pop,decreasing=TRUE))[town_vec]
     U <- length(town_vec)
   }
-  measles %>% 
-    mutate(year=as.integer(format(date,"%Y"))) %>%
-    filter(town%in%towns & year>=1950 & year<Tmax) %>%
-    mutate(time=(julian(date,origin=as.Date("1950-01-01")))/365.25+1950) %>%
-    filter(time>1950 & time<Tmax) %>%
-    select(time,town,cases) -> measles_cases
+  measles_data %>% 
+    dplyr::mutate(year=as.integer(format(date,"%Y"))) %>%
+    dplyr::filter(town%in%towns & year>=1950 & year<Tmax) %>%
+    dplyr::mutate(time=(julian(date,origin=as.Date("1950-01-01")))/365.25+1950) %>%
+    dplyr::filter(time>1950 & time<Tmax) %>%
+    dplyr::select(time,town,cases) -> measles_cases
     
   demog[order(mean_pop[demog$town],
     -as.numeric(demog$year),decreasing=T),] %>%
-  filter(town%in%towns) -> measles_covar
+  dplyr::filter(town%in%towns) -> measles_covar
   colnames(measles_covar)[2] <- "time"
 
   # note: London starts at 1939, others start at 1940
@@ -190,11 +233,13 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
       return(as.vector(dist))
   }
 
-  long_lat <- coord[match(towns,coord$town),c("long","lat"),drop=FALSE]
+  long_lat <- he10coordinates[
+    match(towns,he10coordinates$town),c("long","lat"),drop=FALSE]
   dmat <- matrix(0,U,U)
   for(u1 in 1:U) {
     for(u2 in 1:U) {
-      dmat[u1,u2] <- round(distHaversine(long_lat[u1,],long_lat[u2,]) / 1609.344,1)
+      dmat[u1,u2] <- round(
+        distHaversine(long_lat[u1,],long_lat[u2,]) / 1609.344, 1)
     }
   }
 
@@ -294,11 +339,11 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
       else
         seas = 1.0-amplitude[u*amplitude_unit];
 
-     // transmission rate
-//     beta = R0[u*R0_unit]*(gamma[u*gamma_unit]+mu[u*mu_unit])*seas;
+      // transmission rate
+      //     beta = R0[u*R0_unit]*(gamma[u*gamma_unit]+mu[u*mu_unit])*seas;
 
-// for compatilibity with he10
-    beta = R0[u*R0_unit]*seas*(1-exp(-(gamma[u*gamma_unit]+mu[u*mu_unit])*dt))/dt;
+      // for compatilibity with he10
+      beta = R0[u*R0_unit]*seas*(1-exp(-(gamma[u*gamma_unit]+mu[u*mu_unit])*dt))/dt;
 
       rate[1] = mu[u*mu_unit];		// natural S death
       rate[2] = sigma[u*sigma_unit];	// rate of ending of latent stage
@@ -588,20 +633,6 @@ names(measles_params) <- measles_paramnames
 for(p in fixedParNames) measles_params[paste0(p,1)] <- basic_params[p]
 for(p in sharedParNames) measles_params[paste0(p,1:U)] <- basic_params[p]
 
-perturb_unit_params <- FALSE
-if(perturb_unit_params){
-  # unit-specific parameters can be perturbed  to make them different
-  for(p in unitParNames) {
-    measles_params[paste0(p,1:U)] <- rnorm(
-      U,
-      mean=basic_params[p],
-      sd=basic_params[p]*perturb_unit_params
-    )
-  }
-} else {
-  for(p in unitParNames) measles_params[paste0(p,1:U)] <- basic_params[p]
-}
-
 coef(m1) <- measles_params
-if(simulated) simulate(m1) else m1
+m1
 }
