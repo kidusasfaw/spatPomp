@@ -24,14 +24,7 @@
 #' @importFrom utils data read.csv write.table
 #' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.
 #' @param Tmax Upper time for the window used to construct the object. The lower time is fixed at 1950.0. The default value matches He et al (2010).
-#' @param model_type Select from some previous choices on which parameters to make fixed or unit-specific. If set to unspecified, these are read from subsequent arguments.
-#' @param fixedParNames specifies parameters that have a shared value across
-#' units and are not being optimized so can be represented by a single value.
-#' @param sharedParNames identifies parameters that have common shared value
-#' for all units which is represented separately for each unit for optimization
-#' purposes.
-#' @param unitParNames determines which parameters take a different value for each unit. Cannot be specified if sharedParNames is specified.
-#' @param town_vec A list of towns to be included in the model. If provided, this over-rules the specification of U.
+#' @param expandedParNames specifies the names of parameters which take unit-specific values. Remaining parameters take a single, shared value for all units.
 #' @param basic_params A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
@@ -73,9 +66,7 @@
 # In future, this could be included in the package.
 
 he10 <- function(U=6,dt=2/365, Tmax=1964,
-  model_type=c("unspecified","mostly fixed","mostly shared",
-    "plausible parameters shared","all unit-specific", "he10"),
-  fixedParNames, sharedParNames, unitParNames, town_vec,
+  expandedParNames,
   basic_params =c(
     alpha = 1,
     iota = 0,  
@@ -96,54 +87,12 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
 ){
 
 ## for debugging
-## U=6;dt=2/365; Tmax=1964;model_type=c("mostly fixed","mostly shared","plausible parameters shared","all unit-specific", "he10");basic_params =c(alpha = 1,iota = 0,  R0 = 30,cohort = 0,amplitude = 0.5,gamma = 52,sigma = 52,mu = 0.02,sigmaSE = 0.15, rho = 0.5,psi = 0.15,g = 400,S_0 = 0.032, E_0 = 0.00005, I_0 = 0.00004)
+## U=6;dt=2/365; Tmax=1964;extendedParNames=c("R0","g","S_0");basic_params =c(alpha = 1,iota = 0,  R0 = 30,cohort = 0,amplitude = 0.5,gamma = 52,sigma = 52,mu = 0.02,sigmaSE = 0.15, rho = 0.5,psi = 0.15,g = 400,S_0 = 0.032, E_0 = 0.00005, I_0 = 0.00004)
   
-parNames <- names(basic_params)
-if(model_type[1] == "mostly fixed"){
-  sharedParNames <- c("R0","psi")
-  unitParNames <- c("rho","S_0")
-  estParNames <- c(sharedParNames,unitParNames)
-  fixedParNames <- setdiff(parNames,estParNames)
-} else if(model_type[1] == "mostly shared"){
-  sharedParNames <- c("alpha","R0","psi","g","sigma","gamma","amplitude","cohort","sigmaSE")
-  unitParNames <- c("rho","S_0","E_0","I_0")
-  estParNames <- c(sharedParNames,unitParNames)
-  fixedParNames <- setdiff(parNames,estParNames)
-} else if(model_type[1] == "plausible parameters shared"){
-  # parameters are shared when that makes mechanistic sense. 
-  sharedParNames <- c("alpha","R0","g","sigma","gamma","amplitude","cohort")
-  unitParNames <- c("sigmaSE","S_0","E_0","I_0","rho","psi")
-  estParNames <- c(sharedParNames,unitParNames)
-  fixedParNames <- setdiff(parNames,estParNames)
-} else if(model_type[1] == "all unit-specific"){
-  # all parameters estimated except life expecancy
-  # and immigration, which should not be needed when there is coupling
-  fixedParNames <- c("mu","iota")
-  sharedParNames <- NULL
-  unitParNames <- setdiff(parNames,fixedParNames)
-  estParNames <- c(sharedParNames,unitParNames)
-} else if(model_type[1] == "he10"){
-  # all the parameters estimated by He et al (2010) Table 2
-  fixedParNames <- c("mu","g")
-  sharedParNames <- NULL
-  unitParNames <- setdiff(parNames,fixedParNames)
-  estParNames <- c(sharedParNames,unitParNames)  
-} else if(model_type[1]=="unspecified"){
-  if(missing(sharedParNames)) sharedParNames <- NULL
-  if(missing(unitParNames)) unitParNames <- NULL
-  expandedParNames = c(sharedParNames,unitParNames)
-  if(length(intersect(sharedParNames,unitParNames))>0)
-    stop("sharedParNames and unitParNames should be disjoint")
-} else stop("unrecognized model_type argument")
-
-ivpParNames <- c("S_0","E_0","I_0")
-ivpEstParNames <- intersect(ivpParNames,estParNames)
-regEstParNames <- setdiff(estParNames,ivpParNames)
 
   if(U>20) stop("U <= 20")
   if(Tmax>1964) stop("Tmax <= 1964")
-  birth_lag <- 4 # delay until births hit susceptibles
-  # in years. Note, done in biweeks for measles2()
+  birth_lag <- 4 # delay until births hit susceptibles, in years
 
   # data used for He et al 2010, following their decision
   # to remove 3 data points
@@ -188,12 +137,7 @@ regEstParNames <- setdiff(estParNames,ivpParNames)
   mean_pop <- sapply(split(demog,demog$town),function(x) mean(x$pop))
   measles_data <- measles_data[order(mean_pop[measles_data$town],
     -as.numeric(measles_data$date),decreasing=T),]
-  if(missing(town_vec)){
-    towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
-  } else {
-    towns <-names(sort(mean_pop,decreasing=TRUE))[town_vec]
-    U <- length(town_vec)
-  }
+  towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
   measles_data %>% 
     dplyr::mutate(year=as.integer(format(date,"%Y"))) %>%
     dplyr::filter(town%in%towns & year>=1950 & year<Tmax) %>%
@@ -260,21 +204,15 @@ regEstParNames <- setdiff(estParNames,ivpParNames)
   v_by_g_C_array <- to_C_array(v_by_g_C_rows)
   v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
-  # here, basic parameters are as described in param_formats.R
-  basic_statenames <- c('S','E','I','R','C')
-  basic_RPnames <- c("alpha","iota","psi","R0","gamma","sigma","sigmaSE","cohort","amplitude","mu","rho","g")
-  basic_IVPnames <- c("S_0", "E_0", "I_0")
-  basicParNames <- c(basic_RPnames,basic_IVPnames)
-
-  expandedParNames <- setdiff(basicParNames,fixedParNames)
-
-  set_unit_specific <- Csnippet(paste0("const int ", expandedParNames,
+  parNames <- names(basic_params)
+  fixedParNames <- setdiff(parNames,expandedParNames)
+  set_expanded <- Csnippet(paste0("const int ", expandedParNames,
     "_unit = 1;\n", collapse=" "))
-  set_shared <- Csnippet(paste0("const int ", fixedParNames,
+  set_fixed <- Csnippet(paste0("const int ", fixedParNames,
     "_unit = 0;\n", collapse=" "))
 
   measles_globals <- Csnippet(
-    paste(v_by_g_C, set_unit_specific, set_shared, sep = "\n")
+    paste(v_by_g_C, set_expanded, set_fixed, sep = "\n")
   )
 
   # add a "1" for shared parameter names to make the pointers work
@@ -287,7 +225,8 @@ regEstParNames <- setdiff(estParNames,ivpParNames)
     }
   )
 
-  measles_statenames <- paste0(rep(basic_statenames,each=U),1:U)
+  unit_statenames <- c('S','E','I','R','C')
+  measles_statenames <- paste0(rep(unit_statenames,each=U),1:U)
 
   measles_rprocess <- Csnippet('
     const double *amplitude=&amplitude1;
@@ -610,7 +549,7 @@ m1 <-  spatPomp(measles_cases,
           units = "town",
           times = "time",
           t0 = min(measles_cases$time)-1/52,
-          unit_statenames = basic_statenames,
+          unit_statenames = unit_statenames,
           covar = measles_covar,
           rprocess=euler(measles_rprocess, delta.t=dt),
           skeleton=vectorfield(measles_skel),
@@ -631,7 +570,7 @@ measles_params <- rep(0,length=length(measles_paramnames))
 names(measles_params) <- measles_paramnames
 
 for(p in fixedParNames) measles_params[paste0(p,1)] <- basic_params[p]
-for(p in sharedParNames) measles_params[paste0(p,1:U)] <- basic_params[p]
+for(p in expandedParNames) measles_params[paste0(p,1:U)] <- basic_params[p]
 
 coef(m1) <- measles_params
 m1

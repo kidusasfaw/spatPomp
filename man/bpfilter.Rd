@@ -91,6 +91,7 @@ Other particle filter methods:
 \code{\link{abf}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}

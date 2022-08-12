@@ -46,6 +46,7 @@ Collate:
     'he10measles.R'
     'he10mle.R'
     'iter_filter.R'
+    'ibpf.R'
     'ienkf.R'
     'igirf.R'
     'iubf.R'

@@ -82,6 +82,7 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
+\code{\link{ibpf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 

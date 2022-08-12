@@ -13,12 +13,7 @@ he10(
   U = 6,
   dt = 2/365,
   Tmax = 1964,
-  model_type = c("unspecified", "mostly fixed", "mostly shared",
-    "plausible parameters shared", "all unit-specific", "he10"),
-  fixedParNames,
-  sharedParNames,
-  unitParNames,
-  town_vec,
+  expandedParNames,
   basic_params = c(alpha = 1, iota = 0, R0 = 30, cohort = 0, amplitude = 0.5, gamma = 52,
     sigma = 52, mu = 0.02, sigmaSE = 0.15, rho = 0.5, psi = 0.15, g = 400, S_0 = 0.032,
     E_0 = 5e-05, I_0 = 4e-05)
@@ -33,18 +28,7 @@ studied by He et al., the 10 largest and 10 selected smaller towns.}
 
 \item{Tmax}{Upper time for the window used to construct the object. The lower time is fixed at 1950.0. The default value matches He et al (2010).}
 
-\item{model_type}{Select from some previous choices on which parameters to make fixed or unit-specific. If set to unspecified, these are read from subsequent arguments.}
-
-\item{fixedParNames}{specifies parameters that have a shared value across
-units and are not being optimized so can be represented by a single value.}
-
-\item{sharedParNames}{identifies parameters that have common shared value
-for all units which is represented separately for each unit for optimization
-purposes.}
-
-\item{unitParNames}{determines which parameters take a different value for each unit. Cannot be specified if sharedParNames is specified.}
-
-\item{town_vec}{A list of towns to be included in the model. If provided, this over-rules the specification of U.}
+\item{expandedParNames}{specifies the names of parameters which take unit-specific values. Remaining parameters take a single, shared value for all units.}
 
 \item{basic_params}{A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.}
 }
