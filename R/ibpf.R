@@ -16,6 +16,7 @@
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##'
+##' @importFrom foreach %do%
 ##'
 ##' @inheritParams bpfilter
 ##' @inheritParams pomp::mif2
@@ -42,7 +43,7 @@
 
 NULL
 
-rw.sd <- pomp:::safecall
+rw.sd <- safecall
 
 setClass(
   "ibpfd_spatPomp",
@@ -92,7 +93,6 @@ setMethod(
       cooling.type="geometric",
       cooling.fraction.50,
       block_size, block_list,spat_regression,
-      tol = 1e-300, max.fail = Inf,save.states = FALSE,
       ..., verbose = getOption("verbose", FALSE)) {
 
     if(missing(block_list) && missing(block_size))
@@ -130,8 +130,8 @@ setMethod(
 	sharedParNames=sharedParNames,
 	unitParNames=unitParNames,
 	cooling.type=cooling.type,cooling.fraction.50=cooling.fraction.50,
-        block_list=block_list,tol = tol,max.fail = Inf,
-	save.states = FALSE,...,verbose=verbose),
+        block_list=block_list,
+	...,verbose=verbose),
         error = "error in ibpf_internal"
     )
   }
@@ -141,25 +141,9 @@ ibpf_internal <- function (object,Nbpf,spat_regression,Np,
    rw.sd,cooling.type,cooling.fraction.50,
    sharedParNames,
    unitParNames,
-   block_list,tol, max.fail = Inf,save.states = FALSE,...,
+   block_list, ...,
    .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,
    .gnsi = TRUE, verbose = FALSE) {
-
-
-## for debugging
-if(0){
-params=coef(h_model)
-object <- h_model
-tol <- 1e-10
-rw.sd <- h_rw.sd
-Np <- 10
-cooling.type="geometric"
-cooling.fraction.50=0.5
-spat_regression=0.1
-Nbpf=2
-max.fail = Inf; save.states = FALSE;.ndone = 0L; .indices = integer(0); .paramMatrix = NULL; .gnsi = TRUE; verbose = FALSE; .gnsi=TRUE; verbose=FALSE
-}
-  library(foreach) 
 
   verbose <- as.logical(verbose)
   p_object <- pomp(object,verbose=verbose)
@@ -175,7 +159,7 @@ max.fail = Inf; save.states = FALSE;.ndone = 0L; .indices = integer(0); .paramMa
                 unitname=object@unitname,
                 unit_statenames=object@unit_statenames,
                 unit_obsnames = object@unit_obsnames)
-  if (pomp:::undefined(object@rprocess) || pomp:::undefined(object@dunit_measure))
+  if (undefined(object@rprocess) || undefined(object@dunit_measure))
     pStop_(paste(sQuote(c("rprocess","dunit_measure")),collapse=", ")," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
@@ -228,7 +212,7 @@ max.fail = Inf; save.states = FALSE;.ndone = 0L; .indices = integer(0); .paramMa
 
   if (missing(rw.sd))
     pStop_(sQuote("rw.sd")," must be specified!")
-  rw.sd <- pomp:::perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
+  rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   
   if (missing(cooling.fraction.50))
     pStop_(sQuote("cooling.fraction.50")," is a required argument.")
@@ -238,7 +222,7 @@ max.fail = Inf; save.states = FALSE;.ndone = 0L; .indices = integer(0); .paramMa
     pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
-  cooling.fn <- pomp:::mif2.cooling(
+  cooling.fn <- mif2.cooling(
     type=cooling.type,
     fraction=cooling.fraction.50,
     ntimes=length(time(object))
@@ -276,7 +260,7 @@ max.fail = Inf; save.states = FALSE;.ndone = 0L; .indices = integer(0); .paramMa
       sharedParNamesExpanded=sharedParNamesExpanded,
       estParNames=estParNames,
       Np=Np,nbpf=.ndone+m,cooling.fn=cooling.fn,
-      rw.sd=rw.sd,tol=tol,max.fail=max.fail,
+      rw.sd=rw.sd,
       verbose=verbose,.indices=.indices, .gnsi=gnsi)
     gnsi <- FALSE
     paramMatrix <- b@paramMatrix
@@ -310,17 +294,14 @@ ibpf_bpfilter <- function (object,block_list,params,
     sharedParNames,
     sharedParNamesExpanded,
     estParNames,
-    Np,nbpf,cooling.fn,rw.sd, tol,max.fail = Inf,
+    Np,nbpf,cooling.fn,rw.sd, 
     verbose,.indices = integer(0), .gnsi = TRUE) {
 
-  tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   nbpf <- as.integer(nbpf)
   Np <- as.integer(Np)
   ep <- paste0("in ",sQuote("ibpf"),": ")
-  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
@@ -366,7 +347,7 @@ ibpf_bpfilter <- function (object,block_list,params,
   for (nt in seq_len(ntimes)) {
 
     ## parameter autoregression
-    foreach(par=sharedParNames,.combine=rbind) %do% {
+    foreach::foreach(par=sharedParNames,.combine=rbind) %do% {
       sharedPar <- params[paste0(par,1:U),,drop=FALSE]
       unit_mean <- apply(sharedPar,1,mean)
       overall_mean <- mean(unit_mean)
@@ -379,7 +360,7 @@ ibpf_bpfilter <- function (object,block_list,params,
     }
     ## parameter perturbation
     pmag <- cooling.fn(nt,nbpf)$alpha*rw.sd[,nt]
-    params <- .Call('randwalk_perturbation',params,pmag,PACKAGE = 'pomp')
+    params <- .Call('randwalk_perturbation_spatPomp',params,pmag)
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
     # note: params is on the estimation scale; tparams on the natural scale
 

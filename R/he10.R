@@ -97,11 +97,11 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   # data used for He et al 2010, following their decision
   # to remove 3 data points
 
-  he10measles %>%
+  spatPomp::he10measles %>%
     dplyr::mutate(date=as.Date(date)) %>%
     dplyr::mutate(town=as.character(town)) -> measles_data
 
-  he10demography %>% 
+  spatPomp::he10demography %>% 
     dplyr::mutate(town=as.character(town)) -> demog
 
   # > measles_data[13769+1:5,]
@@ -177,8 +177,8 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
       return(as.vector(dist))
   }
 
-  long_lat <- he10coordinates[
-    match(towns,he10coordinates$town),c("long","lat"),drop=FALSE]
+  long_lat <- spatPomp::he10coordinates[
+    match(towns,spatPomp::he10coordinates$town),c("long","lat"),drop=FALSE]
   dmat <- matrix(0,U,U)
   for(u1 in 1:U) {
     for(u2 in 1:U) {

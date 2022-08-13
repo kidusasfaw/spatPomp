@@ -79,8 +79,7 @@ h_ibpf <- ibpf(h_model,
   Np=10,
   rw.sd=h_rw.sd,
   cooling.fraction.50=0.5,
-  block_list=block_list,
-  tol=1e-10
+  block_list=block_list
 )
 
 paste("ibpfilter logLik for he10 model:",logLik(bpfilter(h_model,Np=10,block_size=1)))

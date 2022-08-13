@@ -18,9 +18,6 @@
   block_size,
   block_list,
   spat_regression,
-  tol = 1e-300,
-  max.fail = Inf,
-  save.states = FALSE,
   ...,
   verbose = getOption("verbose", FALSE)
 )

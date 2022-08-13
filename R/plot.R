@@ -25,6 +25,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 ##' @name plot-igirfd_spatPomp
 ##' @rdname plot
 ##' @importFrom ggplot2 ggplot geom_line aes facet_wrap
+##' @importFrom graphics par
 ##' @aliases plot,igirfd_spatPomp-method
 ##' @return a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
 ##' the convergence record of running \code{igirf()} with respect to the likelihood and the parameters of the model.
