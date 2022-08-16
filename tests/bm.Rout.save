@@ -255,11 +255,6 @@ Warning messages:
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
 > plot(b_model,type="l",log=FALSE)
-Warning message:
-`gather_()` was deprecated in tidyr 1.2.0.
-Please use `gather()` instead.
-This warning is displayed once every 8 hours.
-Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated. 
 > b_sim3v2 <- b_sim3[[1]]
 > b_sim3v2@data <- exp(b_sim3v2@data)
 > plot(b_sim3v2,type="l",log=TRUE)

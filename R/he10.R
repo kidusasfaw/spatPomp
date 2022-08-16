@@ -97,12 +97,12 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   # data used for He et al 2010, following their decision
   # to remove 3 data points
 
-  spatPomp::he10measles %>%
-    dplyr::mutate(date=as.Date(date)) %>%
-    dplyr::mutate(town=as.character(town)) -> measles_data
+  measles_data <- spatPomp::he10measles
+  measles_data$date <- as.Date(measles_data$date)
+  measles_data$town <- as.character(measles_data$town)
 
-  spatPomp::he10demography %>% 
-    dplyr::mutate(town=as.character(town)) -> demog
+  demog <-  spatPomp::he10demography
+  demog$town <- as.character(demog$town)
 
   # > measles_data[13769+1:5,]
   #            town       date cases
@@ -138,9 +138,9 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   measles_data <- measles_data[order(mean_pop[measles_data$town],
     -as.numeric(measles_data$date),decreasing=T),]
   towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
+  measles_data$year <- as.integer(format(measles_data$date,"%Y"))
   measles_data %>% 
-    dplyr::mutate(year=as.integer(format(date,"%Y"))) %>%
-    dplyr::filter(town%in%towns & year>=1950 & year<Tmax) %>%
+    dplyr::filter(town%in%towns & year>=1950 & year<Tmax+0.01) %>%
     dplyr::mutate(time=(julian(date,origin=as.Date("1950-01-01")))/365.25+1950) %>%
     dplyr::filter(time>1950 & time<Tmax) %>%
     dplyr::select(time,town,cases) -> measles_cases
