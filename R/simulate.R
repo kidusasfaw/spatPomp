@@ -56,22 +56,23 @@ setMethod(
       }
       # convert to long format and output
       to_gather <- colnames(sims)[3:length(colnames(sims))][!c(colnames(sims)[3:length(colnames(sims))]%in%object@shared_covarnames)] # all columns except time and .id
-      to_select <- c(colnames(sims)[1:2], "unit", "stateobs", "val")
-      to_arrange <- c(colnames(sims)[1], "unit", "stateobs")
-      gathered <- sims %>%
-        tidyr::pivot_longer(cols = tidyr::all_of(to_gather), names_to = "stateobs", values_to = "val") %>%
-        dplyr::mutate(ui = get_unit_index_from_statename(stateobs)) %>%
-        dplyr::mutate(unit = unit_names(object)[as.integer(ui)]) %>%
-        dplyr::select(to_select) %>%
-        dplyr::arrange(dplyr::across(to_arrange)) %>%
-        dplyr::mutate(stateobstype = get_state_obs_type_from_statename(stateobs)) %>%
-        dplyr::select(-stateobs) %>%
-        tidyr::pivot_wider(names_from = stateobstype, values_from = 'val') %>%
-        dplyr::rename(unitname = unit)
+      to_select <- c(colnames(sims)[1:2], "unitname", "stateobs", "val")
+      to_arrange <- c(colnames(sims)[1], "unitname", "stateobs")
+      sims %>%
+        tidyr::pivot_longer(cols = to_gather, names_to = "stateobs",
+	  values_to = "val") -> tmp
+      tmp$ui <- get_unit_index_from_statename(tmp$stateobs)
+      tmp$unitname <- unit_names(object)[as.integer(tmp$ui)]
+      dplyr::select(tmp,dplyr::all_of(to_select)) %>%
+        dplyr::arrange(dplyr::across(to_arrange)) -> tmp
+      tmp$stateobstype <- get_state_obs_type_from_statename(tmp$stateobs)
+      dplyr::select(tmp, -"stateobs") %>%
+        tidyr::pivot_wider(names_from = "stateobstype",
+	  values_from = 'val') -> gathered
       return(gathered)
     }
     if(format=="spatPomps"){
-                                        # add back spatPomp components into a list of spatPomps
+      # add back spatPomp components into a list of spatPomps
       if(nsim > 1){
         sp.list <- vector(mode="list", length = nsim)
         for(i in 1:length(sims)){

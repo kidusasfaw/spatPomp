@@ -170,7 +170,9 @@ paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",logLik(b_iubf_hyp))
 ## ____________________________________________
 
 b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
+head(b_sim1,10)
 b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
+head(b_sim2,10)
 b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 
 plot(b_model,type="l",log=FALSE)

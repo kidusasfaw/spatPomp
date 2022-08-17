@@ -139,15 +139,17 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
     -as.numeric(measles_data$date),decreasing=T),]
   towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
   measles_data$year <- as.integer(format(measles_data$date,"%Y"))
-  measles_data %>% 
-    dplyr::filter(town%in%towns & year>=1950 & year<Tmax+0.01) %>%
-    dplyr::mutate(time=(julian(date,origin=as.Date("1950-01-01")))/365.25+1950) %>%
-    dplyr::filter(time>1950 & time<Tmax) %>%
-    dplyr::select(time,town,cases) -> measles_cases
+  measles_data <-  measles_data[measles_data$town%in%towns,]
+  measles_data$time <- julian(measles_data$date,
+    origin=as.Date("1950-01-01"))/365.25+1950
+  measles_data <- measles_data[  
+    measles_data$time>1950 & measles_data$time<Tmax,]
+
+  dplyr::select(measles_data,dplyr::all_of(c("time","town","cases"))) -> measles_cases
     
-  demog[order(mean_pop[demog$town],
-    -as.numeric(demog$year),decreasing=T),] %>%
-  dplyr::filter(town%in%towns) -> measles_covar
+  measles_covar <- demog[order(mean_pop[demog$town],
+    -as.numeric(demog$year),decreasing=T) , ]
+  measles_covar <- measles_covar[measles_covar$town %in% towns , ]
   colnames(measles_covar)[2] <- "time"
 
   # note: London starts at 1939, others start at 1940

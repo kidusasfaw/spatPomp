@@ -64,6 +64,10 @@ setGeneric(
     standardGeneric("ibpf")
 )
 
+##' @name ibpf-missing
+##' @aliases ibpf,missing-method
+##' @rdname ibpf
+##' @export
 setMethod(
   "ibpf",
   signature=signature(data="missing"),
@@ -72,6 +76,10 @@ setMethod(
   }
 )
 
+##' @name ibpf-ANY
+##' @aliases ibpf,ANY-method
+##' @rdname ibpf
+##' @export
 setMethod(
   "ibpf",
   signature=signature(data="ANY"),
@@ -94,7 +102,7 @@ setMethod(
       cooling.fraction.50,
       block_size, block_list,spat_regression,
       ..., verbose = getOption("verbose", FALSE)) {
-
+    ep <- paste0("in ",sQuote("ibpf"),": ")
     if(missing(block_list) && missing(block_size))
       stop(ep,sQuote("block_list"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
 
@@ -116,13 +124,14 @@ setMethod(
     block_list <- lapply(block_list, as.integer)
 
 
-    if (missing(Np)) {
-      if (is.matrix(params)) {
-        Np <- ncol(params)
-      } else {
-        stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-      }
-    }
+## currently, ibpf always uses parameters taken from the model object
+#    if (missing(Np)) {
+#      if (is.matrix(params)) {
+#        Np <- ncol(params)
+#      } else {
+#        stop(ep,sQuote("Np")," must be specified",call.=FALSE)
+#      }
+#    }
 
     tryCatch(
       ib <- ibpf_internal(data,Nbpf=Nbpf,spat_regression=spat_regression,
@@ -168,6 +177,7 @@ ibpf_internal <- function (object,Nbpf,spat_regression,Np,
     pStop_(sQuote("Nbpf")," must be a positive integer.")
   Nbpf <- as.integer(Nbpf)
 
+  ## ibpf is not currently set up to work with .paramMatrix
   if (is.null(.paramMatrix)) {
     start <- coef(object)
   } else {

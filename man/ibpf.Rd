@@ -2,10 +2,18 @@
 % Please edit documentation in R/ibpf.R
 \name{ibpf}
 \alias{ibpf}
+\alias{ibpf-missing}
+\alias{ibpf,missing-method}
+\alias{ibpf-ANY}
+\alias{ibpf,ANY-method}
 \alias{ibpf-spatPomp}
 \alias{ibpf,spatPomp-method}
 \title{Iterated block particle filter (IBPF)}
 \usage{
+\S4method{ibpf}{missing}(data, ...)
+
+\S4method{ibpf}{ANY}(data, ...)
+
 \S4method{ibpf}{spatPomp}(
   data,
   Nbpf,
@@ -27,6 +35,8 @@
 or an object of class \sQuote{pomp},
 i.e., the output of another \pkg{pomp} calculation.
 Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
+
+\item{...}{If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
 \item{Nbpf}{the number of iterations of perturbed BPF.}
 
@@ -60,8 +70,6 @@ into blocks with size \code{block_size}.}
 an integer vector of neighboring units.}
 
 \item{spat_regression}{Fraction of each extended parameter regressed toward the unit mean.}
-
-\item{...}{If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }

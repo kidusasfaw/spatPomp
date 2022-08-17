@@ -251,7 +251,33 @@ Warning messages:
 > ## ____________________________________________
 > 
 > b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
+> head(b_sim1,10)
+# A tibble: 8 × 5
+   time .id   unitname       X       Y
+  <dbl> <ord> <chr>      <dbl>   <dbl>
+1     1 1     U1        0.0785  0.195 
+2     1 2     U1        0.0643  2.68  
+3     1 1     U2        0.280   0.562 
+4     1 2     U2       -0.701  -0.0707
+5     2 1     U1        0.0375 -0.631 
+6     2 2     U1        1.13   -0.705 
+7     2 1     U2        1.16    1.03  
+8     2 2     U2        0.0700  0.628 
 > b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
+> head(b_sim2,10)
+# A tibble: 10 × 5
+    time .id   unitname      X      Y
+   <dbl> <ord> <chr>     <dbl>  <dbl>
+ 1     1 data  U1        2.98   3.61 
+ 2     1 1     U1        0.543  0.449
+ 3     1 2     U1        0.690  1.40 
+ 4     1 data  U2        0.824  2.81 
+ 5     1 1     U2        1.13   0.461
+ 6     1 2     U2       -0.553  0.138
+ 7     2 data  U1        2.03   1.73 
+ 8     2 1     U1       -3.20  -2.31 
+ 9     2 2     U1       -0.636  1.07 
+10     2 data  U2       -0.759 -0.849
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
 > plot(b_model,type="l",log=FALSE)
