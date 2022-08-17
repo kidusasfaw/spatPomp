@@ -8,6 +8,7 @@
 ##' @param \dots additional parameters will be ignored
 ##' @name vec_rmeasure
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @rdname vec_rmeasure
 ##' @return An array of dimension \code{length(unit_names(object))} by \code{dim(x)[2]} by \code{dim(x)[3]}
 ##' representing each unit's simulated measurement assessed for each replicate in \code{x} for each observation time.

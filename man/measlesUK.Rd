@@ -18,6 +18,7 @@ Data includes bi-weekly case counts as well as births and population from 40 cit
 }
 \seealso{
 Other datasets: 
-\code{\link{city_data_UK}}
+\code{\link{city_data_UK}},
+\code{\link{he10}()}
 }
 \concept{datasets}

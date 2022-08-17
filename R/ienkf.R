@@ -8,6 +8,7 @@
 ##' @name ienkf
 ##' @rdname ienkf
 ##' @include spatPomp_class.R spatPomp.R enkf.R iter_filter.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @family spatPomp parameter estimation methods
 ##' @importFrom stats rnorm
@@ -29,6 +30,9 @@
 ##' }
 ##'
 ##' @references
+##'
+##' \asfaw2020
+##'
 ##' Evensen, G. (1994) Sequential data assimilation with a
 ##' nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
 ##' error statistics Journal of Geophysical Research: Oceans 99:10143--10162
@@ -103,7 +107,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
-  p_object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=FALSE)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
     shared_covarnames = object@shared_covarnames,
@@ -171,8 +175,8 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       variable=c("loglik",names(start))))
   traces[1L,] <- c(NA,start)
 
-  pompLoad(object,verbose=verbose)
-  on.exit(pompUnload(object,verbose=verbose))
+  pompLoad(object,verbose=FALSE)
+  on.exit(pompUnload(object,verbose=FALSE))
 
   paramMatrix <- partrans(object,paramMatrix,dir="toEst",
     .gnsi=gnsi)

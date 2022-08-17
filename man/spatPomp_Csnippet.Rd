@@ -93,3 +93,6 @@ bm_skel <- spatPomp_Csnippet(
   "
 )
 }
+\author{
+Kidus Asfaw
+}

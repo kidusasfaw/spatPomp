@@ -70,7 +70,12 @@
 ##' @include spatPomp_class.R get_covariate_names.R
 ##' @importFrom rlang .data
 ##' @inheritParams pomp::pomp
-##' @references \asfaw2020
+##' @author Kidus Asfaw, Edward L. Ionides, Aaron A. King
+##' @references
+##'
+##' \asfaw2020
+##'
+##' \king2016
 ##'
 NULL
 

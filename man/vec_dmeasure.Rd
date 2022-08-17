@@ -33,3 +33,6 @@ representing each unit's measurement density assessed for each replicate in \cod
 Evaluate the unit measurement model density function for each unit.
 This method is used primarily as part of likelihood evaluation and parameter inference algorithms.
 }
+\author{
+Kidus Asfaw
+}

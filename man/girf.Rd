@@ -46,7 +46,7 @@
 
 \item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
-\item{Ninter}{the number of intermediate resampling time points.}
+\item{Ninter}{the number of intermediate resampling time points. By default, this is set equal to the number of units.}
 
 \item{lookahead}{The number of future observations included in the guide function.}
 
@@ -76,22 +76,26 @@ The following methods are available for such an object:
 }
 
 \examples{
+# Complete examples are provided in the package tests
+\dontrun{
+#
 # Create a simulation of a Brownian motion
-b <- bm(U=3, N=10)
+b <- bm(U=2, N=5)
 
 # Run GIRF
 girfd_bm <- girf(b,
-                 Np = 100,
+                 Np = 10,
                  Ninter = length(unit_names(b)),
                  lookahead = 1,
-                 Nguide = 50
+                 Nguide = 10
 )
 # Get the likelihood estimate from GIRF
 logLik(girfd_bm)
 
 # Compare with the likelihood estimate from particle filter
-pfd_bm <- pfilter(b, Np = 500)
+pfd_bm <- pfilter(b, Np = 10)
 logLik(pfd_bm)
+}
 }
 \references{
 \park2020
@@ -104,8 +108,12 @@ Other particle filter methods:
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}

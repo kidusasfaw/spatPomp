@@ -5,6 +5,7 @@
 #' @name munit_measure
 #' @rdname munit_measure
 #' @include spatPomp_class.R spatPomp.R
+#' @author Kidus Asfaw
 #' @param object An object of class \code{spatPomp}
 #' @param x A state vector for all units
 #' @param vc The empirically calculated variance used to perform moment-matching
@@ -15,6 +16,8 @@
 #' @return An array with dimensions \code{dim(array.params)[1]} by \code{dim(x)[2]} by \code{length(unit)} by\code{length(time)}
 #' representing the moment-matched parameter set(s) corresponding to the variance of the measurements, \code{vc}, and the states, \code{x}.
 #' @examples
+#' # Complete examples are provided in the package tests
+#' \dontrun{
 #' b <- bm(U=3)
 #' s <- states(b)[,1,drop=FALSE]
 #' rownames(s) -> rn
@@ -29,6 +32,7 @@
 #'                       dimnames = list(params = rownames(p)))
 #' vc <- c(4, 9, 16); dim(vc) <- c(length(vc), 1, 1)
 #' munit_measure(b, x=s, vc=vc, Np=1, unit = 1, time=1, params=array.params)
+#' }
 #'
 NULL
 

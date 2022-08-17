@@ -39,3 +39,6 @@ dim(p) <- c(length(p),1); dimnames(p) <- list(param=rnp)
 o <- obs(b)[,1,drop=FALSE]
 runit_measure(b, x=s, unit=2, time=1, params=p)
 }
+\author{
+Kidus Asfaw
+}

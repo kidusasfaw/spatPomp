@@ -25,6 +25,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 ##' @name plot-igirfd_spatPomp
 ##' @rdname plot
 ##' @importFrom ggplot2 ggplot geom_line aes facet_wrap
+##' @importFrom graphics par
 ##' @aliases plot,igirfd_spatPomp-method
 ##' @return a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
 ##' the convergence record of running \code{igirf()} with respect to the likelihood and the parameters of the model.
@@ -37,7 +38,7 @@ setMethod(
     plot.df <- cbind(c(seq_len(dim(plot.df)[1])), plot.df)
     names(plot.df) <- c("iteration", cn)
     to.gather <- colnames(plot.df)[2:length(colnames(plot.df))]
-    to.plot <- plot.df %>% tidyr::gather_(key = "param", val = "value", to.gather) %>% tail(-1)
+    to.plot <- plot.df %>% tidyr::gather(key = "param", val = "value", tidyr::all_of(to.gather)) %>% tail(-1)
     ggplot2::ggplot(data = to.plot) +
       ggplot2::geom_line(mapping = ggplot2::aes(x = .data$iteration, y = .data$value)) +
       ggplot2::facet_wrap(~param, ncol = ncol, scales = "free")

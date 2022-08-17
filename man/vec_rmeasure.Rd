@@ -26,3 +26,6 @@ representing each unit's simulated measurement assessed for each replicate in \c
 \description{
 Simulate from the unit measurement model density function for each unit
 }
+\author{
+Kidus Asfaw
+}

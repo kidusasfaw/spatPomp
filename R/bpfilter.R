@@ -11,6 +11,7 @@
 ##' @name bpfilter
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @inheritParams abf
 ##'
@@ -23,19 +24,22 @@
 ##' @param \dots If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##'
 ##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=6, N=10)
+##' b <- bm(U=4, N=2)
 ##'
 ##' # Run BPF with the specified number of units per block
-##' bpfilterd_b1 <- bpfilter(b, Np = 100, block_size = 2)
+##' bpfilterd_b1 <- bpfilter(b, Np = 10, block_size = 2)
 ##'
 ##' # Run BPF with the specified partition
 ##' bpfilterd_b2 <- bpfilter(b,
-##'                          Np = 20,
-##'                          block_list = list(c(1,2), c(3,4), c(5,6)))
+##'                          Np = 10,
+##'                          block_list = list(c(1,2),c(3,4)) )
 ##'
 ##' # Get a likelihood estimate
 ##' logLik(bpfilterd_b2)
+##' }
 ##'
 ##' @return Upon successful completion, \code{bpfilter()} returns an object of class
 ##' \sQuote{bpfilterd_spatPomp} containing the algorithmic parameters used to run \code{bpfilter()}
@@ -45,8 +49,12 @@
 ##' Only one of \code{block_size} or \code{block_list} should be specified.
 ##' If both or neither is provided, an error is triggered.
 ##'
-##' @references \rebeschini2015
+##' @references
 ##'
+##' \rebeschini2015
+##' 
+##' \asfaw2020
+##' 
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{

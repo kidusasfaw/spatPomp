@@ -68,17 +68,12 @@ See below for some examples.
 The perturbations that are applied are normally distributed with the specified s.d.
 If parameter transformations have been supplied, then the perturbations are applied on the transformed (estimation) scale.}
 
-\item{cooling.type}{specifications for the cooling schedule,
+\item{cooling.type, cooling.fraction.50}{specifications for the cooling schedule,
 i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
-\item{cooling.fraction.50}{specifications for the cooling schedule,
-i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
-\code{cooling.type} specifies the nature of the cooling schedule.
-See below (under \dQuote{Specifying the perturbations}) for more detail.}
-
-\item{Ninter}{the number of intermediate resampling time points.}
+\item{Ninter}{the number of intermediate resampling time points. By default, this is set equal to the number of units.}
 
 \item{lookahead}{The number of future observations included in the guide function.}
 
@@ -110,6 +105,12 @@ The following methods are available for such an object:
 }
 }
 
+\examples{
+# Complete examples are provided in the package tests
+\dontrun{
+igirf(bm(U=2,N=4),Ngirf=2,rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),cooling.type="geometric",cooling.fraction.50=0.5,Np=10,Ninter=2,lookahead=1,Nguide=5)
+}
+}
 \references{
 \park2020
 
@@ -122,12 +123,16 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 
 Other spatPomp parameter estimation methods: 
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}
 \concept{spatPomp parameter estimation methods}

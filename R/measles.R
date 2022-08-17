@@ -4,16 +4,20 @@
 #' The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #' The data in the object is simulated using the process and measurement models of He et al. (2010).
 #'
+#' @name measles
+#' @rdname measles
+#' @author Edward L. Ionides
+#' @family spatPomp examples
+#'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
 #' @importFrom utils data read.csv write.table
 #' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.
-#' @param fixed_ivps a logical. If \code{TRUE} initial value parameters will be declared in the \code{globals} slot and
+#' @param fixed_ivps a logical. If \code{TRUE} initial value parameters will be
+#' declared in the \code{globals} slot, shared for each unit, and
 #' will not be part of the parameter vector.
-#' @param shared_ivps a logical. If \code{TRUE} and \code{fixed_ivps=TRUE} the values of \code{S_0}, \code{E_0} and \code{I_0} in the
-#' call to \code{measles} will be used as initial value parameters for all spatial units.
-#' @param S_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.
-#' @param E_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.
-#' @param I_0 a numeric. If \code{shared_ivps=TRUE} and \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.
+#' @param S_0 a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are susceptible.
+#' @param E_0 a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are exposed.
+#' @param I_0 a numeric. If \code{fixed_ivps=TRUE} this is the initial proportion of all of the spatial units that are infected.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
 #'
@@ -38,9 +42,12 @@
 #' 4. Bringing all the data and model components together to form a
 #'    spatPomp object via a call to spatPomp().
 #' @examples
+#' # Complete examples are provided in the package tests
+#' \dontrun{
 #' m <- measles(U = 5)
 #' # See all the model specifications of the object
 #' spy(m)
+#' }
 #' @export
 
 # NOTE: As indicated in the Note section of the documentation, this
@@ -49,7 +56,7 @@
 # instead an example of how one goes about going from getting data to creating
 # a spatPomp object.
 measles <- function(U=6,dt=2/365,
-                    fixed_ivps=TRUE,shared_ivps=TRUE,
+                    fixed_ivps=TRUE,
                     S_0=0.032, E_0=0.00005, I_0=0.00004){
 
   birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
@@ -108,23 +115,31 @@ measles <- function(U=6,dt=2/365,
   v_by_g_C_array <- to_C_array(v_by_g_C_rows)
   v_by_g_C <- Csnippet(paste0("const double v_by_g[",U,"][",U,"] = ",v_by_g_C_array,"; "))
 
-  if(fixed_ivps && shared_ivps){
-    ivps_C <- paste0("const double ", c("S_0_shared", "E_0_shared", "I_0_shared"), " = ", c(S_0, E_0, I_0), collapse= ";\n")
-    other_ivps_C <- paste0("const double ", c("S1_0", "E1_0", "I1_0"), " = ", c(S_0, E_0, I_0), collapse= ";\n")
-    ivps_C <- paste("const int fixed_ivps = 1", "const int shared_ivps = 1", ivps_C,other_ivps_C, ";", sep = ";\n")
+## for the C code, we define fixed IVPs and parametric IVPs,
+## but only the needed ones are actually used.
+  if(fixed_ivps){
+    ivps_fixed_C <- paste0("const double ", c("S_0_fixed", "E_0_fixed",
+      "I_0_fixed"), " = ", c(S_0, E_0, I_0), collapse= ";\n")
+    ivps_parametric_C <- paste0("const double ", c("S1_0", "E1_0", "I1_0"),
+      " = ", c(0, 0, 0), collapse= ";\n") ## defined but not used
+    ivps_C <- paste("const int fixed_ivps = 1", ivps_fixed_C,ivps_parametric_C, ";", sep = ";\n")
+  } else {
+    ivps_fixed_C <- paste0("const double ", c("S_0_fixed", "E_0_fixed",
+      "I_0_fixed"), " = ", c(0, 0, 0), collapse= ";\n") ## defined but not used
+    ivps_C <- paste("const int fixed_ivps = 0", ivps_fixed_C, ";",
+      sep = ";\n")
   }
   measles_globals <- Csnippet(
     paste(v_by_g_C, ivps_C, sep = ";\n")
   )
-
   measles_unit_statenames <- c('S','E','I','R','C')
   measles_RPnames <- c("alpha","iota","psi","R0","gamma","sigma","sigmaSE","cohort","amplitude","mu","rho","g")
 
-  if(fixed_ivps && shared_ivps){
+  if(fixed_ivps){
     measles_paramnames <- c(measles_RPnames)
   } else{
     measles_statenames <- paste0(rep(measles_unit_statenames,each=U),1:U)
-    measles_IVPnames <- paste0(measles_statenames[1:(4*U)],"_0")
+    measles_IVPnames <- paste0(measles_statenames[1:(3*U)],"_0")
     measles_paramnames <- c(measles_RPnames,measles_IVPnames)
   }
 
@@ -307,12 +322,12 @@ measles <- function(U=6,dt=2/365,
     double m;
     const double *pop = &pop1;
     int u;
-    if(fixed_ivps && shared_ivps){
+    if(fixed_ivps){
       for (u = 0; u < U; u++) {
         m = (float)(pop[u]);
-        S[u] = nearbyint(m*S_0_shared);
-        I[u] = nearbyint(m*I_0_shared);
-        E[u] = nearbyint(m*E_0_shared);
+        S[u] = nearbyint(m*S_0_fixed);
+        I[u] = nearbyint(m*I_0_fixed);
+        E[u] = nearbyint(m*E_0_fixed);
         R[u] = pop[u]-S[u]-E[u]-I[u];
         C[u] = 0;
       }
@@ -392,7 +407,7 @@ measles <- function(U=6,dt=2/365,
     }
   ')
 
-  if(fixed_ivps && shared_ivps){
+  if(fixed_ivps){
     measles_partrans <- parameter_trans(
       log=c("sigma", "gamma", "sigmaSE", "psi", "R0", "g"),
       logit=c("amplitude", "rho")

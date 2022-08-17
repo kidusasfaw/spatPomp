@@ -6,6 +6,10 @@
 #' though in this case an Euler approximation is exact at the evaluation
 #' times.
 #'
+#' @name bm
+#' @rdname bm
+#' @author Edward L. Ionides
+#' @family spatPomp examples
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of observation time steps to evolve the process.
 #' @param delta_t Process simulations are performed every \code{delta_t} time units
@@ -14,9 +18,14 @@
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' Brownian motion
 #' @examples
+#' # Complete examples are provided in the package tests
+#' \dontrun{
 #' b <- bm(U=4, N=20)
 #' # See all the model specifications of the object
 #' spy(b)
+#' # Examples of methodologies applied to this model
+#' # are provided in the tests directory
+#' }
 #' @export
 
 bm <- function(U=5,N=100,delta_t=0.1){

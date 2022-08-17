@@ -13,6 +13,7 @@
 ##' @name abfir
 ##' @rdname abfir
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @importFrom foreach %dopar%
 ##'
@@ -20,8 +21,10 @@
 ##' @inheritParams girf
 ##' @inheritParams pomp::pfilter
 ##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=3, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Create a neighborhood function mapping a point in space-time
 ##' # to a list of ``neighboring points" in space-time
@@ -32,14 +35,16 @@
 ##'   }
 ##'   return(nbhd_list)
 ##' }
-##' # Run ABFIR with specified number of Monte Carlo replicates and particles per replicate
+##' # Run ABFIR with specified number of Monte Carlo replicates and particles
+##' # per replicate
 ##' abfird_bm <- abfir(b,
 ##'                   Nrep = 2,
-##'                   Np=20,
+##'                   Np=10,
 ##'                   nbhd = bm_nbhd,
 ##'                   Ninter = length(unit_names(b)))
 ##' # Get the likelihood estimate from ABFIR
 ##' logLik(abfird_bm)
+##' }
 ##' @return Upon successful completion, \code{abfir()} returns an object of class
 ##' \sQuote{abfird_spatPomp} containing the algorithmic parameters used to run \code{abfir()}
 ##' and the estimated likelihood.
@@ -51,6 +56,7 @@
 ##' the data under the model. }
 ##' }
 ##'
+##' @references \ionides2021
 NULL
 
 setClass(

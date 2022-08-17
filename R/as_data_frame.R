@@ -65,7 +65,8 @@ setAs(
     to_arrange <- rlang::syms(c(timename, unitname, "stateobscovars"))
     to_final_select <- c(timename, unitname, unit_stateobscovars)
     gathered <- dat %>%
-      tidyr::gather_(key="stateobscovars", val="val", to_gather) %>%
+      tidyr::gather(key="stateobscovars", val="val",
+        tidyr::all_of(to_gather)) %>%
       dplyr::mutate(ui = get_unit_index_from_name_v(.data$stateobscovars))%>%
       dplyr::mutate(!!unitname := unit_names(from)[as.integer(.data$ui)]) %>%
       dplyr::select(-.data$ui) %>%
@@ -81,7 +82,7 @@ setAs(
     gathered <- gathered %>%
       dplyr::select(-.data$stateobscovars) %>%
       tidyr::spread(key = .data$stateobscovarstype, value = .data$val)%>%
-      dplyr::select(to_final_select) %>%
+      dplyr::select(dplyr::all_of(to_final_select)) %>%
       dplyr::arrange(!!rlang::sym(timename),
                      match(!!rlang::sym(unitname), unit_names(from)))
     gathered

@@ -47,12 +47,7 @@ See below for some examples.
 The perturbations that are applied are normally distributed with the specified s.d.
 If parameter transformations have been supplied, then the perturbations are applied on the transformed (estimation) scale.}
 
-\item{cooling.type}{specifications for the cooling schedule,
-i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
-\code{cooling.type} specifies the nature of the cooling schedule.
-See below (under \dQuote{Specifying the perturbations}) for more detail.}
-
-\item{cooling.fraction.50}{specifications for the cooling schedule,
+\item{cooling.type, cooling.fraction.50}{specifications for the cooling schedule,
 i.e., the manner and rate with which the intensity of the parameter perturbations is reduced with successive filtering iterations.
 \code{cooling.type} specifies the nature of the cooling schedule.
 See below (under \dQuote{Specifying the perturbations}) for more detail.}
@@ -91,6 +86,11 @@ The following methods are available for such an object:
 }
 }
 
+\references{
+\asfaw2020
+
+\ionides2021
+}
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
@@ -98,12 +98,16 @@ Other particle filter methods:
 \code{\link{bpfilter}()},
 \code{\link{enkf}()},
 \code{\link{girf}()},
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 
 Other spatPomp parameter estimation methods: 
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}
 \concept{spatPomp parameter estimation methods}

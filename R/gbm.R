@@ -5,6 +5,11 @@
 #' distance around a circle. The model is defined in continuous time, but
 #' an Euler approximation is used for this numerical implementation.
 #'
+#' @name lorenz
+#' @rdname lorenz
+#' @author Kidus Asfaw
+#' @family spatPomp examples
+#'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.
 #' @param delta_t process simulations are performed every \code{delta_t} time units
@@ -13,9 +18,15 @@
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' geometric Brownian motion
 #' @examples
+#' # Complete examples are provided in the package tests
+#' \dontrun{
 #' g <- gbm(U=4, N=20)
 #' # See all the model specifications of the object
 #' spy(g)
+#' }
+#'
+#' @references \asfaw2021thesis
+#'
 #' @export
 gbm <- function(U=5, N=100, delta_t=0.1, IVP_values = 1, delta_obs = 1){
   dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))

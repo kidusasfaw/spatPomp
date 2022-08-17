@@ -14,15 +14,17 @@
 ##' @param data A \code{spatPomp} object.
 ##' @param Np The number of Monte Carlo particles used to approximate the filter distribution.
 ##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=6, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Run EnKF
-##' enkfd_bm <- enkf(b, Np = 100)
+##' enkfd_bm <- enkf(b, Np = 20)
 ##'
 ##' # Get a likelihood estimate
 ##' logLik(enkfd_bm)
-
+##' }
 ##' @return
 ##' An object of class \sQuote{enkfd_spatPomp} that contains the estimate of the log likelihood
 ##' (via the \code{loglik} attribute), algorithmic parameters used to run \code{enkf()}. Also included

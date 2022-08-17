@@ -1,0 +1,359 @@
+
+R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> png(filename="bm-%02d.png",res=100)
+> library(spatPomp)
+Loading required package: pomp
+> 
+> 
+> # For CRAN tests, need to limit to two cores
+> # For covr, needs to be single core (https://github.com/r-lib/covr/issues/227)
+> doParallel::registerDoParallel(1)
+> doRNG::registerDoRNG(2)
+> 
+> b_model <- bm(U=2,N=2) 
+> 
+> ## ------------------------------------------------------------
+> ## The bm model provides a simple example to test other methods.
+> ## First, we test the filtering methods
+> ## ____________________________________________________________
+> 
+> ##
+> ## pfilter tested on bm
+> ##
+> 
+> b_pf <- pfilter(b_model,Np=10)
+> paste("bm pfilter loglik: ",logLik(b_pf))
+[1] "bm pfilter loglik:  -10.1282113760823"
+> 
+> ##
+> ## abf tested on bm. abf uses parallelization, so we also test that
+> ##
+> 
+> b_bag_nbhd <- function(object, time, unit) {
++   nbhd_list <- list()
++   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
++   return(nbhd_list)
++ }
+> 
+> b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
+Loading required package: foreach
+Loading required package: rngtools
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+> paste("bm abf loglik: ",logLik(b_abf))
+[1] "bm abf loglik:  -11.1757157432268"
+> 
+> ##
+> ## abfir tested on bm
+> ##
+> 
+> b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+> paste("bm abfir loglik: ",logLik(b_abfir))
+[1] "bm abfir loglik:  -12.3567049828198"
+> 
+> ##
+> ## bpfilter tested on bm
+> ##
+> 
+> b_bpfilter <- bpfilter(b_model, Np = 10, block_size = 1)
+> paste("bm bpfilter loglik: ",logLik(b_bpfilter))
+[1] "bm bpfilter loglik:  -11.5481233976632"
+> 
+> ##
+> ## enkf tested on bm
+> ##
+> 
+> b_enkf <- enkf(b_model, Np = 10)
+> paste("bm enkf loglik: ",logLik(b_enkf))
+[1] "bm enkf loglik:  -11.881051345158"
+> 
+> ##
+> ## girf tested on bm, both moment and bootstrap methods
+> ##
+> 
+> b_girf_mom <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
++   kind = 'moment')
+> paste("bm girf loglik, moment guide: ",logLik(b_girf_mom))
+[1] "bm girf loglik, moment guide:  -10.2333104944903"
+> 
+> b_girf_boot <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
++   kind = 'bootstrap')
+> paste("bm girf loglik, bootstrap guide: ",logLik(b_girf_boot))
+[1] "bm girf loglik, bootstrap guide:  -11.5486938817766"
+> 
+> 
+> ## ------------------------------------------------------------
+> ## Now, we test the inference methods
+> ## ____________________________________________________________
+> 
+> b_rw.sd <- rw.sd(rho=0.02,X1_0=ivp(0.02))
+> 
+> ##
+> ## igirf on bm
+> ##
+> ## A call to igirf using the moment-based guide function can test compiled
+> ## code for eunit_measure, munit_measure, vunit_measure, dunit_measure,
+> ## runit_measure, rprocess, skeleton, rinit and partrans. 
+> ##
+> ## we test both geometric and hyperbolic cooling
+> 
+> b_igirf_geom <- igirf(b_model,
++   Ngirf = 2,
++   rw.sd = b_rw.sd,
++   cooling.type = "geometric",
++   cooling.fraction.50 = 0.5,
++   Np=10,
++   Ninter = 2,
++   lookahead = 1,
++   Nguide = 5,
++   kind = 'moment',
++   verbose = FALSE
++ )
+> paste("bm igirf loglik, geometric cooling, verbose=F: ",logLik(b_igirf_geom))
+[1] "bm igirf loglik, geometric cooling, verbose=F:  -9.88324157650622"
+> 
+> b_igirf_hyp <- igirf(b_model,
++   Ngirf = 2,
++   rw.sd = b_rw.sd,
++   cooling.type = "hyperbolic",
++   cooling.fraction.50 = 0.5,
++   Np=10,
++   Ninter = 2,
++   lookahead = 1,
++   Nguide = 5,
++   kind = 'moment',
++   verbose = TRUE
++ )
+igirf iteration 1 of 2 completed with likelihood  -10.42318 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.39838507  1.00000000  1.00000000 -0.01712033  0.00000000 
+igirf iteration 2 of 2 completed with likelihood  -10.53336 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.39909286  1.00000000  1.00000000 -0.02358064  0.00000000 
+> paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",logLik(b_igirf_hyp))
+[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.5333644677903"
+> 
+> ##
+> ## ienkf on bm, with geometric and hyperbolic cooling
+> ##
+> 
+> b_ienkf_geom <- ienkf(b_model,
++   Nenkf=2,
++   Np = 10,
++   rw.sd=b_rw.sd,
++   cooling.type="geometric",
++   cooling.fraction.50 = 0.5,
++   verbose=FALSE
++ )
+> paste("bm ienkf loglik, geometric cooling, verbose=F: ",logLik(b_ienkf_geom))
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -8.67225329403963"
+> 
+> b_ienkf_hyp <- ienkf(b_model,
++   Nenkf=2,
++   Np = 10,
++   rw.sd=b_rw.sd,
++   cooling.type="hyperbolic",
++   cooling.fraction.50 = 0.5,
++   verbose=TRUE
++ )
+ienkf iteration 1 of 2 completed
+ienkf iteration 2 of 2 completed
+> paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",logLik(b_ienkf_hyp))
+[1] "bm ienkf loglik, hypoerbolic cooling, verbose=T:  -12.3584256637116"
+> 
+> ##
+> ## iubf on bm, with geometric and hyperbolic cooling
+> ##
+> 
+> b_iubf_geom <- iubf(b_model,
++   Nubf = 2,
++   Nrep_per_param = 3,
++   Nparam = 3,
++   nbhd = b_bag_nbhd,
++   prop = 0.8,
++   rw.sd =b_rw.sd,
++   cooling.type = "geometric",
++   cooling.fraction.50 = 0.5,
++   verbose=FALSE
++ )
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+3: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+4: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+> paste("bm iubf loglik, geometric cooling, verbose=F: ",logLik(b_iubf_geom))
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -12.0533421069986"
+> 
+> b_iubf_hyp <- iubf(b_model,
++   Nubf = 2,
++   Nrep_per_param = 3,
++   Nparam = 3,
++   nbhd = b_bag_nbhd,
++   prop = 0.8,
++   rw.sd =b_rw.sd,
++   cooling.type = "hyperbolic",
++   cooling.fraction.50 = 0.5,
++   verbose=TRUE
++ )
+working on observation times  1  in iteration  1 
+working on observation times  2  in iteration  1 
+iubf iteration 1 of 2 completed with log-likelihood -10.15053 
+       rho      sigma        tau       X1_0       X2_0 
+0.39798686 1.00000000 1.00000000 0.01860935 0.00000000 
+working on observation times  1  in iteration  2 
+working on observation times  2  in iteration  2 
+iubf iteration 2 of 2 completed with log-likelihood -17.15089 
+       rho      sigma        tau       X1_0       X2_0 
+0.39449768 1.00000000 1.00000000 0.03661311 0.00000000 
+Warning messages:
+1: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+2: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+3: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+4: In (function (obj, ex)  :
+  Foreach loop (doParallelMC) had changed the current RNG type: RNG was restored to same type, next state
+> paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",logLik(b_iubf_hyp))
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -17.1508893465284"
+> 
+> ## --------------------------------------------
+> ## using bm to test simulate and plot
+> ## ____________________________________________
+> 
+> b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
+> head(b_sim1,10)
+# A tibble: 8 × 5
+   time .id   unitname       X       Y
+  <dbl> <ord> <chr>      <dbl>   <dbl>
+1     1 1     U1        0.0785  0.195 
+2     1 2     U1        0.0643  2.68  
+3     1 1     U2        0.280   0.562 
+4     1 2     U2       -0.701  -0.0707
+5     2 1     U1        0.0375 -0.631 
+6     2 2     U1        1.13   -0.705 
+7     2 1     U2        1.16    1.03  
+8     2 2     U2        0.0700  0.628 
+> b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
+> head(b_sim2,10)
+# A tibble: 10 × 5
+    time .id   unitname      X      Y
+   <dbl> <ord> <chr>     <dbl>  <dbl>
+ 1     1 data  U1        2.98   3.61 
+ 2     1 1     U1        0.543  0.449
+ 3     1 2     U1        0.690  1.40 
+ 4     1 data  U2        0.824  2.81 
+ 5     1 1     U2        1.13   0.461
+ 6     1 2     U2       -0.553  0.138
+ 7     2 data  U1        2.03   1.73 
+ 8     2 1     U1       -3.20  -2.31 
+ 9     2 2     U1       -0.636  1.07 
+10     2 data  U2       -0.759 -0.849
+> b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
+> 
+> plot(b_model,type="l",log=FALSE)
+> b_sim3v2 <- b_sim3[[1]]
+> b_sim3v2@data <- exp(b_sim3v2@data)
+> plot(b_sim3v2,type="l",log=TRUE)
+> plot(b_sim3[[2]],type="h")
+> 
+> ## --------------------------------------------
+> ## using bm to test spatPomp workhorse functions, extending pomp:
+> ## vunit_measure, eunit_measure, munit_measure, dunit_measure
+> ##
+> ## these are tested implicitly in the methods, but here is
+> ## a more direct test
+> ## ____________________________________________
+> 
+> 
+> b_s <- states(b_model)[,1,drop=FALSE]
+> dim(b_s) <- c(dim(b_s),1)
+> dimnames(b_s) <- list(variable=dimnames(states(b_model))[[1]], rep=NULL)
+> b_p <- coef(b_model)
+> dim(b_p) <- c(length(b_p),1)
+> dimnames(b_p) <- list(param=names(coef(b_model)))
+> 
+> vunit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit   [,1]
+  [1,]    1
+
+> 
+> eunit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit        [,1]
+  [1,] 0.8235357
+
+> 
+> b_array.params <- array(b_p,
++   dim = c(length(b_p),length(unit_names(b_model)), 1, 1),
++   dimnames = list(params = rownames(b_p)))
+> b_vc <- c(4, 9) # this should have length equal to the number of units
+> dim(b_vc) <- c(length(b_vc), 1, 1)
+> 
+> munit_measure(b_model, x=b_s, vc=b_vc, Np=1, unit = 1, time=1,
++   params=b_array.params)
+, , 1, 1
+
+       
+params  [,1]
+  rho    0.4
+  sigma  1.0
+  tau    2.0
+  X1_0   0.0
+  X2_0   0.0
+
+> 
+> dunit_measure(b_model, y=obs(b_model)[,1,drop=FALSE],
++   x=b_s, unit=1, time=1, params=b_p)
+      time
+rep         [,1]
+  [1,] -1.112688
+> 
+> ## --------------------------------------------
+> ## using bm to test edge cases and utility functions
+> ## perhaps only of technical interest
+> ## ____________________________________________
+> 
+> print(b_model)
+<object of class ‘spatPomp’>
+> 
+> 
+> dev.off()
+null device 
+          1 
+> 
+> 

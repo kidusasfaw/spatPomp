@@ -4,6 +4,7 @@
 #' @name runit_measure
 #' @rdname runit_measure
 #' @include spatPomp_class.R spatPomp.R
+#' @author Kidus Asfaw
 #' @param object An object of class \code{spatPomp}
 #' @param x A state vector for all units
 #' @param unit The unit for which to simulate an observation

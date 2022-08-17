@@ -26,7 +26,22 @@ though in this case an Euler approximation is exact at the evaluation
 times.
 }
 \examples{
+# Complete examples are provided in the package tests
+\dontrun{
 b <- bm(U=4, N=20)
 # See all the model specifications of the object
 spy(b)
+# Examples of methodologies applied to this model
+# are provided in the tests directory
 }
+}
+\seealso{
+Other spatPomp examples: 
+\code{\link{he10}()},
+\code{\link{lorenz}()},
+\code{\link{measles}()}
+}
+\author{
+Edward L. Ionides
+}
+\concept{spatPomp examples}

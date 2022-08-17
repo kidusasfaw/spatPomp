@@ -7,6 +7,7 @@
 ##' @name igirf
 ##' @rdname igirf
 ##' @include spatPomp_class.R spatPomp.R girf.R iter_filter.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @family spatPomp parameter estimation methods
 ##' @importFrom stats weighted.mean
@@ -17,6 +18,11 @@
 ##' @param data an object of class \code{spatPomp} or \code{igirfd_spatPomp}
 ##' @param Ngirf the number of iterations of parameter-perturbed GIRF.
 ##'
+##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
+##' igirf(bm(U=2,N=4),Ngirf=2,rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),cooling.type="geometric",cooling.fraction.50=0.5,Np=10,Ninter=2,lookahead=1,Nguide=5)
+##' }
 ##' @return Upon successful completion, \code{igirf()} returns an object of class
 ##' \sQuote{igirfd_spatPomp}. This object contains the convergence record of the iterative algorithm with
 ##' respect to the likelihood and the parameters of the model (which can be accessed using the \code{traces}
@@ -133,7 +139,7 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,.gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
-  p_object <- pomp(object,...,verbose=verbose)
+  p_object <- pomp(object,...,verbose=FALSE)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
     shared_covarnames = object@shared_covarnames,
@@ -228,8 +234,8 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
       variable=c('loglik',names(start))))
   traces[1L,] <- c(NA,start)
 
-  pompLoad(object,verbose=verbose)
-  on.exit(pompUnload(object,verbose=verbose))
+  pompLoad(object,verbose=FALSE)
+  on.exit(pompUnload(object,verbose=FALSE))
 
   paramMatrix <- partrans(object,paramMatrix,dir="toEst",
     .gnsi=gnsi)

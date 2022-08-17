@@ -100,7 +100,7 @@ rhub:
 covr: covr.rds
 
 covr.rds: DESCRIPTION
-	$(REXE) -e 'library(covr); package_coverage(type="all") -> cov; report(cov,file="covr.html",browse=TRUE); saveRDS(cov,file="covr.rds")'
+	$(REXE) -e 'library(covr); package_coverage(type="tests") -> cov; report(cov,file="covr.html",browse=TRUE); saveRDS(cov,file="covr.rds")'
 
 xcovr: covr
 	$(REXE) -e 'library(covr); readRDS("covr.rds") -> cov; codecov(coverage=cov,token="$(TOKEN)",quiet=FALSE)'

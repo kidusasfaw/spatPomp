@@ -32,6 +32,8 @@ representing the moment-matched parameter set(s) corresponding to the variance o
 This is used in \code{girf()} and \code{igirf()} when they are run with \code{kind='moment'}.
 }
 \examples{
+# Complete examples are provided in the package tests
+\dontrun{
 b <- bm(U=3)
 s <- states(b)[,1,drop=FALSE]
 rownames(s) -> rn
@@ -46,5 +48,9 @@ array.params <- array(p,
                       dimnames = list(params = rownames(p)))
 vc <- c(4, 9, 16); dim(vc) <- c(length(vc), 1, 1)
 munit_measure(b, x=s, vc=vc, Np=1, unit = 1, time=1, params=array.params)
+}
 
+}
+\author{
+Kidus Asfaw
 }

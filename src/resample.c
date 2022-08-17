@@ -28,16 +28,3 @@ void nosort_resamp (int nw, double *w, int np, int *p, int offset)
 
 }
 
-SEXP systematic_resampling (SEXP weights)
-{
-  int n;
-  SEXP perm;
-
-  n = LENGTH(weights);
-  PROTECT(perm = NEW_INTEGER(n));
-  GetRNGstate();
-  nosort_resamp(n,REAL(weights),n,INTEGER(perm),1);
-  PutRNGstate();
-  UNPROTECT(1);
-  return(perm);
-}

@@ -6,33 +6,38 @@
 ##' @name girf
 ##' @rdname girf
 ##' @include spatPomp_class.R spatPomp.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##'
 ##'
 ##' @inheritParams abf
-##' @param Ninter the number of intermediate resampling time points.
+##' @param Ninter the number of intermediate resampling time points. By default, this is set equal to the number of units.
 ##' @param lookahead The number of future observations included in the guide function.
 ##' @param Nguide The number of simulations used to estimate state process uncertainty for each particle.
 ##' @param kind One of two types of guide function construction. Defaults to \code{'bootstrap'}. See Park and Ionides (2020) for more details.
 ##' @param tol If all of the guide function evaluations become too small (beyond floating-point precision limits), we set them to this value.
 ##'
 ##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
+##' #
 ##' # Create a simulation of a Brownian motion
-##' b <- bm(U=3, N=10)
+##' b <- bm(U=2, N=5)
 ##'
 ##' # Run GIRF
 ##' girfd_bm <- girf(b,
-##'                  Np = 100,
+##'                  Np = 10,
 ##'                  Ninter = length(unit_names(b)),
 ##'                  lookahead = 1,
-##'                  Nguide = 50
+##'                  Nguide = 10
 ##' )
 ##' # Get the likelihood estimate from GIRF
 ##' logLik(girfd_bm)
 ##'
 ##' # Compare with the likelihood estimate from particle filter
-##' pfd_bm <- pfilter(b, Np = 500)
+##' pfd_bm <- pfilter(b, Np = 10)
 ##' logLik(pfd_bm)
+##' }
 ##' @return Upon successful completion, \code{girf()} returns an object of class
 ##' \sQuote{girfd_spatPomp} which contains the algorithmic parameters that were used to
 ##' run \code{girf()} and the resulting log likelihood estimate.
