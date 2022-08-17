@@ -10,6 +10,7 @@
 ##' @name spatPomp_Csnippet
 ##' @rdname spatPomp_Csnippet
 ##' @include spatPomp_class.R spatPomp.R
+##' @author Kidus Asfaw
 ##'
 ##' @param code encodes a component of a spatiotemporal POMP model using \proglang{C} code
 ##' @param unit_statenames a subset of the \code{unit_statenames} slot of

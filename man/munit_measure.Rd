@@ -51,3 +51,6 @@ munit_measure(b, x=s, vc=vc, Np=1, unit = 1, time=1, params=array.params)
 }
 
 }
+\author{
+Kidus Asfaw
+}

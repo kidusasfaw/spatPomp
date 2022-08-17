@@ -8,6 +8,7 @@
 ##' @name ienkf
 ##' @rdname ienkf
 ##' @include spatPomp_class.R spatPomp.R enkf.R iter_filter.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @family spatPomp parameter estimation methods
 ##' @importFrom stats rnorm
@@ -29,6 +30,9 @@
 ##' }
 ##'
 ##' @references
+##'
+##' \asfaw2020
+##'
 ##' Evensen, G. (1994) Sequential data assimilation with a
 ##' nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
 ##' error statistics Journal of Geophysical Research: Oceans 99:10143--10162

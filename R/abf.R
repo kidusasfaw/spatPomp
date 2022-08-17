@@ -10,8 +10,13 @@
 ##' @name abf
 ##' @rdname abf
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @importFrom foreach %dopar%
+##' @references
+##'
+##' \ionides2021
+##'
 ##' @param object A \code{spatPomp} object.
 ##' @param \dots If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##' @param Np The number of particles used within each replicate for the adapted simulations.

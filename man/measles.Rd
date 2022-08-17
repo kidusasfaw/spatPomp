@@ -67,3 +67,13 @@ spy(m)
 \references{
 \geosphere
 }
+\seealso{
+Other spatPomp examples: 
+\code{\link{bm}()},
+\code{\link{he10}()},
+\code{\link{lorenz}()}
+}
+\author{
+Edward L. Ionides
+}
+\concept{spatPomp examples}

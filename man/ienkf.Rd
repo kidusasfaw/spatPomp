@@ -65,6 +65,8 @@ The following methods are available for such an object:
 }
 
 \references{
+\asfaw2020
+
 Evensen, G. (1994) Sequential data assimilation with a
 nonlinear quasi-geostrophic model using Monte Carlo methods to forecast
 error statistics Journal of Geophysical Research: Oceans 99:10143--10162
@@ -89,6 +91,9 @@ Other particle filter methods:
 Other spatPomp parameter estimation methods: 
 \code{\link{igirf}()},
 \code{\link{iubf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}
 \concept{spatPomp parameter estimation methods}

@@ -7,6 +7,7 @@
 ##' @name igirf
 ##' @rdname igirf
 ##' @include spatPomp_class.R spatPomp.R girf.R iter_filter.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @family spatPomp parameter estimation methods
 ##' @importFrom stats weighted.mean

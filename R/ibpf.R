@@ -13,6 +13,7 @@
 ##' @name ibpf
 ##' @rdname ibpf
 ##' @include spatPomp_class.R spatPomp.R bpfilter.R iter_filter.R
+##' @author Edward L. Ionides
 ##' @family particle filter methods
 ##' @family \pkg{spatPomp} filtering methods
 ##'
@@ -39,6 +40,8 @@
 ##' \describe{
 ##' \item{\code{\link{coef}}}{ gives the Monte Carlo estimate of the maximum likelihood. }
 ##' }
+##'
+##' @references \ionides2022
 ##'
 
 NULL

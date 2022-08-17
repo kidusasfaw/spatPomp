@@ -18,6 +18,11 @@
 #' be represented with a value for each unit, which should be the same for each
 #' unit in a valid model instance but may vary between units while optimizing.
 #'
+#' @name he10
+#' @rdname he10
+#' @author Edward L. Ionides
+#' @family spatPomp examples
+#'
 #' @param U A length-one numeric signifying the number of cities to be
 #' represented in the spatPomp object. Default U=20 gives all the towns
 #' studied by He et al., the 10 largest and 10 selected smaller towns.
@@ -28,6 +33,10 @@
 #' @param basic_params A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
+#'
+#' \he2010
+#'
+#' \ionides2022
 #'
 #' \geosphere
 #'

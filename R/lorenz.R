@@ -4,6 +4,11 @@
 #' \code{N} measurements made at times \eqn{t_n = n * delta_obs}, simulated using an Euler method
 #' with time increment \code{delta_t}.
 #'
+#' @name lorenz
+#' @rdname lorenz
+#' @author Edward L. Ionides
+#' @family spatPomp examples
+#'
 #' @param U A length-one numeric signifying the number of spatial units for the process.
 #' @param N A length-one numeric signifying the number of observations.
 #' @param delta_obs A length-one numeric giving the time between observations.
@@ -11,7 +16,12 @@
 #' @param regular_params A named numeric vector containing the values of the \code{F},
 #' \code{sigma} and \code{tau} parameters.
 #' \code{F=8} is a common value that causes chaotic behavior.
-#' @references \lorenz96
+#' @references
+#'
+#' \lorenz96
+#' 
+#' \ionides2021
+#' 
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a \code{U}-dimensional
 #' Lorenz 96 model
 #'

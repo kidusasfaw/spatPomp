@@ -42,3 +42,6 @@ o <- obs(b)[,1,drop=FALSE]
 vunit_measure(b, x=s, unit=2, time=1, params=p)
 }
 }
+\author{
+Kidus Asfaw
+}

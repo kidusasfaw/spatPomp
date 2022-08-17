@@ -11,6 +11,7 @@
 ##' @name bpfilter
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @inheritParams abf
 ##'
@@ -48,8 +49,12 @@
 ##' Only one of \code{block_size} or \code{block_list} should be specified.
 ##' If both or neither is provided, an error is triggered.
 ##'
-##' @references \rebeschini2015
+##' @references
 ##'
+##' \rebeschini2015
+##' 
+##' \asfaw2020
+##' 
 ##' @section Methods:
 ##' The following methods are available for such an object:
 ##' \describe{

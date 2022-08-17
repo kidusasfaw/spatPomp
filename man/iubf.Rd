@@ -86,6 +86,11 @@ The following methods are available for such an object:
 }
 }
 
+\references{
+\asfaw2020
+
+\ionides2021
+}
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
@@ -100,6 +105,9 @@ Other particle filter methods:
 Other spatPomp parameter estimation methods: 
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}
 \concept{spatPomp parameter estimation methods}

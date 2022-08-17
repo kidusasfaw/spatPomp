@@ -96,6 +96,9 @@ The following methods are available for such an object:
 }
 }
 
+\references{
+\ionides2022
+}
 \seealso{
 Other particle filter methods: 
 \code{\link{abfir}()},
@@ -106,6 +109,9 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
+}
+\author{
+Edward L. Ionides
 }
 \concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}

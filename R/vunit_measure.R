@@ -4,6 +4,7 @@
 #' @name vunit_measure
 #' @rdname vunit_measure
 #' @include spatPomp_class.R spatPomp.R
+#' @author Kidus Asfaw
 #' @param object An object of class \code{spatPomp}
 #' @param x A state vector for all units
 #' @param unit The unit for which to evaluate the variance

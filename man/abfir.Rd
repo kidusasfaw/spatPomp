@@ -91,6 +91,9 @@ abfird_bm <- abfir(b,
 logLik(abfird_bm)
 }
 }
+\references{
+\ionides2021
+}
 \seealso{
 Other particle filter methods: 
 \code{\link{abf}()},
@@ -101,5 +104,8 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}

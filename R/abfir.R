@@ -13,6 +13,7 @@
 ##' @name abfir
 ##' @rdname abfir
 ##' @include spatPomp_class.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @importFrom foreach %dopar%
 ##'
@@ -55,6 +56,7 @@
 ##' the data under the model. }
 ##' }
 ##'
+##' @references \ionides2021
 NULL
 
 setClass(

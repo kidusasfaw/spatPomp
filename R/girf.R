@@ -6,6 +6,7 @@
 ##' @name girf
 ##' @rdname girf
 ##' @include spatPomp_class.R spatPomp.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##'
 ##'

@@ -6,6 +6,7 @@
 ##' @name simulate
 ##' @rdname simulate
 ##' @include spatPomp_class.R spatPomp.R
+##' @author Kidus Asfaw
 ##'
 ##' @inheritParams pomp::simulate
 ##'
@@ -23,6 +24,7 @@
 ##' # Get 2 simulations from same model as data.frame
 ##' sims <- simulate(b, nsim=2, format='data.frame')
 ##' }
+##' @references \asfaw2020
 NULL
 
 setGeneric(

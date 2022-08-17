@@ -84,6 +84,8 @@ logLik(bpfilterd_b2)
 }
 \references{
 \rebeschini2015
+
+\asfaw2020
 }
 \seealso{
 Other particle filter methods: 
@@ -95,5 +97,8 @@ Other particle filter methods:
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
+}
+\author{
+Kidus Asfaw
 }
 \concept{particle filter methods}

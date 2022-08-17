@@ -5,6 +5,7 @@
 #' @name munit_measure
 #' @rdname munit_measure
 #' @include spatPomp_class.R spatPomp.R
+#' @author Kidus Asfaw
 #' @param object An object of class \code{spatPomp}
 #' @param x A state vector for all units
 #' @param vc The empirically calculated variance used to perform moment-matching

@@ -35,3 +35,13 @@ spy(b)
 # are provided in the tests directory
 }
 }
+\seealso{
+Other spatPomp examples: 
+\code{\link{he10}()},
+\code{\link{lorenz}()},
+\code{\link{measles}()}
+}
+\author{
+Edward L. Ionides
+}
+\concept{spatPomp examples}

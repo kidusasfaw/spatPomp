@@ -207,4 +207,9 @@ The five unit-level model components must be provided via C snippets. The remain
 }
 \references{
 \asfaw2020
+
+\king2016
+}
+\author{
+Kidus Asfaw, Edward L. Ionides, Aaron A. King
 }

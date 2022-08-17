@@ -13,6 +13,7 @@
 ##' @name vec_dmeasure
 ##' @include spatPomp_class.R
 ##' @rdname vec_dmeasure
+##' @author Kidus Asfaw
 ##' @return An array of dimension \code{length(unit_names(object))} by \code{dim(x)[2]} by \code{dim(x)[3]}
 ##' representing each unit's measurement density assessed for each replicate in \code{x} for each observation time.
 NULL

@@ -10,6 +10,7 @@
 ##' @name iubf
 ##' @rdname iubf
 ##' @include spatPomp_class.R abf.R iter_filter.R
+##' @author Kidus Asfaw
 ##' @family particle filter methods
 ##' @family spatPomp parameter estimation methods
 ##' @importFrom stats quantile
@@ -31,6 +32,13 @@
 ##' \describe{
 ##' \item{\code{\link{coef}}}{ extracts the point estimate }
 ##' }
+##' @references
+##'
+##' \asfaw2020
+##'
+##' \ionides2021
+##'
+
 NULL
 
 rw.sd <- safecall

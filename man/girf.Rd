@@ -113,4 +113,7 @@ Other particle filter methods:
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 }
+\author{
+Kidus Asfaw
+}
 \concept{particle filter methods}

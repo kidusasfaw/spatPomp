@@ -131,5 +131,8 @@ Other spatPomp parameter estimation methods:
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 }
+\author{
+Kidus Asfaw
+}
 \concept{particle filter methods}
 \concept{spatPomp parameter estimation methods}

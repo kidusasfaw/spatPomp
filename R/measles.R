@@ -4,6 +4,11 @@
 #' The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
 #' The data in the object is simulated using the process and measurement models of He et al. (2010).
 #'
+#' @name measles
+#' @rdname measles
+#' @author Edward L. Ionides
+#' @family spatPomp examples
+#'
 #' @param U A length-one numeric signifying the number of cities to be represented in the spatPomp object.
 #' @importFrom utils data read.csv write.table
 #' @param dt a numeric (in unit of years) that is used as the Euler time-increment for simulating measles data.

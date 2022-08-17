@@ -107,6 +107,10 @@ spy(m)
 }
 }
 \references{
+\he2010
+
+\ionides2022
+
 \geosphere
 
 \he2010
@@ -118,6 +122,11 @@ spy(m)
 \he2010
 }
 \seealso{
+Other spatPomp examples: 
+\code{\link{bm}()},
+\code{\link{lorenz}()},
+\code{\link{measles}()}
+
 Other datasets: 
 \code{\link{city_data_UK}},
 \code{\link{measlesUK}}
@@ -134,4 +143,8 @@ Other datasets:
 \code{\link{city_data_UK}},
 \code{\link{measlesUK}}
 }
+\author{
+Edward L. Ionides
+}
 \concept{datasets}
+\concept{spatPomp examples}

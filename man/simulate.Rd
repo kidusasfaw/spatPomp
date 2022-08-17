@@ -58,3 +58,9 @@ b <- bm(U=2, N=5)
 sims <- simulate(b, nsim=2, format='data.frame')
 }
 }
+\references{
+\asfaw2020
+}
+\author{
+Kidus Asfaw
+}
