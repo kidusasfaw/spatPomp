@@ -21,7 +21,10 @@
 ##' @examples
 ##' # Complete examples are provided in the package tests
 ##' \dontrun{
-##' igirf(bm(U=2,N=4),Ngirf=2,rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),cooling.type="geometric",cooling.fraction.50=0.5,Np=10,Ninter=2,lookahead=1,Nguide=5)
+##' igirf(bm(U=2,N=4),Ngirf=2,
+##'   rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),
+##'   cooling.type="geometric",cooling.fraction.50=0.5,
+##'   Np=10,Ninter=2,lookahead=1,Nguide=5)
 ##' }
 ##' @return Upon successful completion, \code{igirf()} returns an object of class
 ##' \sQuote{igirfd_spatPomp}. This object contains the convergence record of the iterative algorithm with

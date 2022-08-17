@@ -15,7 +15,7 @@
 ##' @include spatPomp_class.R spatPomp.R bpfilter.R iter_filter.R
 ##' @author Edward L. Ionides
 ##' @family particle filter methods
-##' @family \pkg{spatPomp} filtering methods
+##' @family spatPomp filtering methods
 ##'
 ##' @importFrom foreach %do%
 ##'

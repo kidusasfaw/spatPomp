@@ -113,5 +113,5 @@ Other particle filter methods:
 \author{
 Edward L. Ionides
 }
-\concept{\pkg{spatPomp} filtering methods}
 \concept{particle filter methods}
+\concept{spatPomp filtering methods}
