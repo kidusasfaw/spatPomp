@@ -15,7 +15,6 @@ SystemRequirements: For Windows users, Rtools (see https://cran.r-project.org/bi
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Contact: ionides at umich dot edu
 BugReports: https://github.com/kidusasfaw/spatPomp/issues/
 Depends: pomp (>= 4.1), R(>= 4.0.0), methods
 LinkingTo: pomp
