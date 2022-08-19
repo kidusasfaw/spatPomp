@@ -34,7 +34,7 @@
 #' \pkg{spatPomp} is provided under the \acronym{MIT} License.
 #'
 #' @references \asfaw2020
-#' @author Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron King
+#' @author Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King
 #'
 #' @seealso \link[=pomp-package]{pomp package}
 #'
