@@ -49,7 +49,7 @@ and compared on a growing body of models and datasets.
 \link[=pomp-package]{pomp package}
 }
 \author{
-Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron King
+Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King
 }
 \keyword{datasets}
 \keyword{models}
