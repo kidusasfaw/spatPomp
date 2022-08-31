@@ -5,7 +5,11 @@ library(spatPomp)
 # For CRAN tests, need to limit to two cores
 # For covr, needs to be single core (https://github.com/r-lib/covr/issues/227)
 doParallel::registerDoParallel(1)
-doRNG::registerDoRNG(2)
+
+set.seed(2)
+## doRNG::registerDoRNG(2)
+## using doRNG with 1 core leads to warnings: it seems to make
+## foreach confused about whether it is running in parallel or not.
 
 b_model <- bm(U=2,N=2) 
 
@@ -19,7 +23,7 @@ b_model <- bm(U=2,N=2)
 ##
 
 b_pf <- pfilter(b_model,Np=10)
-paste("bm pfilter loglik: ",logLik(b_pf))
+paste("bm pfilter loglik: ",round(logLik(b_pf),10))
 
 ##
 ## abf tested on bm. abf uses parallelization, so we also test that
@@ -32,28 +36,28 @@ b_bag_nbhd <- function(object, time, unit) {
 }
 
 b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
-paste("bm abf loglik: ",logLik(b_abf))
+paste("bm abf loglik: ",round(logLik(b_abf),10))
 
 ##
 ## abfir tested on bm
 ##
 
 b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
-paste("bm abfir loglik: ",logLik(b_abfir))
+paste("bm abfir loglik: ",round(logLik(b_abfir),10))
 
 ##
 ## bpfilter tested on bm
 ##
 
 b_bpfilter <- bpfilter(b_model, Np = 10, block_size = 1)
-paste("bm bpfilter loglik: ",logLik(b_bpfilter))
+paste("bm bpfilter loglik: ",round(logLik(b_bpfilter),10))
 
 ##
 ## enkf tested on bm
 ##
 
 b_enkf <- enkf(b_model, Np = 10)
-paste("bm enkf loglik: ",logLik(b_enkf))
+paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 
 ##
 ## girf tested on bm, both moment and bootstrap methods
@@ -61,11 +65,11 @@ paste("bm enkf loglik: ",logLik(b_enkf))
 
 b_girf_mom <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
   kind = 'moment')
-paste("bm girf loglik, moment guide: ",logLik(b_girf_mom))
+paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
 
 b_girf_boot <- girf(b_model,Np = 10,lookahead = 1,Nguide = 10,
   kind = 'bootstrap')
-paste("bm girf loglik, bootstrap guide: ",logLik(b_girf_boot))
+paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
 
 
 ## ------------------------------------------------------------
@@ -95,7 +99,7 @@ b_igirf_geom <- igirf(b_model,
   kind = 'moment',
   verbose = FALSE
 )
-paste("bm igirf loglik, geometric cooling, verbose=F: ",logLik(b_igirf_geom))
+paste("bm igirf loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_geom),10))
 
 b_igirf_hyp <- igirf(b_model,
   Ngirf = 2,
@@ -109,7 +113,7 @@ b_igirf_hyp <- igirf(b_model,
   kind = 'moment',
   verbose = TRUE
 )
-paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",logLik(b_igirf_hyp))
+paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
 
 ##
 ## ienkf on bm, with geometric and hyperbolic cooling
@@ -123,7 +127,7 @@ b_ienkf_geom <- ienkf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=FALSE
 )
-paste("bm ienkf loglik, geometric cooling, verbose=F: ",logLik(b_ienkf_geom))
+paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geom),10))
 
 b_ienkf_hyp <- ienkf(b_model,
   Nenkf=2,
@@ -133,7 +137,7 @@ b_ienkf_hyp <- ienkf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=TRUE
 )
-paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",logLik(b_ienkf_hyp))
+paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
 
 ##
 ## iubf on bm, with geometric and hyperbolic cooling
@@ -150,7 +154,7 @@ b_iubf_geom <- iubf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=FALSE
 )
-paste("bm iubf loglik, geometric cooling, verbose=F: ",logLik(b_iubf_geom))
+paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom),10))
 
 b_iubf_hyp <- iubf(b_model,
   Nubf = 2,
@@ -163,7 +167,7 @@ b_iubf_hyp <- iubf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=TRUE
 )
-paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",logLik(b_iubf_hyp))
+paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_iubf_hyp),10))
 
 ## --------------------------------------------
 ## using bm to test simulate and plot

@@ -42,8 +42,8 @@ Loading required package: pomp
 +   kind = 'bootstrap',
 +   verbose = FALSE
 + )
-> paste("lorenz igirf bootstrap hyperbolic loglik:", logLik(l_igirf))
-[1] "lorenz igirf bootstrap hyperbolic loglik: -26.2228972527576"
+> paste("lorenz igirf bootstrap hyperbolic loglik:", round(logLik(l_igirf),10))
+[1] "lorenz igirf bootstrap hyperbolic loglik: -26.2228972528"
 > 
 > 
 > 

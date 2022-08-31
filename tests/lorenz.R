@@ -21,7 +21,7 @@ l_igirf <- igirf(l,
   kind = 'bootstrap',
   verbose = FALSE
 )
-paste("lorenz igirf bootstrap hyperbolic loglik:", logLik(l_igirf))
+paste("lorenz igirf bootstrap hyperbolic loglik:", round(logLik(l_igirf),10))
 
 
 
