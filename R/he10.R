@@ -168,8 +168,6 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   
   measles_covar$lag_birthrate <- unlist(v[towns])
   measles_covar$births<- NULL
-  measles_covarnames <- paste0(rep(c("pop","lag_birthrate"),each=U),1:U)
-  measles_unit_covarnames <- c("pop","lag_birthrate")
 
   # Distance between two points on a sphere radius R
   # Adapted from geosphere package, which has been cited in the package
@@ -237,7 +235,6 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   )
 
   unit_statenames <- c('S','E','I','R','C')
-  measles_statenames <- paste0(rep(unit_statenames,each=U),1:U)
 
   measles_rprocess <- Csnippet('
     const double *amplitude=&amplitude1;

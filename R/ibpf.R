@@ -137,7 +137,7 @@ setMethod(
 #    }
 
     tryCatch(
-      ib <- ibpf_internal(data,Nbpf=Nbpf,spat_regression=spat_regression,
+      ibpf_internal(data,Nbpf=Nbpf,spat_regression=spat_regression,
         Np=Np,rw.sd=rw.sd,
 	sharedParNames=sharedParNames,
 	unitParNames=unitParNames,
@@ -344,12 +344,10 @@ ibpf_bpfilter <- function (object,block_list,params,
         sQuote("Np"),"!",call.=FALSE)
   }
   if (NCOL(params)==1) {
-    one.par <- TRUE
     coef(object) <- params
     params <- as.matrix(params)
   }
   paramnames <- rownames(params)
-  npars <- length(paramnames)
   if (is.null(paramnames))
     stop(ep,sQuote("params")," must have rownames",call.=FALSE)
 

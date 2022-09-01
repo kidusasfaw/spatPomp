@@ -317,6 +317,14 @@ params  [,1]
 rep         [,1]
   [1,] -1.112688
 > 
+> runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+        rep
+variable      [,1]
+      Y2 0.3545451
+
+> 
 > ## --------------------------------------------
 > ## using bm to test edge cases and utility functions
 > ## perhaps only of technical interest

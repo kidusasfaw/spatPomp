@@ -217,6 +217,8 @@ munit_measure(b_model, x=b_s, vc=b_vc, Np=1, unit = 1, time=1,
 dunit_measure(b_model, y=obs(b_model)[,1,drop=FALSE],
   x=b_s, unit=1, time=1, params=b_p)
 
+runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
+
 ## --------------------------------------------
 ## using bm to test edge cases and utility functions
 ## perhaps only of technical interest
