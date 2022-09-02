@@ -15,6 +15,12 @@ Kidus will email from kidusasfaw1990@gmail.com to confirm the transfer of the ma
 
 none
 
+## Quality control
+
+rhub::check_with_valgrind() found no memory leaks
+
+covr::package_coverage(type="tests") shows 83.1% coverage. The main functionality is tested, but not yet all edge cases. TODO.md identifies further increases in coverage as a future development goal.
+
 ## Test environments: rhub::check_for_cran()
 
 Unresolved notes other than change of maintainer:
