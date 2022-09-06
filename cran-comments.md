@@ -1,4 +1,17 @@
-## R CMD CHECK --as-cran results
+
+#### Resubmission comments
+
+spatPomp 0.30.0.1 is a resubmission of 0.30.0.0 ammended to fix an error
+arising on win-builder. The previous submission was tested only on
+rhub::check_for_cran() and apparently there is a relevant difference
+in treatment of foreach between
+rhub::check(path=".",platform="windows-x86_64-devel") and
+devtools::check_win_devel(). Running foreach in series by omitting the
+registration of a parallel backend is okay for both. Running the nominally
+parallel code by registering a 1-core parallel backend led to an error on
+win-builder.
+
+#### R CMD CHECK --as-cran results
 
 one NOTE:
 Maintainer: ‘Edward Ionides <ionides@umich.edu>’
@@ -9,19 +22,25 @@ Old maintainer(s):
   Kidus Asfaw <kasfaw@umich.edu>
 
 
-Kidus will email from kidusasfaw1990@gmail.com to confirm the transfer of the maintainer role.
+Kidus emailed to confirm the transfer of the maintainer role.
 
 ## Reverse dependencies
 
 none
 
-## Quality control
+#### Quality control
 
 rhub::check_with_valgrind() found no memory leaks
 
 covr::package_coverage(type="tests") shows 83.1% coverage. The main functionality is tested, but not yet all edge cases. TODO.md identifies further increases in coverage as a future development goal.
 
-## Test environments: rhub::check_for_cran()
+#### Test environments:
+
+## devtools::check_win_devel()
+
+No unresolved notes other than change of maintainer
+
+## rhub::check_for_cran()
 
 Unresolved notes other than change of maintainer:
 

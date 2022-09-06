@@ -3,8 +3,31 @@ library(spatPomp)
 
 
 # For CRAN tests, need to limit to two cores
+# https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
+chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+
+if (nzchar(chk) && chk == "TRUE") {
+  # use 2 cores for CRAN
+  num_workers <- 2L
+} else {
+  # use all cores when testing
+  num_workers <- parallel::detectCores()
+}
+num_workers <- 2L
+
+# if(.Platform$OS.type != "windows")
+#   doParallel::registerDoParallel(num_workers)
+
 # For covr, needs to be single core (https://github.com/r-lib/covr/issues/227)
-doParallel::registerDoParallel(1)
+
+# CRAN win-builder test fails in foreach for iubf when using a single
+# core registered with 
+###  doParallel::registerDoParallel(1)
+# so run without registering parallel backend at all
+# this generates an R warning
+# Warning message:
+# executing %dopar% sequentially: no parallel backend registered 
+# but that is not a major problem
 
 set.seed(2)
 ## doRNG::registerDoRNG(2)
