@@ -158,7 +158,7 @@ ibpf_internal <- function (object,Nbpf,spat_regression,Np,
    .gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
-  p_object <- pomp(object,verbose=verbose)
+  p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
                 unit_covarnames = object@unit_covarnames,
                 shared_covarnames = object@shared_covarnames,
