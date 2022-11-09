@@ -1,7 +1,7 @@
 
 #### Resubmission comments
 
-spatPomp 0.30.0.1 is a resubmission of 0.30.0.0 ammended to fix an error
+spatPomp 0.30.0.1 is a resubmission of 0.30.0.0 amended to fix an error
 arising on win-builder. The previous submission was tested only on
 rhub::check_for_cran() and apparently there is a relevant difference
 in treatment of foreach between
@@ -58,6 +58,7 @@ NOTE:
   Skipping checking HTML validation: no command 'tidy' found
   Skipping checking math rendering: package 'V8' unavailable
 
+* No explanation. Let me know if this needs attention *
 
 3.   Platform:   Ubuntu Linux 20.04.1 LTS, R-release, GCC
 

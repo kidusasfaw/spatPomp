@@ -332,6 +332,7 @@ setMethod(
       "abfd_spatPomp",
       object,
       Np=as.integer(Np),
+      Nrep=as.integer(Nrep),
       tol=tol,
       cond_loglik=cond_loglik,
       loglik=sum(cond_loglik)
