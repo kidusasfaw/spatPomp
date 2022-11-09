@@ -281,22 +281,7 @@ setMethod(
         return(nbhd_list)
       }
     }
-    ## single thread for testing
     mult_rep_output <- list()
-    ## for(i in 1:Nrep){
-    ##   mult_rep_output <- c(mult_rep_output,
-    ##                        abf_internal(
-    ##                          object=object,
-    ##                          Np=Np,
-    ##                          nbhd = nbhd,
-    ##                          tol=tol,
-    ##                          ...,
-    ##                          verbose=verbose)
-    ##                        )
-    ## }
-    ## end single thread for testing
-    ## begin multi-thread code
-    i <- 1
     mcopts <- list(set.seed=TRUE)
     mult_rep_output <- foreach::foreach(i=1:Nrep,
       .packages=c("pomp","spatPomp"),
@@ -310,18 +295,21 @@ setMethod(
                                                      )
     ntimes <- length(time(object))
     nunits <- length(unit_names(object))
+    # R CMD check --as-cran raises a flag that
+    # i is an undefined global variable in the foreach
+    # this irrelevant assignment seems to help
+    i <- NA 
     cond_loglik <- foreach::foreach(i=seq_len(nunits),
       .combine = 'rbind',
       .packages=c("pomp", "spatPomp"),
-      .options.multicore=mcopts) %dopar%
-      {
+      .options.multicore=mcopts) %dopar% {
         cond_loglik_u <- array(data = numeric(0), dim=c(ntimes))
         for (n in seq_len(ntimes)){
           log_mp_sum <- logmeanexp(vapply(mult_rep_output,
-            FUN = function(rep_output) return(rep_output@log_wm_times_wp_avg[i,n]),
+            FUN = function(x) return(x@log_wm_times_wp_avg[i,n]),
             FUN.VALUE = 1.0))
           log_p_sum <- logmeanexp(vapply(mult_rep_output,
-            FUN = function(rep_output) return(rep_output@log_wp_avg[i,n]),
+            FUN = function(x) return(x@log_wp_avg[i,n]),
             FUN.VALUE = 1.0))
           cond_loglik_u[n] <- log_mp_sum - log_p_sum
         }
