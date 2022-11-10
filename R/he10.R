@@ -71,9 +71,6 @@
 # parameters.  That could arise if initial values
 # are estimated using some other data.
 
-# NOTE: currently assumes measles is loaded from load("data/twentycities.rda").
-# In future, this could be included in the package.
-
 he10 <- function(U=6,dt=2/365, Tmax=1964,
   expandedParNames,
   basic_params =c(
@@ -95,10 +92,6 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   )
 ){
 
-## for debugging
-## U=6;dt=2/365; Tmax=1964;extendedParNames=c("R0","g","S_0");basic_params =c(alpha = 1,iota = 0,  R0 = 30,cohort = 0,amplitude = 0.5,gamma = 52,sigma = 52,mu = 0.02,sigmaSE = 0.15, rho = 0.5,psi = 0.15,g = 400,S_0 = 0.032, E_0 = 0.00005, I_0 = 0.00004)
-  
-
   if(U>20) stop("U <= 20")
   if(Tmax>1964) stop("Tmax <= 1964")
   birth_lag <- 4 # delay until births hit susceptibles, in years
@@ -107,11 +100,7 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   # to remove 3 data points
 
   measles_data <- spatPomp::he10measles
-  measles_data$date <- as.Date(measles_data$date)
-  measles_data$town <- as.character(measles_data$town)
-
   demog <-  spatPomp::he10demography
-  demog$town <- as.character(demog$town)
 
   # > measles_data[13769+1:5,]
   #            town       date cases

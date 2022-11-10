@@ -63,7 +63,6 @@ measles <- function(U=6,dt=2/365,
 
   # pre-vaccine biweekly measles reports for the largest 40 UK cities, sorted by size
   measlesUK <- spatPomp::measlesUK
-  measlesUK$city<-as.character(measlesUK$city)
   city_data_UK <- spatPomp::city_data_UK
 
   cities <- unique(measlesUK$city)[1:U]
