@@ -65,7 +65,7 @@ spy(m)
 }
 }
 \references{
-\geosphere
+\ionides2021
 }
 \seealso{
 Other spatPomp examples: 

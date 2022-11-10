@@ -15,8 +15,6 @@
 
 \newcommand{\Evensen2009}{G. Evensen. \emph{Data assimilation: the ensemble Kalman filter}. Springer-Verlag, 2009.}
 
-\newcommand{\geosphere}{Robert J. Hijmans (2019). The \pkg{geosphere} spherical trigonometry package. \url{https://CRAN.R-project.org/package=geosphere}.}
-
 \newcommand{\he2010}{He, D., Ionides, E. L., and King, A. A. (2010). Plug-and-play inference for disease dynamics: measles in large and small populations as a case study. \emph{Journal of the Royal Society Interface}, \bold{7}(43), 271-283. \doi{10.1098/rsif.2009.0151}}
 
 \newcommand{\ionides2006}{Ionides, E. L., Breto, C. and King, A. A. (2006) Inference for nonlinear dynamical systems. \emph{Proceedings of the National Academy of Sciences}, \bold{103(49)}, 18438--18443. \doi{10.1073/pnas.0603181103}}
@@ -27,7 +25,7 @@
 
 \newcommand{\ionides2021}{Ionides, E. L., Asfaw, K., Park, J., and King, A. A. (2021). Bagged filters for partially observed interacting systems. \emph{Journal of the American Statistical Association}, \doi{10.1080/01621459.2021.1974867}}
 
-\newcommand{\ionides2022}{Ionides, E. L., Ning, N., and Wheeler, J. (2022). An iterated block particle filter for inference on coupled dynamic systems with shared and unit-specific parameters. \emph{arXiv}:2206.03837, \doi{10.48550/arXiv.2206.03837}}
+\newcommand{\ionides2022}{Ionides, E. L., Ning, N., and Wheeler, J. (2022). An iterated block particle filter for inference on coupled dynamic systems with shared and unit-specific parameters. \emph{Statistica Sinica}, to appear. \doi{10.48550/arXiv.2206.03837}}
 
 \newcommand{\king2016}{King, A. A., Nguyen, D. and Ionides, E. L. (2016) Statistical Inference for Partially Observed Markov Processes via the R Package pomp. \emph{Journal of Statistical Software}, \bold{69(12)}, 1--43. \doi{10.18637/jss.v069.i12}}
 

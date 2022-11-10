@@ -111,8 +111,6 @@ spy(m)
 
 \ionides2022
 
-\geosphere
-
 \he2010
 
 \he2010

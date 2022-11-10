@@ -130,7 +130,7 @@ rows with equal values for the same time over all units must be supplied. Howeve
 using this argument.}
 
 \item{globals}{optional character;
-arbitrary C code that will be hard-coded into the shared-object library created when  C snippets are provided.
+arbitrary C code that will be hard-coded into the shared-object library created when C snippets are provided.
 If no C snippets are used, \code{globals} has no effect.}
 
 \item{paramnames}{optional character vector;
@@ -151,7 +151,10 @@ By default, a random filename is used.
 If the chosen filename would result in over-writing an existing file, an error is generated.}
 
 \item{shlib.args}{optional character variables.
-Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.}
+Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.
+One can, for example, specify libraries against which the C snippets are to be linked.
+In doing so, take care to make sure the appropriate header files are available to the C snippets, e.g., using the \code{globals} argument.
+See \code{\link[pomp]{Csnippet}} for more information.}
 
 \item{PACKAGE}{optional character;
 the name (without extension) of the external, dynamically loaded library in which any native routines are to be found.

@@ -38,8 +38,6 @@
 #'
 #' \ionides2022
 #'
-#' \geosphere
-#'
 #' @note This function goes through a typical workflow of constructing
 #' a typical spatPomp object (1-4 below). This allows the user to have a
 #' file that replicates the exercise of model building as well as function
@@ -66,10 +64,6 @@
 #' spy(m)
 #' }
 #' @export
-
-# NOTE: Code was written assuming that there are no fixed unit-specific
-# parameters.  That could arise if initial values
-# are estimated using some other data.
 
 he10 <- function(U=6,dt=2/365, Tmax=1964,
   expandedParNames,
@@ -158,30 +152,24 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   measles_covar$lag_birthrate <- unlist(v[towns])
   measles_covar$births<- NULL
 
-  # Distance between two points on a sphere radius R
-  # Adapted from geosphere package, which has been cited in the package
-  distHaversine <- function (p1, p2, r = 6378137)
-  {
-      toRad <- pi/180
-      p1 <- p1 * toRad
-      p2 <- p2 * toRad
-      p = cbind(p1[, 1], p1[, 2], p2[, 1], p2[, 2], as.vector(r))
-      dLat <- p[, 4] - p[, 2]
-      dLon <- p[, 3] - p[, 1]
-      a <- sin(dLat/2) * sin(dLat/2) + cos(p[, 2]) * cos(p[, 4]) *
-          sin(dLon/2) * sin(dLon/2)
-      a <- pmin(a, 1)
-      dist <- 2 * atan2(sqrt(a), sqrt(1 - a)) * p[, 5]
-      return(as.vector(dist))
+  # Haversine formula for great circle distance between two points
+  # on a sphere radius r. Here, r defaults to a mean radius for the
+  # earth, in miles.
+  distGreatCircle <- function(p1, p2, r = 3963.191) {
+    Lon1 <- p1[,1]*pi/180
+    Lat1 <- p1[,2]*pi/180
+    Lon2 <- p2[,1]*pi/180
+    Lat2 <- p2[,2]*pi/180
+    a <- sin((Lat2-Lat1)/2)^2 + cos(Lat1)*cos(Lat2)*sin((Lon2-Lon1)/2)^2
+    atan2(sqrt(a), sqrt(1 - a)) * 2 * r
   }
 
-  long_lat <- spatPomp::he10coordinates[
+  lon_lat <- spatPomp::he10coordinates[
     match(towns,spatPomp::he10coordinates$town),c("long","lat"),drop=FALSE]
   dmat <- matrix(0,U,U)
   for(u1 in 1:U) {
     for(u2 in 1:U) {
-      dmat[u1,u2] <- round(
-        distHaversine(long_lat[u1,],long_lat[u2,]) / 1609.344, 1)
+      dmat[u1,u2] <- round(distGreatCircle(lon_lat[u1,],lon_lat[u2,]),1)
     }
   }
 
