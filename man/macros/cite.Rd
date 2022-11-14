@@ -9,7 +9,7 @@
 
 \newcommand{\breto2019}{Breto, C., Ionides, E. L. and King, A. A. (2019) Panel Data Analysis via Mechanistic Models. \emph{Journal of the American Statistical Association}. \doi{10.1080/01621459.2019.1604367}}
 
-\newcommand{\dalziel2016}{Dalziel, Benjamin D. et al. (2016) Persistent chaos of measles epidemics in the prevaccination United States caused by a small change in seasonal transmission patterns. \emph{PLoS computational biology}, \bold{12(2)}, e1004655. \doi{10.5061/dryad.r4q34}}
+\newcommand{\dalziel2016}{Dalziel, Benjamin D. et al. (2016) Persistent chaos of measles epidemics in the prevaccination United States caused by a small change in seasonal transmission patterns. \emph{PLoS Computational Biology}, \bold{12(2)}, e1004655. \doi{10.5061/dryad.r4q34}}
 
 \newcommand{\Evensen1994}{G. Evensen. Sequential data assimilation with a nonlinear quasi-geostrophic model using Monte Carlo methods to forecast error statistics. \emph{Journal of Geophysical Research: Oceans} \bold{99}, 10143--10162, 1994.}
 
@@ -19,7 +19,7 @@
 
 \newcommand{\ionides2006}{Ionides, E. L., Breto, C. and King, A. A. (2006) Inference for nonlinear dynamical systems. \emph{Proceedings of the National Academy of Sciences}, \bold{103(49)}, 18438--18443. \doi{10.1073/pnas.0603181103}}
 
-\newcommand{\ionides2011}{Ionides, E. L., Bhadra, A., Atchade, Y. and King, A. A. (2011) Iterated filtering. \emph{Ann. Statist.}, \bold{39, no. 3}, 1776--1802. \doi{10.1214/11-AOS886}}
+\newcommand{\ionides2011}{Ionides, E. L., Bhadra, A., Atchade, Y. and King, A. A. (2011) Iterated filtering. \emph{Annals of Statists}, \bold{39, no. 3}, 1776--1802. \doi{10.1214/11-AOS886}}
 
 \newcommand{\ionides2015}{Ionides, E. L., Nguyen, D., Atchade, Y., Stoev, S. and King, A. A. (2015) Inference via iterated, perturbed Bayes maps. \emph{Proceedings of the National Academy of Sciences}, \bold{112(3)}, 719--724. \doi{10.1073/pnas.1410597112}}
 

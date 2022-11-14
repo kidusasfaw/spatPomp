@@ -34,7 +34,7 @@ An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatial
 \description{
 Generate a spatPomp object for measles in the top-\code{U} most populous cities in England and Wales.
 The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
-The data in the object is simulated using the process and measurement models of He et al. (2010).
+The data are from Dalziel et al (2016).
 }
 \note{
 This function goes through a typical workflow of constructing
@@ -66,6 +66,8 @@ spy(m)
 }
 \references{
 \ionides2021
+
+\dalziel2016
 }
 \seealso{
 Other spatPomp examples: 

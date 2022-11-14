@@ -2,7 +2,7 @@
 #'
 #' Generate a spatPomp object for measles in the top-\code{U} most populous cities in England and Wales.
 #' The model is adapted from He et al. (2010) with gravity transport following Park and Ionides (2019).
-#' The data in the object is simulated using the process and measurement models of He et al. (2010).
+#' The data are from Dalziel et al (2016).
 #'
 #' @name measles
 #' @rdname measles
@@ -22,6 +22,8 @@
 #' @references
 #'
 #' \ionides2021
+#'
+#' \dalziel2016
 #'
 #' @note This function goes through a typical workflow of constructing
 #' a typical spatPomp object (1-4 below). This allows the user to have a
@@ -65,6 +67,7 @@ measles <- function(U=6,dt=2/365,
   measlesUK <- spatPomp::measlesUK
   city_data_UK <- spatPomp::city_data_UK
 
+  if(U>40) stop("Require U<=40 since data are only available for 40 cities")
   cities <- unique(measlesUK$city)[1:U]
   measles_cases <- measlesUK[measlesUK$city %in% cities,c("year","city","cases")]
   measles_cases <- measles_cases[measles_cases$year>1949.99,]

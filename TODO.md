@@ -2,8 +2,6 @@
 
 22-10-05. Use spatPomp_Csnippet() where appropriate in the models.
 
-22-10-05. Add option for measles() to provide simulated data, and/or update documentation for measles().
-
 22-09-02. add more unit tests (current coverage 83.1%)
 
 22-09-02. add localization to enkf and ienkf
