@@ -46,7 +46,7 @@ setMethod(
                object,
                x,
                time,
-               unit,
+               as.integer(unit-1),
                params,
                TRUE)[unit,,1,drop=FALSE]
     pompUnload(object)

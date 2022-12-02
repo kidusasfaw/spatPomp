@@ -97,11 +97,11 @@ spatPomp_workhorse_templates <- quote(list(
       ),
       unit_states=list(
         names=unit_statenames,
-        cref="__x[__stateindex[{%v%}]+u-1]"
+        cref="__x[__stateindex[{%v%}]+u]"
       ),
       obstyp=list(
         names=unit_obsnames,
-        cref="__y[__obsindex[{%v%}]+u-1]"
+        cref="__y[__obsindex[{%v%}]+u]"
       ),
       lik=list(
         names="lik",
@@ -126,7 +126,7 @@ spatPomp_workhorse_templates <- quote(list(
       ),
       unit_states=list(
         names=unit_statenames,
-        cref="__x[__stateindex[{%v%}]+u-1]"
+        cref="__x[__stateindex[{%v%}]+u]"
       )
     )
   )

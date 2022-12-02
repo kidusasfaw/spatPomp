@@ -160,7 +160,7 @@ b_ienkf_hyp <- ienkf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=TRUE
 )
-paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
+paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
 
 ##
 ## iubf on bm, with geometric and hyperbolic cooling
@@ -168,8 +168,8 @@ paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",round(logLik(b_ienkf_h
 
 b_iubf_geom <- iubf(b_model,
   Nubf = 2,
-  Nrep_per_param = 3,
-  Nparam = 3,
+  Nrep_per_param = 5,
+  Nparam = 5,
   nbhd = b_bag_nbhd,
   prop = 0.8,
   rw.sd =b_rw.sd,
@@ -181,12 +181,13 @@ paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom)
 
 b_iubf_hyp <- iubf(b_model,
   Nubf = 2,
-  Nrep_per_param = 3,
-  Nparam = 3,
+  Nrep_per_param = 5,
+  Nparam = 5,
   nbhd = b_bag_nbhd,
   prop = 0.8,
   rw.sd =b_rw.sd,
-  cooling.type = "hyperbolic",
+#  cooling.type = "hyperbolic",
+  cooling.type = "geometric",
   cooling.fraction.50 = 0.5,
   verbose=TRUE
 )
@@ -223,6 +224,7 @@ dimnames(b_s) <- list(variable=dimnames(states(b_model))[[1]], rep=NULL)
 b_p <- coef(b_model)
 dim(b_p) <- c(length(b_p),1)
 dimnames(b_p) <- list(param=names(coef(b_model)))
+b_y <- obs(b_model)[,1,drop=FALSE]
 
 vunit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
 
@@ -237,7 +239,7 @@ dim(b_vc) <- c(length(b_vc), 1, 1)
 munit_measure(b_model, x=b_s, vc=b_vc, Np=1, unit = 1, time=1,
   params=b_array.params)
 
-dunit_measure(b_model, y=obs(b_model)[,1,drop=FALSE],
+dunit_measure(b_model, y=b_y,
   x=b_s, unit=1, time=1, params=b_p)
 
 runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
@@ -249,6 +251,22 @@ runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
 
 print(b_model)
 
+# check how u is treated by dunit_measure, runit_measure, eunit_measure,
+# vunit_measure and munit_measure,
+
+b_u <- spatPomp(b_model,
+  dunit_measure=spatPomp_Csnippet("lik=u;"),
+  eunit_measure=spatPomp_Csnippet("ey=u;"),
+  munit_measure=spatPomp_Csnippet("M_tau=u;"),
+  vunit_measure=spatPomp_Csnippet("vc=u;"),
+  runit_measure=spatPomp_Csnippet("u;")  
+)
+
+vunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
+eunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
+munit_measure(b_u, x=b_s, vc=b_vc, Np=1, unit = 2, time=1,params=b_array.params)
+dunit_measure(b_u, y=b_y,x=b_s, unit=2, time=1, params=b_p)
+runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
 
 dev.off()
 

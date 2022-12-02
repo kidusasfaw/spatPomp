@@ -1,5 +1,5 @@
 
-R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin17.0 (64-bit)
 
@@ -200,8 +200,8 @@ igirf iteration 2 of 2 completed with likelihood  -7.207082
 + )
 ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
-> paste("bm ienkf loglik, hypoerbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
-[1] "bm ienkf loglik, hypoerbolic cooling, verbose=T:  -11.3760139796"
+> paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -11.3760139796"
 > 
 > ##
 > ## iubf on bm, with geometric and hyperbolic cooling
@@ -209,8 +209,8 @@ ienkf iteration 2 of 2 completed
 > 
 > b_iubf_geom <- iubf(b_model,
 +   Nubf = 2,
-+   Nrep_per_param = 3,
-+   Nparam = 3,
++   Nrep_per_param = 5,
++   Nparam = 5,
 +   nbhd = b_bag_nbhd,
 +   prop = 0.8,
 +   rw.sd =b_rw.sd,
@@ -219,31 +219,32 @@ ienkf iteration 2 of 2 completed
 +   verbose=FALSE
 + )
 > paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom),10))
-[1] "bm iubf loglik, geometric cooling, verbose=F:  -12.4344017313"
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -12.2187469901"
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
-+   Nrep_per_param = 3,
-+   Nparam = 3,
++   Nrep_per_param = 5,
++   Nparam = 5,
 +   nbhd = b_bag_nbhd,
 +   prop = 0.8,
 +   rw.sd =b_rw.sd,
-+   cooling.type = "hyperbolic",
++ #  cooling.type = "hyperbolic",
++   cooling.type = "geometric",
 +   cooling.fraction.50 = 0.5,
 +   verbose=TRUE
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -10.20991 
+iubf iteration 1 of 2 completed with log-likelihood -11.57922 
          rho        sigma          tau         X1_0         X2_0 
- 0.400377478  1.000000000  1.000000000 -0.001886783  0.000000000 
+ 0.400002635  1.000000000  1.000000000 -0.008497559  0.000000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -12.45696 
-        rho       sigma         tau        X1_0        X2_0 
- 0.41471053  1.00000000  1.00000000 -0.02221359  0.00000000 
+iubf iteration 2 of 2 completed with log-likelihood -11.15303 
+         rho        sigma          tau         X1_0         X2_0 
+0.4084016639 1.0000000000 1.0000000000 0.0002841102 0.0000000000 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_iubf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.4569589663"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -11.1530296923"
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot
@@ -252,31 +253,31 @@ iubf iteration 2 of 2 completed with log-likelihood -12.45696
 > b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
 > head(b_sim1,10)
 # A tibble: 8 × 5
-   time .id   unitname      X       Y
-  <dbl> <ord> <chr>     <dbl>   <dbl>
-1     1 1     U1        0.127 -0.292 
-2     1 2     U1        0.269  0.755 
-3     1 1     U2       -0.538  0.464 
-4     1 2     U2        0.111 -0.0791
-5     2 1     U1        0.366 -0.411 
-6     2 2     U1        0.515  2.23  
-7     2 1     U2        0.403  0.260 
-8     2 2     U2       -0.749 -0.0796
+   time .id   unitname      X      Y
+  <dbl> <ord> <chr>     <dbl>  <dbl>
+1     1 1     U1       -1.42  -2.23 
+2     1 2     U1        0.366 -0.752
+3     1 1     U2       -1.91  -2.15 
+4     1 2     U2       -1.22  -1.93 
+5     2 1     U1       -3.00  -1.15 
+6     2 2     U1        0.650  0.921
+7     2 1     U2       -3.19  -3.70 
+8     2 2     U2       -0.923 -1.04 
 > b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
 > head(b_sim2,10)
 # A tibble: 10 × 5
-    time .id   unitname      X      Y
-   <dbl> <ord> <chr>     <dbl>  <dbl>
- 1     1 data  U1        2.98   3.61 
- 2     1 1     U1       -1.39  -2.74 
- 3     1 2     U1       -1.12  -0.753
- 4     1 data  U2        0.824  2.81 
- 5     1 1     U2        0.462  0.170
- 6     1 2     U2       -1.20  -2.57 
- 7     2 data  U1        2.03   1.73 
- 8     2 1     U1       -0.937 -0.449
- 9     2 2     U1        0.705 -0.392
-10     2 data  U2       -0.759 -0.849
+    time .id   unitname        X       Y
+   <dbl> <ord> <chr>       <dbl>   <dbl>
+ 1     1 data  U1        2.98     3.61  
+ 2     1 1     U1       -0.00459 -0.0769
+ 3     1 2     U1        1.73     1.51  
+ 4     1 data  U2        0.824    2.81  
+ 5     1 1     U2        0.104    0.714 
+ 6     1 2     U2        1.48     2.03  
+ 7     2 data  U1        2.03     1.73  
+ 8     2 1     U1       -0.811   -1.13  
+ 9     2 2     U1        3.10     3.87  
+10     2 data  U2       -0.759   -0.849 
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
 > plot(b_model,type="l",log=FALSE)
@@ -300,6 +301,7 @@ iubf iteration 2 of 2 completed with log-likelihood -12.45696
 > b_p <- coef(b_model)
 > dim(b_p) <- c(length(b_p),1)
 > dimnames(b_p) <- list(param=names(coef(b_model)))
+> b_y <- obs(b_model)[,1,drop=FALSE]
 > 
 > vunit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
 , , 1
@@ -336,7 +338,7 @@ params  [,1]
   X2_0   0.0
 
 > 
-> dunit_measure(b_model, y=obs(b_model)[,1,drop=FALSE],
+> dunit_measure(b_model, y=b_y,
 +   x=b_s, unit=1, time=1, params=b_p)
       time
 rep         [,1]
@@ -347,7 +349,7 @@ rep         [,1]
 
         rep
 variable      [,1]
-      Y2 0.3545451
+      Y2 0.3080259
 
 > 
 > ## --------------------------------------------
@@ -358,6 +360,53 @@ variable      [,1]
 > print(b_model)
 <object of class ‘spatPomp’>
 > 
+> # check how u is treated by dunit_measure, runit_measure, eunit_measure,
+> # vunit_measure and munit_measure,
+> 
+> b_u <- spatPomp(b_model,
++   dunit_measure=spatPomp_Csnippet("lik=u;"),
++   eunit_measure=spatPomp_Csnippet("ey=u;"),
++   munit_measure=spatPomp_Csnippet("M_tau=u;"),
++   vunit_measure=spatPomp_Csnippet("vc=u;"),
++   runit_measure=spatPomp_Csnippet("u;")  
++ )
+> 
+> vunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit   [,1]
+  [1,]    1
+
+> eunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit   [,1]
+  [1,]    1
+
+> munit_measure(b_u, x=b_s, vc=b_vc, Np=1, unit = 2, time=1,params=b_array.params)
+, , 1, 1
+
+       
+params  [,1]
+  rho    0.4
+  sigma  1.0
+  tau    1.0
+  X1_0   0.0
+  X2_0   0.0
+
+> dunit_measure(b_u, y=b_y,x=b_s, unit=2, time=1, params=b_p)
+      time
+rep    [,1]
+  [1,]    1
+> runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+        rep
+variable    [,1]
+      Y2 1.55928
+
 > 
 > dev.off()
 null device 

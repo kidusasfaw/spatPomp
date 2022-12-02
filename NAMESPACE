@@ -3,6 +3,7 @@
 S3method(as.data.frame,spatPomp)
 export("%>%")
 export(bm)
+export(bm2)
 export(gbm)
 export(he10)
 export(ienkf)

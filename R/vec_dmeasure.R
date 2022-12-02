@@ -48,7 +48,8 @@ vec_dmeasure.internal <- function (object, y, x, units, times, params, log = FAL
     if(length(dim(params)) > 2){
       params <- params[,i,]
     }
-    weights[i,,] <- .Call(do_dunit_measure,object,y,x,times,units[i],params,log,.gnsi)
+    weights[i,,] <- .Call(do_dunit_measure,object,y,x,times,
+      as.integer(units[i]-1),params,log,.gnsi)
   }
   pompUnload(object)
   return(weights)

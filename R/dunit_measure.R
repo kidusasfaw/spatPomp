@@ -44,7 +44,8 @@ setMethod(
     storage.mode(x) <- "double"
     storage.mode(unit) <- "integer"
     storage.mode(params) <- "double"
-    out <- .Call(do_dunit_measure,object,y,x,time,unit,params,log,TRUE)
+    out <- .Call(do_dunit_measure,object,y,x,time,
+      as.integer(unit-1),params,log,TRUE)
     pompUnload(object)
     out
   }
