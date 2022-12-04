@@ -60,8 +60,7 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
   if ((nreps % nrepsp != 0) || (nreps % nrepsx != 0))
     errorcall(R_NilValue,"larger number of replicates is not a multiple of smaller.");
 
-  PROTECT(pompfun = GET_SLOT(object,install("rmeasure"))); nprotect++;
-
+  PROTECT(pompfun = GET_SLOT(object,install("runit_measure"))); nprotect++;
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = (*gcn)(GET_SLOT(object,install("covar")))); nprotect++;
@@ -104,6 +103,7 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
     // address of native routine
     *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
+    // create array to store results
     PROTECT(Y = ret_array(nobs,nreps,ntimes,Onames)); nprotect++;
     yt = REAL(Y);
 

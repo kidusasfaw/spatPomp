@@ -126,15 +126,12 @@ bm <- function(U=5,N=100,delta_t=0.1){
   ")
 
   bm_dunit_measure <- Csnippet("
-    //double tol = 1.0e-18;
     lik = dnorm(Y,X,tau,1);
     if(!give_log) lik = exp(lik);
   ")
 
   bm_runit_measure <- Csnippet("
-    double tol = pow(1.0e-18,U);
-    double Y;
-    Y = rnorm(X,tau+tol);
+    Y = rnorm(X,tau);
   ")
 
   bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time, factor(.data$unit, levels = bm_unitnames_level)),

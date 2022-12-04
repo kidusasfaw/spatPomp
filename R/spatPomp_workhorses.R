@@ -112,8 +112,8 @@ spatPomp_workhorse_templates <- quote(list(
   runit_measure=list(
     slotname="runit_measure",
     Cname="__spatPomp_runit_measure",
-    proto=quote(runit_measure(x,t,d,params,log,...)),
-    header="\nvoid __spatPomp_runit_measure (const double *__y, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int u)\n{\n",
+    proto=quote(runit_measure(x,t,d,params,...)),
+    header="\nvoid __spatPomp_runit_measure (double *__y_u, const double *__x, const double *__p, const int *__obsindex, const int *__stateindex, const int *__parindex, const int *__covindex, int __ncovars, const double *__covars, double t, int u)\n{\n",
     footer="\n}\n\n",
     vars=list(
       params=list(
@@ -127,7 +127,10 @@ spatPomp_workhorse_templates <- quote(list(
       unit_states=list(
         names=unit_statenames,
         cref="__x[__stateindex[{%v%}]+u]"
-      )
+      ),
+      Y=list(
+        names="Y",
+	cref="__y_u[0]")
     )
   )
 ))

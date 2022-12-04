@@ -252,14 +252,15 @@ runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
 print(b_model)
 
 # check how u is treated by dunit_measure, runit_measure, eunit_measure,
-# vunit_measure and munit_measure,
+# vunit_measure and munit_measure. this should output unit-1 to
+# be consistent with Csnippet indexing.
 
 b_u <- spatPomp(b_model,
   dunit_measure=spatPomp_Csnippet("lik=u;"),
   eunit_measure=spatPomp_Csnippet("ey=u;"),
   munit_measure=spatPomp_Csnippet("M_tau=u;"),
   vunit_measure=spatPomp_Csnippet("vc=u;"),
-  runit_measure=spatPomp_Csnippet("u;")  
+  runit_measure=spatPomp_Csnippet("Y=u;")  
 )
 
 vunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)

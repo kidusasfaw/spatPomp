@@ -123,7 +123,6 @@ gbm <- function(U=5, N=100, delta_t=0.1, IVP_values = 1, delta_obs = 1){
 
   gbm_runit_measure <- Csnippet("
   double tol = pow(1.0e-18,U);
-  double Y;
   Y = X*exp(rnorm(0,tau+tol));
   ")
 

@@ -348,8 +348,8 @@ rep         [,1]
 , , 1
 
         rep
-variable      [,1]
-      Y2 0.3080259
+variable       [,1]
+      Y1 -0.1071652
 
 > 
 > ## --------------------------------------------
@@ -361,14 +361,15 @@ variable      [,1]
 <object of class ‘spatPomp’>
 > 
 > # check how u is treated by dunit_measure, runit_measure, eunit_measure,
-> # vunit_measure and munit_measure,
+> # vunit_measure and munit_measure. this should output unit-1 to
+> # be consistent with Csnippet indexing.
 > 
 > b_u <- spatPomp(b_model,
 +   dunit_measure=spatPomp_Csnippet("lik=u;"),
 +   eunit_measure=spatPomp_Csnippet("ey=u;"),
 +   munit_measure=spatPomp_Csnippet("M_tau=u;"),
 +   vunit_measure=spatPomp_Csnippet("vc=u;"),
-+   runit_measure=spatPomp_Csnippet("u;")  
++   runit_measure=spatPomp_Csnippet("Y=u;")  
 + )
 > 
 > vunit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
@@ -404,8 +405,8 @@ rep    [,1]
 , , 1
 
         rep
-variable    [,1]
-      Y2 1.55928
+variable [,1]
+      Y1    1
 
 > 
 > dev.off()

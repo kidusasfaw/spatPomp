@@ -137,7 +137,6 @@ lorenz <- function(U=5,
 
   lorenz_runit_measure <- Csnippet("
     double tol = pow(1.0e-18,U);
-    double Y;
     Y = rnorm(X,tau+tol);
   ")
 
