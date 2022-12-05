@@ -82,7 +82,7 @@ h_ibpf <- ibpf(h_model,
   block_list=block_list
 )
 
-paste("ibpfilter logLik for he10 model:",logLik(bpfilter(h_model,Np=10,block_size=1)))
+paste("ibpf logLik for he10 model:",logLik(bpfilter(h_ibpf,Np=10,block_size=1)))
 
 
 

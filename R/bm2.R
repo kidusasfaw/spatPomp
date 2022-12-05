@@ -101,7 +101,7 @@ bm2 <- function(U=5,N=100,delta_t=0.1,
     }
     for (u = 0 ; u < U ; u++) {
       for (v=0; v < U ; v++) {
-        X[u] += dW[v]*pow(rho[u*rho_unit,dist[u][v]]);
+        X[u] += dW[v]*pow(rho[u*rho_unit],dist[u][v]);
       }
     }
   ", unit_statenames = c("X"))
@@ -157,16 +157,13 @@ bm2 <- function(U=5,N=100,delta_t=0.1,
 
   bm2_dunit_measure <- Csnippet("
     const double *tau = &tau1;
-    //double tol = 1.0e-18;
     lik = dnorm(Y,X,tau[u*tau_unit],1);
     if(!give_log) lik = exp(lik);
   ")
 
   bm2_runit_measure <- Csnippet("
     const double *tau = &tau1;
-    double tol = pow(1.0e-18,U);
-    double Y;
-    Y = rnorm(X,tau[u*tau_unit]+tol);
+    Y = rnorm(X,tau[u*tau_unit]);
   ")
 
 log_unit_names <- c("sigma", "tau")

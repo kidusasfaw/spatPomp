@@ -1,5 +1,5 @@
 
-R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin17.0 (64-bit)
 
@@ -111,8 +111,8 @@ Loading required package: pomp
 +   block_list=block_list
 + )
 > 
-> paste("ibpfilter logLik for he10 model:",logLik(bpfilter(h_model,Np=10,block_size=1)))
-[1] "ibpfilter logLik for he10 model: -3881.65048986357"
+> paste("ibpf logLik for he10 model:",logLik(bpfilter(h_ibpf,Np=10,block_size=1)))
+[1] "ibpf logLik for he10 model: -5892.02352225529"
 > 
 > 
 > 
