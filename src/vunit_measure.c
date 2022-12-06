@@ -16,7 +16,7 @@ static R_INLINE SEXP ret_array (int nunits, int nreps, int ntimes) {
   return F;
 }
 
-SEXP do_theta_to_v (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
+SEXP do_vunit_measure (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi){
   int nprotect = 0;
   pompfunmode mode = undef;
   int ntimes, nunits, nvars, npars, ncovars, nreps, nrepsx, nrepsp;

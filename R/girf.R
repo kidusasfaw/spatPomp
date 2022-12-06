@@ -338,7 +338,7 @@ momgirf.internal <- function (object,
         skel <- X
       }
       meas_var_skel <- tryCatch(
-        .Call(do_theta_to_v,
+        .Call(do_vunit_measure,
           object=object,
           X=skel,
           Np = as.integer(Np[1]),
@@ -356,7 +356,7 @@ momgirf.internal <- function (object,
       inflated_var <- meas_var_skel + fcst_var_upd
       array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
       mmp <- tryCatch(
-        .Call(do_v_to_theta,
+        .Call(do_munit_measure,
           object=object,
           X=skel,
           vc=inflated_var,

@@ -222,7 +222,7 @@ abfir_internal <- function (object, Np, nbhd,
         skel <- xp
       }
       meas_var_skel <- tryCatch(
-        .Call(do_theta_to_v,
+        .Call(do_vunit_measure,
           object=object,
           X=skel,
           Np = as.integer(Np[1]),
@@ -240,7 +240,7 @@ abfir_internal <- function (object, Np, nbhd,
       array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np, 1), dimnames = list(params = names(params)))
 
       mmp <- tryCatch(
-        .Call(do_v_to_theta,
+        .Call(do_munit_measure,
           object=object,
           X=skel,
           vc=inflated_var,

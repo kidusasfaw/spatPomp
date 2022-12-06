@@ -54,12 +54,12 @@ extern SEXP girf_computations(SEXP x, SEXP params, SEXP Np, SEXP trackancestry, 
 extern SEXP iabf_computations(SEXP x, SEXP params, SEXP Np, SEXP rw_sd, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP onepar, SEXP weights);
 // fcstsampvar.c
 extern SEXP do_fcst_samp_var(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
-// v_to_theta.c
-extern SEXP do_v_to_theta(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
-// theta_to_v.c
-extern SEXP do_theta_to_v(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
-// theta_to_e.c
-extern SEXP do_theta_to_e(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+// munit_measure.c
+extern SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+// vunit_measure.c
+extern SEXP do_vunit_measure(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
+// eunit_measure.c
+extern SEXP do_eunit_measure(SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SEXP gnsi);
 // resample.c
 extern void nosort_resamp(int nw, double *w, int np, int *p, int offset);
 extern SEXP systematic_resampling(SEXP weights);

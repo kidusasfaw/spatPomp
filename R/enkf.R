@@ -163,7 +163,7 @@ enkf.internal <- function (object,
 
                                         # ensemble of forecasts
     Y <- tryCatch(
-      .Call(do_theta_to_e,
+      .Call(do_eunit_measure,
         object=object,
         X=X,
         Np = as.integer(Np[1]),
@@ -176,7 +176,7 @@ enkf.internal <- function (object,
     )
                                         # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
-      .Call(do_theta_to_v,
+      .Call(do_vunit_measure,
         object=object,
         X=X,
         Np = as.integer(Np[1]),

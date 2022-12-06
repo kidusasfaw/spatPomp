@@ -19,9 +19,9 @@ static const R_CallMethodDef callMethods[] = {
   {"girf_computations", (DL_FUNC) &girf_computations, 9},
   {"bpfilter_computations", (DL_FUNC) &bpfilter_computations, 6},
   {"do_fcst_samp_var", (DL_FUNC) &do_fcst_samp_var, 6},
-  {"do_v_to_theta", (DL_FUNC) &do_v_to_theta, 7},
-  {"do_theta_to_v", (DL_FUNC) &do_theta_to_v, 6},
-  {"do_theta_to_e", (DL_FUNC) &do_theta_to_e, 6},
+  {"do_munit_measure", (DL_FUNC) &do_munit_measure, 7},
+  {"do_vunit_measure", (DL_FUNC) &do_vunit_measure, 6},
+  {"do_eunit_measure", (DL_FUNC) &do_eunit_measure, 6},
   {NULL, NULL, 0}
 };
 

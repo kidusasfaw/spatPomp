@@ -382,7 +382,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         skel <- X
       }
       meas_var_skel <- tryCatch(
-        .Call(do_theta_to_v,
+        .Call(do_vunit_measure,
           object=object,
           X=skel,
           Np = as.integer(Np[1]),
@@ -400,7 +400,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
       array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
       for(i in 1:length(unit_names(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
       mmp <- tryCatch(
-        .Call(do_v_to_theta,
+        .Call(do_munit_measure,
           object=object,
           X=skel,
           vc=inflated_var,

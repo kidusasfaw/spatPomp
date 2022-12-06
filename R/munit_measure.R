@@ -51,7 +51,7 @@ setMethod(
     storage.mode(params) <- "double"
     storage.mode(vc) <- "double"
     storage.mode(unit) <- "integer"
-    out <- .Call(do_v_to_theta,
+    out <- .Call(do_munit_measure,
           object=object,
           X=x,
           vc=vc,

@@ -265,7 +265,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
 
                                         # ensemble of forecasts
     Y <- tryCatch(
-      .Call(do_theta_to_e,
+      .Call(do_eunit_measure,
         object=object,
         X=X,
         Np = as.integer(Np),
@@ -280,7 +280,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
 
                                         # variance of artificial noise (i.e. R) computed using vmeasure
     meas_var <- tryCatch(
-      .Call(do_theta_to_v,
+      .Call(do_vunit_measure,
         object=object,
         X=X,
         Np = as.integer(Np[1]),

@@ -1,5 +1,11 @@
 # spatPomp to-do list
 
+22-12-06. rmeasure and dmeasure could be built using runit_measure and dunit_measure if those are supplied.
+
+22-12-06. note that eunit_measure, vunit_measure and munit_measure calculate for all units and subset out the requested ones. this could lead to inefficient code when not used in a vectorized way.
+
+22-12-06. dunit_measure and runit_measure could be vectorized to prevent the need for vec_dmeasure and vec_rmeasure.
+
 22-10-05. Use spatPomp_Csnippet() where appropriate in the models.
 
 22-09-02. add more unit tests (current coverage 83.1%)
