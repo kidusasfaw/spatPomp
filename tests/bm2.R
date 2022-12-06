@@ -30,6 +30,7 @@ b2_ibpf <- ibpf(b2,
 
 paste("ibpf logLik for b2 model:",logLik(bpfilter(b2_ibpf,Np=10,block_size=1)))
 
+paste("kf logLik for b2:",bm2_kalman_logLik(b2))
 
 
 

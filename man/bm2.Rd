@@ -4,7 +4,14 @@
 \alias{bm2}
 \title{Brownian motion spatPomp generator with shared or unit-specific parameters}
 \usage{
-bm2(U = 5, N = 100, delta_t = 0.1, shared_names, unit_specific_names)
+bm2(
+  U = 5,
+  N = 100,
+  delta_t = 0.1,
+  unit_specific_names = "rho",
+  shared_names = NULL,
+  unit_params = c(rho = 0.4, sigma = 1, tau = 1, X_0 = 0)
+)
 }
 \arguments{
 \item{U}{A length-one numeric signifying dimension of the process.}
@@ -14,11 +21,14 @@ bm2(U = 5, N = 100, delta_t = 0.1, shared_names, unit_specific_names)
 \item{delta_t}{Process simulations are performed every \code{delta_t} time units
 whereas observations occur every one time unit}
 
-\item{shared_names}{identifies parameters that have common shared value for all units, which by default is all parameters.}
-
 \item{unit_specific_names}{determines which parameters take a different value
 for each unit. Cannot be specified if shared_names is specified.
 each unit. Other parameters are considered shared between all units.}
+
+\item{shared_names}{identifies parameters that have common shared value for all units, which by default is all parameters.}
+
+\item{unit_params}{parameter values used to build the object, copied across 
+each unit for unit-specific parameters}
 }
 \value{
 An object of class \sQuote{spatPomp} representing a simulation from a

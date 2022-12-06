@@ -50,8 +50,10 @@ Loading required package: pomp
 + )
 > 
 > paste("ibpf logLik for b2 model:",logLik(bpfilter(b2_ibpf,Np=10,block_size=1)))
-[1] "ibpf logLik for b2 model: -33.5858109448205"
+[1] "ibpf logLik for b2 model: -33.5860640719352"
 > 
+> paste("kf logLik for b2:",bm2_kalman_logLik(b2))
+[1] "kf logLik for b2: -33.4664837094839"
 > 
 > 
 > 

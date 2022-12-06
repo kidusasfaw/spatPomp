@@ -62,6 +62,13 @@ Loading required package: pomp
 > ## ____________________________________________________________
 > 
 > ##
+> ## exact likelihood via the Kalman filter
+> ##
+> 
+> paste("bm kalman filter loglik: ",round(bm_kalman_logLik(b_model),10))
+[1] "bm kalman filter loglik:  -10.5025878626"
+> 
+> ##
 > ## pfilter tested on bm
 > ##
 > 
@@ -412,5 +419,6 @@ variable [,1]
 > dev.off()
 null device 
           1 
+> 
 > 
 > 

@@ -42,6 +42,12 @@ b_model <- bm(U=2,N=2)
 ## ____________________________________________________________
 
 ##
+## exact likelihood via the Kalman filter
+##
+
+paste("bm kalman filter loglik: ",round(bm_kalman_logLik(b_model),10))
+
+##
 ## pfilter tested on bm
 ##
 
@@ -270,4 +276,5 @@ dunit_measure(b_u, y=b_y,x=b_s, unit=2, time=1, params=b_p)
 runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
 
 dev.off()
+
 

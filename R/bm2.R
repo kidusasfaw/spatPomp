@@ -18,6 +18,8 @@
 #' @param unit_specific_names determines which parameters take a different value
 #' for each unit. Cannot be specified if shared_names is specified.
 #' each unit. Other parameters are considered shared between all units.
+#' @param unit_params parameter values used to build the object, copied across 
+#' each unit for unit-specific parameters
 #' @importFrom utils data
 #' @return An object of class \sQuote{spatPomp} representing a simulation from a
 #' \code{U}-dimensional Brownian motion
@@ -33,7 +35,9 @@
 #' @export
 
 bm2 <- function(U=5,N=100,delta_t=0.1,
-  shared_names,unit_specific_names){
+  unit_specific_names="rho",
+  shared_names=NULL,
+  unit_params =c(rho=0.4,sigma=1,tau=1,X_0=0)){
   dist <- function(u,v,n=U) min(abs(u-v),abs(u-v+U),abs(u-v-U))
   dmat <- matrix(0,U,U)
   for(u in 1:U) {
@@ -51,8 +55,8 @@ bm2 <- function(U=5,N=100,delta_t=0.1,
   bm2_unitnames <- unique(bm2_data[["unit"]])
   bm2_unitnames_level <- paste("U",sort(as.numeric(stringr::str_remove(bm2_unitnames, "U"))),sep='')
 
-  bm2_unit_statenames <- c("X")
-  bm2_unit_IVPnames <- paste0(bm2_unit_statenames,"_0")
+  bm2_unit_statenames <- "X"
+  bm2_unit_IVPnames <- "X_0"
   bm2_unit_RPnames <- c("rho","sigma","tau")
   bm2_unit_paramnames <- c(bm2_unit_RPnames,bm2_unit_IVPnames)
 
@@ -121,7 +125,7 @@ bm2 <- function(U=5,N=100,delta_t=0.1,
     code = "
       const double *X_0 = &X_01;
       for (int u = 0; u < U; u++) {
-        X[u]=X_0[u];
+        X[u]=X_0[u*X_0_unit];
       }
     "
   )
@@ -200,17 +204,13 @@ bm2_partrans <- parameter_trans(log=log_names,logit=logit_names)
   ## We need a parameter vector.
   bm2_params <- rep(0,length=length(bm2_paramnames))
   names(bm2_params) <- bm2_paramnames
-  # parameter match the default for previous spatPomp bm() 
-  bm2_unit_params <- c(
-    rho=0.4,
-    sigma=1,  
-    tau=1,
-    X_0=0)
+  
   for(p in unit_specific_names) {
-    bm2_params[paste0(p,1:U)] <- bm2_unit_params[p]
+    bm2_params[paste0(p,1:U)] <- unit_params[p]
   }
   for(p in shared_names) {
-    bm2_params[paste0(p,1)] <- bm2_unit_params[p]
+    bm2_params[paste0(p,1)] <- unit_params[p]
   }
   simulate(bm2_spatPomp,params=bm2_params)
 }
+
