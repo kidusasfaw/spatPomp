@@ -31,6 +31,8 @@
 #' @param Tmax Upper time for the window used to construct the object. The lower time is fixed at 1950.0. The default value matches He et al (2010).
 #' @param expandedParNames specifies the names of parameters which take unit-specific values. Remaining parameters take a single, shared value for all units.
 #' @param basic_params A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.
+#' @param towns_selected A numeric vector of towns to be modeled. Defaults 
+#' to 1:U, with cities ranked by decreasing population and 1 being London.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
 #' @references
 #'
@@ -66,7 +68,7 @@
 #' @export
 
 he10 <- function(U=6,dt=2/365, Tmax=1964,
-  expandedParNames,
+  expandedParNames=c("alpha","iota","R0","cohort","amplitude","gamma","sigma","sigmaSE","rho","psi","g","S_0","E_0","I_0"),
   basic_params =c(
     alpha = 1,
     iota = 0,  
@@ -83,10 +85,13 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
     S_0 = 0.032, 
     E_0 = 0.00005, 
     I_0 = 0.00004
-  )
+  ),
+  towns_selected=NULL
 ){
 
-  if(U>20) stop("U <= 20")
+  if(!is.null(towns_selected) & U!=length(towns_selected)) stop("Require U==length(towns_selected) when towns_selected is specified")
+  if(is.null(towns_selected)) towns_selected <- 1:U
+  if(max(towns_selected)>20) stop("U <= 20")
   if(Tmax>1964) stop("Tmax <= 1964")
   birth_lag <- 4 # delay until births hit susceptibles, in years
 
@@ -129,7 +134,7 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   mean_pop <- sapply(split(demog,demog$town),function(x) mean(x$pop))
   he10_data <- he10_data[order(mean_pop[he10_data$town],
     -as.numeric(he10_data$date),decreasing=T),]
-  towns <-names(sort(mean_pop,decreasing=TRUE))[1:U]
+  towns <-names(sort(mean_pop,decreasing=TRUE))[towns_selected]
   he10_data$year <- as.integer(format(he10_data$date,"%Y"))
   he10_data <-  he10_data[he10_data$town%in%towns,]
   he10_data$time <- julian(he10_data$date,

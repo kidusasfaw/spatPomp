@@ -13,10 +13,12 @@ he10(
   U = 6,
   dt = 2/365,
   Tmax = 1964,
-  expandedParNames,
+  expandedParNames = c("alpha", "iota", "R0", "cohort", "amplitude", "gamma", "sigma",
+    "sigmaSE", "rho", "psi", "g", "S_0", "E_0", "I_0"),
   basic_params = c(alpha = 1, iota = 0, R0 = 30, cohort = 0, amplitude = 0.5, gamma = 52,
     sigma = 52, mu = 0.02, sigmaSE = 0.15, rho = 0.5, psi = 0.15, g = 400, S_0 = 0.032,
-    E_0 = 5e-05, I_0 = 4e-05)
+    E_0 = 5e-05, I_0 = 4e-05),
+  towns_selected = NULL
 )
 }
 \arguments{
@@ -31,6 +33,9 @@ studied by He et al., the 10 largest and 10 selected smaller towns.}
 \item{expandedParNames}{specifies the names of parameters which take unit-specific values. Remaining parameters take a single, shared value for all units.}
 
 \item{basic_params}{A candidate parameter vector in the basic format, i.e., no unit-specific parameters or unit-related name extensions.}
+
+\item{towns_selected}{A numeric vector of towns to be modeled. Defaults 
+to 1:U, with cities ranked by decreasing population and 1 being London.}
 }
 \value{
 An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
