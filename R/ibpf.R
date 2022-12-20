@@ -29,7 +29,7 @@
 ##' @param unitParNames estimated parameters that are different for
 ##' each unit.
 ##'
-##' @param spat_regression Fraction of each extended parameter regressed toward the unit mean.
+##' @param spat_regression Fraction of each extended parameter regressed toward the unit mean. Not required when all parameters are unit-specific.
 ##'
 ##' @return
 ##' Upon successful completion, \code{ibpf} returns an object of class
@@ -105,26 +105,29 @@ setMethod(
       cooling.fraction.50,
       block_size, block_list,spat_regression,
       ..., verbose = getOption("verbose", FALSE)) {
-    ep <- paste0("in ",sQuote("ibpf"),": ")
-    if(missing(block_list) && missing(block_size))
-      stop(ep,sQuote("block_list"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
-
-    if (!missing(block_list) & !missing(block_size)){
-      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " should be provided, but not both.",call.=FALSE)
+  ep <- paste0("in ",sQuote("ibpf"),": ")
+  if(missing(block_list) && missing(block_size)) {
+    stop(ep,sQuote("block_list"), " or ", sQuote("block_size"),
+      " must be specified to the call",call.=FALSE)
+  }
+  if (!missing(block_list) & !missing(block_size)){
+    stop(ep,"Exactly one of ",sQuote("block_size"), " and ",
+      sQuote("block_list"), " should be provided, but not both.",call.=FALSE)
+  }
+  if (missing(spat_regression) && !is.null(sharedParNames)) 
+    stop(ep, sQuote("spat_regression"),
+     " should be provided when there are shared parameters",call.=FALSE)
+  if (missing(spat_regression)) spat_regression <- numeric()
+  if (missing(block_list)){
+    if(block_size > length(unit_names(data))){
+      stop(ep,sQuote("block_size"),
+        " cannot be greater than the number of spatial units",call.=FALSE)
     }
-
-    if (missing(spat_regression))
-      stop(ep, sQuote("spat_regression"), " should be provided",call.=FALSE)
-
-    if (missing(block_list)){
-      if(block_size > length(unit_names(data))){
-        stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
-      }
-      all_units = seq_len(length(unit_names(data)))
-      nblocks = round(length(all_units)/block_size)
-      block_list = split(all_units, sort(all_units %% nblocks))
-    }
-    block_list <- lapply(block_list, as.integer)
+    all_units = seq_len(length(unit_names(data)))
+    nblocks = round(length(all_units)/block_size)
+    block_list = split(all_units, sort(all_units %% nblocks))
+  }
+  block_list <- lapply(block_list, as.integer)
 
 
 ## currently, ibpf always uses parameters taken from the model object

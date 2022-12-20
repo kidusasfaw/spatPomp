@@ -69,7 +69,7 @@ into blocks with size \code{block_size}.}
 \item{block_list}{List that specifies an exact partition of the spatial units. Each partition element, or block, is
 an integer vector of neighboring units.}
 
-\item{spat_regression}{Fraction of each extended parameter regressed toward the unit mean.}
+\item{spat_regression}{Fraction of each extended parameter regressed toward the unit mean. Not required when all parameters are unit-specific.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }
