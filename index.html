@@ -445,19 +445,20 @@ inference for spatiotemporal partially observed Markov processes</h1>
 
 <p><span class="firstcharacter"><strong>spatPomp</strong></span>
 concerns inference for nonlinear partially-observed Markov process
-models where the Markovian latent variable has a spatial unit structure.
-Such a model is called a SpatPOMP. For example, ecological
-metapopulation models consist of spatial units corresponding to
-distinct, interacting sub-populations. Each unit may itself consist of
-multiple interacting species. In <strong>spatPomp</strong>, models can
-be represented by specifying the latent dynamic process and how it is
-measured. The <strong>spatPomp</strong> package builds on
-<strong>pomp</strong>, and indeed its base class, <code>spatPomp</code>
-extends the <strong>pomp</strong> class <code>pomp</code>. Thus,
-algorithms available in <strong>pomp</strong> are accessible in
-<strong>spatPomp</strong>. However, practical analysis of
-high-dimensional systems can take advantage of the additional unit
-structure that POMP models do not necessarily possess.</p>
+models having a spatial unit structure in addition to the temporal
+Markovian property of the latent process. Such a model is called a
+SpatPOMP. For example, ecological metapopulation models consist of
+spatial units corresponding to distinct, interacting sub-populations.
+Each unit may itself consist of multiple interacting species. In
+<strong>spatPomp</strong>, models can be represented by specifying the
+latent dynamic process and how it is measured. The
+<strong>spatPomp</strong> package builds on <strong>pomp</strong>, and
+its base class, <code>spatPomp</code> extends the <strong>pomp</strong>
+class <code>pomp</code>. Therefore, all algorithms and methods provided
+by <strong>pomp</strong> are accessible in <strong>spatPomp</strong>.
+However, practical analysis of high-dimensional systems can take
+advantage of the additional unit structure that POMP models do not
+necessarily possess.</p>
 <p>Algorithms currently provided by <strong>spatPomp</strong> include
 the following:</p>
 <ul>
