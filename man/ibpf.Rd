@@ -8,6 +8,10 @@
 \alias{ibpf,ANY-method}
 \alias{ibpf-spatPomp}
 \alias{ibpf,spatPomp-method}
+\alias{ibpf-ibpfd_spatPomp}
+\alias{ibpf,ibpfd_spatPomp-method}
+\alias{ibpf-bpfd_spatPomp}
+\alias{ibpf,bpfilterd_spatPomp-method}
 \title{Iterated block particle filter (IBPF)}
 \usage{
 \S4method{ibpf}{missing}(data, ...)
@@ -15,6 +19,38 @@
 \S4method{ibpf}{ANY}(data, ...)
 
 \S4method{ibpf}{spatPomp}(
+  data,
+  Nbpf,
+  Np,
+  rw.sd,
+  sharedParNames,
+  unitParNames,
+  cooling.type = "geometric",
+  cooling.fraction.50,
+  block_size,
+  block_list,
+  spat_regression,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
+
+\S4method{ibpf}{ibpfd_spatPomp}(
+  data,
+  Nbpf,
+  Np,
+  rw.sd,
+  sharedParNames,
+  unitParNames,
+  cooling.type = "geometric",
+  cooling.fraction.50,
+  block_size,
+  block_list,
+  spat_regression,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
+
+\S4method{ibpf}{bpfilterd_spatPomp}(
   data,
   Nbpf,
   Np,

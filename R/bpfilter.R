@@ -61,6 +61,7 @@
 ##' \item{\code{\link{logLik}}}{ yields an estimate of the log-likelihood of the data under the model. }
 ##' }
 ##'
+NULL
 
 setClass(
   "bpfilterd_spatPomp",
@@ -85,7 +86,36 @@ setClass(
   )
 )
 
-setGeneric("bpfilter",  function (object, ...) standardGeneric("bpfilter"))
+setGeneric(
+  "bpfilter",
+  function (object, ...)
+    standardGeneric("bpfilter")
+)
+
+##' @name bpfilter-missing
+##' @aliases bpfilter,missing-method
+##' @rdname bpfilter
+##' @export
+setMethod(
+  "bpfilter",
+  signature=signature(object="missing"),
+  definition=function (...) {
+    stop("bpfilter: ","data"," is a required argument.")
+  }
+)
+
+##' @name bpfilter-ANY
+##' @aliases bpfilter,ANY-method
+##' @rdname bpfilter
+##' @export
+setMethod(
+  "bpfilter",
+  signature=signature(object="ANY"),
+  definition=function (object, ...) {
+    stop("bpfilter is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
+  }
+)
+
 
 ##' @name bpfilter-spatPomp
 ##' @aliases bpfilter,spatPomp-method
@@ -119,6 +149,47 @@ setMethod(
       block_list = split(all_units, sort(all_units %% nblocks))
     }
     block_list <- lapply(block_list, as.integer)
+
+    bpfilter.internal(
+     object=object,
+     Np=Np,
+     block_list=block_list,
+     save_states=save_states,
+     ...,
+     verbose=verbose)
+  }
+)
+
+##' @name bpfilter-bpfilterd_spatPomp
+##' @aliases bpfilter,bpfilterd_spatPomp-method
+##' @rdname bpfilter
+##' @export
+setMethod(
+  "bpfilter",
+  signature=signature(object="bpfilterd_spatPomp"),
+  function (object, Np, block_size, block_list, save_states, ..., verbose=getOption("verbose", FALSE)) {
+    ep = paste0("in ",sQuote("bpfilter"),": ")
+
+    if(missing(save_states)) save_states <- FALSE
+
+    if (!missing(block_list) & !missing(block_size)){
+      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.",call.=FALSE)
+    }
+
+    if(missing(block_list) && missing(block_size))
+      block_list <- object@block_list
+
+    if (!missing(block_size)){
+      if(block_size > length(unit_names(object))){
+        stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
+      }
+      all_units = seq_len(length(unit_names(object)))
+      nblocks = round(length(all_units)/block_size)
+      block_list = split(all_units, sort(all_units %% nblocks))
+    }
+    block_list <- lapply(block_list, as.integer)
+
+    if (missing(Np)) Np <- object@Np
 
     bpfilter.internal(
      object=object,
