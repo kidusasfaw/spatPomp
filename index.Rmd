@@ -19,7 +19,7 @@ Algorithms currently provided by  **spatPomp** include the following:
 - Guided intermediate resampling filter, `girf`
 - Block particle filter, `bpfilter`
 - Adapted bagged filter, `abf`
-- Ensemble Kalman filter, `EnKF`
+- Ensemble Kalman filter, `enkf`
 - Iterated GIRF for parameter estimation, `igirf`
 - Iterated bpfilter for parameter estimation, `ibpf`
 - Iterated ensemble Kalman filter for parameter estimation, `ienkf`
