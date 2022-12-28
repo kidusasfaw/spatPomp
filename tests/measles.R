@@ -52,7 +52,7 @@ m3_igirf_ngirf <- 2
 
 m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
   params=m3_params,
-  rw.sd=rw.sd(g=0.02),
+  rw.sd=rw_sd(g=0.02),
   cooling.type = "geometric",
   cooling.fraction.50 = 0.5,
   Np=m3_igirf_np,

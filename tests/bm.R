@@ -115,7 +115,7 @@ paste("check girf on girfd_spatPomp: ",
 ## Now, we test the inference methods
 ## ____________________________________________________________
 
-b_rw.sd <- rw.sd(rho=0.02,X1_0=ivp(0.02))
+b_rw.sd <- rw_sd(rho=0.02,X1_0=ivp(0.02))
 
 ##
 ## igirf on bm

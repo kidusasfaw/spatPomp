@@ -2,11 +2,11 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches: [master]
+    branches: '*'
   pull_request:
     branches: [master]
   workflow_dispatch:
-    branches: [master]
+    branches: '*'
 
 name: R-CMD-check
 
@@ -23,7 +23,7 @@ jobs:
           - {os: ubuntu-22.04,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
-          - {os: ubuntu-latest,  r: '4.0.5'}
+          - {os: ubuntu-latest,  r: '4.1.0'}
           - {os: macOS-11,       r: 'release'}
           - {os: macOS-12,       r: 'release'}
           - {os: windows-latest, r: 'release'}
@@ -65,7 +65,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2.3.1
         with:
-          extra-packages: any::rcmdcheck, any::pomp
+          extra-packages: |
+            any::rcmdcheck
+            kingaa/pomp
           
       - uses: r-lib/actions/check-r-package@v2
 

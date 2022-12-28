@@ -11,7 +11,7 @@ paste("lorenz pfilter loglik: ", logLik(l_pf))
 
 l_igirf <- igirf(l,
   Ngirf = 2,
-  rw.sd = rw.sd(F=0.02, tau=0.02,X1_0=ivp(0),X2_0=ivp(0)),
+  rw.sd = rw_sd(F=0.02, tau=0.02,X1_0=ivp(0),X2_0=ivp(0)),
   cooling.type = "hyperbolic",
   cooling.fraction.50 = 0.5,
   Np=10,

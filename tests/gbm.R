@@ -10,7 +10,7 @@ logLik(gbm_pf)
 
 gbm_igirf_out <- igirf(gbm_model,
   Ngirf = 2,
-  rw.sd = rw.sd(rho=0.02, sigma=0.02, tau=0.02),
+  rw.sd = rw_sd(rho=0.02, sigma=0.02, tau=0.02),
   cooling.type = "geometric",
   cooling.fraction.50 = 0.5,
   Np=10,

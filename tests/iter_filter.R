@@ -5,7 +5,7 @@
 
 library(spatPomp)
 try(
-  spatPomp:::perturbn.kernel.sd(rw.sd=rw.sd(rho=0.02,X1_0=ivp(0.02)),1:2,
+  spatPomp:::perturbn.kernel.sd(rw.sd=rw_sd(rho=0.02,X1_0=ivp(0.02)),1:2,
     paramnames="testing_error")
 )
 

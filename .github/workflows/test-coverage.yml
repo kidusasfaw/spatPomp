@@ -25,7 +25,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2.3.1
         with:
-          extra-packages: covr
+          extra-packages: |
+            any::covr
+            kingaa/pomp
 
       - name: Test coverage
         run: covr::codecov()

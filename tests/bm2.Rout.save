@@ -1,13 +1,11 @@
 
 R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
-
-  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -30,7 +28,7 @@ Loading required package: pomp
 > # here there are no transformations so use small rw.sd. to avoid negatives
 > b2_rw_list <- rep(list(0.001),times=b2_U) 
 > names(b2_rw_list) <-paste0("rho",1:b2_U)
-> b2_rw.sd <- do.call(rw.sd,b2_rw_list)
+> b2_rw.sd <- do.call(rw_sd,b2_rw_list)
 > 
 > b2_units = seq_len(b2_U)
 > b2_nblocks = b2_U/2

@@ -63,7 +63,7 @@ if("alpha"%in%estParNames) reg_rw.sd[paste0("alpha",1:h_U)] <- 0.005
  
 ivp_rw.sd <- lapply(ivpEstParNames_expanded,function(x)expression(ivp(0.05)))
 names(ivp_rw.sd) <- ivpEstParNames_expanded
-h_rw.sd <- do.call(rw.sd,c(reg_rw.sd,ivp_rw.sd))
+h_rw.sd <- do.call(rw_sd,c(reg_rw.sd,ivp_rw.sd))
 
 all_units = seq_len(length(unit_names(h_model)))
 nblocks = 2

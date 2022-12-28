@@ -1,13 +1,11 @@
 
 R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
-
-  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -147,7 +145,7 @@ executing %dopar% sequentially: no parallel backend registered
 > ## Now, we test the inference methods
 > ## ____________________________________________________________
 > 
-> b_rw.sd <- rw.sd(rho=0.02,X1_0=ivp(0.02))
+> b_rw.sd <- rw_sd(rho=0.02,X1_0=ivp(0.02))
 > 
 > ##
 > ## igirf on bm
