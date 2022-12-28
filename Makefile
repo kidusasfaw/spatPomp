@@ -1,6 +1,5 @@
-include rules.mk
-
 REVDEPS=
-TOKEN=
+INCLUDES=inst/include/spatPomp_defines.h
+HEADERS=
 
-includes: inst/include/spatPomp_defines.h
+include rules.mk
