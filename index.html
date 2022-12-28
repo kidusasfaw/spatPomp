@@ -465,15 +465,16 @@ the following:</p>
 <li>Guided intermediate resampling filter, <code>girf</code></li>
 <li>Block particle filter, <code>bpfilter</code></li>
 <li>Adapted bagged filter, <code>abf</code></li>
+<li>Ensemble Kalman filter, <code>EnKF</code></li>
 <li>Iterated GIRF for parameter estimation, <code>igirf</code></li>
 <li>Iterated bpfilter for parameter estimation, <code>ibpf</code></li>
+<li>Iterated ensemble Kalman filter for parameter estimation,
+<code>ienkf</code></li>
 </ul>
-<p>Tools from <a href="https://kingaa.github.io/pomp/"><strong>pomp</strong></a> that are
-useful for SpatPOMP analysis include:</p>
-<ul>
-<li>Particle filter, <code>pfilter</code></li>
-<li>Ensemble Kalman filter, <code>EnKF</code></li>
-</ul>
+<p>In addition, the particle filter provided by <a href="https://kingaa.github.io/pomp/"><strong>pomp</strong></a> as
+<code>pfilter</code> and the corresponding iterated filter,
+<code>mif2</code>, are useful for validating <strong>spatPomp</strong>
+models and workflows on small subsets the spatial units.</p>
 <p><strong>spatPomp</strong> is currently in development. All are
 welcome to contribute methods or models, or any other feedback. Please
 let the developers know if you find <strong>spatPomp</strong> useful and
@@ -486,6 +487,16 @@ relevant resources are:</p>
 <li><a href="vignettes/spatPomp.pdf">An introductory article</a></li>
 <li><a href="vignettes/ibpf.pdf">A tutorial on the iterated block
 particle filter</a></li>
+</ul>
+<p>Papers using <strong>spatPomp</strong> include the following:</p>
+<ul>
+<li>Ionides, E. L., Asfaw, K., Park, J., and King, A. A. (2021). Bagged
+filters for partially observed interacting systems. <em>Journal of the
+American Statistical Association,</em> prepublished online. <a href="https://doi.org/10.1080/01621459.2021.1974867">doi</a>. <a href="https://arxiv.org/abs/2002.05211">arxiv</a>. <a href="https://github.com/ionides/bagged_filters">github</a>.</li>
+<li>Ionides, E. L., Ning, N. and Wheeler, J. (2022). An iterated block
+particle filter for inference on coupled dynamic systems with shared and
+unit-specific parameters. <em>Statistica Sinica,</em> prepublished
+online. <a href="https://doi.org/10.5705/ss.202022.0188">doi</a>. <a href="https://arxiv.org/abs/2206.03837">arxiv</a>. <a href="https://github.com/ionides/ibpf_article">github</a>.</li>
 </ul>
 
 

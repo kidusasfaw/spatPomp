@@ -19,13 +19,12 @@ Algorithms currently provided by  **spatPomp** include the following:
 - Guided intermediate resampling filter, `girf`
 - Block particle filter, `bpfilter`
 - Adapted bagged filter, `abf`
+- Ensemble Kalman filter, `EnKF`
 - Iterated GIRF for parameter estimation, `igirf`
 - Iterated bpfilter for parameter estimation, `ibpf`
+- Iterated ensemble Kalman filter for parameter estimation, `ienkf`
 
-Tools from [**pomp**](https://kingaa.github.io/pomp/) that are useful for SpatPOMP analysis include:
-
-- Particle filter, `pfilter`
-- Ensemble Kalman filter, `EnKF`
+In addition, the particle filter provided by [**pomp**](https://kingaa.github.io/pomp/) as `pfilter` and the corresponding iterated filter, `mif2`, are useful for validating **spatPomp** models and workflows on small subsets the spatial units.
 
 **spatPomp** is currently in development. All are welcome to contribute methods or models, or any other feedback.   Please let the developers know if you find **spatPomp** useful and if you publish results obtained using it!
 
@@ -33,4 +32,21 @@ The latest development version of **spatPomp** is available on [GitHub](https://
 
 - [An introductory article](vignettes/spatPomp.pdf)
 - [A tutorial on the iterated block particle filter](vignettes/ibpf.pdf)
+
+Papers using **spatPomp** include the following:
+
+- Ionides, E. L., Asfaw, K., Park, J.,  and King, A. A. (2021). 
+  Bagged filters for partially observed interacting systems.
+  _Journal of the American Statistical Association,_
+  prepublished online.
+  [doi](https://doi.org/10.1080/01621459.2021.1974867).
+  [arxiv](https://arxiv.org/abs/2002.05211).
+  [github](https://github.com/ionides/bagged_filters).
+- Ionides, E. L.,  Ning, N. and Wheeler, J. (2022).
+  An iterated block particle filter for inference on coupled dynamic systems with shared and unit-specific parameters.
+  _Statistica Sinica,_
+  prepublished online.
+  [doi](https://doi.org/10.5705/ss.202022.0188).
+  [arxiv](https://arxiv.org/abs/2206.03837).
+  [github](https://github.com/ionides/ibpf_article).
 
