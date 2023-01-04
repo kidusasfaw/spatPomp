@@ -440,5 +440,19 @@ variable [,1]
 null device 
           1 
 > 
+> ## --------------------------------------------
+> ## using bm to test spatPomp() replacement functionality
+> ## ____________________________________________
+> 
+> b_rep1 <- spatPomp(b_model,params=coef(b_model))
+> for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
+[1] "states"
+> 
+> try(spatPomp(data=as.data.frame(b_model),units=NULL))
+Error in value[[3L]](cond) : 
+  ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
+> 
+>   
+> 
 > 
 > 

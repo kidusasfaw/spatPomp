@@ -294,4 +294,15 @@ runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
 
 dev.off()
 
+## --------------------------------------------
+## using bm to test spatPomp() replacement functionality
+## ____________________________________________
+
+b_rep1 <- spatPomp(b_model,params=coef(b_model))
+for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
+
+try(spatPomp(data=as.data.frame(b_model),units=NULL))
+
+  
+
 

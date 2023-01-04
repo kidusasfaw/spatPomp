@@ -1,5 +1,5 @@
 
-R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin17.0 (64-bit)
 
@@ -91,5 +91,18 @@ Warning messages:
 > logLik(m3_igirf_out)
 [1] -98231.34
 > 
+> ## --------------------------------------------------------------------
+> ## using measles to test spatPomp() covariate replacement functionality
+> ## ____________________________________________________________________
 > 
+> m_covrep <- spatPomp(m,
++   covar=spatPomp::measlesUK[
++     measlesUK$city %in% m@unit_names,
++     c("year","city","pop","births")]
++ )
+> for(slt in slotNames(m)) if(!identical(slot(m,slt),slot(m_covrep,slt))) print(slt)
+[1] "unit_covarnames"
+[1] "covar"
+> ## covariates are not the same since this replacement does not deal with
+> ## birth delay
 > 

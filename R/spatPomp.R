@@ -367,7 +367,6 @@ setMethod(
 
     unit_covarnames <- data@unit_covarnames
     if(missing(shared_covarnames))  shared_covarnames <- data@shared_covarnames
-    if(missing(unit_accumvars)) unit_accumvars <- data@unit_accumvars
     if(!missing(covar)){
       if(timename %in% names(covar)) tcovar <- timename
       else{
@@ -429,7 +428,10 @@ setMethod(
     if (!missing(covar)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
     else  pomp_covarnames <- get_covariate_names(data@covar)
     if (!missing(unit_accumvars)) pomp_accumvars <- paste0(rep(unit_accumvars,each=U),seq_len(U))
-    else pomp_accumvars <- data@accumvars
+    else {
+      pomp_accumvars <- data@accumvars
+      unit_accumvars <- data@unit_accumvars
+    }
     mparamnames <- paste("M_", paramnames, sep = "")
 
     ## We will always have a global giving us the number of spatial units
