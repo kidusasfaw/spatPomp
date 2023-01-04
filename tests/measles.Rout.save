@@ -38,7 +38,7 @@ Loading required package: pomp
 > 
 > m_pf <- pfilter(m_model,Np=20,params=m_params)
 > logLik(m_pf)
-[1] -92071.51
+[1] -85104.57
 > 
 > ## setting IVPs
 > 
@@ -56,7 +56,7 @@ Loading required package: pomp
 > set.seed(1)
 > m2_pf <- pfilter(m2_model,Np=20,params=m2_params)
 > logLik(m2_pf)
-[1] -45830.66
+[1] -46672.26
 > 
 > ##
 > ## Note: the measles skeleton is correct only when there is no cohort effect,
@@ -86,10 +86,10 @@ Loading required package: pomp
 +   verbose = FALSE
 + )
 Warning messages:
-1: in 'table_lookup': extrapolating at 1.965002e+03. 
+1: in 'table_lookup': extrapolating at 1.965000e+03. 
 2: in 'table_lookup': extrapolating at 1.965002e+03. 
 > logLik(m3_igirf_out)
-[1] -98231.34
+[1] -86380.55
 > 
 > ## --------------------------------------------------------------------
 > ## using measles to test spatPomp() covariate replacement functionality

@@ -61,7 +61,7 @@ measles <- function(U=6,dt=2/365,
                     fixed_ivps=TRUE,
                     S_0=0.032, E_0=0.00005, I_0=0.00004){
 
-  birth_lag <- 3*26  # delay until births hit susceptibles, in biweeks
+  birth_lag <- 4*26  # delay until births hit susceptibles, in biweeks
 
   # pre-vaccine biweekly measles reports for the largest 40 UK cities, sorted by size
   measlesUK <- spatPomp::measlesUK
