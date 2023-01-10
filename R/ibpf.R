@@ -14,8 +14,8 @@
 ##' @rdname ibpf
 ##' @include spatPomp_class.R spatPomp.R bpfilter.R iter_filter.R
 ##' @author Edward L. Ionides
-##' @family particle filter methods
-##' @family spatPomp filtering methods
+##' @family likelihood maximization algorithms
+##' @seealso likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 ##'
 ##' @importFrom foreach %do%
 ##'

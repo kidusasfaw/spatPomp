@@ -109,7 +109,7 @@ The following methods are available for such an object:
 # Complete examples are provided in the package tests
 \dontrun{
 igirf(bm(U=2,N=4),Ngirf=2,
-  rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),
+  rw.sd = rw_sd(rho=0.02,X1_0=ivp(0.02)),
   cooling.type="geometric",cooling.fraction.50=0.5,
   Np=10,Ninter=2,lookahead=1,Nguide=5)
 }
@@ -120,22 +120,14 @@ igirf(bm(U=2,N=4),Ngirf=2,
 \asfaw2020
 }
 \seealso{
-Other particle filter methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{girf}()},
-\code{\link{ibpf}()},
-\code{\link{ienkf}()},
-\code{\link{iubf}()}
+likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 
-Other spatPomp parameter estimation methods: 
+Other likelihood maximization algorithms: 
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{iubf}()}
 }
 \author{
 Kidus Asfaw
 }
-\concept{particle filter methods}
-\concept{spatPomp parameter estimation methods}
+\concept{likelihood maximization algorithms}

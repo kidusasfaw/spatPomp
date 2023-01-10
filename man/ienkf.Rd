@@ -78,22 +78,14 @@ Anderson, J. L. (2001) An Ensemble Adjustment Kalman Filter for Data
 Assimilation Monthly Weather Review 129:2884--2903
 }
 \seealso{
-Other particle filter methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{girf}()},
-\code{\link{ibpf}()},
-\code{\link{igirf}()},
-\code{\link{iubf}()}
+likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 
-Other spatPomp parameter estimation methods: 
+Other likelihood maximization algorithms: 
+\code{\link{ibpf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
 }
 \author{
 Kidus Asfaw
 }
-\concept{particle filter methods}
-\concept{spatPomp parameter estimation methods}
+\concept{likelihood maximization algorithms}

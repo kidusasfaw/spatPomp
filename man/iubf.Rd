@@ -92,22 +92,14 @@ The following methods are available for such an object:
 \ionides2021
 }
 \seealso{
-Other particle filter methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{girf}()},
-\code{\link{ibpf}()},
-\code{\link{ienkf}()},
-\code{\link{igirf}()}
+likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 
-Other spatPomp parameter estimation methods: 
+Other likelihood maximization algorithms: 
+\code{\link{ibpf}()},
 \code{\link{ienkf}()},
 \code{\link{igirf}()}
 }
 \author{
 Kidus Asfaw
 }
-\concept{particle filter methods}
-\concept{spatPomp parameter estimation methods}
+\concept{likelihood maximization algorithms}

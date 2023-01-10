@@ -8,8 +8,8 @@
 ##' @rdname igirf
 ##' @include spatPomp_class.R spatPomp.R girf.R iter_filter.R
 ##' @author Kidus Asfaw
-##' @family particle filter methods
-##' @family spatPomp parameter estimation methods
+##' @family likelihood maximization algorithms
+##' @seealso likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 ##' @importFrom stats weighted.mean
 ##' @importFrom utils head
 ##' @inheritParams girf
@@ -22,7 +22,7 @@
 ##' # Complete examples are provided in the package tests
 ##' \dontrun{
 ##' igirf(bm(U=2,N=4),Ngirf=2,
-##'   rw.sd = rw.sd(rho=0.02,X1_0=ivp(0.02)),
+##'   rw.sd = rw_sd(rho=0.02,X1_0=ivp(0.02)),
 ##'   cooling.type="geometric",cooling.fraction.50=0.5,
 ##'   Np=10,Ninter=2,lookahead=1,Nguide=5)
 ##' }

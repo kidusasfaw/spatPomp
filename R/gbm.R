@@ -5,10 +5,10 @@
 #' distance around a circle. The model is defined in continuous time, but
 #' an Euler approximation is used for this numerical implementation.
 #'
-#' @name lorenz
-#' @rdname lorenz
+#' @name gbm
+#' @rdname gbm
 #' @author Kidus Asfaw
-#' @family spatPomp examples
+#' @family spatPomp model generators
 #'
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of time steps to evolve the process.

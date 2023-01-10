@@ -18,7 +18,6 @@ Data includes births and population at bi-weekly observations from 40 cities and
 }
 \seealso{
 Other datasets: 
-\code{\link{he10}()},
 \code{\link{measlesUK}}
 }
 \concept{datasets}

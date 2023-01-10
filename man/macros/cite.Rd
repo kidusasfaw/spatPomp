@@ -7,6 +7,8 @@
 
 \newcommand{\asfaw2021thesis}{Asfaw, K. T. (2021). Simulation-based Inference for Partially Observed Markov Process Models with Spatial Coupling. University of Michigan Doctoral dissertation. \doi{10.7302/2751}}
 
+\newcommand{\breto2011}{Breto, C. and Ionides, E.L. (2011) Compound Markov counting processes and their applications to modeling infinitesimally over-dispersed systems. Stochastic Processes and their Applications \bold{121}, 2571-2591. \doi{10.1016/j.spa.2011.07.005}}
+
 \newcommand{\breto2019}{Breto, C., Ionides, E. L. and King, A. A. (2019) Panel Data Analysis via Mechanistic Models. \emph{Journal of the American Statistical Association}. \doi{10.1080/01621459.2019.1604367}}
 
 \newcommand{\dalziel2016}{Dalziel, Benjamin D. et al. (2016) Persistent chaos of measles epidemics in the prevaccination United States caused by a small change in seasonal transmission patterns. \emph{PLoS Computational Biology}, \bold{12(2)}, e1004655. \doi{10.5061/dryad.r4q34}}

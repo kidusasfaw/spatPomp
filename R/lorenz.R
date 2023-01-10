@@ -6,8 +6,9 @@
 #'
 #' @name lorenz
 #' @rdname lorenz
+#' @aliases lorenz96
 #' @author Edward L. Ionides
-#' @family spatPomp examples
+#' @family spatPomp model generators
 #'
 #' @param U A length-one numeric signifying the number of spatial units for the process.
 #' @param N A length-one numeric signifying the number of observations.

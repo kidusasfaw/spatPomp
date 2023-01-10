@@ -136,12 +136,9 @@ The following methods are available for such an object:
 \ionides2022
 }
 \seealso{
-Other particle filter methods: 
-\code{\link{abfir}()},
-\code{\link{abf}()},
-\code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{girf}()},
+likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
+
+Other likelihood maximization algorithms: 
 \code{\link{ienkf}()},
 \code{\link{igirf}()},
 \code{\link{iubf}()}
@@ -149,5 +146,4 @@ Other particle filter methods:
 \author{
 Edward L. Ionides
 }
-\concept{particle filter methods}
-\concept{spatPomp filtering methods}
+\concept{likelihood maximization algorithms}

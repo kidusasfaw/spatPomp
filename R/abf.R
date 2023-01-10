@@ -11,7 +11,8 @@
 ##' @rdname abf
 ##' @include spatPomp_class.R
 ##' @author Kidus Asfaw
-##' @family particle filter methods
+##' @family likelihood evaluation algorithms
+##' @seealso likelihood maximization algorithms: \code{ienkf()}, \code{igirf}, \code{iubf}, \code{ibpf}
 ##' @importFrom foreach %dopar%
 ##' @references
 ##'

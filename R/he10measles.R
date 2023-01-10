@@ -5,9 +5,9 @@
 ##' Data are weekly case counts for the 20 towns analyzed by He et al (2010).
 ##'
 ##' @name he10measles
-##' @aliases he10
-##' @rdname he10
-##' @family datasets
+##' @aliases he10measles
+##' @rdname he10measles
+##' @family datasets he10
 ##' @return a \sQuote{data.frame} of reported measles cases for 20 towns,
 ##' analyzed by He et al (2010).
 ##' @references

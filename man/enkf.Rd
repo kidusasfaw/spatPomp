@@ -50,14 +50,12 @@ logLik(enkfd_bm)
 \Anderson2001
 }
 \seealso{
-Other particle filter methods: 
+\code{ienkf()}, \code{igirf}, \code{iubf}, \code{ibpf}
+
+Other likelihood evaluation algorithms: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
-\code{\link{girf}()},
-\code{\link{ibpf}()},
-\code{\link{ienkf}()},
-\code{\link{igirf}()},
-\code{\link{iubf}()}
+\code{\link{girf}()}
 }
-\concept{particle filter methods}
+\concept{likelihood evaluation algorithms}

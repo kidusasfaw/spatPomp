@@ -8,7 +8,8 @@
 ##' @rdname enkf
 ##' @include spatPomp_class.R spatPomp.R undefined.R pstop.R
 ##' @aliases enkf  enkf,ANY-method enkf,missing-method
-##' @family particle filter methods
+##' @family likelihood evaluation algorithms
+##' @seealso \code{ienkf()}, \code{igirf}, \code{iubf}, \code{ibpf}
 ##' @importFrom stats rnorm
 ##' @inheritParams abf
 ##' @param data A \code{spatPomp} object.

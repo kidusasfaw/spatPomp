@@ -103,17 +103,15 @@ logLik(pfd_bm)
 \asfaw2020
 }
 \seealso{
-Other particle filter methods: 
+likelihood maximization algorithms: \code{ienkf()}, \code{igirf()}, \code{iubf()}, \code{ibpf()}
+
+Other likelihood evaluation algorithms: 
 \code{\link{abfir}()},
 \code{\link{abf}()},
 \code{\link{bpfilter}()},
-\code{\link{enkf}()},
-\code{\link{ibpf}()},
-\code{\link{ienkf}()},
-\code{\link{igirf}()},
-\code{\link{iubf}()}
+\code{\link{enkf}()}
 }
 \author{
 Kidus Asfaw
 }
-\concept{particle filter methods}
+\concept{likelihood evaluation algorithms}

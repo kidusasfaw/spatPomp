@@ -11,8 +11,8 @@
 ##' @rdname iubf
 ##' @include spatPomp_class.R abf.R iter_filter.R
 ##' @author Kidus Asfaw
-##' @family particle filter methods
-##' @family spatPomp parameter estimation methods
+##' @family likelihood maximization algorithms
+##' @seealso likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 ##' @importFrom stats quantile
 ##' @importFrom utils head
 ##' @inheritParams pomp::mif2

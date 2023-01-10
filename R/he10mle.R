@@ -5,9 +5,9 @@
 ##' The values are similar, but not identical, to those reported by He et al.
 ##'
 ##' @name he10mle
-##' @aliases he10
-##' @rdname he10
-##' @family datasets
+##' @aliases he10mle
+##' @rdname he10mle
+##' @family datasets he10
 ##' @return a \sQuote{data.frame} containing the estimated parameters.
 ##' @references
 ##'

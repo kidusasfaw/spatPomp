@@ -12,7 +12,8 @@
 ##' @rdname bpfilter
 ##' @include spatPomp_class.R
 ##' @author Kidus Asfaw
-##' @family particle filter methods
+##' @family likelihood evaluation algorithms
+##' @seealso likelihood maximization algorithms: \code{ienkf()}, \code{igirf()}, \code{iubf()}, \code{ibpf()}
 ##' @inheritParams abf
 ##'
 ##' @param block_size The number of spatial units per block. If this is provided, the method subdivides units approximately evenly

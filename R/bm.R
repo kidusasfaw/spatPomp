@@ -9,7 +9,7 @@
 #' @name bm
 #' @rdname bm
 #' @author Edward L. Ionides
-#' @family spatPomp examples
+#' @family spatPomp model generators
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of observation time steps to evolve the process.
 #' @param delta_t Process simulations are performed every \code{delta_t} time units

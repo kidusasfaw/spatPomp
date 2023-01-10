@@ -36,7 +36,9 @@ spy(b)
 }
 }
 \seealso{
-Other spatPomp examples: 
+Other spatPomp model generators: 
+\code{\link{bm2}()},
+\code{\link{gbm}()},
 \code{\link{he10}()},
 \code{\link{lorenz}()},
 \code{\link{measles}()}
@@ -44,4 +46,4 @@ Other spatPomp examples:
 \author{
 Edward L. Ionides
 }
-\concept{spatPomp examples}
+\concept{spatPomp model generators}

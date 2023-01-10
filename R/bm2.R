@@ -9,6 +9,7 @@
 #'
 #' @name bm2
 #' @rdname bm2
+#' @family spatPomp model generators
 #' @author Edward L. Ionides
 #' @param U A length-one numeric signifying dimension of the process.
 #' @param N A length-one numeric signifying the number of observation time steps to evolve the process.

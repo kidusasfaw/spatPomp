@@ -21,7 +21,8 @@
 #' @name he10
 #' @rdname he10
 #' @author Edward L. Ionides
-#' @family spatPomp examples
+#' @family spatPomp model generators 
+#' @seealso \code{he10coordinates}, \code{he10measles}, \code{he10mle}, \code{he10demography}
 #'
 #' @param U A length-one numeric signifying the number of cities to be
 #' represented in the spatPomp object. Default U=20 gives all the towns
@@ -34,11 +35,35 @@
 #' @param towns_selected A numeric vector of towns to be modeled. Defaults 
 #' to 1:U, with cities ranked by decreasing population and 1 being London.
 #' @return An object of class \sQuote{spatPomp} representing a \code{U}-dimensional spatially coupled measles POMP model.
+#'
+#' @section Relationship to published analysis:
+#' The model generator \code{he10()} differs from \code{measles()} in some details necessitated to reproduce the results of He et al (2010).
+#' The \code{measles()} model follows the decision of Park and Ionides (2020) and Ionides et al (2021) to apply the mixing exponent \eqn{\alpha_u} to \eqn{(I_u/P_u)} rather than just to \eqn{I_u}.
+#' \code{he10()} does this for the infections arising from individuals traveling to another town (which don't arise for the panel model of He et al (2010)).
+#' However, for infections arising within a city, in order to reproduce the results of He et al (2010), \code{he10()} uses \eqn{(I_u^{\alpha_u}/P_u)}.
+#' This is not fully documented in the text of Ionides et al (2022).
+#' Models fitted to data have \eqn{alpha_u} close to \eqn{1}, so this issue may be negligible in practice.
+#'
+#' Another discrepancy between the \code{he10()} code and the mathematical model written by Ionides et al (2022) arises in whether individuals traveling from \eqn{u} to \eqn{v} use mixing exponent \eqn{\alpha_u} or \eqn{\alpha_v}.
+#' Ionides et al (2022) wrote \eqn{u} but the code used implemented \eqn{v}.
+#' The implementation in \code{he10()} matches the implementation of Ionides et al (2022) and so uses \eqn{v}.
+#'
+#' It might seem surprising that immigrant infections affect only the first term in the expression for \eqn{\mu_{SE}} in Ionides et al (2022), and in the corresponding \code{he10()} code.
+#' This immigration term is needed in the first term to make the model of He et al (2010) a proper sub-model, when coupling is removed by setting the gravitational constant parameter equal to zero.
+#' When this constant is allowed to be positive, the role of immigrant infections transmitting to traveling individuals is anticipated to be a negligible, second-order effect which has been omitted from the model.
+#'
+#'
 #' @references
+#'
+#' \asfaw2020
 #'
 #' \he2010
 #'
+#' \ionides2021
+#'
 #' \ionides2022
+#'
+#' \park2020
 #'
 #' @note This function goes through a typical workflow of constructing
 #' a typical spatPomp object (1-4 below). This allows the user to have a
@@ -256,7 +281,6 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
 
       // pre-computing this saves substantial time
       powVec[u] = pow(I[u]/pop[u],alpha[u*alpha_unit]);
-      // powVec[u] = I[u]/pop[u];
 
     }
 
@@ -287,14 +311,10 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
         br = (1.0-cohort[u*cohort_unit])*lag_birthrate[u];
 
       // expected force of infection
-      if(alpha[u*alpha_unit]==1.0 && iota[u*iota_unit]==0.0)
-        foi = I[u]/pop[u];
-      else
-        foi = pow( (I[u]+iota[u*iota_unit]),alpha[u*alpha_unit])/pop[u];
-      // back to the he10 form where we do not put pop within the power
-      //  foi = pow( (I[u]+iota[u*iota_unit])/pop[u],alpha[u*alpha_unit]);
-      // following Park and Ionides (2019) we raise pop to the alpha power
-      // He et al (2010) did not do this.
+      foi = pow( (I[u]+iota[u*iota_unit]),alpha[u*alpha_unit])/pop[u];
+      // using the he10 form where we do not put pop within the power, to match He et al (2010) results
+      // to match the mathematical specification in Ionides et al (2021) we would use
+      // foi = pow( (I[u]+iota[u*iota_unit])/pop[u],alpha[u*alpha_unit]);
 
       for (v=0; v < U ; v++) {
         if(v != u)
@@ -329,11 +349,6 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
     double m,v;
     double tol = 1e-300;
     double mytol = 1e-5;
-
-// smaller tolerances can be appropriate for higher dimensions
-// to check compatilibity with he10 for single towns:
-//    double tol = 1e-18;
-//    double mytol = 0;
 
     int u;
 

@@ -9,8 +9,8 @@
 ##' @rdname ienkf
 ##' @include spatPomp_class.R spatPomp.R enkf.R iter_filter.R
 ##' @author Kidus Asfaw
-##' @family particle filter methods
-##' @family spatPomp parameter estimation methods
+##' @family likelihood maximization algorithms
+##' @seealso likelihood evaluation algorithms: \code{girf()}, \code{enkf()}, \code{bpfilter()}, \code{abf()}, \code{abfir()}
 ##' @importFrom stats rnorm
 ##' @inheritParams abf
 ##' @inheritParams pomp::mif2

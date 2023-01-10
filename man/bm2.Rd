@@ -52,6 +52,15 @@ spy(b)
 # are provided in the tests directory
 }
 }
+\seealso{
+Other spatPomp model generators: 
+\code{\link{bm}()},
+\code{\link{gbm}()},
+\code{\link{he10}()},
+\code{\link{lorenz}()},
+\code{\link{measles}()}
+}
 \author{
 Edward L. Ionides
 }
+\concept{spatPomp model generators}
