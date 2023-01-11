@@ -64,8 +64,14 @@ b_bag_nbhd <- function(object, time, unit) {
   return(nbhd_list)
 }
 
+set.seed(7)
 b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
 paste("bm abf loglik: ",round(logLik(b_abf),10))
+
+set.seed(7)
+b_abf_repeat <- abf(b_abf)
+paste("check abf on abfd_spatPomp: ",
+  logLik(b_abf_repeat)==logLik(b_abf))
 
 ##
 ## abfir tested on bm
@@ -160,6 +166,9 @@ b_igirf_hyp <- igirf(b_model,
   verbose = TRUE
 )
 paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
+
+plot(b_igirf_geom) -> b_igirf_plot
+head(b_igirf_plot$data)
 
 ##
 ## ienkf on bm, with geometric and hyperbolic cooling
@@ -267,6 +276,8 @@ dunit_measure(b_model, y=b_y,
 
 runit_measure(b_model, x=b_s, unit=2, time=1, params=b_p)
 
+vec_rmeasure(b_model,x=b_s,time=1, params=b_p)
+
 ## --------------------------------------------
 ## using bm to test edge cases and utility functions
 ## perhaps only of technical interest
@@ -294,6 +305,10 @@ runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
 
 dev.off()
 
+## test spatPomp_Csnippet variable construction
+spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"), unit_covarnames="D",
+  unit_ivpnames="E",unit_paramnames="F",unit_vfnames="G")
+
 ## --------------------------------------------
 ## using bm to test spatPomp() replacement functionality
 ## ____________________________________________
@@ -301,7 +316,7 @@ dev.off()
 b_rep1 <- spatPomp(b_model,params=coef(b_model))
 for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 
-try(spatPomp(data=as.data.frame(b_model),units=NULL))
+try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 
   
 

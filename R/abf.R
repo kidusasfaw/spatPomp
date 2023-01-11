@@ -322,6 +322,7 @@ setMethod(
       object,
       Np=as.integer(Np),
       Nrep=as.integer(Nrep),
+      nbhd=nbhd,
       tol=tol,
       cond_loglik=cond_loglik,
       loglik=sum(cond_loglik)

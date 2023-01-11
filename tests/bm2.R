@@ -4,7 +4,8 @@ set.seed(0)
 b2_U <- 4
 b2 <- bm2(U=b2_U,N=2,unit_specific_names="rho")
 
-paste("bpfilter logLik for bm2 model:",logLik(bpfilter(b2,Np=5,block_size=1)))
+b2_bpfilter <- bpfilter(b2,Np=5,block_size=1)
+paste("bpfilter logLik for bm2 model:",logLik(b2_bpfilter))
 
 # here there are no transformations so use small rw.sd. to avoid negatives
 b2_rw_list <- rep(list(0.001),times=b2_U) 
@@ -48,8 +49,16 @@ paste("bm2 ibpf loglik: ",round(logLik(b2_ibpf),10))
 set.seed(5)
 b2_ibpf_repeat <- ibpf(b2_ibpf,params=coef(b2), unitParNames="rho",
   sharedParNames=NULL,spat_regression=0.1)
-paste("check ibpf on ipfd_spatPomp: ",
-  logLik(b2_ibpf)==logLik(b2_ibpf_repeat))
+paste("check ibpf on ibpfd_spatPomp: ",
+  logLik(b2_ibpf_repeat)==logLik(b2_ibpf))
+
+set.seed(5)
+b2_ibpf_bpfilterd <- ibpf(b2_bpfilter,Np=5,block_size=1,Nbpf=2,
+  rw.sd=b2_rw.sd,
+  cooling.frac=0.5, spat_regression=0.1,
+  unitParNames="rho",sharedParNames=NULL)
+paste("check ibpf on bpfilterd_spatPomp: ",
+  logLik(b2_ibpf_bpfilterd)==logLik(b2_ibpf))
 
 
 

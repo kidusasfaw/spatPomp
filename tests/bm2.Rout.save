@@ -1,11 +1,13 @@
 
 R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -17,12 +19,21 @@ Type 'q()' to quit R.
 
 > library(spatPomp)
 Loading required package: pomp
+
+Welcome to pomp!
+
+As of version 4.6, no user-visible pomp function has a name that
+includes a dot (.). Function names have been changed to replace the dot
+with an underscore (_). For more information, see the pomp blog:
+https://kingaa.github.io/pomp/blog.html.
+
 > set.seed(0)
 > 
 > b2_U <- 4
 > b2 <- bm2(U=b2_U,N=2,unit_specific_names="rho")
 > 
-> paste("bpfilter logLik for bm2 model:",logLik(bpfilter(b2,Np=5,block_size=1)))
+> b2_bpfilter <- bpfilter(b2,Np=5,block_size=1)
+> paste("bpfilter logLik for bm2 model:",logLik(b2_bpfilter))
 [1] "bpfilter logLik for bm2 model: -12.9121635525516"
 > 
 > # here there are no transformations so use small rw.sd. to avoid negatives
@@ -70,9 +81,18 @@ Loading required package: pomp
 > set.seed(5)
 > b2_ibpf_repeat <- ibpf(b2_ibpf,params=coef(b2), unitParNames="rho",
 +   sharedParNames=NULL,spat_regression=0.1)
-> paste("check ibpf on ipfd_spatPomp: ",
-+   logLik(b2_ibpf)==logLik(b2_ibpf_repeat))
-[1] "check ibpf on ipfd_spatPomp:  TRUE"
+> paste("check ibpf on ibpfd_spatPomp: ",
++   logLik(b2_ibpf_repeat)==logLik(b2_ibpf))
+[1] "check ibpf on ibpfd_spatPomp:  TRUE"
+> 
+> set.seed(5)
+> b2_ibpf_bpfilterd <- ibpf(b2_bpfilter,Np=5,block_size=1,Nbpf=2,
++   rw.sd=b2_rw.sd,
++   cooling.frac=0.5, spat_regression=0.1,
++   unitParNames="rho",sharedParNames=NULL)
+> paste("check ibpf on bpfilterd_spatPomp: ",
++   logLik(b2_ibpf_bpfilterd)==logLik(b2_ibpf))
+[1] "check ibpf on bpfilterd_spatPomp:  TRUE"
 > 
 > 
 > 

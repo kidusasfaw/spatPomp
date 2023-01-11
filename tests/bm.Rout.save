@@ -1,11 +1,13 @@
 
 R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
 Copyright (C) 2022 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -18,6 +20,14 @@ Type 'q()' to quit R.
 > png(filename="bm-%02d.png",res=100)
 > library(spatPomp)
 Loading required package: pomp
+
+Welcome to pomp!
+
+As of version 4.6, no user-visible pomp function has a name that
+includes a dot (.). Function names have been changed to replace the dot
+with an underscore (_). For more information, see the pomp blog:
+https://kingaa.github.io/pomp/blog.html.
+
 > 
 > 
 > # For CRAN tests, need to limit to two cores
@@ -84,11 +94,18 @@ Loading required package: pomp
 +   return(nbhd_list)
 + }
 > 
+> set.seed(7)
 > b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 > paste("bm abf loglik: ",round(logLik(b_abf),10))
-[1] "bm abf loglik:  -9.5797654877"
+[1] "bm abf loglik:  -9.6260083071"
+> 
+> set.seed(7)
+> b_abf_repeat <- abf(b_abf)
+> paste("check abf on abfd_spatPomp: ",
++   logLik(b_abf_repeat)==logLik(b_abf))
+[1] "check abf on abfd_spatPomp:  TRUE"
 > 
 > ##
 > ## abfir tested on bm
@@ -96,7 +113,7 @@ executing %dopar% sequentially: no parallel backend registered
 > 
 > b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
 > paste("bm abfir loglik: ",round(logLik(b_abfir),10))
-[1] "bm abfir loglik:  -9.9216752921"
+[1] "bm abfir loglik:  -8.7556872332"
 > 
 > ##
 > ## bpfilter tested on bm
@@ -199,6 +216,16 @@ igirf iteration 2 of 2 completed with likelihood  -10.7886
  0.40021397  1.00000000  1.00000000 -0.03993169  0.00000000 
 > paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
 [1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.7886016055"
+> 
+> plot(b_igirf_geom) -> b_igirf_plot
+> head(b_igirf_plot$data)
+  iteration  param       value
+2         2 loglik -10.8072342
+3         3 loglik  -9.9887893
+4         1    rho   0.4000000
+5         2    rho   0.4014437
+6         3    rho   0.3984085
+7         1  sigma   1.0000000
 > 
 > ##
 > ## ienkf on bm, with geometric and hyperbolic cooling
@@ -377,6 +404,14 @@ variable      [,1]
       Y1 0.9852548
 
 > 
+> vec_rmeasure(b_model,x=b_s,time=1, params=b_p)
+, , 1
+
+          [,1]
+[1,] 1.7469874
+[2,] 0.7308696
+
+> 
 > ## --------------------------------------------
 > ## using bm to test edge cases and utility functions
 > ## perhaps only of technical interest
@@ -438,6 +473,14 @@ variable [,1]
 null device 
           1 
 > 
+> ## test spatPomp_Csnippet variable construction
+> spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"), unit_covarnames="D",
++   unit_ivpnames="E",unit_paramnames="F",unit_vfnames="G")
+An object of class "Csnippet"
+Slot "text":
+[1] "double *A = &A1;\nconst double *B = &B1;\nconst double *C = &C1;\nconst double *D = &D1;\nconst double *E_0 = &E1_0;\nconst double *F = &F1;\ndouble *DG = &DG1;\nlik=u;"
+
+> 
 > ## --------------------------------------------
 > ## using bm to test spatPomp() replacement functionality
 > ## ____________________________________________
@@ -446,7 +489,7 @@ null device
 > for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 [1] "states"
 > 
-> try(spatPomp(data=as.data.frame(b_model),units=NULL))
+> try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 Error in value[[3L]](cond) : 
   ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
 > 
