@@ -374,8 +374,8 @@ pre code {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -383,16 +383,9 @@ pre code {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -484,7 +477,8 @@ available on <a href="https://github.com/kidusasfaw/spatPomp">GitHub</a>
 and versions are occasionally uploaded to <a href="https://cran.rstudio.com/web/packages/spatPomp">CRAN</a>. Other
 relevant resources are:</p>
 <ul>
-<li><a href="vignettes/spatPomp.pdf">An introductory article</a></li>
+<li><a href="vignettes/spatPomp.pdf">Partially observed Markov processes
+with spatial structure via the R package spatPomp</a></li>
 <li><a href="vignettes/ibpf.pdf">A tutorial on the iterated block
 particle filter</a></li>
 </ul>
@@ -497,6 +491,10 @@ American Statistical Association,</em> prepublished online. <a href="https://doi
 particle filter for inference on coupled dynamic systems with shared and
 unit-specific parameters. <em>Statistica Sinica,</em> prepublished
 online. <a href="https://doi.org/10.5705/ss.202022.0188">doi</a>. <a href="https://arxiv.org/abs/2206.03837">arxiv</a>. <a href="https://github.com/ionides/ibpf_article">github</a>.</li>
+<li>Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and
+Ionides, E. L. (2023). Informing policy via dynamic models: Cholera in
+Haiti. <a href="https://ionides.github.io/pubs/wheeler23-draft.pdf">working
+draft</a>. <a href="https://ionides.github.io/pubs/wheeler23-sup-draft.pdf">supplement</a>.</li>
 </ul>
 
 

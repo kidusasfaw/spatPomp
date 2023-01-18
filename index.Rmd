@@ -30,7 +30,7 @@ In addition, the particle filter provided by [**pomp**](https://kingaa.github.io
 
 The latest development version of **spatPomp** is available on [GitHub](https://github.com/kidusasfaw/spatPomp) and versions are occasionally uploaded to [CRAN](https://cran.rstudio.com/web/packages/spatPomp). Other relevant resources are:
 
-- [An introductory article](vignettes/spatPomp.pdf)
+- [Partially observed Markov processes with spatial structure via the R package spatPomp](vignettes/spatPomp.pdf)
 - [A tutorial on the iterated block particle filter](vignettes/ibpf.pdf)
 
 Papers using **spatPomp** include the following:
@@ -49,4 +49,7 @@ Papers using **spatPomp** include the following:
   [doi](https://doi.org/10.5705/ss.202022.0188).
   [arxiv](https://arxiv.org/abs/2206.03837).
   [github](https://github.com/ionides/ibpf_article).
-
+- Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2023).
+  Informing policy via dynamic models: Cholera in Haiti.
+  [working draft](https://ionides.github.io/pubs/wheeler23-draft.pdf).
+  [supplement](https://ionides.github.io/pubs/wheeler23-sup-draft.pdf).
