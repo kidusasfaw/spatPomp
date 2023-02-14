@@ -12,6 +12,8 @@
 ##' @param type for visualizing an object of class \code{spatPomp}, the user
 ##' can obtain a grid of line plots by default (\code{'l'}) or a heat map by
 ##' supplying argument \code{'h'}.
+##' @param plot_unit_names allows suppression of unit names when making
+##' a heat map for a large number of units
 ##' @param ...  for visualizing an object of class \code{spatPomp}, the user
 ##' can add arguments like \code{nrow} to specify the number of rows in the
 ##' grid.
@@ -57,37 +59,48 @@ setMethod(
 setMethod(
   "plot",
   signature=signature(x="spatPomp"),
-  definition=function (x, type = c('l','h'), log=F, ...) {
+  definition=function (x, type = c('l','h'), log=F, plot_unit_names=T,...) {
     df <- as.data.frame(x)
-    if(log) df[x@unit_obsnames] <- log(df[x@unit_obsnames]+1)
+    if(log) df[x@unit_obsnames] <- log10(df[x@unit_obsnames]+1)
     type = match.arg(type)
     if(type == 'l'){
       unit_nm <- rlang::sym(x@unitname)
       df[[unit_nm]] <- factor(df[[unit_nm]], levels = x@unit_names)
       g <- ggplot2::ggplot(data = df,
-                      mapping = ggplot2::aes(x = !!rlang::sym(x@timename),
-                                             y = !!rlang::sym(x@unit_obsnames))) +
-        ggplot2::geom_line() +
-        ggplot2::facet_wrap(unit_nm, ...)
+        mapping = ggplot2::aes(
+	  x = !!rlang::sym(x@timename),
+          y = !!rlang::sym(x@unit_obsnames)
+	)
+      ) +
+      ggplot2::geom_line() +
+      ggplot2::facet_wrap(unit_nm, ...)
       return(g)
     }
     if(type == 'h'){
-      ggplot2::ggplot(data = df,
-                      mapping = ggplot2::aes(x = !!rlang::sym(x@timename),
-                                             y = factor(!!rlang::sym(x@unitname),
-                                                        levels = unit_names(x)))) +
-        ggplot2::geom_tile(mapping = ggplot2::aes(fill = !!rlang::sym(x@unit_obsnames))) +
-        ggplot2::scale_x_continuous(expand=c(0,0)) +
-        ggplot2::scale_y_discrete(expand=c(0,0)) +
-        ggplot2::theme(axis.text.y = ggplot2::element_text(
-          size = 11-(2*floor(length(unit_names(x))/10)),
-          vjust = 0.5,
-          hjust=1)) +
-        ggplot2::scale_fill_gradient(low = "#000000", high = "#FFFFFF") +
-        ggplot2::labs(x = "time", y = "unit", fill = ifelse(log,
-                                                            paste("log(",x@unit_obsnames,"+1)",sep=""),
-                                                            x@unit_obsnames))
+      g <- ggplot2::ggplot(data = df,
+        mapping = ggplot2::aes(x = !!rlang::sym(x@timename),
+          y = factor(!!rlang::sym(x@unitname),
+          levels = unit_names(x)))) +
+      ggplot2::geom_tile(mapping = ggplot2::aes(fill = !!rlang::sym(x@unit_obsnames))) +
+      ggplot2::scale_x_continuous(expand=c(0,0)) +
+      ggplot2::scale_y_discrete(expand=c(0,0)) +
+      ggplot2::scale_fill_gradient(low = "#000000", high = "#FFFFFF") +
+      ggplot2::labs(x = "time",
+        y = "unit",
+        fill = ifelse(log,
+        paste("log10\n(",x@unit_obsnames,"+1)",sep=""),x@unit_obsnames)
+      )
+      if(plot_unit_names) {
+        g <- g + ggplot2::theme(
+	  axis.text.y = ggplot2::element_text(
+            size = 11-(2*floor(length(unit_names(x))/10)),
+            vjust = 0.5, hjust=1))
+      } else {
+        g <- g + ggplot2::theme(
+	  axis.text.y=ggplot2::element_blank(),
+	  axis.ticks.y=ggplot2::element_blank())
+      }
+      return(g)
     }
   }
 )
-

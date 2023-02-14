@@ -10,7 +10,7 @@
 \usage{
 \S4method{plot}{igirfd_spatPomp}(x, params = names(coef(x)), ncol = 3)
 
-\S4method{plot}{spatPomp}(x, type = c("l", "h"), log = F, ...)
+\S4method{plot}{spatPomp}(x, type = c("l", "h"), log = F, plot_unit_names = T, ...)
 }
 \arguments{
 \item{x}{a \code{spatPomp} object}
@@ -26,6 +26,9 @@ supplying argument \code{'h'}.}
 \item{log}{should the data be log-transformed before plotting?
 This helps in contexts where there are spikes that could take away
 attention from the dynamics illustrated by the rest of the data.}
+
+\item{plot_unit_names}{allows suppression of unit names when making
+a heat map for a large number of units}
 
 \item{...}{for visualizing an object of class \code{spatPomp}, the user
 can add arguments like \code{nrow} to specify the number of rows in the
