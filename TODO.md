@@ -1,5 +1,11 @@
 # spatPomp to-do list
 
+23-03-10. Add params argument to spatPomp()
+
+23-03-10. Issue with spatPomp_Csnippet: get const right for observations in rmeasure.
+
+23-03-10. Write compartment models using mu[SE], dN[SE], etc.
+
 22-12-06. rmeasure and dmeasure could be built using runit_measure and dunit_measure if those are supplied.
 
 22-12-06. note that eunit_measure, vunit_measure and munit_measure calculate for all units and subset out the requested ones. this could lead to inefficient code when not used in a vectorized way.
