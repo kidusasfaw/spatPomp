@@ -100,8 +100,8 @@ setMethod(
       enkf.internal(
         data,
         Np=Np,
-        ...,
-        verbose=verbose
+        ...,      
+  verbose=verbose
       ),
       error = function (e) stop("enkf",conditionMessage(e))
     )
@@ -110,8 +110,9 @@ setMethod(
 
 enkf.internal <- function (object,
   Np,
-  ..., verbose) {
+  ...,.gnsi=TRUE,verbose) {
 
+  gnsi <- .gnsi
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
@@ -170,7 +171,7 @@ enkf.internal <- function (object,
         Np = as.integer(Np[1]),
         times=tt[k+1],
         params=params,
-        gnsi=TRUE),
+        gnsi=gnsi),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
@@ -183,7 +184,7 @@ enkf.internal <- function (object,
         Np = as.integer(Np[1]),
         times=tt[k+1],
         params=params,
-        gnsi=TRUE),
+        gnsi=gnsi),
       error = function (e) {
         stop("ep",conditionMessage(e),call.=FALSE) # nocov
       }
@@ -218,6 +219,8 @@ enkf.internal <- function (object,
     condlogLik[k] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
     filterMeans[,k] <- rowMeans(X)  # filter mean
     forecast[,k] <- ym
+
+    gnsi=FALSE
   }
   new("enkfd_spatPomp", object,
     paramMatrix=array(data=numeric(0),dim=c(0,0)),
