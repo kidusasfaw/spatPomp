@@ -196,7 +196,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
       .gnsi=gnsi
     )
 
-    gnsi <- TRUE
+    gnsi <- FALSE
     paramMatrix <- es@paramMatrix
     traces[n+1,-1L] <- coef(es)
     traces[n,1L] <- es@loglik
