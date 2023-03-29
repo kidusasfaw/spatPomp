@@ -1,5 +1,9 @@
 # spatPomp to-do list
 
+23-03-29. Allow spatPomp to use the "order" pomp feature for covariate interpolation. Perhaps have a spatPomp_covariate_table function analogous to pomp::covariate_table?
+
+23-03-25. Arguably, ibpf() should have an argument which determines whether to contract the expanded representation of a shared parameter so that it is U copies of the mean, rather than U slightly different estimates (which are close but not exactly equal, due to the construction of ibpf). This argument could default to contract=TRUE. As I pointed out earlier, you may not want contract=TRUE when you plan to continue refining the results of the search, and in this case you can deliberately set contract=FALSE but at this point hopefully the users will understand sufficiently what is going on.
+
 23-03-10. Add params argument to spatPomp()
 
 23-03-10. Issue with spatPomp_Csnippet: get const right for observations in rmeasure.
