@@ -1,0 +1,165 @@
+
+R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> library(spatPomp)
+Loading required package: pomp
+
+Welcome to pomp!
+
+As of version 4.6, no user-visible pomp function has a name that
+includes a dot ('.'). Function names have been changed to replace the
+dot with an underscore ('_'). For more information, see the pomp blog:
+https://kingaa.github.io/pomp/blog.html.
+
+> 
+> i <- 1
+> DEBUG=FALSE
+> U <- switch(i,4,10,40)
+> N <- switch(i,2,50,391)
+> Np <- switch(i,10,100,1000)
+> 
+> m1 <- measles2(U=U,N=N)
+> if(DEBUG){
++   plot(simulate(m1),log=T)
++ }
+> 
+> # test for all parameters expanded, by default
+> set.seed(1)
+> s1 <- simulate(m1)
+> head(obs(s1))
+        year
+name     [,1] [,2]
+  cases1   95   97
+  cases2   42   46
+  cases3   42   36
+  cases4   29   13
+> 
+> if(DEBUG){
++ par1 <- coef(m1)
++ par1[paste0('iota',1:U)] <- 10
++  plot(simulate(m1,params=par1),ty="l",log=T)
++ }
+> 
+> # test for all parameters contracted, e.g., for mif2 with
+> # all shared parameters
+> m2 <- measles2(U=U,N=N,expandedParNames=NULL,
++   contractedParNames=c("R0", "c", "A", "muIR",
++     "muEI", "sigmaSE", "rho", "psi", "g", "S_0", "E_0", "I_0")
++ )
+> 
+> set.seed(1)
+> s2 <- simulate(m2)
+> 
+> # test for all parameters contracted, e.g., for mif2 with
+> # all shared parameters
+> m2 <- measles2(U=U,N=N,expandedParNames=NULL,
++   contractedParNames=c("R0", "c", "A", "muIR",
++     "muEI", "sigmaSE", "rho", "psi", "g", "S_0", "E_0", "I_0")
++ )
+> 
+> # test for both expanded and contracted parameters
+> m3 <- measles2(U=U,N=N,expandedParNames=c("A","muIR"),
++   contractedParNames=c("R0", "c", "S_0")
++ )
+> 
+> set.seed(1)
+> s3 <- simulate(m3)
+> 
+> if(any(obs(s2)!=obs(s1)))stop("s1 and s2 should be identical")
+> if(any(obs(s3)!=obs(s1)))stop("s1 and s3 should be identical")
+> 
+> partrans(m1,coef(m1),dir="toEst")
+        R01         R02         R03         R04          c1          c2 
+  3.4011974   3.4011974   3.4011974   3.4011974  -0.8472979  -0.8472979 
+         c3          c4          A1          A2          A3          A4 
+ -0.8472979  -0.8472979   0.0000000   0.0000000   0.0000000   0.0000000 
+      muIR1       muIR2       muIR3       muIR4       muEI1       muEI2 
+  3.9512437   3.9512437   3.9512437   3.9512437   3.9512437   3.9512437 
+      muEI3       muEI4    sigmaSE1    sigmaSE2    sigmaSE3    sigmaSE4 
+  3.9512437   3.9512437  -1.8971200  -1.8971200  -1.8971200  -1.8971200 
+       rho1        rho2        rho3        rho4        psi1        psi2 
+  0.0000000   0.0000000   0.0000000   0.0000000  -1.8971200  -1.8971200 
+       psi3        psi4          g1          g2          g3          g4 
+ -1.8971200  -1.8971200   5.9914645   5.9914645   5.9914645   5.9914645 
+       S_01        S_02        S_03        S_04        E_01        E_02 
+ -3.4094962  -3.4094962  -3.4094962  -3.4094962  -9.9034376  -9.9034376 
+       E_03        E_04        I_01        I_02        I_03        I_04 
+ -9.9034376  -9.9034376 -10.1265911 -10.1265911 -10.1265911 -10.1265911 
+     alpha1       iota1        muD1 
+  0.9800000   0.1000000   0.0200000 
+> partrans(m2,coef(m2),dir="toEst")
+        R01          c1          A1       muIR1       muEI1    sigmaSE1 
+  3.4011974  -0.8472979   0.0000000   3.9512437   3.9512437  -1.8971200 
+       rho1        psi1          g1        S_01        E_01        I_01 
+  0.0000000  -1.8971200   5.9914645  -3.4094962  -9.9034376 -10.1265911 
+     alpha1       iota1        muD1 
+  0.9800000   0.1000000   0.0200000 
+> partrans(m3,coef(m3),dir="toEst")
+         A1          A2          A3          A4       muIR1       muIR2 
+  0.0000000   0.0000000   0.0000000   0.0000000   3.9512437   3.9512437 
+      muIR3       muIR4         R01          c1        S_01      alpha1 
+  3.9512437   3.9512437   3.4011974  -0.8472979  -3.4094962   0.9800000 
+      iota1        psi1       muEI1    sigmaSE1        muD1        rho1 
+  0.1000000   0.1500000  52.0000000   0.1500000   0.0200000   0.5000000 
+         g1        E_01        I_01 
+400.0000000   0.0000500   0.0000400 
+> 
+> set.seed(2)
+> pf1 <- pfilter(m1,Np=Np)
+> logLik(pf1)
+[1] -1415.717
+> set.seed(2)
+> pf2 <- pfilter(m2,Np=Np)
+> logLik(pf2)
+[1] -1415.717
+> set.seed(2)
+> pf3 <- pfilter(m3,Np=Np)
+> logLik(pf3)
+[1] -1415.717
+> 
+> e1 <- enkf(m1,Np=Np)
+> logLik(e1)
+[1] -1472.011
+> 
+> if(DEBUG){
++   # compare to measles()
++   n1 <- measles(U=40)
++   coef(n1) <- c(
++     alpha = 1,
++     iota = 0,  
++     R0 = 30,
++     cohort = 0,
++     amplitude = 0.5,
++     gamma = 52,
++     sigma = 52,
++     mu = 0.02,
++     sigmaSE = 0.15, 
++     rho = 0.5,
++     psi = 0.15,
++     g = 400,
++     S_0 = 0.032, 
++     E_0 = 0.00005, 
++     I_0 = 0.00004
++   )
++   t1 <- simulate(n1)
++   plot(simulate(n1),ty="l",log=T)
++ }
+> 
+> 
