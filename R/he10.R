@@ -243,243 +243,215 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
 
   unit_statenames <- c('S','E','I','R','C')
 
-  he10_rprocess <- Csnippet('
-    const double *amplitude=&amplitude1;
-    const double *sigmaSE=&sigmaSE1;
-    const double *mu=&mu1;
-    const double *g=&g1;
-    const double *cohort=&cohort1;
-    const double *gamma=&gamma1;
-    const double *sigma=&sigma1;
-    const double *R0=&R01;
-    const double *alpha=&alpha1;
-    const double *iota=&iota1;
-    double br, beta, seas, foi, dw, births;
-    double rate[6], trans[6];
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
-    double powVec[U];
-    const double *pop = &pop1;
-    const double *lag_birthrate = &lag_birthrate1;
-    int u,v;
-    double tol = 1e-18;
-    double day = (t-floor(t))*365;
+  he10_rprocess <- spatPomp_Csnippet(
+    unit_statenames = c('S','E','I','R','C'),
+    unit_covarnames = c('pop','lag_birthrate'),
+    unit_paramnames = c('alpha','iota','R0','cohort','amplitude',
+      'gamma','sigma','mu','sigmaSE','g'),
+    code="
+      int BS=0, SE=1, SD=2, EI=3, ED=4, IR=5, ID=6;
+      double br, beta, seas, foi, dw;
+      double rate[7], dN[7];
+      double powVec[U];
+      int u,v;
+      double tol = 1e-18;
+      double day = (t-floor(t))*365;
+  
+      for (u = 0 ; u < U ; u++) {
 
-    for (u = 0 ; u < U ; u++) {
+        // needed for the Ensemble Kalman filter
+        // or other methods making real-valued perturbations to the state
+        // reulermultinom requires integer-valued double type for states
+        S[u] = S[u]>0 ? floor(S[u]) : 0;
+        E[u] = E[u]>0 ? floor(E[u]) : 0;
+        I[u] = I[u]>0 ? floor(I[u]) : 0;
+        R[u] = R[u]>0 ? floor(R[u]) : 0;
 
-
-      // needed for the Ensemble Kalman filter
-      // or other methods making real-valued perturbations to the state
-      // reulermultinom requires integer-valued double type for states
-      S[u] = S[u]>0 ? floor(S[u]) : 0;
-      E[u] = E[u]>0 ? floor(E[u]) : 0;
-      I[u] = I[u]>0 ? floor(I[u]) : 0;
-      R[u] = R[u]>0 ? floor(R[u]) : 0;
-
-      // pre-computing this saves substantial time
-      powVec[u] = pow(I[u]/pop[u],alpha[u*alpha_unit]);
-
-    }
-
-
-    for (u = 0 ; u < U ; u++) {
-
-       if ((day>=7&&day<=100) || (day>=115&&day<=199) || (day>=252&&day<=300) || (day>=308&&day<=356))
-        seas = 1.0+amplitude[u*amplitude_unit]*0.2411/0.7589;
-      else
-        seas = 1.0-amplitude[u*amplitude_unit];
-
-      // transmission rate
-      //     beta = R0[u*R0_unit]*(gamma[u*gamma_unit]+mu[u*mu_unit])*seas;
-
-      // for compatilibity with he10
-      beta = R0[u*R0_unit]*seas*(1-exp(-(gamma[u*gamma_unit]+mu[u*mu_unit])*dt))/dt;
-
-      rate[1] = mu[u*mu_unit];		// natural S death
-      rate[2] = sigma[u*sigma_unit];	// rate of ending of latent stage
-      rate[3] = mu[u*mu_unit];		// natural E death
-      rate[4] = gamma[u*gamma_unit];	// recovery
-      rate[5] = mu[u*mu_unit];		// natural I death
-
-      // cohort effect
-      if (fabs(day-251.0+tol) < 0.5*dt*365)
-        br = cohort[u*cohort_unit]*lag_birthrate[u]/dt + (1-cohort[u*cohort_unit])*lag_birthrate[u];
-      else
-        br = (1.0-cohort[u*cohort_unit])*lag_birthrate[u];
-
-      // expected force of infection
-      foi = pow( (I[u]+iota[u*iota_unit]),alpha[u*alpha_unit])/pop[u];
-      // using the he10 form where we do not put pop within the power, to match He et al (2010) results
-      // to match the mathematical specification in Ionides et al (2021) we would use
-      // foi = pow( (I[u]+iota[u*iota_unit])/pop[u],alpha[u*alpha_unit]);
-
-      for (v=0; v < U ; v++) {
-        if(v != u)
-          foi += g[u*g_unit] * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
+        // pre-computing this saves substantial time
+        powVec[u] = pow(I[u]/pop[u],alpha[u*alpha_unit]);
       }
 
-      // white noise (extrademographic stochasticity)
-      dw = rgammawn(sigmaSE[u*sigmaSE_unit],dt);
-      rate[0] = beta*foi*dw/dt;  // stochastic force of infection
+      for (u = 0 ; u < U ; u++) {
 
-      // Poisson births
-      births = rpois(br*dt);
+         if ((day>=7&&day<=100) || (day>=115&&day<=199) || (day>=252&&day<=300) || (day>=308&&day<=356))
+          seas = 1.0+amplitude[u*amplitude_unit]*0.2411/0.7589;
+        else
+          seas = 1.0-amplitude[u*amplitude_unit];
 
-      // transitions between classes
-      reulermultinom(2,S[u],&rate[0],dt,&trans[0]);
-      reulermultinom(2,E[u],&rate[2],dt,&trans[2]);
-      reulermultinom(2,I[u],&rate[4],dt,&trans[4]);
+        // transmission rate
+        //     beta = R0[u*R0_unit]*(gamma[u*gamma_unit]+mu[u*mu_unit])*seas;
 
-      S[u] += births   - trans[0] - trans[1];
-      E[u] += trans[0] - trans[2] - trans[3];
-      I[u] += trans[2] - trans[4] - trans[5];
-      R[u] = pop[u] - S[u] - E[u] - I[u];
-      C[u] += trans[4];           // true incidence
-     }
-  ')
+        // for compatilibity with he10
+        beta = R0[u*R0_unit]*seas*(1-exp(-(gamma[u*gamma_unit]+mu[u*mu_unit])*dt))/dt;
 
-  he10_dmeasure <- Csnippet("
-    const double *C = &C1;
-    const double *cases = &cases1;
-    const double *rho=&rho1;
-    const double *psi=&psi1;
-    double m,v;
-    double tol = 1e-300;
-    double mytol = 1e-5;
+        rate[SD] = mu[u*mu_unit];	
+        rate[EI] = sigma[u*sigma_unit];	
+        rate[ED] = mu[u*mu_unit];	
+        rate[IR] = gamma[u*gamma_unit];	
+        rate[ID] = mu[u*mu_unit];	
 
-    int u;
+        // cohort effect
+        if (fabs(day-251.0+tol) < 0.5*dt*365)
+          br = cohort[u*cohort_unit]*lag_birthrate[u]/dt + (1-cohort[u*cohort_unit])*lag_birthrate[u];
+        else
+          br = (1.0-cohort[u*cohort_unit])*lag_birthrate[u];
 
-    lik = 0;
-    for (u = 0; u < U; u++) {
-      m = rho[u*rho_unit]*(C[u]+mytol);
-      v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
+        // expected force of infection
+        foi = pow( (I[u]+iota[u*iota_unit]),alpha[u*alpha_unit])/pop[u];
+        // using the he10 form where we do not put pop within the power, to match He et al (2010) results
+        // to match the mathematical specification in Ionides et al (2021) we would use
+        // foi = pow( (I[u]+iota[u*iota_unit])/pop[u],alpha[u*alpha_unit]);
 
-      // Deal with NA measurements by omitting them
-      if(!(ISNA(cases[u]))){
-        // C < 0 can happen in bootstrap methods such as bootgirf
-        if (C[u] < 0) {lik += log(tol);} else {
-          if (cases[u] > tol) {
-            lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-
-              pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
-          } else {
-              lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+        for (v=0; v < U ; v++) {
+          if(v != u)
+            foi += g[u*g_unit] * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
+        }
+
+        // white noise (extrademographic stochasticity)
+        dw = rgammawn(sigmaSE[u*sigmaSE_unit],dt);
+        rate[SE] = beta*foi*dw/dt;  // stochastic force of infection
+
+        // Poisson births
+        dN[BS] = rpois(br*dt);
+
+        // transitions between classes
+        reulermultinom(2,S[u],&rate[SE],dt,&dN[SE]);
+        reulermultinom(2,E[u],&rate[EI],dt,&dN[EI]);
+        reulermultinom(2,I[u],&rate[IR],dt,&dN[IR]);
+
+        S[u] += dN[BS]   - dN[SE] - dN[SD];
+        E[u] += dN[SE] - dN[EI] - dN[ED];
+        I[u] += dN[EI] - dN[IR] - dN[ID];
+        R[u] = pop[u] - S[u] - E[u] - I[u];
+        C[u] += dN[IR];   // case reports modeled at time of removal/recovery
+       }
+    "
+  )
+
+  he10_dmeasure <-  spatPomp_Csnippet(
+    unit_statenames = 'C',
+    unit_obsnames = 'cases',
+    unit_paramnames = c('rho','psi'),
+    code="
+      double m,v;
+      double tol = 1e-300;
+      double mytol = 1e-5;
+      int u;
+      lik = 0;
+      for (u = 0; u < U; u++) {
+        m = rho[u*rho_unit]*(C[u]+mytol);
+        v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
+
+        // Deal with NA measurements by omitting them
+        if(!(ISNA(cases[u]))){
+          // C < 0 can happen in bootstrap methods such as bootgirf
+          if (C[u] < 0) {lik += log(tol);} else {
+            if (cases[u] > tol) {
+              lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-
+                pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
+            } else {
+                lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+            }
           }
         }
       }
-    }
+      if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
+    "
+  )
 
-    if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
-    
-  ")
-
-  he10_rmeasure <- Csnippet("
-    const double *C = &C1;
-    double *cases = &cases1;
-    const double *rho = &rho1;
-    const double *psi = &psi1;
-    double m,v;
-    double tol = 1.0e-300;
-    int u;
-
-    for (u = 0; u < U; u++) {
-      m = rho[u*rho_unit]*(C[u]+tol);
-      v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
-      cases[u] = rnorm(m,sqrt(v)+tol);
-      if (cases[u] > 0.0) {
-        cases[u] = nearbyint(cases[u]);
-      } else {
-        cases[u] = 0.0;
-      }
-    }
-  ")
-
-  he10_dunit_measure <- Csnippet('
-    const double *rho = &rho1;
-    const double *psi = &psi1;
-    double mytol = 1e-5;
-    double m = rho[u*rho_unit]*(C+mytol);
-    double v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
-    double tol = 1e-300;
-    // C < 0 can happen in bootstrap methods such as bootgirf
-    if(ISNA(cases)) {lik=1;} else { 
-      if (C < 0) {lik = 0;} else {
-        if (cases > tol) {
-          lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-
-            pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
+  he10_rmeasure <- spatPomp_Csnippet(
+    unit_paramnames=c('rho','psi'),
+    unit_statenames='C',
+    code="
+      double *cases = &cases1;
+      double m,v;
+      double tol = 1.0e-300;
+      int u;
+      for (u = 0; u < U; u++) {
+        m = rho[u*rho_unit]*(C[u]+tol);
+        v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
+        cases[u] = rnorm(m,sqrt(v)+tol);
+        if (cases[u] > 0.0) {
+          cases[u] = nearbyint(cases[u]);
         } else {
-          lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
+          cases[u] = 0.0;
         }
       }
-    }
-    if(give_log) lik = log(lik);
-  ')
+    "
+  )
 
-  he10_eunit_measure <- Csnippet("
-    const double *rho = &rho1;
-    ey = rho[u*rho_unit]*C;
-  ")
+  he10_dunit_measure <- spatPomp_Csnippet(
+    unit_paramnames=c('rho','psi'),
+    code="
+      double mytol = 1e-5;
+      double m = rho[u*rho_unit]*(C+mytol);
+      double v = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
+      double tol = 1e-300;
+      // C < 0 can happen in bootstrap methods such as bootgirf
+      if(ISNA(cases)) {lik=1;} else { 
+        if (C < 0) {lik = 0;} else {
+          if (cases > tol) {
+            lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-
+              pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
+          } else {
+            lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)+tol;
+          }
+        }
+      }
+      if(give_log) lik = log(lik);
+    "
+  )
 
-  he10_vunit_measure <- Csnippet("
-    //consider adding 1 to the variance for the case C = 0
-    const double *rho = &rho1;
-    const double *psi = &psi1;
-    double mytol = 1e-5;
-    double m;
-    m = rho[u*rho_unit]*(C+mytol);
-    vc = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
-  ")
+  he10_eunit_measure <- spatPomp_Csnippet(
+    unit_paramnames='rho',
+    code = "
+      ey = rho[u*rho_unit]*C;
+    "
+  )
 
-  he10_rinit <- Csnippet("
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
-    const double *S_0 = &S_01;
-    const double *E_0 = &E_01;
-    const double *I_0 = &I_01;
-    double m;
-    const double *pop = &pop1;
-    int u;
-    for(u = 0; u < U; u++) {
-      m = (float)(pop[u]);
-      S[u] = nearbyint(m*S_0[u*S_0_unit]);
-      I[u] = nearbyint(m*I_0[u*I_0_unit]);
-      E[u] = nearbyint(m*E_0[u*E_0_unit]);
-      R[u] = pop[u]-S[u]-E[u]-I[u];
-      C[u] = 0;
-      // in any practical model fit, we expect R>0
-      // though the model does not strictly enforce that 
-    }
-  ")
+  he10_vunit_measure <- spatPomp_Csnippet(
+    unit_paramnames=c('rho','psi'),
+    code="
+      double mytol = 1e-5;
+      double m;
+      m = rho[u*rho_unit]*(C+mytol);
+      vc = m*(1.0-rho[u*rho_unit]+psi[u*psi_unit]*psi[u*psi_unit]*m);
+    "
+  )
 
-  he10_skel <- Csnippet('
+  he10_rinit <- spatPomp_Csnippet(
+    unit_paramnames = c('S_0','E_0','I_0'),
+    unit_statenames = c('S','E','I','R','C'),
+    unit_covarnames = 'pop',
+    code="
+      double m;
+      int u;
+      for(u = 0; u < U; u++) {
+        m = (float)(pop[u]);
+        S[u] = nearbyint(m*S_0[u*S_0_unit]);
+        I[u] = nearbyint(m*I_0[u*I_0_unit]);
+        E[u] = nearbyint(m*E_0[u*E_0_unit]);
+        R[u] = pop[u]-S[u]-E[u]-I[u];
+        C[u] = 0;
+        // in any practical model fit, we expect R>0
+        // though the model does not strictly enforce that 
+      }
+    "
+  )
+
+  he10_skel <- spatPomp_Csnippet(
+    unit_statenames = c('S','E','I','R','C'),
+    unit_covarnames = c('pop','lag_birthrate'),
+    unit_paramnames = c('alpha','iota','R0','cohort','amplitude',
+      'gamma','sigma','mu','sigmaSE','g'),
+    code="
     double beta, br, seas, foi;
-    const double *amplitude=&amplitude1;
-    const double *mu=&mu1;
-    const double *g=&g1;
-    const double *cohort=&cohort1;
-    const double *gamma=&gamma1;
-    const double *sigma=&sigma1;
-    const double *R0=&R01;
-    const double *alpha=&alpha1;
-    const double *iota=&iota1;
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
     double *DS = &DS1;
     double *DE = &DE1;
     double *DI = &DI1;
     double *DR = &DR1;
     double *DC = &DC1;
     double powVec[U];
-    const double *pop = &pop1;
-    const double *lag_birthrate = &lag_birthrate1;
     int u,v;
 
     // pre-computing this saves substantial time
@@ -522,7 +494,8 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
       DR[u] = gamma[u*gamma_unit]*I[u] - mu[u*mu_unit]*R[u];
       DC[u] = gamma[u*gamma_unit]*I[u];
     }
-  ')
+  "
+  )
 
 basic_log_names <- c("sigma", "gamma", "sigmaSE", "psi", "R0", "g","iota","mu")
 basic_log_names <- setdiff(basic_log_names,fixedParNames)
