@@ -1,6 +1,9 @@
 png(filename="bm-%02d.png",res=100)
 library(spatPomp)
-
+i <- 1
+U <- switch(i,2,10)
+N <- switch(i,2,10)
+Np <- switch(i,10,100)
 
 # For CRAN tests, need to limit to two cores
 # https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
@@ -34,7 +37,7 @@ set.seed(2)
 ## using doRNG with 1 core leads to warnings: it seems to make
 ## foreach confused about whether it is running in parallel or not.
 
-b_model <- bm(U=2,N=2) 
+b_model <- bm(U=U,N=N) 
 
 ## ------------------------------------------------------------
 ## The bm model provides a simple example to test other methods.
@@ -51,7 +54,7 @@ paste("bm kalman filter loglik: ",round(bm_kalman_logLik(b_model),10))
 ## pfilter tested on bm
 ##
 
-b_pf <- pfilter(b_model,Np=10)
+b_pf <- pfilter(b_model,Np=Np)
 paste("bm pfilter loglik: ",round(logLik(b_pf),10))
 
 ##
@@ -65,7 +68,7 @@ b_bag_nbhd <- function(object, time, unit) {
 }
 
 set.seed(7)
-b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
+b_abf <- abf(b_model,Nrep=2,Np=Np, nbhd = b_bag_nbhd)
 paste("bm abf loglik: ",round(logLik(b_abf),10))
 
 set.seed(7)
@@ -77,7 +80,7 @@ paste("check abf on abfd_spatPomp: ",
 ## abfir tested on bm
 ##
 
-b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
+b_abfir <- abfir(b_model, Nrep = 2, Np = Np, nbhd = b_bag_nbhd)
 paste("bm abfir loglik: ",round(logLik(b_abfir),10))
 
 ##
@@ -85,7 +88,7 @@ paste("bm abfir loglik: ",round(logLik(b_abfir),10))
 ##
 
 set.seed(5)
-b_bpfilter <- bpfilter(b_model, Np = 10, block_size = 1)
+b_bpfilter <- bpfilter(b_model, Np = Np, block_size = 1)
 paste("bm bpfilter loglik: ",round(logLik(b_bpfilter),10))
 set.seed(5)
 b_bpfilter_repeat <- bpfilter(b_bpfilter)
@@ -96,19 +99,21 @@ paste("check bpfilter on bpfilterd_spatPomp: ",
 ## enkf tested on bm
 ##
 
-b_enkf <- enkf(b_model, Np = 10)
+b_enkf <- enkf(b_model, Np = Np)
 paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 
 ##
 ## girf tested on bm, both moment and bootstrap methods
 ##
 
-b_girf_mom <- girf(b_model,Np = 5,lookahead = 1,Nguide = 5,
+b_girf_mom <- girf(b_model,Np = floor(Np/2),lookahead = 1,
+  Nguide = floor(Np/2),
   kind = 'moment',Ninter=2)
 paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
 
 set.seed(0)
-b_girf_boot <- girf(b_model,Np = 5,lookahead = 1,Nguide = 5,
+b_girf_boot <- girf(b_model,Np = floor(Np/2),lookahead = 1,
+  Nguide = floor(Np/2),
   kind = 'bootstrap',Ninter=2)
 paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
 
@@ -138,7 +143,7 @@ b_igirf_geom <- igirf(b_model,
   rw.sd = b_rw.sd,
   cooling.type = "geometric",
   cooling.fraction.50 = 0.5,
-  Np=10,
+  Np=Np,
   Ninter = 2,
   lookahead = 1,
   Nguide = 5,
@@ -158,10 +163,10 @@ b_igirf_hyp <- igirf(b_model,
   rw.sd = b_rw.sd,
   cooling.type = "hyperbolic",
   cooling.fraction.50 = 0.5,
-  Np=10,
+  Np=floor(Np/2),
   Ninter = 2,
   lookahead = 1,
-  Nguide = 5,
+  Nguide = floor(Np/2),
   kind = 'moment',
   verbose = TRUE
 )
@@ -176,7 +181,7 @@ head(b_igirf_plot$data)
 
 b_ienkf_geom <- ienkf(b_model,
   Nenkf=2,
-  Np = 10,
+  Np = Np,
   rw.sd=b_rw.sd,
   cooling.type="geometric",
   cooling.fraction.50 = 0.5,
@@ -186,7 +191,7 @@ paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geo
 
 b_ienkf_hyp <- ienkf(b_model,
   Nenkf=2,
-  Np = 10,
+  Np = Np,
   rw.sd=b_rw.sd,
   cooling.type="hyperbolic",
   cooling.fraction.50 = 0.5,
@@ -200,8 +205,8 @@ paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hy
 
 b_iubf_geom <- iubf(b_model,
   Nubf = 2,
-  Nrep_per_param = 5,
-  Nparam = 5,
+  Nrep_per_param = floor(Np/2),
+  Nparam = floor(Np/2),
   nbhd = b_bag_nbhd,
   prop = 0.8,
   rw.sd =b_rw.sd,
@@ -213,8 +218,8 @@ paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom)
 
 b_iubf_hyp <- iubf(b_model,
   Nubf = 2,
-  Nrep_per_param = 5,
-  Nparam = 5,
+  Nrep_per_param = floor(Np/2),
+  Nparam = floor(Np/2),
   nbhd = b_bag_nbhd,
   prop = 0.8,
   rw.sd =b_rw.sd,
@@ -318,6 +323,5 @@ for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))
 
 try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 
-  
 
 

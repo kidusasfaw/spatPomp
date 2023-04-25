@@ -4,7 +4,8 @@ set.seed(2)
 gbm_model <- gbm(U=3,N=2) 
 
 gbm_pf <- pfilter(gbm_model,Np=10)
-logLik(gbm_pf)
+
+paste("gbm pfilter loglik:",round(logLik(gbm_pf),10))
 
 ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
 
@@ -21,6 +22,16 @@ gbm_igirf_out <- igirf(gbm_model,
   verbose = FALSE
 )
 
-logLik(gbm_igirf_out)
+paste("gbm igirf loglik:", round(logLik(gbm_igirf_out),10))
+
+## --------------------------------------------
+## using gbm to test arma_benchmark()
+## ____________________________________________
+
+a1 <- arma_benchmark(gbm_model,order=c(1,0,0))
+
+paste("ARMA benchmark:", round(a1$total,10))
+
+
 
 

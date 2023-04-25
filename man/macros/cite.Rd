@@ -29,6 +29,8 @@
 
 \newcommand{\ionides2022}{Ionides, E. L., Ning, N., and Wheeler, J. (2022). An iterated block particle filter for inference on coupled dynamic systems with shared and unit-specific parameters. \emph{Statistica Sinica}, to appear. \doi{10.48550/arXiv.2206.03837}}
 
+\newcommand{\king2008}{King, A. A., Ionides, E. L., Pascual, M. and Bouma, M. J. (2008). Inapparent infections and cholera dynamics. Nature 454 877-880.}
+
 \newcommand{\king2016}{King, A. A., Nguyen, D. and Ionides, E. L. (2016) Statistical Inference for Partially Observed Markov Processes via the R Package pomp. \emph{Journal of Statistical Software}, \bold{69(12)}, 1--43. \doi{10.18637/jss.v069.i12}}
 
 \newcommand{\lorenz96}{Lorenz, E. N. (1996) Predictability: A problem partly solved. \emph{Proceedings of the seminar on predictability}}
@@ -42,3 +44,5 @@
 \newcommand{\sisson2009}{Sisson, S. A., Fan, Y. and Tanaka, M. M. (2009) Correction for Sisson et al., Sequential Monte Carlo without likelihoods. \emph{Proceedings of the National Academy of Sciences}, \bold{106(39)}, 16889. \doi{10.1073/pnas.0908847106}}
 
 \newcommand{\tavare1997}{Tavare, S., Balding, D. J., Griffiths, R. C. and Donnelly, P. (1997) Inferring Coalescence Times from DNA Sequence Data. \emph{Genetics}, \bold{145(2)}, 505--518.}
+
+\newcommand{\wheeler2023}{Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2023). Informing policy via dynamic models: Cholera in Haiti. arxiv:2301.08979.}

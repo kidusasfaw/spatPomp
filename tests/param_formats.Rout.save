@@ -17,6 +17,7 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
+> 
 > library(spatPomp)
 Loading required package: pomp
 
@@ -27,43 +28,31 @@ includes a dot ('.'). Function names have been changed to replace the
 dot with an underscore ('_'). For more information, see the pomp blog:
 https://kingaa.github.io/pomp/blog.html.
 
-> set.seed(2)
 > 
-> gbm_model <- gbm(U=3,N=2) 
+> p_expanded <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=4)
 > 
-> gbm_pf <- pfilter(gbm_model,Np=10)
+> p_contracted <- contract_params(p_expanded,expandedParNames="c",U=3)
+>   
+> p_contracted
+a1 b1 b2 b3 c1 
+ 0  0  1  2  4 
 > 
-> paste("gbm pfilter loglik:",round(logLik(gbm_pf),10))
-[1] "gbm pfilter loglik: -15.2594676712"
+> p_expanded2 <- expand_params(p_contracted,expandedParNames="c",U=3)
 > 
-> ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+> p_expanded2
+c1 c2 c3 a1 b1 b2 b3 
+ 4  4  4  0  0  1  2 
 > 
-> gbm_igirf_out <- igirf(gbm_model,
-+   Ngirf = 2,
-+   rw.sd = rw_sd(rho=0.02, sigma=0.02, tau=0.02),
-+   cooling.type = "geometric",
-+   cooling.fraction.50 = 0.5,
-+   Np=10,
-+   Ninter = 2,
-+   lookahead = 1,
-+   Nguide = 5,
-+   kind = 'moment',
-+   verbose = FALSE
+> if(any(p_expanded[names(p_expanded2)]!=p_expanded2)) stop(
++   "failed inverse for expand_params() and contract_params()"
 + )
 > 
-> paste("gbm igirf loglik:", round(logLik(gbm_igirf_out),10))
-[1] "gbm igirf loglik: -14.5884737681"
+> mean_by_unit(p_expanded,expandedParNames=c("b","c"),U=3)
+a1 b1 b2 b3 c1 c2 c3 
+ 0  1  1  1  4  4  4 
 > 
-> ## --------------------------------------------
-> ## using gbm to test arma_benchmark()
-> ## ____________________________________________
-> 
-> a1 <- arma_benchmark(gbm_model,order=c(1,0,0))
-> 
-> paste("ARMA benchmark:", round(a1$total,10))
-[1] "ARMA benchmark: 196.3173327754"
-> 
-> 
-> 
+> mean_by_unit(p_expanded,expandedParNames=c("c"),U=3)
+a1 b1 b2 b3 c1 c2 c3 
+ 0  0  1  2  4  4  4 
 > 
 > 

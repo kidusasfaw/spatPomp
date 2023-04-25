@@ -169,133 +169,137 @@ measles <- function(U=6,dt=2/365,
     measles_paramnames <- c(measles_RPnames,measles_IVPnames)
   }
 
-  measles_rprocess <- Csnippet('
-    double beta, br, seas, foi, dw, births;
-    double rate[6], trans[6];
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
-    //double *W = &W1;
-    double powVec[U];
-    //double *Acc = &Acc1;
-    const double *pop = &pop1;
-    const double *lag_birthrate = &lag_birthrate1;
-    int obstime = 0;
-    int u,v;
-    // term-time seasonality
-    t = (t-floor(t))*365.25;
-    if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
-        seas = 1.0+amplitude*0.2411/0.7589;
-      else
-        seas = 1.0-amplitude;
+  measles_rprocess <- spatPomp_Csnippet(
+    unit_statenames = c('S','E','I','R','C'),
+    unit_covarnames = c('pop','lag_birthrate'),
+    unit_paramnames = c('alpha','iota','R0','cohort','amplitude',
+      'gamma','sigma','mu','sigmaSE','g'),
+    code="
+      int BS=0, SE=1, SD=2, EI=3, ED=4, IR=5, ID=6;
+      double br, beta, seas, foi, dw;
+      double rate[7], dN[7];
+      double powVec[U];
+      int obstime = 0;
+      int u,v;
+      // term-time seasonality
+      t = (t-floor(t))*365.25;
+      if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
+          seas = 1.0+amplitude*0.2411/0.7589;
+        else
+          seas = 1.0-amplitude;
 
-    // transmission rate
-    beta = R0*(gamma+mu)*seas;
+      // transmission rate
+      beta = R0*(gamma+mu)*seas;
 
-    for (u = 0 ; u < U ; u++) {
-      // needed for the Ensemble Kalman filter
-      // or other methods making real-valued perturbations to the state
-      // reulermultinom requires integer-valued double type for states
-      S[u] = S[u]>0 ? floor(S[u]) : 0;
-      E[u] = E[u]>0 ? floor(E[u]) : 0;
-      I[u] = I[u]>0 ? floor(I[u]) : 0;
-      R[u] = R[u]>0 ? floor(R[u]) : 0;
+      for (u = 0 ; u < U ; u++) {
+        // needed for the Ensemble Kalman filter
+       // or other methods making real-valued perturbations to the state
+        // reulermultinom requires integer-valued double type for states
+        S[u] = S[u]>0 ? floor(S[u]) : 0;
+        E[u] = E[u]>0 ? floor(E[u]) : 0;
+        I[u] = I[u]>0 ? floor(I[u]) : 0;
+        R[u] = R[u]>0 ? floor(R[u]) : 0;
 
-      // pre-computing this saves substantial time
-      powVec[u] = pow(I[u]/pop[u],alpha);
-    }
-
-    // These rates could be inside the u loop if some parameters arent shared between units
-    rate[1] = mu;			    // natural S death
-    rate[2] = sigma;		  // rate of ending of latent stage
-    rate[3] = mu;			    // natural E death
-    rate[4] = gamma;		  // recovery
-    rate[5] = mu;			    // natural I death
-
-    for (u = 0 ; u < U ; u++) {
-      // cohort effect
-      if (fabs(t-floor(t)-251.0/365.0) < 0.5*dt)
-        br = cohort*lag_birthrate[u]/dt + (1-cohort)*lag_birthrate[u];
-      else
-        br = (1.0-cohort)*lag_birthrate[u];
-
-      // expected force of infection
-      foi = pow( (I[u]+iota)/pop[u],alpha);
-      // we follow Park and Ionides (2019) and raise pop to the alpha power
-      // He et al (2010) did not do this.
-
-      for (v=0; v < U ; v++) {
-        if(v != u)
-          foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
+        // pre-computing this saves substantial time
+        powVec[u] = pow(I[u]/pop[u],alpha);
       }
 
-      // white noise (extrademographic stochasticity)
-      dw = rgammawn(sigmaSE,dt);
-      rate[0] = beta*foi*dw/dt;  // stochastic force of infection
+      // These rates could be inside the u loop if some parameters arent shared between units
+      rate[SD] = mu;	
+      rate[EI] = sigma;	
+      rate[ED] = mu;	
+      rate[IR] = gamma;	
+      rate[ID] = mu;	
 
-      // Poisson births
-      births = rpois(br*dt);
+      for (u = 0 ; u < U ; u++) {
+        // cohort effect
+        if (fabs(t-floor(t)-251.0/365.0) < 0.5*dt)
+          br = cohort*lag_birthrate[u]/dt + (1-cohort)*lag_birthrate[u];
+        else
+          br = (1.0-cohort)*lag_birthrate[u];
 
-      // transitions between classes
-      reulermultinom(2,S[u],&rate[0],dt,&trans[0]);
-      reulermultinom(2,E[u],&rate[2],dt,&trans[2]);
-      reulermultinom(2,I[u],&rate[4],dt,&trans[4]);
+        // expected force of infection
+        foi = pow( (I[u]+iota)/pop[u],alpha);
+        // we follow Park and Ionides (2019) and raise pop to the alpha power
+        // He et al (2010) did not do this.
 
-      S[u] += births   - trans[0] - trans[1];
-      E[u] += trans[0] - trans[2] - trans[3];
-      I[u] += trans[2] - trans[4] - trans[5];
-      R[u] = pop[u] - S[u] - E[u] - I[u];
-      C[u] += trans[4];           // true incidence
-     }
-  ')
+        for (v=0; v < U ; v++) {
+          if(v != u)
+            foi += g * v_by_g[u][v] * (powVec[v] - powVec[u]) / pop[u];
+        }
 
-  measles_dmeasure <- Csnippet("
-    const double *C = &C1;
-    const double *cases = &cases1;
-    double m,v;
-    double tol = 1e-300;
-    double mytol = 1e-5;
-    int u;
+        // white noise (extrademographic stochasticity)
+        dw = rgammawn(sigmaSE,dt);
+        rate[BS] = beta*foi*dw/dt;  // stochastic force of infection
 
-    lik = 0;
-    for (u = 0; u < U; u++) {
-      m = rho*(C[u]+mytol);
-      v = m*(1.0-rho+psi*psi*m);
-      // C < 0 can happen in bootstrap methods such as bootgirf
-      if (C < 0) {lik += log(tol);} else {
-        if (cases[u] > tol) {
-          lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-
-            pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
-        } else {
+        // Poisson births
+        dN[BS] = rpois(br*dt);
+
+        // transitions between classes
+	// For example, S[u] has 2 exit flows, SE and SD, which must be numbered consecutively,
+	// in this case, SE=1 and SD=2. &rate[SE] and &dN[SE] are pointers to the first exit flow.
+        reulermultinom(2,S[u],&rate[SE],dt,&dN[SE]);
+        reulermultinom(2,E[u],&rate[EI],dt,&dN[EI]);
+        reulermultinom(2,I[u],&rate[IR],dt,&dN[IR]);
+
+        S[u] += dN[BS]   - dN[SE] - dN[SD];
+        E[u] += dN[SE] - dN[EI] - dN[ED];
+        I[u] += dN[EI] - dN[IR] - dN[ID];
+        R[u] = pop[u] - S[u] - E[u] - I[u];
+        C[u] += dN[IR];   // case reports modeled at time of removal/recovery
+      }
+    "
+  )
+
+  measles_dmeasure <- spatPomp_Csnippet(
+    unit_statenames = 'C',
+    unit_obsnames = 'cases',
+    unit_paramnames = c('rho','psi'),
+    code="
+      double m,v;
+      double tol = 1e-300;
+      double mytol = 1e-5;
+      int u;
+
+      lik = 0;
+      for (u = 0; u < U; u++) {
+        m = rho*(C[u]+mytol);
+        v = m*(1.0-rho+psi*psi*m);
+        // C < 0 can happen in bootstrap methods such as bootgirf
+        if (C < 0) {lik += log(tol);} else {
+          if (cases[u] > tol) {
+            lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)-
+              pnorm(cases[u]-0.5,m,sqrt(v)+tol,1,0)+tol);
+          } else {
             lik += log(pnorm(cases[u]+0.5,m,sqrt(v)+tol,1,0)+tol);
+          }
         }
       }
-    }
-    if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
-  ")
+      if(!give_log) lik = (lik > log(tol)) ? exp(lik) : tol;
+    "
+  )
 
-  measles_rmeasure <- Csnippet("
-    const double *C = &C1;
-    double *cases = &cases1;
-    double m,v;
-    double tol = 1.0e-300;
-    int u;
-
-    for (u = 0; u < U; u++) {
-      m = rho*(C[u]+tol);
-      v = m*(1.0-rho+psi*psi*m);
-      cases[u] = rnorm(m,sqrt(v)+tol);
-      if (cases[u] > 0.0) {
-        cases[u] = nearbyint(cases[u]);
-      } else {
-        cases[u] = 0.0;
+  measles_rmeasure <- spatPomp_Csnippet(
+    unit_statenames='C',
+    code="
+      double *cases = &cases1;
+      double m,v;
+      double tol = 1.0e-300;
+      int u;
+      for (u = 0; u < U; u++) {
+        m = rho*(C[u]+tol);
+        v = m*(1.0-rho+psi*psi*m);
+        cases[u] = rnorm(m,sqrt(v)+tol);
+        if (cases[u] > 0.0) {
+          cases[u] = nearbyint(cases[u]);
+        } else {
+          cases[u] = 0.0;
+        }
       }
-    }
-  ")
+    "
+  )
 
-  measles_dunit_measure <- Csnippet('
+  measles_dunit_measure <- spatPomp_Csnippet("
     double mytol = 1e-5;
     double m = rho*(C+mytol);
     double v = m*(1.0-rho+psi*psi*m);
@@ -310,124 +314,115 @@ measles <- function(U=6,dt=2/365,
       }
     }
     if(give_log) lik = log(lik);
-  ')
-
-  measles_eunit_measure <- Csnippet("
-  ey = rho*C;
   ")
 
-  measles_vunit_measure <- Csnippet("
-  //consider adding 1 to the variance for the case C = 0
-  double mytol = 1e-5;
-  double m;
-  m = rho*(C+mytol);
-  vc = m*(1.0-rho+psi*psi*m);
+  measles_eunit_measure <- spatPomp_Csnippet("
+    ey = rho*C;
   ")
 
-  measles_munit_measure <- Csnippet("
-  double binomial_var;
-  double m;
-  double mytol = 1e-5;
-  m = rho*(C+mytol);
-  binomial_var = rho*(1-rho)*C;
-  if(vc > binomial_var) {
-    M_psi = sqrt(vc - binomial_var)/m;
-  }
-  ")
-
-  measles_rinit <- Csnippet("
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
+  measles_vunit_measure <- spatPomp_Csnippet("
+    //consider adding 1 to the variance for the case C = 0
+    double mytol = 1e-5;
     double m;
-    const double *pop = &pop1;
-    int u;
-    if(fixed_ivps){
-      for (u = 0; u < U; u++) {
-        m = (float)(pop[u]);
-        S[u] = nearbyint(m*S_0_fixed);
-        I[u] = nearbyint(m*I_0_fixed);
-        E[u] = nearbyint(m*E_0_fixed);
-        R[u] = pop[u]-S[u]-E[u]-I[u];
-        C[u] = 0;
-      }
-    } else{
-      const double *S_0 = &S1_0;
-      const double *E_0 = &E1_0;
-      const double *I_0 = &I1_0;
-      for (u = 0; u < U; u++) {
-        m = (float)(pop[u]);
-        S[u] = nearbyint(m*S_0[u]);
-        I[u] = nearbyint(m*I_0[u]);
-        // Use I[u] and the two relvant rates to
-        // compute E[u]. (gamma/sigma)*I[u]
-        E[u] = nearbyint((gamma/sigma)*(float)(I[u]));
-        R[u] = pop[u]-S[u]-E[u]-I[u];
-        C[u] = 0;
-      }
+    m = rho*(C+mytol);
+    vc = m*(1.0-rho+psi*psi*m);
+  ")
+
+  measles_munit_measure <- spatPomp_Csnippet("
+    double binomial_var;
+    double m;
+    double mytol = 1e-5;
+    m = rho*(C+mytol);
+    binomial_var = rho*(1-rho)*C;
+    if(vc > binomial_var) {
+      M_psi = sqrt(vc - binomial_var)/m;
     }
   ")
 
-  measles_skel <- Csnippet('
-    double beta, br, seas, foi;
-    double *S = &S1;
-    double *E = &E1;
-    double *I = &I1;
-    double *R = &R1;
-    double *C = &C1;
-    double *DS = &DS1;
-    double *DE = &DE1;
-    double *DI = &DI1;
-    double *DR = &DR1;
-    double *DC = &DC1;
-    double powVec[U];
-    const double *pop = &pop1;
-    const double *lag_birthrate = &lag_birthrate1;
-    int u,v;
-    int obstime = 0;
+  measles_rinit <- spatPomp_Csnippet(
+    unit_statenames = c('S','E','I','R','C'),
+    unit_covarnames = 'pop',
+    code = "
+      double m;
+      int u;
+      if(fixed_ivps){
+        for (u = 0; u < U; u++) {
+          m = (float)(pop[u]);
+          S[u] = nearbyint(m*S_0_fixed);
+          I[u] = nearbyint(m*I_0_fixed);
+          E[u] = nearbyint(m*E_0_fixed);
+          R[u] = pop[u]-S[u]-E[u]-I[u];
+          C[u] = 0;
+        }
+      } else{
+        const double *S_0 = &S1_0;
+        const double *E_0 = &E1_0;
+        const double *I_0 = &I1_0;
+        for (u = 0; u < U; u++) {
+          m = (float)(pop[u]);
+          S[u] = nearbyint(m*S_0[u]);
+          I[u] = nearbyint(m*I_0[u]);
+          // Use I[u] and the two relvant rates to
+          // compute E[u]. (gamma/sigma)*I[u]
+          E[u] = nearbyint((gamma/sigma)*(float)(I[u]));
+          R[u] = pop[u]-S[u]-E[u]-I[u];
+          C[u] = 0;
+        }
+      }
+    "
+  )
 
-    // term-time seasonality
-     t = (t-floor(t))*365.25;
-    if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
-        seas = 1.0+amplitude*0.2411/0.7589;
-      else
-        seas = 1.0-amplitude;
+  measles_skel <- spatPomp_Csnippet(
+    unit_statenames = c('S','E','I','R','C'),
+    unit_vfnames = c('S','E','I','R','C'),
+    unit_covarnames = c('pop','lag_birthrate'),
+    code = "
+      double beta, br, seas, foi;
+      double powVec[U];
+      int u,v;
+      int obstime = 0;
 
-    // transmission rate
-    beta = R0*(gamma+mu)*seas;
+      // term-time seasonality
+      t = (t-floor(t))*365.25;
+      if ((t>=7&&t<=100) || (t>=115&&t<=199) || (t>=252&&t<=300) || (t>=308&&t<=356))
+          seas = 1.0+amplitude*0.2411/0.7589;
+        else
+          seas = 1.0-amplitude;
 
-    // pre-computing this saves substantial time
-    for (u = 0 ; u < U ; u++) {
-      powVec[u] = pow(I[u]/pop[u],alpha);
-    }
+      // transmission rate
+      beta = R0*(gamma+mu)*seas;
 
-    for (u = 0 ; u < U ; u++) {
-      // cannot readily put the cohort effect into a vectorfield for the skeleton
-      // therefore, we ignore it here.
-      // this is okay as long as the skeleton is being used for short-term forecasts
-      //    br = lag_birthrate[u];
-
-      // cohort effect, added back in with cohort arriving over a time interval 0.05yr
-      if (fabs(t-floor(t)-251.0/365.0) < 0.5*0.05)
-        br = cohort*lag_birthrate[u]/0.05 + (1-cohort)*lag_birthrate[u];
-      else
-        br = (1.0-cohort)*lag_birthrate[u];
-
-      foi = I[u]/pop[u];
-      for (v=0; v < U ; v++) {
-        if(v != u)
-          foi += g * v_by_g[u][v] * (I[v]/pop[v] - I[u]/pop[u]) / pop[u];
+      // pre-computing this saves substantial time
+      for (u = 0 ; u < U ; u++) {
+        powVec[u] = pow(I[u]/pop[u],alpha);
       }
 
-      DS[u] = br - (beta*foi + mu)*S[u];
-      DE[u] = beta*foi*S[u] - (sigma+mu)*E[u];
-      DI[u] = sigma*E[u] - (gamma+mu)*I[u];
-      DR[u] = gamma*I[u] - mu*R[u];
-      DC[u] = gamma*I[u];
-    }
-  ')
+      for (u = 0 ; u < U ; u++) {
+        // cannot readily put the cohort effect into a vectorfield for the skeleton
+        // therefore, we ignore it here.
+        // this is okay as long as the skeleton is being used for short-term forecasts
+        //    br = lag_birthrate[u];
+
+        // cohort effect, added back in with cohort arriving over a time interval 0.05yr
+        if (fabs(t-floor(t)-251.0/365.0) < 0.5*0.05)
+          br = cohort*lag_birthrate[u]/0.05 + (1-cohort)*lag_birthrate[u];
+        else
+          br = (1.0-cohort)*lag_birthrate[u];
+
+        foi = I[u]/pop[u];
+        for (v=0; v < U ; v++) {
+          if(v != u)
+            foi += g * v_by_g[u][v] * (I[v]/pop[v] - I[u]/pop[u]) / pop[u];
+        }
+
+        DS[u] = br - (beta*foi + mu)*S[u];
+        DE[u] = beta*foi*S[u] - (sigma+mu)*E[u];
+        DI[u] = sigma*E[u] - (gamma+mu)*I[u];
+        DR[u] = gamma*I[u] - mu*R[u];
+        DC[u] = gamma*I[u];
+      }
+    "
+  )
 
   if(fixed_ivps){
     measles_partrans <- parameter_trans(

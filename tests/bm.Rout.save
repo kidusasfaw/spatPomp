@@ -1,6 +1,6 @@
 
-R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
-Copyright (C) 2022 The R Foundation for Statistical Computing
+R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -28,7 +28,10 @@ includes a dot ('.'). Function names have been changed to replace the
 dot with an underscore ('_'). For more information, see the pomp blog:
 https://kingaa.github.io/pomp/blog.html.
 
-> 
+> i <- 1
+> U <- switch(i,2,10)
+> N <- switch(i,2,10)
+> Np <- switch(i,10,100)
 > 
 > # For CRAN tests, need to limit to two cores
 > # https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
@@ -62,7 +65,7 @@ https://kingaa.github.io/pomp/blog.html.
 > ## using doRNG with 1 core leads to warnings: it seems to make
 > ## foreach confused about whether it is running in parallel or not.
 > 
-> b_model <- bm(U=2,N=2) 
+> b_model <- bm(U=U,N=N) 
 > 
 > ## ------------------------------------------------------------
 > ## The bm model provides a simple example to test other methods.
@@ -80,7 +83,7 @@ https://kingaa.github.io/pomp/blog.html.
 > ## pfilter tested on bm
 > ##
 > 
-> b_pf <- pfilter(b_model,Np=10)
+> b_pf <- pfilter(b_model,Np=Np)
 > paste("bm pfilter loglik: ",round(logLik(b_pf),10))
 [1] "bm pfilter loglik:  -10.1282113761"
 > 
@@ -95,11 +98,11 @@ https://kingaa.github.io/pomp/blog.html.
 + }
 > 
 > set.seed(7)
-> b_abf <- abf(b_model,Nrep=3,Np=10, nbhd = b_bag_nbhd)
+> b_abf <- abf(b_model,Nrep=2,Np=Np, nbhd = b_bag_nbhd)
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 > paste("bm abf loglik: ",round(logLik(b_abf),10))
-[1] "bm abf loglik:  -9.6260083071"
+[1] "bm abf loglik:  -9.6241814039"
 > 
 > set.seed(7)
 > b_abf_repeat <- abf(b_abf)
@@ -111,16 +114,16 @@ executing %dopar% sequentially: no parallel backend registered
 > ## abfir tested on bm
 > ##
 > 
-> b_abfir <- abfir(b_model, Nrep = 3, Np = 10, nbhd = b_bag_nbhd)
+> b_abfir <- abfir(b_model, Nrep = 2, Np = Np, nbhd = b_bag_nbhd)
 > paste("bm abfir loglik: ",round(logLik(b_abfir),10))
-[1] "bm abfir loglik:  -8.7556872332"
+[1] "bm abfir loglik:  -9.6437796804"
 > 
 > ##
 > ## bpfilter tested on bm
 > ##
 > 
 > set.seed(5)
-> b_bpfilter <- bpfilter(b_model, Np = 10, block_size = 1)
+> b_bpfilter <- bpfilter(b_model, Np = Np, block_size = 1)
 > paste("bm bpfilter loglik: ",round(logLik(b_bpfilter),10))
 [1] "bm bpfilter loglik:  -11.2089477605"
 > set.seed(5)
@@ -133,7 +136,7 @@ executing %dopar% sequentially: no parallel backend registered
 > ## enkf tested on bm
 > ##
 > 
-> b_enkf <- enkf(b_model, Np = 10)
+> b_enkf <- enkf(b_model, Np = Np)
 > paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 [1] "bm enkf loglik:  -11.038124567"
 > 
@@ -141,13 +144,15 @@ executing %dopar% sequentially: no parallel backend registered
 > ## girf tested on bm, both moment and bootstrap methods
 > ##
 > 
-> b_girf_mom <- girf(b_model,Np = 5,lookahead = 1,Nguide = 5,
+> b_girf_mom <- girf(b_model,Np = floor(Np/2),lookahead = 1,
++   Nguide = floor(Np/2),
 +   kind = 'moment',Ninter=2)
 > paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
 [1] "bm girf loglik, moment guide:  -13.2689915662"
 > 
 > set.seed(0)
-> b_girf_boot <- girf(b_model,Np = 5,lookahead = 1,Nguide = 5,
+> b_girf_boot <- girf(b_model,Np = floor(Np/2),lookahead = 1,
++   Nguide = floor(Np/2),
 +   kind = 'bootstrap',Ninter=2)
 > paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
 [1] "bm girf loglik, bootstrap guide:  -14.3228315101"
@@ -179,7 +184,7 @@ executing %dopar% sequentially: no parallel backend registered
 +   rw.sd = b_rw.sd,
 +   cooling.type = "geometric",
 +   cooling.fraction.50 = 0.5,
-+   Np=10,
++   Np=Np,
 +   Ninter = 2,
 +   lookahead = 1,
 +   Nguide = 5,
@@ -201,21 +206,21 @@ executing %dopar% sequentially: no parallel backend registered
 +   rw.sd = b_rw.sd,
 +   cooling.type = "hyperbolic",
 +   cooling.fraction.50 = 0.5,
-+   Np=10,
++   Np=floor(Np/2),
 +   Ninter = 2,
 +   lookahead = 1,
-+   Nguide = 5,
++   Nguide = floor(Np/2),
 +   kind = 'moment',
 +   verbose = TRUE
 + )
-igirf iteration 1 of 2 completed with likelihood  -8.864864 
-         rho        sigma          tau         X1_0         X2_0 
-0.4042940956 1.0000000000 1.0000000000 0.0004004701 0.0000000000 
-igirf iteration 2 of 2 completed with likelihood  -10.7886 
-        rho       sigma         tau        X1_0        X2_0 
- 0.40021397  1.00000000  1.00000000 -0.03993169  0.00000000 
+igirf iteration 1 of 2 completed with likelihood  -11.56221 
+       rho      sigma        tau       X1_0       X2_0 
+0.39957108 1.00000000 1.00000000 0.01379269 0.00000000 
+igirf iteration 2 of 2 completed with likelihood  -10.59957 
+       rho      sigma        tau       X1_0       X2_0 
+0.40074887 1.00000000 1.00000000 0.04083778 0.00000000 
 > paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
-[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.7886016055"
+[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.599572921"
 > 
 > plot(b_igirf_geom) -> b_igirf_plot
 > head(b_igirf_plot$data)
@@ -233,18 +238,18 @@ igirf iteration 2 of 2 completed with likelihood  -10.7886
 > 
 > b_ienkf_geom <- ienkf(b_model,
 +   Nenkf=2,
-+   Np = 10,
++   Np = Np,
 +   rw.sd=b_rw.sd,
 +   cooling.type="geometric",
 +   cooling.fraction.50 = 0.5,
 +   verbose=FALSE
 + )
 > paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geom),10))
-[1] "bm ienkf loglik, geometric cooling, verbose=F:  -10.7262815137"
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -11.2659371179"
 > 
 > b_ienkf_hyp <- ienkf(b_model,
 +   Nenkf=2,
-+   Np = 10,
++   Np = Np,
 +   rw.sd=b_rw.sd,
 +   cooling.type="hyperbolic",
 +   cooling.fraction.50 = 0.5,
@@ -253,7 +258,7 @@ igirf iteration 2 of 2 completed with likelihood  -10.7886
 ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.4670683154"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.4969604389"
 > 
 > ##
 > ## iubf on bm, with geometric and hyperbolic cooling
@@ -261,8 +266,8 @@ ienkf iteration 2 of 2 completed
 > 
 > b_iubf_geom <- iubf(b_model,
 +   Nubf = 2,
-+   Nrep_per_param = 5,
-+   Nparam = 5,
++   Nrep_per_param = floor(Np/2),
++   Nparam = floor(Np/2),
 +   nbhd = b_bag_nbhd,
 +   prop = 0.8,
 +   rw.sd =b_rw.sd,
@@ -271,12 +276,12 @@ ienkf iteration 2 of 2 completed
 +   verbose=FALSE
 + )
 > paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom),10))
-[1] "bm iubf loglik, geometric cooling, verbose=F:  -9.1342209153"
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -11.4595005548"
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
-+   Nrep_per_param = 5,
-+   Nparam = 5,
++   Nrep_per_param = floor(Np/2),
++   Nparam = floor(Np/2),
 +   nbhd = b_bag_nbhd,
 +   prop = 0.8,
 +   rw.sd =b_rw.sd,
@@ -287,16 +292,16 @@ ienkf iteration 2 of 2 completed
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -10.75135 
-       rho      sigma        tau       X1_0       X2_0 
-0.39859037 1.00000000 1.00000000 0.02810935 0.00000000 
+iubf iteration 1 of 2 completed with log-likelihood -12.04241 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.40312565  1.00000000  1.00000000 -0.01326395  0.00000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -12.00495 
-       rho      sigma        tau       X1_0       X2_0 
-0.39755252 1.00000000 1.00000000 0.01749735 0.00000000 
+iubf iteration 2 of 2 completed with log-likelihood -12.83948 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.40523197  1.00000000  1.00000000 -0.00474667  0.00000000 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_iubf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.0049482564"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.8394821627"
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot
@@ -305,30 +310,30 @@ iubf iteration 2 of 2 completed with log-likelihood -12.00495
 > b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
 > head(b_sim1,10)
 # A tibble: 8 × 5
-   time .id   unitname       X      Y
-  <dbl> <ord> <chr>      <dbl>  <dbl>
-1     1 1     U1        0.358   1.13 
-2     1 2     U1       -0.0475 -0.546
-3     1 1     U2        1.17    0.815
-4     1 2     U2        0.700   1.98 
-5     2 1     U1        1.17   -0.211
-6     2 2     U1       -0.411  -0.363
-7     2 1     U2        1.60    0.596
-8     2 2     U2        2.51    2.31 
+   time .id   unitname      X       Y
+  <dbl> <ord> <chr>     <dbl>   <dbl>
+1     1 1     U1       -1.12  -0.918 
+2     1 2     U1       -0.670 -0.945 
+3     1 1     U2       -1.07  -0.409 
+4     1 2     U2       -0.648 -1.24  
+5     2 1     U1       -2.81  -4.87  
+6     2 2     U1        0.850  0.589 
+7     2 1     U2       -1.26  -1.96  
+8     2 2     U2       -0.491 -0.0759
 > b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
 > head(b_sim2,10)
 # A tibble: 10 × 5
     time .id   unitname      X      Y
    <dbl> <ord> <chr>     <dbl>  <dbl>
  1     1 data  U1        2.98   3.61 
- 2     1 1     U1        0.425  0.282
- 3     1 2     U1        1.15   0.411
+ 2     1 1     U1       -0.827 -1.76 
+ 3     1 2     U1        0.417  3.17 
  4     1 data  U2        0.824  2.81 
- 5     1 1     U2        0.286 -1.66 
- 6     1 2     U2        0.224 -0.285
+ 5     1 1     U2       -0.228 -0.282
+ 6     1 2     U2       -0.158 -1.84 
  7     2 data  U1        2.03   1.73 
- 8     2 1     U1        3.13   2.95 
- 9     2 2     U1        0.518 -0.312
+ 8     2 1     U1        0.164 -0.282
+ 9     2 2     U1       -0.270  0.730
 10     2 data  U2       -0.759 -0.849
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
@@ -400,16 +405,16 @@ rep         [,1]
 , , 1
 
         rep
-variable      [,1]
-      Y1 0.9852548
+variable     [,1]
+      Y1 1.181054
 
 > 
 > vec_rmeasure(b_model,x=b_s,time=1, params=b_p)
 , , 1
 
-          [,1]
-[1,] 1.7469874
-[2,] 0.7308696
+           [,1]
+[1,]  0.8543340
+[2,] -0.5666138
 
 > 
 > ## --------------------------------------------
@@ -493,7 +498,6 @@ Slot "text":
 Error in value[[3L]](cond) : 
   ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
 > 
->   
 > 
 > 
 > 
