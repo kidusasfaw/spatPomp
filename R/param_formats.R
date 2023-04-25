@@ -18,9 +18,12 @@
 #' @param expandedParNames character vector of parameters that are, or
 #' should be, expanded. These names should have no numerical suffix 1:U.
 #' @param U Number of units
+#' @param average Logical value for whether contract_params should
+#' average unequal values
 #' @rdname param_formats
 #' @aliases contract_params, mean_by_unit, expand_params, param_formats
 #' @family utilities
+#' @importFrom stats arima sd
 #' @export
 expand_params <- function(params, expandedParNames,U){
   expanded <- unlist(lapply(expandedParNames,function(par){

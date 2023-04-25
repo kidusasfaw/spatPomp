@@ -172,8 +172,6 @@ measles <- function(U=6,dt=2/365,
   measles_rprocess <- spatPomp_Csnippet(
     unit_statenames = c('S','E','I','R','C'),
     unit_covarnames = c('pop','lag_birthrate'),
-    unit_paramnames = c('alpha','iota','R0','cohort','amplitude',
-      'gamma','sigma','mu','sigmaSE','g'),
     code="
       int BS=0, SE=1, SD=2, EI=3, ED=4, IR=5, ID=6;
       double br, beta, seas, foi, dw;
@@ -230,7 +228,7 @@ measles <- function(U=6,dt=2/365,
 
         // white noise (extrademographic stochasticity)
         dw = rgammawn(sigmaSE,dt);
-        rate[BS] = beta*foi*dw/dt;  // stochastic force of infection
+        rate[SE] = beta*foi*dw/dt;  // stochastic force of infection
 
         // Poisson births
         dN[BS] = rpois(br*dt);
@@ -254,7 +252,6 @@ measles <- function(U=6,dt=2/365,
   measles_dmeasure <- spatPomp_Csnippet(
     unit_statenames = 'C',
     unit_obsnames = 'cases',
-    unit_paramnames = c('rho','psi'),
     code="
       double m,v;
       double tol = 1e-300;
@@ -356,7 +353,6 @@ measles <- function(U=6,dt=2/365,
         }
       } else{
         const double *S_0 = &S1_0;
-        const double *E_0 = &E1_0;
         const double *I_0 = &I1_0;
         for (u = 0; u < U; u++) {
           m = (float)(pop[u]);

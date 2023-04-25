@@ -4,6 +4,8 @@
 \alias{expand_params}
 \alias{contract_params,}
 \alias{mean_by_unit,}
+\alias{expand_params,}
+\alias{param_formats}
 \alias{contract_params}
 \alias{mean_by_unit}
 \title{Book-keeping functions for working with expanded parameters}
@@ -21,6 +23,9 @@ mean_by_unit(params, expandedParNames, U)
 should be, expanded. These names should have no numerical suffix 1:U.}
 
 \item{U}{Number of units}
+
+\item{average}{Logical value for whether contract_params should
+average unequal values}
 }
 \description{
 Iterated block particle filters require shared parameters to be

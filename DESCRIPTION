@@ -29,7 +29,6 @@ Collate:
     'arma_benchmark.R'
     'get_covariate_names.R'
     'as_data_frame.R'
-    'bak-param_formats.R'
     'bm.R'
     'bm2.R'
     'bm2_kalman_logLik.R'
