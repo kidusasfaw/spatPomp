@@ -41,15 +41,22 @@ Papers using **spatPomp** include the following:
   prepublished online.
   [doi](https://doi.org/10.1080/01621459.2021.1974867).
   [arxiv](https://arxiv.org/abs/2002.05211).
-  [github](https://github.com/ionides/bagged_filters).
+  [code](https://github.com/ionides/bagged_filters).
 - Ionides, E. L.,  Ning, N. and Wheeler, J. (2022).
   An iterated block particle filter for inference on coupled dynamic systems with shared and unit-specific parameters.
   _Statistica Sinica,_
   prepublished online.
   [doi](https://doi.org/10.5705/ss.202022.0188).
   [arxiv](https://arxiv.org/abs/2206.03837).
-  [github](https://github.com/ionides/ibpf_article).
+  [code](https://github.com/ionides/ibpf_article).
+- Ning, N. and Ionides, E. L. (2023). Iterated block particle filter for high-dimensional parameter learning: Beating the curse of dimensionality. _Journal of Machine Learning Research_ 24(82), 1-76.
+[pdf](https://jmlr.org/papers/v24/21-1253.pdf). 
+[arxiv](https://arxiv.org/abs/2110.10745v3"><i>arxiv</i></a>).
 - Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2023).
   Informing policy via dynamic models: Cholera in Haiti.
-  [working draft](https://ionides.github.io/pubs/wheeler23-draft.pdf).
-  [supplement](https://ionides.github.io/pubs/wheeler23-sup-draft.pdf).
+  [arxiv](https://doi.org/10.48550/arXiv.2301.08979).
+  [code](https://github.com/jeswheel/haiti_article).
+  [software](https://github.com/jeswheel/haitipkg).
+- Zhang, B., Huang, W., Pei, S., Zeng, J., Shen, W., Wang, D., Wang, G., Chen, T., Yang, L., Cheng, P., Wang, D., Shu, Y., & Du, X. (2022). Mechanisms for the circulation of influenza A (H3N2) in China: A spatiotemporal modelling study. _PLoS Pathogens_, 18(12), e1011046.
+[doi](https://doi.org/10.1371/journal.ppat.1011046).
+
