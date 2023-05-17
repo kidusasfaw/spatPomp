@@ -494,9 +494,16 @@ Slot "text":
 > for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 [1] "states"
 > 
+> # test an error message
 > try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 Error in value[[3L]](cond) : 
   ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
+> 
+> # test parameter replacement
+> b_rep2 <- spatPomp(b_model,params=coef(b_model)+1)
+> if(!identical(coef(b_rep2),coef(b_model)+1)) stop('problem with parameter replacement')
+> 
+> 
 > 
 > 
 > 

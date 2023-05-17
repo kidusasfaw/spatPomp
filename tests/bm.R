@@ -321,7 +321,14 @@ spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"), unit_co
 b_rep1 <- spatPomp(b_model,params=coef(b_model))
 for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 
+# test an error message
 try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
+
+# test parameter replacement
+b_rep2 <- spatPomp(b_model,params=coef(b_model)+1)
+if(!identical(coef(b_rep2),coef(b_model)+1)) stop('problem with parameter replacement')
+
+
 
 
 

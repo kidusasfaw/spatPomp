@@ -448,6 +448,7 @@ setMethod(
       covar = pomp_covar,
       statenames=pomp_statenames,
       accumvars=pomp_accumvars,
+      params=params,
       paramnames = paramnames,
       globals = globals,
       cdir = cdir,
