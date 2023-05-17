@@ -360,10 +360,11 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   )
 
   he10_rmeasure <- spatPomp_Csnippet(
+    method='rmeasure',
     unit_paramnames=c('rho','psi'),
     unit_statenames='C',
+    unit_obsnames='cases',
     code="
-      double *cases = &cases1;
       double m,v;
       double tol = 1.0e-300;
       int u;
@@ -440,17 +441,14 @@ he10 <- function(U=6,dt=2/365, Tmax=1964,
   )
 
   he10_skel <- spatPomp_Csnippet(
+    method='skeleton',
     unit_statenames = c('S','E','I','R','C'),
     unit_covarnames = c('pop','lag_birthrate'),
     unit_paramnames = c('alpha','iota','R0','cohort','amplitude',
       'gamma','sigma','mu','sigmaSE','g'),
+    unit_vfnames = c('S','E','I','R','C'),
     code="
     double beta, br, seas, foi;
-    double *DS = &DS1;
-    double *DE = &DE1;
-    double *DI = &DI1;
-    double *DR = &DR1;
-    double *DC = &DC1;
     double powVec[U];
     int u,v;
 

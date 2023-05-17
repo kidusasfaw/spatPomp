@@ -13,6 +13,9 @@
 ##' @author Kidus Asfaw
 ##'
 ##' @param code encodes a component of a spatiotemporal POMP model using \proglang{C} code
+##' @param method a character string matching the name of the \code{'spatPomp'}
+##' argument which the code is designed to specify. This argument is ignored unless
+##' needed to correctly specify the Csnippet.
 ##' @param unit_statenames a subset of the \code{unit_statenames} slot of
 ##' the \code{spatPomp} object for which we are writing a model. This argument
 ##' allows the user to get variables that can be indexed conveniently to update
@@ -26,7 +29,6 @@
 ##' This allows the user to get variables that can be indexed conveniently to
 ##' use incorporate the covariate information in a loop. See examples for more
 ##' details.
-##'
 ##' @param unit_ivpnames This argument is particularly useful when specifying the
 ##' \code{rinit} model component. The \code{paramnames} argument to the
 ##' \code{spatPomp()} constructor often has names for initial value
@@ -54,6 +56,7 @@
 ##' @examples
 ##' # Set initial states for Brownian motion
 ##' bm_rinit <- spatPomp_Csnippet(
+##'   method = "rinit",
 ##'   unit_statenames = c("X"),
 ##'   unit_ivpnames = c("X"),
 ##'   code = "
@@ -64,6 +67,7 @@
 ##' )
 ##' # Skeleton for Brownian motion
 ##' bm_skel <- spatPomp_Csnippet(
+##'   method = "skeleton",
 ##'   unit_statenames = c("X"),
 ##'   unit_vfnames = c("X"),
 ##'   code = "
@@ -83,7 +87,8 @@ setGeneric("spatPomp_Csnippet", function(code,...)standardGeneric("spatPomp_Csni
 setMethod(
   "spatPomp_Csnippet",
   signature=signature(code="character"),
-  definition=function(code, unit_statenames, unit_obsnames, unit_covarnames, unit_ivpnames, unit_paramnames, unit_vfnames){
+  definition=function(code, method="", unit_statenames, unit_obsnames, unit_covarnames,
+    unit_ivpnames, unit_paramnames, unit_vfnames){
     if(missing(unit_statenames) &&
        missing(unit_obsnames) &&
        missing(unit_covarnames) &&
@@ -92,15 +97,20 @@ setMethod(
        missing(unit_vfnames))
       return(pomp::Csnippet(code))
     sn_inits <- on_inits <- cn_inits <- in_inits <- pn_inits <- vn_inits <- character()
+      
     if(!missing(unit_statenames)){
-      sn_inits_lhs <- paste("double *",unit_statenames, sep = "")
-      sn_inits_rhs <- paste("&", unit_statenames,"1;",sep="")
+      const <- ""
+      if(method%in%c("dprocess","rmeasure","dmeasure","skeleton")) const <- "const"
+      sn_inits_lhs <- paste0(const, " double *",unit_statenames)
+      sn_inits_rhs <- paste0("&", unit_statenames,"1;")
       sn_inits_vec <- paste(sn_inits_lhs, sn_inits_rhs, sep = " = ")
       sn_inits <- paste0(sn_inits_vec, collapse = "\n")
     }
     if(!missing(unit_obsnames)){
-      on_inits_lhs <- paste("const double *",unit_obsnames, sep = "")
-      on_inits_rhs <- paste("&", unit_obsnames,"1;",sep="")
+      const <- "const"
+      if(method%in%c("rmeasure")) const <- ""
+      on_inits_lhs <- paste0(const," double *",unit_obsnames)
+      on_inits_rhs <- paste0("&", unit_obsnames,"1;")
       on_inits_vec <- paste(on_inits_lhs, on_inits_rhs, sep = " = ")
       on_inits <- paste0(on_inits_vec, collapse = "\n")
     }

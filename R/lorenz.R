@@ -57,86 +57,98 @@ lorenz <- function(U=5,
   lorenz_paramnames <- c(lorenz_RPnames,lorenz_IVPnames)
 
   ## added a condition to prevent numerical instability when the gradient exceeds 1/delta_t
-  lorenz_rprocess <- Csnippet("
-    double *X = &X1;
-    double dXdt[U];
-    int u;
+  lorenz_rprocess <- spatPomp_Csnippet(
+    unit_statenames = "X",
+    code = "
+      double dXdt[U];
+      int u;
+      for (u = 2 ; u < U-1 ; u++) {
+        dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
+      }
+      dXdt[0] = (X[1]-X[U-2])*X[U-1] - X[0]+F;
+      dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
+      dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
+      for (u = 0 ; u < U ; u++) {
+        if(dXdt[u]> 1/dt) dXdt[u] = 1/dt;
+        if(dXdt[u]< -1/dt) dXdt[u] = -1/dt;
+        X[u] += dXdt[u]*dt + rnorm(0,sigma*sqrt(dt));
+      }
+    "
+  )
 
-    for (u = 2 ; u < U-1 ; u++) {
-      dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
-    }
-    dXdt[0] = (X[1]-X[U-2])*X[U-1] - X[0]+F;
-    dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
-    dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
-    for (u = 0 ; u < U ; u++) {
-      if(dXdt[u]> 1/dt) dXdt[u] = 1/dt;
-      if(dXdt[u]< -1/dt) dXdt[u] = -1/dt;
-      X[u] += dXdt[u]*dt + rnorm(0,sigma*sqrt(dt));
-    }
-  ")
+  lorenz_skel <- spatPomp_Csnippet(
+    method = "skeleton",
+    unit_statenames = "X",
+    unit_vfnames = "X",
+    code = "
+      double dXdt[U];
+      int u;
+      for (u = 2 ; u < U-1 ; u++) {
+       dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
+      }
+      dXdt[0] = (X[1]-X[U-2])*X[U-1] - X[0]+F;
+      dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
+      dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
+      for (u = 0 ; u < U ; u++) {
+        DX[u] = dXdt[u];
+      }
+    "
+  )
 
-  lorenz_skel <- Csnippet("
-    double *X = &X1;
-    double dXdt[U];
-    double *DX = &DX1;
-    int u;
-    for (u = 2 ; u < U-1 ; u++) {
-      dXdt[u] =  (X[u+1]-X[u-2])*X[u-1] - X[u]+F;
-    }
-    dXdt[0] = (X[1]-X[U-2])*X[U-1] - X[0]+F;
-    dXdt[1] = (X[2]-X[U-1])*X[0] - X[1]+F;
-    dXdt[U-1] = (X[0]-X[U-3])*X[U-2] - X[U-1]+F;
-    for (u = 0 ; u < U ; u++) {
-      DX[u] = dXdt[u];
-    }
-  ")
+  lorenz_rinit <- spatPomp_Csnippet(
+    unit_statenames = "X",
+    unit_ivpnames = "X",
+    code = "
+      int u;
+      for (u = 0; u < U; u++) {
+        X[u]=X_0[u];
+      }
+    "
+  )
 
-  lorenz_rinit <- Csnippet("
-    double *X = &X1;
-    const double *X_0 =&X1_0;
-    int u;
-    for (u = 0; u < U; u++) {
-      X[u]=X_0[u];
-    }
-  ")
+  lorenz_dmeasure <- spatPomp_Csnippet(
+    method="dmeasure",
+    unit_statenames="X",
+    unit_obsnames="Y",
+    code = "
+      double tol = pow(1.0e-18,U);
+      int u;
+      lik=0;
+      for (u=0; u<U; u++) lik += dnorm(Y[u],X[u],tau,1);
+      if(!give_log) lik = exp(lik) + tol;
+    "
+  )
 
-  lorenz_dmeasure <- Csnippet("
-    const double *X = &X1;
-    const double *Y = &Y1;
-    double tol = pow(1.0e-18,U);
-    int u;
-    lik=0;
-    for (u=0; u<U; u++) lik += dnorm(Y[u],X[u],tau,1);
-    if(!give_log) lik = exp(lik) + tol;
-  ")
+  lorenz_rmeasure <- spatPomp_Csnippet(
+    method="rmeasure",
+    unit_statenames="X",
+    unit_obsnames="Y",
+    code = "
+      double tol = pow(1.0e-18,U);
+     int u;
+      for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
+    "
+  )
 
-  lorenz_rmeasure <- Csnippet("
-    const double *X = &X1;
-    double *Y = &Y1;
-    double tol = pow(1.0e-18,U);
-    int u;
-    for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
-  ")
-
-  lorenz_eunit_measure <- Csnippet("
+  lorenz_eunit_measure <- spatPomp_Csnippet("
     ey = X;
   ")
 
-  lorenz_vunit_measure <- Csnippet("
+  lorenz_vunit_measure <- spatPomp_Csnippet("
     vc = tau*tau;
   ")
 
-  lorenz_munit_measure <- Csnippet("
+  lorenz_munit_measure <- spatPomp_Csnippet("
     M_tau = sqrt(vc);
   ")
 
-  lorenz_dunit_measure <- Csnippet("
+  lorenz_dunit_measure <- spatPomp_Csnippet("
     double tol = 1.0e-18;
     lik = dnorm(Y,X,tau,1);
     if(!give_log) lik = exp(lik);
   ")
 
-  lorenz_runit_measure <- Csnippet("
+  lorenz_runit_measure <- spatPomp_Csnippet("
     double tol = pow(1.0e-18,U);
     Y = rnorm(X,tau+tol);
   ")

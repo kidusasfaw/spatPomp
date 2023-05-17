@@ -55,27 +55,30 @@ bm <- function(U=5,N=100,delta_t=0.1){
   bm_RPnames <- c("rho","sigma","tau")
   bm_paramnames <- c(bm_RPnames,bm_IVPnames)
 
-  bm_rprocess <- spatPomp_Csnippet("
-    double dW[U];
-    double pow_rho[U];
-    int u,v;
-
-    pow_rho[0] = 1;
-    for (u=1 ; u < U ; u++) {
-      pow_rho[u] = pow_rho[u-1]*rho;
-    }
-
-    for (u = 0 ; u < U ; u++) {
-      dW[u] = rnorm(0,sigma*sqrt(dt));
-    }
-    for (u = 0 ; u < U ; u++) {
-      for (v=0; v < U ; v++) {
-        X[u] += dW[v]*pow_rho[dist[u][v]];
+  bm_rprocess <- spatPomp_Csnippet(
+    method="rprocess",
+    unit_statenames = c("X"),
+    code = "
+      double dW[U];
+      double pow_rho[U];
+      int u,v;
+      pow_rho[0] = 1;
+      for (u=1 ; u < U ; u++) {
+        pow_rho[u] = pow_rho[u-1]*rho;
       }
-    }
-  ", unit_statenames = c("X"))
+      for (u = 0 ; u < U ; u++) {
+        dW[u] = rnorm(0,sigma*sqrt(dt));
+      }
+      for (u = 0 ; u < U ; u++) {
+        for (v=0; v < U ; v++) {
+          X[u] += dW[v]*pow_rho[dist[u][v]];
+        }
+      }
+    "
+  )
 
   bm_skel <- spatPomp_Csnippet(
+    method="skeleton",
     unit_statenames = c("X"),
     unit_vfnames = c("X"),
     code = "
@@ -95,42 +98,48 @@ bm <- function(U=5,N=100,delta_t=0.1){
     "
   )
 
-  bm_dmeasure <- Csnippet("
-    const double *X = &X1;
-    const double *Y = &Y1;
-    double tol = pow(1.0e-18,U);
-    int u;
-    lik=0;
-    for (u=0; u<U; u++) lik += dnorm(Y[u],X[u],tau,1);
-    if(!give_log) lik = exp(lik) + tol;
-  ")
+  bm_dmeasure <- spatPomp_Csnippet(
+    method="dmeasure",
+    unit_statenames="X",
+    unit_obsnames="Y",
+    code = "
+      double tol = pow(1.0e-18,U);
+      int u;
+      lik=0;
+      for (u=0; u<U; u++) lik += dnorm(Y[u],X[u],tau,1);
+      if(!give_log) lik = exp(lik) + tol;
+    "
+  )
 
-  bm_eunit_measure <- Csnippet("
+  bm_eunit_measure <- spatPomp_Csnippet("
     ey = X;
   ")
 
-  bm_munit_measure <- Csnippet("
+  bm_munit_measure <- spatPomp_Csnippet("
     M_tau = sqrt(vc);
   ")
 
-  bm_vunit_measure <- Csnippet("
+  bm_vunit_measure <- spatPomp_Csnippet("
     vc = tau*tau;
   ")
 
-  bm_rmeasure <- Csnippet("
-    const double *X = &X1;
-    double *Y = &Y1;
-    double tol = pow(1.0e-18,U);
-    int u;
-    for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
-  ")
+  bm_rmeasure <- spatPomp_Csnippet(
+    method="rmeasure",
+    unit_statenames="X",
+    unit_obsnames="Y",
+    code = "
+      double tol = pow(1.0e-18,U);
+      int u;
+      for (u=0; u<U; u++) Y[u] = rnorm(X[u],tau+tol);
+    "
+  )
 
-  bm_dunit_measure <- Csnippet("
+  bm_dunit_measure <- spatPomp_Csnippet("
     lik = dnorm(Y,X,tau,1);
     if(!give_log) lik = exp(lik);
   ")
 
-  bm_runit_measure <- Csnippet("
+  bm_runit_measure <- spatPomp_Csnippet("
     Y = rnorm(X,tau);
   ")
 

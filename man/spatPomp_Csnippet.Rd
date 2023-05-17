@@ -8,6 +8,7 @@
 \usage{
 \S4method{spatPomp_Csnippet}{character}(
   code,
+  method = "",
   unit_statenames,
   unit_obsnames,
   unit_covarnames,
@@ -18,6 +19,10 @@
 }
 \arguments{
 \item{code}{encodes a component of a spatiotemporal POMP model using \proglang{C} code}
+
+\item{method}{a character string matching the name of the \code{'spatPomp'}
+argument which the code is designed to specify. This argument is ignored unless
+needed to correctly specify the Csnippet.}
 
 \item{unit_statenames}{a subset of the \code{unit_statenames} slot of
 the \code{spatPomp} object for which we are writing a model. This argument
@@ -74,6 +79,7 @@ model size grows.
 \examples{
 # Set initial states for Brownian motion
 bm_rinit <- spatPomp_Csnippet(
+  method = "rinit",
   unit_statenames = c("X"),
   unit_ivpnames = c("X"),
   code = "
@@ -84,6 +90,7 @@ bm_rinit <- spatPomp_Csnippet(
 )
 # Skeleton for Brownian motion
 bm_skel <- spatPomp_Csnippet(
+  method = "skeleton",
   unit_statenames = c("X"),
   unit_vfnames = c("X"),
   code = "

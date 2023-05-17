@@ -233,10 +233,11 @@ measles2 <- function(U=6,dt=2/365,N=391,
   )
 
   measles_rmeasure <- spatPomp_Csnippet(
+    method='rmeasure',
     unit_paramnames=c('rho','psi'),
     unit_statenames='C',
+    unit_obsnames='cases',
     code="
-      double *cases = &cases1;
       double m,v;
       double tol = 1.0e-300;
       int u;

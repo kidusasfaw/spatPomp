@@ -1,5 +1,7 @@
 # spatPomp to-do list
 
+23-05-17 added method argument to spatPomp_Csnippet to allow it to figure out whether the variable needs a "const" specificiation. This is done in a backwards-compatible way - at some point, it could give warnings if this is not specified when it is needed.
+
 23-04-17 ibpf should average shared parameters in output, by default, with an option not to for continuing searchs.
 
 23-04-17 applying mif2 to a spatPomp gives a pomp (more specifically, a mif2d_pomp). This is annoying if one uses mif2 on spatPomps. Any useful pomp function could have a wrapper so that it can be applied to a spatPomp while preserving the class, but preserving pomp class functionality within spatPomp is nontrivial. 
