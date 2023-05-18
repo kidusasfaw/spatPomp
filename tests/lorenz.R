@@ -5,7 +5,7 @@ set.seed(3)
 l <- lorenz(U=5,N=3)
 
 l_pf <- pfilter(l,Np=10)
-paste("lorenz pfilter loglik: ", logLik(l_pf))
+paste("lorenz pfilter loglik: ", round(logLik(l_pf),10))
 
 ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
 

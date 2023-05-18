@@ -1,21 +1,24 @@
 library(spatPomp)
 set.seed(22)
 
-model_type <- "he10"
+#model_type <- "he10"
+model_type <- "mostly shared"
 parNames <- c("alpha","R0","g","sigma","gamma","amplitude","cohort","sigmaSE","S_0","E_0","I_0","rho","psi","iota","mu")
+# he10 defaults to alpha=1, cohort=0, which means the usual transformations are undefined.
+# here, we don't estimate either
 if(model_type == "mostly fixed"){
   sharedParNames <- c("R0","psi")
   unitParNames <- c("rho","S_0")
   estParNames <- c(sharedParNames,unitParNames)
   fixedParNames <- setdiff(parNames,estParNames)
 } else if(model_type == "mostly shared"){
-  sharedParNames <- c("alpha","R0","psi","g","sigma","gamma","amplitude","cohort","sigmaSE")
+  sharedParNames <- c("R0","psi","g","sigma","gamma","amplitude","sigmaSE")
   unitParNames <- c("rho","S_0","E_0","I_0")
   estParNames <- c(sharedParNames,unitParNames)
   fixedParNames <- setdiff(parNames,estParNames)
 } else if(model_type == "plausible parameters shared"){
   # parameters are shared when that makes mechanistic sense. 
-  sharedParNames <- c("alpha","R0","g","sigma","gamma","amplitude","cohort")
+  sharedParNames <- c("R0","g","sigma","gamma","amplitude")
   unitParNames <- c("sigmaSE","S_0","E_0","I_0","rho","psi")
   estParNames <- c(sharedParNames,unitParNames)
   fixedParNames <- setdiff(parNames,estParNames)
@@ -37,7 +40,7 @@ if(model_type == "mostly fixed"){
 # Note: here we assume that there are no unestimated unit-specific
 # parameters. That could readily be accommodated if needed.
 
-h_model <- he10(,U=2,dt=4/365,Tmax=1950.5,
+h_model <- he10(U=2,dt=4/365,Tmax=1950.5,
   expandedParNames=estParNames)
 
 coef(h_model)
@@ -84,6 +87,7 @@ h_ibpf <- ibpf(h_model,
 
 paste("ibpf logLik for he10 model:",logLik(bpfilter(h_ibpf,Np=10,block_size=1)))
 
+coef(h_ibpf)
 
 
 

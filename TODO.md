@@ -1,16 +1,12 @@
 # spatPomp to-do list
 
-23-05-17 added method argument to spatPomp_Csnippet to allow it to figure out whether the variable needs a "const" specificiation. This is done in a backwards-compatible way - at some point, it could give warnings if this is not specified when it is needed.
+23-05-18 Currently, spatPomp inference methodologies are not set up with a "continue" method. This should be added. As part of this, test that paramMatrix is treated consistently: iterated, perturbed filter methods should have a paramMatrix slot in the corresponding class, which is used by continue. Aim to follow the choices of pomp::mif2, where mif2_internal has a .paramMatrix argument used for continue applied to a pfilterd_pomp, but otherwise supplying a matrix of starting values is not supported---in principle, this variation can be controlled by rw_sd.
 
-23-04-17 ibpf should average shared parameters in output, by default, with an option not to for continuing searchs.
+23-05-17 added method argument to spatPomp_Csnippet to allow it to figure out whether the variable needs a "const" specificiation. This is done in a backwards-compatible way - at some point, it could give warnings if this is not specified when it is needed.
 
 23-04-17 applying mif2 to a spatPomp gives a pomp (more specifically, a mif2d_pomp). This is annoying if one uses mif2 on spatPomps. Any useful pomp function could have a wrapper so that it can be applied to a spatPomp while preserving the class, but preserving pomp class functionality within spatPomp is nontrivial. 
 
 23-03-29. Allow spatPomp to use the "order" pomp feature for covariate interpolation. Perhaps have a spatPomp_covariate_table function analogous to pomp::covariate_table?
-
-23-03-25. Arguably, ibpf() should have an argument which determines whether to contract the expanded representation of a shared parameter so that it is U copies of the mean, rather than U slightly different estimates (which are close but not exactly equal, due to the construction of ibpf). This argument could default to contract=TRUE. As I pointed out earlier, you may not want contract=TRUE when you plan to continue refining the results of the search, and in this case you can deliberately set contract=FALSE but at this point hopefully the users will understand sufficiently what is going on.
-
-23-03-10. Issue with spatPomp_Csnippet: get const right for observations in rmeasure.
 
 22-12-06. rmeasure and dmeasure could be built using runit_measure and dunit_measure if those are supplied.
 

@@ -483,7 +483,7 @@ null device
 +   unit_ivpnames="E",unit_paramnames="F",unit_vfnames="G")
 An object of class "Csnippet"
 Slot "text":
-[1] "double *A = &A1;\nconst double *B = &B1;\nconst double *C = &C1;\nconst double *D = &D1;\nconst double *E_0 = &E1_0;\nconst double *F = &F1;\ndouble *DG = &DG1;\nlik=u;"
+[1] " double *A = &A1;\nconst double *B = &B1;\nconst double *C = &C1;\nconst double *D = &D1;\nconst double *E_0 = &E1_0;\nconst double *F = &F1;\ndouble *DG = &DG1;\nlik=u;"
 
 > 
 > ## --------------------------------------------

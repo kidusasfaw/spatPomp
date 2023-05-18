@@ -3,45 +3,42 @@ note1 <- sprintf("R~package, version~%s", meta$Version)
 note2 <- sprintf("(R package, version %s)", meta$Version)
 
 c(
-    bibentry(
-        header=paste("To cite the",sQuote("spatPomp"),
-                     "package in publications, please use:"),
-        bibtype = "misc",
-        title = "Statistical Inference for Spatiotemporal Partially Observed Markov Processes via the R Package {spatPomp}",
-        author       = c(person(given = c("Kidus"),
-                                family = "Asfaw",
-                                email = "kasfaw@umich.edu"),
-                         person(given = "Joonha",
-                                family = "Park"),
-                         person(given = "Allister",
-                                family = "Ho"),
-                         person(given = "Aaron A.",
-                                family = "King"),
-                         person(given = "Edward",
-                                family = "Ionides")),
-        year={2021},
-        eprint={2101.01157},
-        archivePrefix={"arXiv"},
-        primaryClass={"stat.ME"}
+  bibentry(
+    header=paste("To cite the",sQuote("spatPomp"),
+      "package in publications, please use:"),
+    bibtype = "misc",
+    title = "Partially observed Markov processes with spatial structure via the {R} package {spatPomp}",
+    author = c(
+      person(given = "Kidus", family = "Asfaw"),
+      person(given = "Joonha", family = "Park"),
+      person(given = "Aaron A.", family = "King"),
+      person(given = "Edward", family = "Ionides",
+        email = "ionides@umich.edu")
     ),
-    bibentry(
-        header="To cite the package itself:",
-        bibtype="Manual",
-        title="{spatPomp}: {Statistical} Inference for Spatiotemporal Partially Observed {Markov} Processes",
-        author=personList(
-            as.person("Kidus Asfaw"),
-            as.person("Joonha Park"),
-            as.person("Allister Ho"),
-            as.person("Aaron A. King"),
-            as.person("Edward Ionides")
-        ),
-        year=year,
-        note=note1,
-        url=meta$URL,
-        textVersion=paste0(
-            "Asfaw K., Park J., Ho A., A. A. King, E. L. Ionides"," (",year,") ",
-            "spatPomp: Statistical Inference for Spatiotemporal Partially Observed Markov Processes ",
-            note2,". ",meta$URL
-        )
+    year={2023},
+    eprint={2101.01157},
+    archivePrefix={"arXiv"},
+    primaryClass={"stat.ME"}
+  ),
+  bibentry(
+    header="To cite the package itself:",
+    bibtype="Manual",
+    title="{spatPomp}: {Statistical} Inference for Spatiotemporal Partially Observed {Markov} Processes",
+    author=c(
+      person(given = "Kidus", family = "Asfaw"),
+      person(given = "Joonha", family = "Park"),
+      person(given = "Aaron A.", family = "King"),
+      person(given = "Edward", family = "Ionides",
+	email = "ionides@umich.edu")
+    ),
+    year=year,
+    note=note1,
+    url=meta$URL,
+    textVersion=paste0(
+      "Asfaw K., Park J., A. A. King, E. L. Ionides"," (",year,") ",
+      "spatPomp: Statistical Inference for Spatiotemporal Partially Observed Markov Processes ",
+       note2,". ",meta$URL
     )
+  )
 )
+

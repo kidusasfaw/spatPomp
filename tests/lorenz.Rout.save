@@ -1,6 +1,6 @@
 
-R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
-Copyright (C) 2022 The R Foundation for Statistical Computing
+R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -33,8 +33,8 @@ https://kingaa.github.io/pomp/blog.html.
 > l <- lorenz(U=5,N=3)
 > 
 > l_pf <- pfilter(l,Np=10)
-> paste("lorenz pfilter loglik: ", logLik(l_pf))
-[1] "lorenz pfilter loglik:  -43.0914532809711"
+> paste("lorenz pfilter loglik: ", round(logLik(l_pf),10))
+[1] "lorenz pfilter loglik:  -43.091453281"
 > 
 > ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
 > 
