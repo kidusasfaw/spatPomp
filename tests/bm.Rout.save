@@ -503,8 +503,59 @@ Error in value[[3L]](cond) :
 > b_rep2 <- spatPomp(b_model,params=coef(b_model)+1)
 > if(!identical(coef(b_rep2),coef(b_model)+1)) stop('problem with parameter replacement')
 > 
+> ## -----------------------------------------------------------------
+> ## using bm to test behavior of inference methods when logLik = -Inf
+> ## _________________________________________________________________
 > 
 > 
+> b_inf <- spatPomp(b_model,
++   dmeasure = spatPomp_Csnippet(
++     method="dmeasure",
++     unit_statenames="X",
++     unit_obsnames="Y",
++     code = "
++       lik=0;
++       if(give_log) lik = log(lik);
++     "
++   ),
++   dunit_measure = spatPomp_Csnippet("
++     lik = 0;
++     if(give_log) lik = log(lik);
++   ")
++ )
+> 
+> dmeasure(b_inf,x=states(b_model))
+      time
+.id    [,1] [,2]
+  [1,]    0    0
+> 
+> dmeasure(b_inf,x=states(b_model),log=T)
+      time
+.id    [,1] [,2]
+  [1,] -Inf -Inf
+> 
+> vec_dmeasure(b_inf,y=obs(b_inf),x=states(b_model),units=1:U,times=1:2,params=coef(b_inf),log=T)[,,1]
+     [,1] [,2]
+[1,] -Inf -Inf
+[2,] -Inf -Inf
+> 
+> b_girf_mom_inf <- girf(b_inf,Np = floor(Np/2),lookahead = 1,
++   Nguide = floor(Np/2),
++   kind = 'moment',Ninter=2)
+> paste("bm moment girf loglik, zero measurement: ",round(logLik(b_girf_mom_inf),10))
+[1] "bm moment girf loglik, zero measurement:  -Inf"
+> 
+> set.seed(0)
+> b_girf_boot_inf <- girf(b_inf,Np = floor(Np/2),lookahead = 1,
++   Nguide = floor(Np/2),
++   kind = 'bootstrap',Ninter=2)
+> paste("bm bootstrap girf loglik, zero measurement: ",round(logLik(b_girf_boot_inf),10))
+[1] "bm bootstrap girf loglik, zero measurement:  -Inf"
+> 
+> set.seed(5)
+> b_bpfilter_inf <- bpfilter(b_inf, Np = Np, block_size = 1)
+> paste("bm bpfilter loglik, zero measurement: ",round(logLik(b_bpfilter_inf),10))
+[1] "bm bpfilter loglik, zero measurement:  NaN"
 > 
 > 
 > 

@@ -449,7 +449,7 @@ momgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X
+        x <- X[,,1]
         log_filter_guide_fun <- log(tol)
       }
     }
@@ -693,7 +693,7 @@ bootgirf.internal <- function (object,
       }
       else{
         cond.loglik[nt+1, s] <- -Inf
-        x <- X
+        x <- X[,,1]
         log_filter_guide_fun <- log(tol)
       }
       gc()

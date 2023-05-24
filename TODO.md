@@ -1,5 +1,7 @@
 # spatPomp to-do list
 
+23-05-24 bpfilter has log-likelihood NaN when all particles have zero likelihood. Better to return -Inf.
+
 23-05-18 Currently, spatPomp inference methodologies are not set up with a "continue" method. This should be added. As part of this, test that paramMatrix is treated consistently: iterated, perturbed filter methods should have a paramMatrix slot in the corresponding class, which is used by continue. Aim to follow the choices of pomp::mif2, where mif2_internal has a .paramMatrix argument used for continue applied to a pfilterd_pomp, but otherwise supplying a matrix of starting values is not supported---in principle, this variation can be controlled by rw_sd.
 
 23-05-17 added method argument to spatPomp_Csnippet to allow it to figure out whether the variable needs a "const" specificiation. This is done in a backwards-compatible way - at some point, it could give warnings if this is not specified when it is needed.
