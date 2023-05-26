@@ -137,7 +137,12 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
         I_01         I_02 
 3.749471e-05 4.049693e-05 
 > 
-> 
+> ## test error message when munit_measure is undefined
+> try(girf(h_model,kind="moment",
++   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
+Error in .local(object, ...) : 
+  girf with kind = 'moment' requires munit_measure
+>   
 > 
 > 
 > 

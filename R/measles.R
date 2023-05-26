@@ -331,9 +331,7 @@ measles <- function(U=6,dt=2/365,
     double mytol = 1e-5;
     m = rho*(C+mytol);
     binomial_var = rho*(1-rho)*C;
-    if(vc > binomial_var) {
-      M_psi = sqrt(vc - binomial_var)/m;
-    }
+    M_psi = (vc > binomial_var) ? sqrt(vc - binomial_var)/m : 0;
   ")
 
   measles_rinit <- spatPomp_Csnippet(

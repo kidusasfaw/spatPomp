@@ -89,6 +89,9 @@ paste("ibpf logLik for he10 model:",logLik(bpfilter(h_ibpf,Np=10,block_size=1)))
 
 coef(h_ibpf)
 
-
+## test error message when munit_measure is undefined
+try(girf(h_model,kind="moment",
+  Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
+  
 
 
