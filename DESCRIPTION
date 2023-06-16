@@ -1,7 +1,7 @@
 Package: spatPomp
 Type: Package
 Title: Inference for Spatiotemporal Partially Observed Markov Processes
-Version: 0.32.2
+Version: 0.32.3
 Date: 2023-05-26
 Authors@R: c(
   person("Kidus", "Asfaw", email = "kidusasfaw1990@gmail.com", role = c("aut")),
@@ -36,10 +36,15 @@ Collate:
     'bm_kalman_logLik.R'
     'bpfilter.R'
     'city_data_UK.R'
+    'iter_filter.R'
     'safecall.R'
     'pstop.R'
     'undefined.R'
     'spatPomp.R'
+    'ibpf.R'
+    'listie.R'
+    'conc.R'
+    'concat.R'
     'dunit_measure.R'
     'enkf.R'
     'eunit_measure.R'
@@ -50,8 +55,6 @@ Collate:
     'he10demography.R'
     'he10measles.R'
     'he10mle.R'
-    'iter_filter.R'
-    'ibpf.R'
     'ienkf.R'
     'igirf.R'
     'iubf.R'

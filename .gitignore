@@ -32,3 +32,4 @@ hub_cov.R
 covr.html
 covr.rds
 .DS_Store
+.Rproj.user
