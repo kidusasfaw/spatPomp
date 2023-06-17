@@ -1,7 +1,7 @@
 
-R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
 Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -45,7 +45,7 @@ https://kingaa.github.io/pomp/blog.html.
 +   estParNames <- c(sharedParNames,unitParNames)
 +   fixedParNames <- setdiff(parNames,estParNames)
 + } else if(model_type == "plausible parameters shared"){
-+   # parameters are shared when that makes mechanistic sense. 
++   # parameters are shared when that makes mechanistic sense.
 +   sharedParNames <- c("R0","g","sigma","gamma","amplitude")
 +   unitParNames <- c("sigmaSE","S_0","E_0","I_0","rho","psi")
 +   estParNames <- c(sharedParNames,unitParNames)
@@ -62,7 +62,7 @@ https://kingaa.github.io/pomp/blog.html.
 +   fixedParNames <- c("mu","g")
 +   sharedParNames <- NULL
 +   unitParNames <- setdiff(parNames,fixedParNames)
-+   estParNames <- c(sharedParNames,unitParNames)  
++   estParNames <- c(sharedParNames,unitParNames)
 + }
 > 
 > # Note: here we assume that there are no unestimated unit-specific
@@ -100,7 +100,7 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
 > reg_rw.sd <- rep(list(0.02),times=length(regEstParNames_expanded))
 > names(reg_rw.sd) <- regEstParNames_expanded
 > if("alpha"%in%estParNames) reg_rw.sd[paste0("alpha",1:h_U)] <- 0.005
->  
+> 
 > ivp_rw.sd <- lapply(ivpEstParNames_expanded,function(x)expression(ivp(0.05)))
 > names(ivp_rw.sd) <- ivpEstParNames_expanded
 > h_rw.sd <- do.call(rw_sd,c(reg_rw.sd,ivp_rw.sd))
@@ -142,7 +142,27 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
 +   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
 Error in .local(object, ...) : 
   girf with kind = 'moment' requires munit_measure
->   
 > 
+> # Create second ibpfd_spatPomp object with different chain length, to test error
+> h_ibpf2 <- ibpf(h_model,
++                 params=coef(h_model),
++                 sharedParNames=sharedParNames,
++                 unitParNames=unitParNames,
++                 Nbpf=3,
++                 spat_regression=0.1,
++                 Np=10,
++                 rw.sd=h_rw.sd,
++                 cooling.fraction.50=0.5,
++                 block_list=block_list
++ )
+> 
+> # Should correctly make ibpfList object
+> is(c(h_ibpf, h_ibpf), "ibpfList")
+[1] TRUE
+> 
+> # Throws error because they have different chain lengths
+> try(c(h_ibpf, h_ibpf2))
+Error in validObject(.Object) : 
+  invalid class “ibpfList” object: error in ‘c’: to be combined, ‘ibpfd_spatPomp’ objects must have chains of equal length
 > 
 > 
