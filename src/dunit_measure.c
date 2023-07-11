@@ -106,8 +106,6 @@ SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
     // address of native routine
     *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
-    (*spu)(args);
-
     for (k = 0; k < ntimes; k++, time++, yp += nobs) { // loop over times
 
       R_CheckUserInterrupt();	// check for user interrupt
@@ -123,8 +121,6 @@ SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
         (*ff)(ft,yp,xp,pp,give_log,oidx,sidx,pidx,cidx,ncovars,cov,*time,*unit);
       }
     }
-
-    (*upu)();
 
   }
 

@@ -127,7 +127,6 @@ SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP pa
     // address of native routine
     *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
-    (*spu)(args);
     for (k = 0; k < ntimes; k++, time++) { // loop over times
       // interpolate the covar functions for the covariates
       (*tl)(&covariate_table,*time,cov);
@@ -141,8 +140,6 @@ SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP pa
       }
 
     }
-
-    (*upu)();
 
   }
 

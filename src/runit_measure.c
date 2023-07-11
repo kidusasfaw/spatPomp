@@ -107,7 +107,6 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
     PROTECT(Y = ret_array(nobs,nreps,ntimes,Onames)); nprotect++;
     yt = REAL(Y);
 
-    (*spu)(args);
     GetRNGstate();
 
     for (k = 0; k < ntimes; k++, time++) { // loop over times
@@ -128,7 +127,6 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
     }
 
     PutRNGstate();
-    (*upu)();
 
   }
 
