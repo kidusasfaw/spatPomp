@@ -1,4 +1,4 @@
-REXE = R --vanilla
+REXE = $(shell which R) --vanilla
 RSESSION = emacs -f R
 RCMD = $(REXE) CMD
 RCMD_ALT = R --no-save --no-restore CMD
