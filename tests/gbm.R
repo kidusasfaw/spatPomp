@@ -28,9 +28,13 @@ paste("gbm igirf loglik:", round(logLik(gbm_igirf_out),10))
 ## using gbm to test arma_benchmark()
 ## ____________________________________________
 
-a1 <- arma_benchmark(gbm_model,order=c(1,0,0))
 
-paste("ARMA benchmark:", round(a1$total,10))
+# unit test commented out for 0.33.0 since CRAN additional checks found
+# that stats::arima() has reproducibility problems on an M1 mac.
+
+# a1 <- arma_benchmark(gbm_model,order=c(1,0,0))
+
+# paste("ARMA benchmark:", round(a1$total,10))
 
 
 

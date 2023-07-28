@@ -38,7 +38,7 @@
 ##' columns that provide the observation time and the observation spatial unit with the same names and arrangement as the \code{data}.
 ##' @param unit_statenames The names of the components of the latent state. E.g. if the user is constructing an joint SIR model
 ##' over many spatial units, \code{c('S','I','R')} would be passed.
-##' @param unit_accumvars a subset of the \code{unit_statenames} argument that are accumulator variables. See \link[pomp]{accumulator variables}
+##' @param unit_accumvars a subset of the \code{unit_statenames} argument that are accumulator variables. See \link[pomp]{accumvars}
 ##' for more on the concept of \pkg{pomp} accumulator variables.
 ##' @param shared_covarnames If \code{covar} is supplied, covariates that are shared must still be specified for each unit, i.e.,
 ##' rows with equal values for the same time over all units must be supplied. However, if such covariates exists, supply the names

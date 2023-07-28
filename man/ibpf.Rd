@@ -70,7 +70,7 @@
 \item{data}{either a data frame holding the time series data,
 or an object of class \sQuote{pomp},
 i.e., the output of another \pkg{pomp} calculation.
-Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
+Internally, \code{data} will be coerced to an array with storage-mode \code{double}.}
 
 \item{...}{If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
 
