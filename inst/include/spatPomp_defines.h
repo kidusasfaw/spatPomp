@@ -32,8 +32,6 @@ extern pomp_fun_handler_t *pfh;
 extern get_covariate_names_t *gcn;
 extern table_lookup_t *tl;
 extern make_covariate_table_t *mct;
-extern set_pomp_userdata_t *spu;
-extern unset_pomp_userdata_t *upu;
 extern pomp_onestep_sim *pos;
 extern SEXP(*randwalk_perturbation_pomp)(SEXP,SEXP);
 extern SEXP (*lookup_in_table_pomp)(SEXP,SEXP);

@@ -1,4 +1,10 @@
 examples
+repo
+revdep
+scripts
+tools
+wiki
+www
 tests/Makefile
 tests/(.+?)\.png$
 tests/(.+?)\.pdf$
@@ -7,6 +13,7 @@ inst/doc/Makefile
 inst/doc/(.+?).md
 inst/doc/(.+?).Rmd
 man/roxygen
+Doxyfile
 LICENSE\.md$
 README\.md$
 CRAN\.md$
@@ -33,6 +40,7 @@ Makefile
 rules.mk
 scripts
 lib
+libs
 library
 check
 www

@@ -32,8 +32,6 @@ SEXP (*lsd)(SEXP);
 SEXP (*lsi)(SEXP);
 make_covariate_table_t * mct;
 SEXP (*pfh)(SEXP, SEXP, pompfunmode *, SEXP, SEXP, SEXP, SEXP);
-void (*spu)(SEXP);
-void (*upu)(void);
 void (*tl)(lookup_table_t *, double, double *);
 
 
@@ -49,6 +47,4 @@ void R_init_spatPomp (DllInfo *info) {
   gcn = (get_covariate_names_t *) R_GetCCallable("pomp", "get_covariate_names");
   tl = (table_lookup_t *) R_GetCCallable("pomp", "table_lookup");
   mct = (make_covariate_table_t *) R_GetCCallable("pomp", "make_covariate_table");
-  spu = (set_pomp_userdata_t *) R_GetCCallable("pomp", "set_pomp_userdata");
-  upu = (unset_pomp_userdata_t *) R_GetCCallable("pomp", "unset_pomp_userdata");
 }

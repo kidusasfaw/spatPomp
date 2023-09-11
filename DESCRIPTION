@@ -19,7 +19,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 BugReports: https://github.com/kidusasfaw/spatPomp/issues/
-Depends: pomp (>= 4.5.2), R(>= 4.1), methods
+Depends: pomp (>= 5.4), R(>= 4.1), methods
 LinkingTo: pomp
 Suggests: testthat, doParallel (>= 1.0.11), parallel, doRNG
 Imports: foreach, dplyr, tidyr, stringr, abind, rlang, magrittr, ggplot2
