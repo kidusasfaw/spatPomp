@@ -22,6 +22,7 @@
   block_size,
   block_list,
   save_states,
+  filter_traj,
   ...,
   verbose = getOption("verbose", FALSE)
 )
@@ -32,6 +33,7 @@
   block_size,
   block_list,
   save_states,
+  filter_traj,
   ...,
   verbose = getOption("verbose", FALSE)
 )
@@ -51,6 +53,8 @@ an integer vector of neighboring units.}
 
 \item{save_states}{logical. If True, the state-vector for each particle and
 block is saved.}
+
+\item{filter_traj}{logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }

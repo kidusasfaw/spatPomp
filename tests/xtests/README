@@ -1,0 +1,6 @@
+
+## This directory is for extra tests of correctness
+## requiring addition Monte Carlo intensity, which we do not
+## want to run every time we do the unit tests to check nothing has
+## been broken.
+

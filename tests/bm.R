@@ -95,10 +95,22 @@ b_bpfilter_repeat <- bpfilter(b_bpfilter)
 paste("check bpfilter on bpfilterd_spatPomp: ",
   logLik(b_bpfilter)==logLik(b_bpfilter_repeat))
 
+set.seed(5)
+b_bpfilter_filter_traj <- bpfilter(b_bpfilter,filter_traj=TRUE)
+paste("bpfilter filter trajectory final particle: ")
+round(b_bpfilter_filter_traj@filter.traj[,1,N+1],3)
+
+
+set.seed(5)
+b_bpfilter_save_states <- bpfilter(b_bpfilter,save_states=TRUE)
+paste("bpfilter final particles: ")
+round(b_bpfilter_save_states@saved.states[[N]],3)
+
 ##
 ## enkf tested on bm
 ##
 
+set.seed(5)
 b_enkf <- enkf(b_model, Np = Np)
 paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 
@@ -106,6 +118,7 @@ paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 ## girf tested on bm, both moment and bootstrap methods
 ##
 
+set.seed(0)
 b_girf_mom <- girf(b_model,Np = floor(Np/2),lookahead = 1,
   Nguide = floor(Np/2),
   kind = 'moment',Ninter=2)

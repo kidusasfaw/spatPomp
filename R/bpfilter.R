@@ -22,6 +22,7 @@
 ##' an integer vector of neighboring units.
 ##' @param save_states logical. If True, the state-vector for each particle and
 ##' block is saved.
+##' @param filter_traj logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
 ##' @param \dots If a \code{params} argument is specified, \code{bpfilter} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.
 ##'
 ##' @examples
@@ -74,7 +75,8 @@ setClass(
     cond.loglik="numeric",
     block.cond.loglik="array",
     loglik="numeric",
-    saved.states="list"
+    saved.states="list",
+    filter.traj="array"
   ),
   prototype=prototype(
     block_list = list(),
@@ -83,7 +85,8 @@ setClass(
     cond.loglik=as.double(NA),
     block.cond.loglik=array(data=numeric(0),dim=c(0,0)),
     loglik=as.double(NA),
-    saved.states=list()
+    saved.states=list(),
+    filter.traj=array(data=numeric(0),dim=c(0,0,0))
   )
 )
 
@@ -125,10 +128,11 @@ setMethod(
 setMethod(
   "bpfilter",
   signature=signature(object="spatPomp"),
-  function (object, Np, block_size, block_list, save_states, ..., verbose=getOption("verbose", FALSE)) {
+  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("verbose", FALSE)) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
 
     if(missing(save_states)) save_states <- FALSE
+    if(missing(filter_traj)) filter_traj <- FALSE
 
     if(missing(block_list) && missing(block_size))
       stop(ep,sQuote("block_list"), " or ", sQuote("block_size"), " must be specified to the call",call.=FALSE)
@@ -156,6 +160,7 @@ setMethod(
      Np=Np,
      block_list=block_list,
      save_states=save_states,
+     filter_traj=filter_traj,
      ...,
      verbose=verbose)
   }
@@ -168,10 +173,11 @@ setMethod(
 setMethod(
   "bpfilter",
   signature=signature(object="bpfilterd_spatPomp"),
-  function (object, Np, block_size, block_list, save_states, ..., verbose=getOption("verbose", FALSE)) {
+  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("verbose", FALSE)) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
 
     if(missing(save_states)) save_states <- FALSE
+    if(missing(filter_traj)) filter_traj <- FALSE
 
     if (!missing(block_list) & !missing(block_size)){
       stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.",call.=FALSE)
@@ -197,16 +203,18 @@ setMethod(
      Np=Np,
      block_list=block_list,
      save_states=save_states,
+     filter_traj=filter_traj,
      ...,
      verbose=verbose)
   }
 )
 
-bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose, .gnsi = TRUE) {
+bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj, ..., verbose, .gnsi = TRUE) {
   ep <- paste0("in ",sQuote("bpfilter"),": ")
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...)
   save_states <- as.logical(save_states)
+  filter_traj <- as.logical(filter_traj)
   object <- new("spatPomp",p_object,
                 unit_covarnames = object@unit_covarnames,
                 shared_covarnames = object@shared_covarnames,
@@ -253,6 +261,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
   ## returns an nvars by nsim matrix
   init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
   statenames <- rownames(init.x)
+  nvars <- nrow(init.x)
   x <- init.x
 
   # create array to store weights per particle per block_list
@@ -265,6 +274,32 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
     saved.states <- list()
   }
 
+  ## set up storage for saving samples from filtering distributions
+  
+  ## bpfilter has a logical "saved.states" 
+  ## pomp::pfilter has an option to save weighted filter states
+  ## this is not implemented yet in spatPomp::bpfilter
+  ## weighted states require interacting with the block structure, which 
+  ## saved.states does not need
+  ## stsav and wtsav are included as a stub in case the functionality is added later
+  ## stsav <- save.states %in% c("unweighted","TRUE")
+  ## wtsav <- save.states == "weighted"
+  stsav <- FALSE
+  wtsav <- FALSE
+  if (stsav || wtsav || filter_traj) {
+    xparticles <- matrix(vector(mode="list"),nrow=ntimes,ncol=nblocks)
+    ## if (wtsav) xweights <- xparticles
+  }
+  if (filter_traj) {
+    pedigree <- matrix(vector(mode="list"),nrow=ntimes+1,ncol=nblocks)
+  }
+
+  if (filter_traj) {
+    filt.t <- array(data=numeric(1),dim=c(nvars,1,ntimes+1),
+      dimnames=list(name=statenames,rep=1,time=NULL))
+  } else {
+    filt.t <- array(data=numeric(0),dim=c(0,0,0))
+  }
 
   for (nt in seq_len(ntimes)) { ## main loop
     ## advance the state variables according to the process model
@@ -316,13 +351,13 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
       us = object@unit_statenames
       statenames = paste0(rep(us,length(block)),rep(block,each=length(us)))
       tempX = X[statenames,,,drop = FALSE]
-      xx <- tryCatch( #resampling with cross pollination
+      xx <- tryCatch( #block resampling 
         .Call(
           "bpfilter_computations",
           x=tempX,
           params=params,
           Np=Np[nt+1],
-          trackancestry=FALSE,
+          trackancestry=filter_traj,
           doparRS=FALSE,
           weights=weights[i,]
         ),
@@ -332,6 +367,12 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
       )
       x[statenames,] <- xx$states
       params <- xx$params
+      if (filter_traj) pedigree[nt,i][[1]] <- xx$ancestry
+      if (stsav || filter_traj) {
+        xparticles[nt,i][[1]] <- xx$states
+        dimnames(xparticles[nt,i][[1]]) <- list(name=statenames,.id=NULL)
+    }
+
     }
     if (save_states) saved.states[[nt]] <- x
     log_weights = max_log_d + log(weights)
@@ -339,6 +380,27 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
     loglik[nt] = sum(block_log_weights)
     block.loglik[,nt] <- block_log_weights
   } ## end of main loop
+
+  if (filter_traj) { ## select a single trajectory
+    # sample sequentially for each  block
+    for(i in seq(nblocks)){
+      block <- block_list[[i]]
+      us = object@unit_statenames
+      block_statenames = paste0(rep(us,length(block)),rep(block,each=length(us)))
+      b <- sample.int(n=ncol(weights),size=1L,replace=TRUE)
+      filt.t[block_statenames,1L,ntimes+1] <- xparticles[ntimes,i][[1]][,b]
+      for (nt in seq.int(from=ntimes-1,to=1L,by=-1L)) {
+        b <- pedigree[nt+1,][[1]][b]
+        filt.t[block_statenames,1L,nt+1] <- xparticles[nt,i][[1]][,b]
+      }
+      if (times[2L] > times[1L]) {
+        b <- pedigree[1L,i][[1]][b]
+        filt.t[block_statenames,1L,1L] <- init.x[block_statenames,b]
+      } 
+    }
+    if (times[2L] <= times[1L]) filt.t <- filt.t[,,-1L,drop=FALSE]
+  }
+
   new(
     "bpfilterd_spatPomp",
     object,
@@ -347,6 +409,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, ..., verbose
     cond.loglik=loglik,
     block.cond.loglik=block.loglik,
     loglik=sum(loglik),
-    saved.states=saved.states
+    saved.states=saved.states,
+    filter.traj=filt.t
   )
 }

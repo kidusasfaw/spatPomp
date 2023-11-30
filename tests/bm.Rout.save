@@ -132,23 +132,44 @@ executing %dopar% sequentially: no parallel backend registered
 +   logLik(b_bpfilter)==logLik(b_bpfilter_repeat))
 [1] "check bpfilter on bpfilterd_spatPomp:  TRUE"
 > 
+> set.seed(5)
+> b_bpfilter_filter_traj <- bpfilter(b_bpfilter,filter_traj=TRUE)
+> paste("bpfilter filter trajectory final particle: ")
+[1] "bpfilter filter trajectory final particle: "
+> round(b_bpfilter_filter_traj@filter.traj[,1,N+1],3)
+   X1    X2 
+2.349 0.796 
+> 
+> 
+> set.seed(5)
+> b_bpfilter_save_states <- bpfilter(b_bpfilter,save_states=TRUE)
+> paste("bpfilter final particles: ")
+[1] "bpfilter final particles: "
+> round(b_bpfilter_save_states@saved.states[[N]],3)
+    .id
+name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
+  X1 2.611 2.236 2.186 2.186 2.349 1.077 1.077 1.155 1.442 1.063
+  X2 0.796 0.442 0.442 0.231 0.231 0.231 0.648 0.648 1.337 1.019
+> 
 > ##
 > ## enkf tested on bm
 > ##
 > 
+> set.seed(5)
 > b_enkf <- enkf(b_model, Np = Np)
 > paste("bm enkf loglik: ",round(logLik(b_enkf),10))
-[1] "bm enkf loglik:  -11.038124567"
+[1] "bm enkf loglik:  -10.8897941231"
 > 
 > ##
 > ## girf tested on bm, both moment and bootstrap methods
 > ##
 > 
+> set.seed(0)
 > b_girf_mom <- girf(b_model,Np = floor(Np/2),lookahead = 1,
 +   Nguide = floor(Np/2),
 +   kind = 'moment',Ninter=2)
 > paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
-[1] "bm girf loglik, moment guide:  -13.2689915662"
+[1] "bm girf loglik, moment guide:  -14.9828908185"
 > 
 > set.seed(0)
 > b_girf_boot <- girf(b_model,Np = floor(Np/2),lookahead = 1,
