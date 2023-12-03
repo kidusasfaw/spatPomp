@@ -1,8 +1,8 @@
 Package: spatPomp
 Type: Package
 Title: Inference for Spatiotemporal Partially Observed Markov Processes
-Version: 0.33.1
-Date: 2023-11-30
+Version: 0.34.0
+Date: 2023-12-03
 Authors@R: c(
   person("Kidus", "Asfaw", email = "kidusasfaw1990@gmail.com", role = c("aut")),
   person("Edward", "Ionides", email = "ionides@umich.edu",role = c("cre","aut")),
@@ -11,9 +11,10 @@ Authors@R: c(
   person("Joonha", "Park", email = "j.park@ku.edu", role = c("ctb")),
   person("Jesse", "Wheeler", email = "jeswheel@umich.edu", role = c("ctb")),
   person("Jifan", "Li", email = "jifanli@umich.edu", role = c("ctb")),
-  person("Ning", "Ning", email = "patning@tamu.edu", role = c("ctb")))
+  person("Ning", "Ning", email = "patning@tamu.edu", role = c("ctb")),
+  person("Haogao", "Gu", email = "hggu@connect.hku.hk", role = c("ctb")))
 URL: https://github.com/kidusasfaw/spatPomp
-Description: Inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. To do so, it relies on and extends a number of facilities that the 'pomp' package provides for inference on time series data using partially-observed Markov process (POMP) models. Implemented methods include filtering and inference methods in Park and Ionides (2020) <doi:10.1007/s11222-020-09957-3>, Rebeschini and van Handel (2015) <doi:10.1214/14-AAP1061>, Evensen and van Leeuwen (1996) <doi:10.1029/94JC00572>, Ionides et al. (2021) <doi:10.1080/01621459.2021.1974867>, Ionides, Ning and Wheeler (2022) <doi:10.5705/ss.202022.0188>, Ning and Ionides (2023) <arXiv:2110.10745>. Pre-print statistical software article: Asfaw et al. (2021) <arXiv:2101.01157>.
+Description: Inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models. The 'spatPomp' package extends 'pomp' to include algorithms taking advantage of the spatial structure in order to assist with handling high dimensional processes. See Asfaw et al. (2023) <arXiv:2101.01157> for further description of the package.
 SystemRequirements: For Windows users, Rtools (see https://cran.r-project.org/bin/windows/Rtools/).
 License: GPL-3
 Encoding: UTF-8
