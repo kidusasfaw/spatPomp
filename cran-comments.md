@@ -15,9 +15,10 @@ Status: OK
 
 ## devtools::check_mac_release()
 
-The following NOTEs and the corresponding WARNING did not seem to require any action. The
-spatPomp package is not supporsed to include the source for the packages that it
-requires, and installing them from CRAN is the intended action.
+The following WARNING and the corresponding NOTEs did not seem to
+require any action. The spatPomp package is not supposed to include
+the source for the packages that it requires, and installing them
+from CRAN is the intended action.
 
 Building package dependency tree..
 (from /Volumes/PkgBuild/work/1701616455-16fc4133d5f711ca/packages/CRAN/src/contrib)
