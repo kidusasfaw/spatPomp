@@ -390,7 +390,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
       b <- sample.int(n=ncol(weights),size=1L,replace=TRUE)
       filt.t[block_statenames,1L,ntimes+1] <- xparticles[ntimes,i][[1]][,b]
       for (nt in seq.int(from=ntimes-1,to=1L,by=-1L)) {
-        b <- pedigree[nt+1,][[1]][b]
+        b <- pedigree[nt+1,i][[1]][b]
         filt.t[block_statenames,1L,nt+1] <- xparticles[nt,i][[1]][,b]
       }
       if (times[2L] > times[1L]) {

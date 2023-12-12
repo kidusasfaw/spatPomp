@@ -98,7 +98,7 @@ paste("check bpfilter on bpfilterd_spatPomp: ",
 set.seed(5)
 b_bpfilter_filter_traj <- bpfilter(b_bpfilter,filter_traj=TRUE)
 paste("bpfilter filter trajectory final particle: ")
-round(b_bpfilter_filter_traj@filter.traj[,1,N+1],3)
+round(b_bpfilter_filter_traj@filter.traj[,1,],3)
 
 
 set.seed(5)
@@ -335,6 +335,7 @@ b_rep1 <- spatPomp(b_model,params=coef(b_model))
 for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 
 # test an error message
+print("The following delivers an error message, to test it")
 try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 
 # test parameter replacement
