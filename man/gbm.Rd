@@ -41,8 +41,8 @@ spy(g)
 }
 \seealso{
 Other spatPomp model generators: 
-\code{\link{bm2}()},
 \code{\link{bm}()},
+\code{\link{bm2}()},
 \code{\link{he10}()},
 \code{\link{lorenz}()},
 \code{\link{measles}()}

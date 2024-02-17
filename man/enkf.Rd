@@ -53,8 +53,8 @@ logLik(enkfd_bm)
 \code{ienkf()}, \code{igirf}, \code{iubf}, \code{ibpf}
 
 Other likelihood evaluation algorithms: 
-\code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{abfir}()},
 \code{\link{bpfilter}()},
 \code{\link{girf}()}
 }

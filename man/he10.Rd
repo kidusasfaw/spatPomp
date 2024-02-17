@@ -114,8 +114,8 @@ spy(m)
 \code{he10coordinates}, \code{he10measles}, \code{he10mle}, \code{he10demography}
 
 Other spatPomp model generators: 
-\code{\link{bm2}()},
 \code{\link{bm}()},
+\code{\link{bm2}()},
 \code{\link{gbm}()},
 \code{\link{lorenz}()},
 \code{\link{measles}()}

@@ -106,8 +106,8 @@ logLik(pfd_bm)
 likelihood maximization algorithms: \code{ienkf()}, \code{igirf()}, \code{iubf()}, \code{ibpf()}
 
 Other likelihood evaluation algorithms: 
-\code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{abfir}()},
 \code{\link{bpfilter}()},
 \code{\link{enkf}()}
 }

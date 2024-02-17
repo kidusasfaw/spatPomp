@@ -115,7 +115,7 @@ b_enkf <- enkf(b_model, Np = Np)
 paste("bm enkf loglik: ",round(logLik(b_enkf),10))
 
 ##
-## girf tested on bm, both moment and bootstrap methods
+## girf on bm: moment and bootstrap methods, followed by error tests
 ##
 
 set.seed(0)
@@ -124,16 +124,23 @@ b_girf_mom <- girf(b_model,Np = floor(Np/2),lookahead = 1,
   kind = 'moment',Ninter=2)
 paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
 
+## for boostrap girf, we do not set Ninter, to test the default which is Ninter=U
 set.seed(0)
 b_girf_boot <- girf(b_model,Np = floor(Np/2),lookahead = 1,
   Nguide = floor(Np/2),
-  kind = 'bootstrap',Ninter=2)
+  kind = 'bootstrap')
 paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
 
 set.seed(0)
 b_girf_boot_repeat <- girf(b_girf_boot)
 paste("check girf on girfd_spatPomp: ",
   logLik(b_girf_boot)==logLik(b_girf_boot_repeat))
+
+print("The following delivers an error message, to test it")
+try(girf())
+try(girf(object="nonsense"))
+try(girf(b_girf_boot,Np=c(Inf)))
+try(girf(b_girf_boot,Np=seq(from=10,length=N+1,by=2)))
 
 ## ------------------------------------------------------------
 ## Now, we test the inference methods

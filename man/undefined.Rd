@@ -14,7 +14,7 @@
 \usage{
 undefined(object, ...)
 
-\S4method{undefined}{`NULL`}(object, ...)
+\S4method{undefined}{NULL}(object, ...)
 
 \S4method{undefined}{ANY}(object, ...)
 

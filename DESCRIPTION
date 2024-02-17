@@ -1,8 +1,8 @@
 Package: spatPomp
 Type: Package
 Title: Inference for Spatiotemporal Partially Observed Markov Processes
-Version: 0.34.1
-Date: 2023-12-11
+Version: 0.34.2
+Date: 2024-02-17
 Authors@R: c(
   person("Kidus", "Asfaw", email = "kidusasfaw1990@gmail.com", role = c("aut")),
   person("Edward", "Ionides", email = "ionides@umich.edu",role = c("cre","aut")),
@@ -78,4 +78,4 @@ Collate:
     'vec_dmeasure.R'
     'vec_rmeasure.R'
     'vunit_measure.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

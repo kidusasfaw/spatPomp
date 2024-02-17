@@ -20,14 +20,6 @@ Type 'q()' to quit R.
 > png(filename="bm-%02d.png",res=100)
 > library(spatPomp)
 Loading required package: pomp
-
-Welcome to pomp!
-
-As of version 4.6, no user-visible pomp function has a name that
-includes a dot ('.'). Function names have been changed to replace the
-dot with an underscore ('_'). For more information, see the pomp blog:
-https://kingaa.github.io/pomp/blog.html.
-
 > i <- 1
 > U <- switch(i,2,10)
 > N <- switch(i,2,10)
@@ -163,7 +155,7 @@ name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
 [1] "bm enkf loglik:  -10.8897941231"
 > 
 > ##
-> ## girf tested on bm, both moment and bootstrap methods
+> ## girf on bm: moment and bootstrap methods, followed by error tests
 > ##
 > 
 > set.seed(0)
@@ -173,10 +165,11 @@ name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
 > paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
 [1] "bm girf loglik, moment guide:  -14.9828908185"
 > 
+> ## for boostrap girf, we do not set Ninter, to test the default which is Ninter=U
 > set.seed(0)
 > b_girf_boot <- girf(b_model,Np = floor(Np/2),lookahead = 1,
 +   Nguide = floor(Np/2),
-+   kind = 'bootstrap',Ninter=2)
++   kind = 'bootstrap')
 > paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
 [1] "bm girf loglik, bootstrap guide:  -14.3228315101"
 > 
@@ -185,6 +178,18 @@ name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
 > paste("check girf on girfd_spatPomp: ",
 +   logLik(b_girf_boot)==logLik(b_girf_boot_repeat))
 [1] "check girf on girfd_spatPomp:  TRUE"
+> 
+> print("The following delivers an error message, to test it")
+[1] "The following delivers an error message, to test it"
+> try(girf())
+Error in girf() : girf: data is a required argument.
+> try(girf(object="nonsense"))
+Error in girf(object = "nonsense") : 
+  girf is undefined for ‘nonsense’of class ‘character’.
+> try(girf(b_girf_boot,Np=c(Inf)))
+Error : in ‘girf’: ‘Np’ must be a single positive integer
+> try(girf(b_girf_boot,Np=seq(from=10,length=N+1,by=2)))
+Error : in ‘girf’: ‘Np’ must be a single positive integer
 > 
 > ## ------------------------------------------------------------
 > ## Now, we test the inference methods

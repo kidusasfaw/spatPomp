@@ -114,8 +114,8 @@ logLik(bpfilterd_b2)
 likelihood maximization algorithms: \code{ienkf()}, \code{igirf()}, \code{iubf()}, \code{ibpf()}
 
 Other likelihood evaluation algorithms: 
-\code{\link{abfir}()},
 \code{\link{abf}()},
+\code{\link{abfir}()},
 \code{\link{enkf}()},
 \code{\link{girf}()}
 }

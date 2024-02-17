@@ -245,58 +245,44 @@ momgirf.internal <- function (object,
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
 
-  params.matrix <- matrix(params,nrow=length(params), ncol = Np[1])
+  if (missing(Np) || is.null(Np)) {
+    pStop_(sQuote("Np")," must be specified.")
+  } else if (length(Np)>1) {
+    pStop_(sQuote("Np")," must be a single positive integer")
+  } else if (!is.numeric(Np)|| !is.finite(Np) || (Np < 0)) {
+    pStop_(sQuote("Np")," must be a single positive integer")
+  }
+
+  Np <- as.integer(Np)
+  params.matrix <- matrix(params,nrow=length(params), ncol = Np)
   rownames(params.matrix) <- names(params)
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
 
-  if (missing(Np) || is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
-  } else if (is.function(Np)) {
-    Np <- tryCatch(
-      vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
-      error = function (e) {
-        pStop_("if ",sQuote("Np")," is a function, it must return ",
-          "a single positive integer.")
-      }
-    )
-  } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
-  }
 
-  if (length(Np) == 1)
-    Np <- rep(Np,times=ntimes+1)
-  else if (length(Np) != (ntimes+1))
-    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
-
-  if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
-
-  Np <- as.integer(Np)
-
-  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
+  if (length(tol) != 1 || !is.finite(tol) || tol < 0 || !is.numeric(tol))
     pStop_(sQuote("tol")," should be a small positive number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
 
-  init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
+  init.x <- rinit(object,params=params,nsim=Np,.gnsi=gnsi)
   x <- init.x
   znames <- object@accumvars
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
-  log_filter_guide_fun <- array(0, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np)
   for (nt in 0:(ntimes-1)) { ## main loop
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps <- min(lookahead, ntimes-nt)
                                         # Get a matrix with nguides times nreps columns to propagate using rprocess
-    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
+    x_with_guides <- x[,rep(1:Np, rep(Nguide, Np))]
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
       params=params,.gnsi=gnsi)
     xx <- tryCatch(
       .Call(do_fcst_samp_var,
         object=object,
         X=Xg,
-        Np = as.integer(Np[1]),
+        Np = as.integer(Np),
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=params,
         gnsi=TRUE),
@@ -305,7 +291,7 @@ momgirf.internal <- function (object,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
+    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
     for (s in 1:Ninter){
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
         params=params,.gnsi=gnsi)
@@ -346,7 +332,7 @@ momgirf.internal <- function (object,
         .Call(do_vunit_measure,
           object=object,
           X=skel,
-          Np = as.integer(Np[1]),
+          Np = as.integer(Np),
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=params,
           gnsi=TRUE),
@@ -354,18 +340,18 @@ momgirf.internal <- function (object,
           stop(ep,conditionMessage(e),call.=FALSE) # nocov
         }
       )
-      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
+      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np)
 
-      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(params = names(params)))
+      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np, lookahead_steps), dimnames = list(params = names(params)))
       mmp <- tryCatch(
         .Call(do_munit_measure,
           object=object,
           X=skel,
           vc=inflated_var,
-          Np = as.integer(Np[1]),
+          Np = as.integer(Np),
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.params,
           gnsi=TRUE),
@@ -374,9 +360,9 @@ momgirf.internal <- function (object,
         }
       )
       mom_match_param <- mmp
-      dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np[1])
+      dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np)
       dimnames(mom_match_param) <- list(param = names(params))
-      log_guide_fun = vector(mode = "numeric", length = Np[1])
+      log_guide_fun = vector(mode = "numeric", length = Np)
 
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
@@ -434,7 +420,7 @@ momgirf.internal <- function (object,
           .Call(girf_computations,
             x=X,
             params=params,
-            Np=Np[nt+1],
+            Np=as.integer(Np),
             trackancestry=FALSE,
             doparRS=FALSE,
             weights=weights,
@@ -465,7 +451,7 @@ momgirf.internal <- function (object,
     Nguide=Nguide,
     lookahead=lookahead,
     cond.loglik=cond.loglik,
-    Np=Np[1],
+    Np=Np,
     tol=tol,
     loglik=sum(cond.loglik)
   )
@@ -508,52 +494,38 @@ bootgirf.internal <- function (object,
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
 
-  params.matrix <- matrix(params,nrow=length(params), ncol = Np[1])
+  if (missing(Np) || is.null(Np)) {
+    pStop_(sQuote("Np")," must be specified.")
+  } else if (length(Np)>1) {
+    pStop_(sQuote("Np")," must be a single positive integer")
+  } else if (!is.numeric(Np)|| !is.finite(Np) || (Np < 0)) {
+    pStop_(sQuote("Np")," must be a single positive integer")
+  }
+
+  Np <- as.integer(Np)
+  params.matrix <- matrix(params,nrow=length(params), ncol = Np)
   rownames(params.matrix) <- names(params)
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
   U <- length(unit_names(object))
-  if (missing(Np) || is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
-  } else if (is.function(Np)) {
-    Np <- tryCatch(
-      vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
-      error = function (e) {
-        pStop_("if ",sQuote("Np")," is a function, it must return ",
-          "a single positive integer.")
-      }
-    )
-  } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
-  }
 
-  if (length(Np) == 1)
-    Np <- rep(Np,times=ntimes+1)
-  else if (length(Np) != (ntimes+1))
-    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1,".")
-
-  if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_("number of particles, ",sQuote("Np"),", must be a positive integer.")
-
-  Np <- as.integer(Np)
-
-  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
+  if (length(tol) != 1 || !is.finite(tol) || (tol < 0))
     pStop_(sQuote("tol")," should be a small positive number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
 
-  init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
+  init.x <- rinit(object,params=params,nsim=Np,.gnsi=gnsi)
   x <- init.x
   znames <- object@accumvars
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
-  log_filter_guide_fun <- array(0, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np)
   for (nt in 0:(ntimes-1)) { ## main loop
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
                                         # Get a matrix with nguides times nreps columns to propagate using rprocess
-    x_with_guides <- x[,rep(1:Np[1], each=Nguide)]
-    guidesim_index <- 1:Np[1] # the index for guide simulations (to be updated each time resampling occurs)
+    x_with_guides <- x[,rep(1:Np, each=Nguide)]
+    guidesim_index <- 1:Np # the index for guide simulations (to be updated each time resampling occurs)
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
     Xskel <- tryCatch( # skeleton
       pomp::flow(object,
@@ -571,7 +543,7 @@ bootgirf.internal <- function (object,
           method = 'adams')
       }
     )
-    resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
+    resids <- Xg - Xskel[,rep(1:Np, each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
@@ -610,7 +582,7 @@ bootgirf.internal <- function (object,
         skel <- X
       }
 
-      log_guide_fun = vector(mode = "numeric", length = Np[1])
+      log_guide_fun = vector(mode = "numeric", length = Np)
 
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
@@ -618,10 +590,10 @@ bootgirf.internal <- function (object,
         discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
 
                                         # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
-        pseudosims <- skel[,rep(1:Np[1], each=Nguide),l,drop=FALSE] +
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),l,drop=FALSE] -
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] +
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] * sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
+        pseudosims <- skel[,rep(1:Np, each=Nguide),l,drop=FALSE] +
+          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np),l,drop=FALSE] -
+          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np),1,drop=FALSE] +
+          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np),1,drop=FALSE] * sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
 
         log_dmeas_weights <- tryCatch(
         (vec_dmeasure(
@@ -638,7 +610,7 @@ bootgirf.internal <- function (object,
             conditionMessage(e),call.=FALSE)
         }
         )
-        ldw <- array(log_dmeas_weights, c(U,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
+        ldw <- array(log_dmeas_weights, c(U,Nguide,Np)) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
         log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
         log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
@@ -678,12 +650,12 @@ bootgirf.internal <- function (object,
           .Call(girf_computations,
             x=X,
             params=params,
-            Np=Np[nt+1],
+            Np=Np,
             trackancestry=TRUE,
             doparRS=FALSE,
             weights=weights,
             lgps=log_guide_fun,
-            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np[1])), # bootgirf2 doesn't use fsv, set to an arbitrary val.
+            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), # bootgirf2 doesn't use fsv, set to an arbitrary val.
             tol=tol
           ),
           error = function (e) {
@@ -710,7 +682,7 @@ bootgirf.internal <- function (object,
     Nguide=Nguide,
     lookahead=lookahead,
     cond.loglik=cond.loglik,
-    Np=Np[1],
+    Np=Np,
     tol=tol,
     loglik=sum(cond.loglik)
   )

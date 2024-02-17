@@ -1,6 +1,5 @@
 ## package description
 
-#' @docType package
 #' @name spatPomp-package
 #' @title Inference for SpatPOMPs (Spatiotemporal Partially Observed Markov Processes)
 #'
@@ -41,6 +40,8 @@
 #' @keywords models datasets ts
 #'
 #' @import methods
+"_PACKAGE"
+
 #' @import pomp
 #' @useDynLib spatPomp, .registration=TRUE
 #' @importFrom stats dnorm runif setNames var

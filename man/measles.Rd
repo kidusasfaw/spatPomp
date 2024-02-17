@@ -102,8 +102,8 @@ spy(m)
 \code{measles_UK}, \code{city_data_UK}
 
 Other spatPomp model generators: 
-\code{\link{bm2}()},
 \code{\link{bm}()},
+\code{\link{bm2}()},
 \code{\link{gbm}()},
 \code{\link{he10}()},
 \code{\link{lorenz}()}
