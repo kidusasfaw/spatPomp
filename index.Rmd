@@ -30,15 +30,14 @@ In addition, the particle filter provided by [**pomp**](https://kingaa.github.io
 
 The latest development version of **spatPomp** is available on [GitHub](https://github.com/kidusasfaw/spatPomp) and versions are occasionally uploaded to [CRAN](https://cran.rstudio.com/web/packages/spatPomp). Other relevant resources are:
 
-- [Partially observed Markov processes with spatial structure via the R package spatPomp](vignettes/spatPomp.pdf)
+- [A tutorial on spatiotemporal partially observed Markov process models via the R package spatPomp](vignettes/spatPomp.pdf)
 - [A tutorial on the iterated block particle filter](vignettes/ibpf.pdf)
 
 Papers using **spatPomp** include the following:
 
-- Ionides, E. L., Asfaw, K., Park, J.,  and King, A. A. (2021). 
+- Ionides, E. L., Asfaw, K., Park, J.,  and King, A. A. (2023). 
   Bagged filters for partially observed interacting systems.
-  _Journal of the American Statistical Association,_
-  prepublished online.
+  _Journal of the American Statistical Association,_ 118, 1078-1089.
   [doi](https://doi.org/10.1080/01621459.2021.1974867).
   [arxiv](https://arxiv.org/abs/2002.05211).
   [code](https://github.com/ionides/bagged_filters).
@@ -49,11 +48,15 @@ Papers using **spatPomp** include the following:
   [doi](https://doi.org/10.5705/ss.202022.0188).
   [arxiv](https://arxiv.org/abs/2206.03837).
   [code](https://github.com/ionides/ibpf_article).
+- Li, J., E. L. Ionides, A. A., King, M. Pascual and N. Ning (2024). Inference on spatiotemporal dynamics for networks of biological populations.
+  [arxiv](https://arxiv.org/abs/2311.06702).
+  [code](https://github.com/jifanli/metapop_article).
 - Ning, N. and Ionides, E. L. (2023). Iterated block particle filter for high-dimensional parameter learning: Beating the curse of dimensionality. _Journal of Machine Learning Research_ 24(82), 1-76.
 [pdf](https://jmlr.org/papers/v24/21-1253.pdf). 
 [arxiv](https://arxiv.org/abs/2110.10745v3"><i>arxiv</i></a>).
-- Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2023).
+- Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2024).
   Informing policy via dynamic models: Cholera in Haiti.
+  To appear in _PLOS Computational Biology_.
   [arxiv](https://doi.org/10.48550/arXiv.2301.08979).
   [code](https://github.com/jeswheel/haiti_article).
   [software](https://github.com/jeswheel/haitipkg).
