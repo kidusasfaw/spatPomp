@@ -103,44 +103,47 @@ setMethod(
     ..., verbose = getOption("verbose", FALSE)
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
+    if (missing(Nbpf)) pStop_(ep, "Nbpf is required")
+    if (missing(rw.sd)) pStop_(ep, "rw.sd is required")  
+    if (missing(Np)) pStop_(ep, "Np is required")
+    if (missing(sharedParNames)) pStop_(ep, "sharedParNames is required")
+    if (missing(unitParNames)) pStop_(ep, "unitParNames is required")
+    if (missing(spat_regression)) spat_regression <- numeric()
     if(missing(block_list) && missing(block_size)) {
-      stop(ep,sQuote("block_list"), " or ", sQuote("block_size"),
-        " must be specified to the call",call.=FALSE)
+      pStop_(ep,sQuote("block_list"), " or ", sQuote("block_size"),
+        " must be specified to the call")
     }
     if (!missing(block_list) & !missing(block_size)){
-      stop(ep,"Exactly one of ",sQuote("block_size"), " and ",
-        sQuote("block_list"), " should be provided, but not both.",call.=FALSE)
+      pStop_(ep,"Exactly one of ",sQuote("block_size"), " and ",
+        sQuote("block_list"), " should be provided, but not both.")
     }
     if (missing(spat_regression) && !is.null(sharedParNames)) 
-      stop(ep, sQuote("spat_regression"),
-       " should be provided when there are shared parameters",call.=FALSE)
-    if (missing(Nbpf)) stop(ep, "Nbpf is required")
-    if (missing(rw.sd)) stop(ep, "rw.sd is required")  
-    if (missing(Np)) stop(ep, "Np is required")
-    if (missing(sharedParNames)) stop(ep, "sharedParNames is required")
-    if (missing(unitParNames)) stop(ep, "unitParNames is required")
-    if (missing(spat_regression)) spat_regression <- numeric()
-    if (missing(block_list)){
+      pStop_(ep, sQuote("spat_regression"),
+       " should be provided when there are shared parameters")
+      if (missing(block_list)){
       if(block_size > length(unit_names(data))){
-        stop(ep,sQuote("block_size"),
-          " cannot be greater than the number of spatial units",call.=FALSE)
+        pStop_(ep,sQuote("block_size"), " cannot be greater than the number of spatial units")
       }
       all_units = seq_len(length(unit_names(data)))
       nblocks = round(length(all_units)/block_size)
       block_list = split(all_units, sort(all_units %% nblocks))
     }
     block_list <- lapply(block_list, as.integer)
+    if (missing(cooling.fraction.50)) pStop_(ep, "cooling.fraction.50 is required")
 
     tryCatch(
-      ibpf_internal(data,Nbpf=Nbpf,spat_regression=spat_regression,
+      ibpf_internal(data,
+        Nbpf=Nbpf,
+        spat_regression=spat_regression,
         Np=Np,rw.sd=rw.sd,
         sharedParNames=sharedParNames,
         unitParNames=unitParNames,
-        cooling.type=cooling.type,cooling.fraction.50=cooling.fraction.50,
+        cooling.type=cooling.type,
+	cooling.fraction.50=cooling.fraction.50,
         block_list=block_list,
         ...,verbose=verbose
       ),
-      error = "error in ibpf_internal"
+      error = function(e) pStop("ibpf",conditionMessage(e))
     )
   }
 )
@@ -181,6 +184,7 @@ setMethod(
 
     if (missing(Np)) Np <- data@Np
     if (missing(Nbpf)) Nbpf <- data@Nbpf
+    if (!is.numeric(Nbpf)|| Nbpf <1) stop(ep, sQuote("Nbpf"), " should be a positive integer")
     if (missing(rw.sd)) rw.sd <- data@rw.sd
     if (missing(cooling.type)) cooling.type <- data@cooling.type
     if (missing(cooling.fraction.50)) cooling.fraction.50 <- data@cooling.fraction.50
@@ -190,10 +194,11 @@ setMethod(
         Np=Np,rw.sd=rw.sd,
 	sharedParNames=sharedParNames,
 	unitParNames=unitParNames,
-	cooling.type=cooling.type,cooling.fraction.50=cooling.fraction.50,
+	cooling.type=cooling.type,
+	cooling.fraction.50=cooling.fraction.50,
         block_list=block_list,
 	...,verbose=verbose),
-      error = "error in ibpf_internal"
+        error = function(e) pStop("ibpf",conditionMessage(e))
     )
   }
 )
@@ -235,18 +240,15 @@ setMethod(
         Np=Np,rw.sd=rw.sd,
 	sharedParNames=sharedParNames,
 	unitParNames=unitParNames,
-	cooling.type=cooling.type,cooling.fraction.50=cooling.fraction.50,
+	cooling.type=cooling.type,
+	cooling.fraction.50=cooling.fraction.50,
         block_list=block_list,
 	.paramMatrix=NULL,
 	...,verbose=verbose),
-      error = "error in ibpf_internal"
+      error = function (e) pStop(who="ibpf",conditionMessage(e))
     )
   }
 )
-
-
-
-
 
 
 ibpf_internal <- function (object,Nbpf,spat_regression,
@@ -308,7 +310,7 @@ ibpf_internal <- function (object,Nbpf,spat_regression,
     Np <- rep(Np,times=ntimes)
   } else if (length(Np) > ntimes) {
     if (Np[1L] != Np[ntimes+1] || length(Np) > ntimes+1) {
-      pWarn("igirf","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
+      pWarn("ibpf","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
     }
     Np <- head(Np,ntimes)
   } else if (length(Np) < ntimes) {
@@ -413,7 +415,6 @@ ibpf_bpfilter <- function (object,block_list,params,
   verbose <- as.logical(verbose)
   nbpf <- as.integer(nbpf)
   Np <- as.integer(Np)
-  ep <- paste0("in ",sQuote("ibpf"),": ")
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
@@ -425,22 +426,22 @@ ibpf_bpfilter <- function (object,block_list,params,
   nblocks <- length(block_list)
   loglik <- rep(NA,ntimes)
 
-  if (length(Np)==1)
+  if (length(Np)==1) {
     Np <- rep(Np,times=ntimes+1)
-  else if (length(Np)!=(ntimes+1))
-    stop(ep,sQuote("Np")," must have length 1 or length ",ntimes+1,call.=FALSE)
+  } else if (length(Np)!=(ntimes+1)) {
+    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1)
+  } else if (!all(Np==Np[1]))
+    pStop_("time-varying ", sQuote("Np")," is currently unsupported")
   if (any(Np<=0))
-    stop(ep,"number of particles, ",sQuote("Np"),
-      ", must always be positive",call.=FALSE)
+    pStop_("number of particles, ",sQuote("Np"),", must always be positive")
   if (!is.numeric(Np))
-    stop(ep,sQuote("Np"),
-      " must be a number, a vector of numbers, or a function",call.=FALSE)
+    pStop_(sQuote("Np"),
+      " must be a number, a vector of numbers, or a function")
   Np <- as.integer(Np)
   if (is.matrix(params)) {
     if (!all(Np==ncol(params)))
-      stop(ep,"when ",sQuote("params"),
-        " is provided as a matrix, do not specify ",
-        sQuote("Np"),"!",call.=FALSE)
+      pStop_("when ",sQuote("params"),
+        " is provided as a matrix, do not specify ", sQuote("Np"),"!")
   }
   if (NCOL(params)==1) {
     coef(object) <- params
@@ -448,7 +449,7 @@ ibpf_bpfilter <- function (object,block_list,params,
   }
   paramnames <- rownames(params)
   if (is.null(paramnames))
-    stop(ep,sQuote("params")," must have rownames",call.=FALSE)
+    pStop_(sQuote("params")," must have rownames")
 
   # create array to store weights per particle per block_list
   weights <- array(data = numeric(0), dim=c(nblocks,Np[1L]))
@@ -489,8 +490,7 @@ ibpf_bpfilter <- function (object,block_list,params,
         .gnsi=gnsi
       ),
       error = function (e) {
-        stop(ep,"process simulation error: ",
-             conditionMessage(e),call.=FALSE)
+        pStop_("process simulation error: ", conditionMessage(e))
       }
     )
 
@@ -512,8 +512,8 @@ ibpf_bpfilter <- function (object,block_list,params,
           .gnsi=gnsi
         ),
         error = function (e) {
-          stop(ep,"error in calculation of weights: ",
-               conditionMessage(e),call.=FALSE)
+          pStop_("error in calculation of weights: ",
+               conditionMessage(e))
         }
       )
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
@@ -549,7 +549,7 @@ ibpf_bpfilter <- function (object,block_list,params,
           weights=weights[i,]
         ),
         error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
+          pStop_(conditionMessage(e)) 
         }
       )
 

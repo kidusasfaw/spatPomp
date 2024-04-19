@@ -89,6 +89,27 @@ paste("ibpf logLik for he10 model:",logLik(bpfilter(h_ibpf,Np=10,block_size=1)))
 
 coef(h_ibpf)
 
+# test various errors
+try(ibpf())
+try(ibpf("h_model"))
+try(ibpf(h_model,Nbpf=NA,Np=10))
+try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1))
+try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1,sharedParNames=NULL))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1)))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL,unitParNames=NULL))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+
+## this works, but was tested previously
+## try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+
+# tmp <- ibpf(spatPomp(h_model,dmeasure=function(log,...)log(-1)), Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5)
+
 ## test error message when munit_measure is undefined
 try(girf(h_model,kind="moment",
   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))

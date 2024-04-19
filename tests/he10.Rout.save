@@ -1,7 +1,7 @@
 
-R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin20 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -128,6 +128,43 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
 5.423109e-01 5.009793e-01 3.257674e-02 3.188634e-02 4.835306e-05 4.617649e-05 
         I_01         I_02 
 3.749471e-05 4.049693e-05 
+> 
+> # test various errors
+> try(ibpf())
+Error : in ‘ibpf’: ‘data’ is a required argument.
+> try(ibpf("h_model"))
+Error : ‘ibpf’ is undefined for ‘data’ of class ‘character’.
+> try(ibpf(h_model,Nbpf=NA,Np=10))
+Error : in ‘ibpf’: rw.sd is required
+> try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1))
+Error : in ‘ibpf’: rw.sd is required
+> try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1,sharedParNames=NULL))
+Error : in ‘ibpf’: rw.sd is required
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1)))
+Error : in ‘ibpf’: sharedParNames is required
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL))
+Error : in ‘ibpf’: unitParNames is required
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL,unitParNames=NULL))
+Error : in ‘ibpf’: cooling.fraction.50 is required
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
+Error : in ‘ibpf’: ‘Nbpf’ must be a positive integer.
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+Error : in ‘ibpf’: ‘Nbpf’ must be a positive integer.
+> try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,spat_regression=0.5))
+Error : in ‘ibpf’: ‘cooling.fraction.50’ must be in (0,1].
+> try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+Error : in ‘ibpf’: ‘Nbpf’ must be a positive integer.
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+Error : in ‘ibpf’: ‘Np’ must be specified.
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+Error : in ‘ibpf’: time-varying ‘Np’ is currently unsupported
+In addition: Warning message:
+in ‘ibpf’: Np[k] ignored for k > ‘length(time(object))’. 
+> 
+> ## this works, but was tested previously
+> ## try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> 
+> # tmp <- ibpf(spatPomp(h_model,dmeasure=function(log,...)log(-1)), Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5)
 > 
 > ## test error message when munit_measure is undefined
 > try(girf(h_model,kind="moment",
