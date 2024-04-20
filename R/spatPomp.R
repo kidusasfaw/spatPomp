@@ -98,10 +98,10 @@ spatPomp <- function (data, units, times, covar, t0, ...,
   ep <- paste0("in ",sQuote("spatPomp"),": ")
 
   if (missing(data))
-    stop(ep,sQuote("data")," is a required argument",call.=FALSE)
+    pStop_(ep,sQuote("data")," is a required argument")
 
   if (!inherits(data,what=c("data.frame","spatPomp")))
-    pStop("spatPomp",sQuote("data")," must be a data frame or an object of ",
+    pStop_(ep, sQuote("data")," must be a data frame or an object of ",
       "class ",sQuote("spatPomp"),".")
 
   ## return as quickly as possible if no work is to be done
@@ -133,7 +133,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
       globals=globals,cdir=cdir,cfile=cfile,shlib.args=shlib.args,
       compile=compile, verbose=verbose
     ),
-    error = function (e) stop(conditionMessage(e))
+    error = function (e) pStop_(conditionMessage(e))
   )
 }
 
@@ -142,7 +142,7 @@ setMethod(
   "construct_spatPomp",
   signature=signature(data="ANY", times="ANY", units="ANY"),
   definition = function (data, times, t0, ...) {
-    stop(sQuote("times")," should be a single name identifying the column of data that represents",
+    pStop_("in spatPomp : ", sQuote("times")," should be a single name identifying the column of data that represents",
       " the observation times. ", sQuote("units"), " should be likewise for column that represents",
       " the observation units.")
   }
@@ -158,19 +158,21 @@ setMethod(
     paramnames, shared_covarnames, PACKAGE, globals,
     cdir, cfile, shlib.args, compile, verbose) {
 
-    if (anyDuplicated(names(data)))
-      stop("names of data variables must be unique.")
+   ep <- paste0("in ",sQuote("spatPomp"),": ")
 
-    if (missing(t0)) reqd_arg(NULL,"t0")
+   if (anyDuplicated(names(data)))
+      pStop_(ep, "names of data variables must be unique.")
+
+    if (missing(t0)) pStop_(ep, sQuote("t0"), " is a required argument")
 
     tpos <- match(times,names(data),nomatch=0L)
     upos <- match(units,names(data),nomatch=0L)
 
     if (length(times) != 1 || tpos == 0L)
-      stop(sQuote("times")," does not identify a single column of ",
+      pStop_(ep, sQuote("times")," does not identify a single column of ",
         sQuote("data")," by name.")
     if (length(units) != 1 || upos == 0L)
-      stop(sQuote("units")," does not identify a single column of ",
+      pStop_(ep, sQuote("units")," does not identify a single column of ",
         sQuote("data")," by name.")
 
     timename <- times
@@ -229,7 +231,8 @@ setMethod(
     if(!missing(covar)){
       if(timename %in% names(covar)) tcovar <- timename
       else{
-        stop(sQuote("covariate"), ' data.frame should have a time column with the same name as the ',
+        pStop_(ep, sQuote("covariate"),
+	  ' data.frame should have a time column with the same name as the ',
           'time column of the observation data.frame')
       }
     }

@@ -1,7 +1,7 @@
 
-R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin20 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -522,16 +522,37 @@ Slot "text":
 > for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 [1] "states"
 > 
-> # test an error message
-> print("The following delivers an error message, to test it")
-[1] "The following delivers an error message, to test it"
-> try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
-Error in value[[3L]](cond) : 
-  ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
-> 
 > # test parameter replacement
 > b_rep2 <- spatPomp(b_model,params=coef(b_model)+1)
 > if(!identical(coef(b_rep2),coef(b_model)+1)) stop('problem with parameter replacement')
+> 
+> # test do-nothing behavior
+> b_rep3 <- spatPomp(b_model)
+> 
+> ## --------------------------------------------
+> ## using bm to test spatPomp() warning messages
+> ## ____________________________________________
+> 
+> print("The following deliver error messages, to test them")
+[1] "The following deliver error messages, to test them"
+> try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
+Error : in spatPomp : ‘times’ should be a single name identifying the column of data that represents the observation times. ‘units’ should be likewise for column that represents the observation units.
+> try(spatPomp("test on type character"))
+Error : in ‘spatPomp’: ‘data’ must be a data frame or an object of class ‘spatPomp’.
+> 
+> b_data <- as.data.frame(b_model)
+> try(spatPomp(data=b_data,times="time",units="unit"))
+Error : in ‘spatPomp’: ‘t0’ is a required argument
+> try(spatPomp(data=b_data,times="NONSENSE",units="unit",t0=0))
+Error : in ‘spatPomp’: ‘times’ does not identify a single column of ‘data’ by name.
+> try(spatPomp(data=b_data,times="time",units="NONSENSE",t0=0))
+Error : in ‘spatPomp’: ‘units’ does not identify a single column of ‘data’ by name.
+> b_data2 <- b_data
+> names(b_data2) <- c("time","unit","X","X")
+> try(spatPomp(data=b_data2,times="time",units="unit"))
+Error : in ‘spatPomp’: names of data variables must be unique.
+> b_data_only_model <- spatPomp(data=b_data,times="time",units="unit",
++   t0=0)
 > 
 > ## -----------------------------------------------------------------
 > ## using bm to test behavior of inference methods when logLik = -Inf

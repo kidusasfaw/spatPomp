@@ -341,13 +341,30 @@ spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"), unit_co
 b_rep1 <- spatPomp(b_model,params=coef(b_model))
 for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
 
-# test an error message
-print("The following delivers an error message, to test it")
-try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
-
 # test parameter replacement
 b_rep2 <- spatPomp(b_model,params=coef(b_model)+1)
 if(!identical(coef(b_rep2),coef(b_model)+1)) stop('problem with parameter replacement')
+
+# test do-nothing behavior
+b_rep3 <- spatPomp(b_model)
+
+## --------------------------------------------
+## using bm to test spatPomp() warning messages
+## ____________________________________________
+
+print("The following deliver error messages, to test them")
+try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
+try(spatPomp("test on type character"))
+
+b_data <- as.data.frame(b_model)
+try(spatPomp(data=b_data,times="time",units="unit"))
+try(spatPomp(data=b_data,times="NONSENSE",units="unit",t0=0))
+try(spatPomp(data=b_data,times="time",units="NONSENSE",t0=0))
+b_data2 <- b_data
+names(b_data2) <- c("time","unit","X","X")
+try(spatPomp(data=b_data2,times="time",units="unit"))
+b_data_only_model <- spatPomp(data=b_data,times="time",units="unit",
+  t0=0)
 
 ## -----------------------------------------------------------------
 ## using bm to test behavior of inference methods when logLik = -Inf

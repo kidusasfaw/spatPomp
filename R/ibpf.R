@@ -108,7 +108,6 @@ setMethod(
     if (missing(Np)) pStop_(ep, "Np is required")
     if (missing(sharedParNames)) pStop_(ep, "sharedParNames is required")
     if (missing(unitParNames)) pStop_(ep, "unitParNames is required")
-    if (missing(spat_regression)) spat_regression <- numeric()
     if(missing(block_list) && missing(block_size)) {
       pStop_(ep,sQuote("block_list"), " or ", sQuote("block_size"),
         " must be specified to the call")
@@ -117,10 +116,12 @@ setMethod(
       pStop_(ep,"Exactly one of ",sQuote("block_size"), " and ",
         sQuote("block_list"), " should be provided, but not both.")
     }
-    if (missing(spat_regression) && !is.null(sharedParNames)) 
+    if (missing(spat_regression) && !is.null(sharedParNames)){
       pStop_(ep, sQuote("spat_regression"),
        " should be provided when there are shared parameters")
-      if (missing(block_list)){
+    }
+    if (missing(spat_regression)) spat_regression <- numeric()
+    if (missing(block_list)){
       if(block_size > length(unit_names(data))){
         pStop_(ep,sQuote("block_size"), " cannot be greater than the number of spatial units")
       }
@@ -166,7 +167,7 @@ setMethod(
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){
-      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.",call.=FALSE)
+      pStop_(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.")
     }
 
     if(missing(block_list) && missing(block_size))
@@ -174,7 +175,7 @@ setMethod(
 
     if (!missing(block_size)){
       if(block_size > length(unit_names(data))){
-        stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
+        pStop_(ep,sQuote("block_size"), " cannot be greater than the number of spatial units")
       }
       all_units = seq_len(length(unit_names(data)))
       nblocks = round(length(all_units)/block_size)
@@ -184,10 +185,11 @@ setMethod(
 
     if (missing(Np)) Np <- data@Np
     if (missing(Nbpf)) Nbpf <- data@Nbpf
-    if (!is.numeric(Nbpf)|| Nbpf <1) stop(ep, sQuote("Nbpf"), " should be a positive integer")
+    if (!is.numeric(Nbpf)|| Nbpf <1) pStop_(ep, sQuote("Nbpf"), " should be a positive integer")
     if (missing(rw.sd)) rw.sd <- data@rw.sd
     if (missing(cooling.type)) cooling.type <- data@cooling.type
     if (missing(cooling.fraction.50)) cooling.fraction.50 <- data@cooling.fraction.50
+    if (missing(spat_regression)) spat_regression <- data@spat_regression
 
     tryCatch(
       ibpf_internal(data,Nbpf=Nbpf,spat_regression=spat_regression,
@@ -220,12 +222,12 @@ setMethod(
   ) {
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){
-      stop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.",call.=FALSE)
+      pStop(ep,"Exactly one of ",sQuote("block_size"), " and ", sQuote("block_list"), " can be provided, but not both.")
     }
     if(missing(block_list) && missing(block_size)) block_list <- data@block_list
     if (!missing(block_size)){
       if(block_size > length(unit_names(data))){
-        stop(ep,sQuote("block_size"), " cannot be greater than the number of spatial units",call.=FALSE)
+        pStop_(ep,sQuote("block_size"), " cannot be greater than the number of spatial units")
       }
       all_units = seq_len(length(unit_names(data)))
       nblocks = round(length(all_units)/block_size)
