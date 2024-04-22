@@ -356,15 +356,48 @@ print("The following deliver error messages, to test them")
 try(spatPomp(data=as.data.frame(b_model),units=NULL),outFile=stdout())
 try(spatPomp("test on type character"))
 
+try(spatPomp())
 b_data <- as.data.frame(b_model)
 try(spatPomp(data=b_data,times="time",units="unit"))
 try(spatPomp(data=b_data,times="NONSENSE",units="unit",t0=0))
 try(spatPomp(data=b_data,times="time",units="NONSENSE",t0=0))
+spatPomp(data=b_data,times="time",units="unit",t0=0,params=list(coef(b_model)))
 b_data2 <- b_data
 names(b_data2) <- c("time","unit","X","X")
 try(spatPomp(data=b_data2,times="time",units="unit"))
 b_data_only_model <- spatPomp(data=b_data,times="time",units="unit",
   t0=0)
+
+# test error messages for covariates with data.frame class for spatPomp()
+b_covar_error <- data.frame(time_name_error=0:2,Z=3:5)
+try(spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_covar_error))
+
+b_unit_covar_names_error <- data.frame(time=c(0:2,0:2),JUNK=rep(c("U1","U2"),each=3), Z=rep(3:5,times=2))
+try(spatPomp(data=b_data,times="time",units="unit",t0=0,
+  covar=b_unit_covar_names_error))
+
+b_shared_covar <- data.frame(time=0:2,Z=3:5)
+model_shared_covar <- spatPomp(data=b_data,times="time",units="unit",
+  t0=0,covar=b_shared_covar, shared_covarnames="Z")
+
+b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
+  Z=rep(3:5,times=2))
+model_unit_covar <- spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_unit_covar,skeleton=NULL,partrans=NULL,unit_accumvars <- "JUNK")
+
+try(spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_unit_covar,shared_covarnames ="JUNK"))
+
+# test spatPomp warnings with argument of class spatPomp
+
+# perhaps surprisingly, this gives no error
+spatPomp(model_unit_covar,timename="JUNK",unitname="JUNK",
+  unit_accumvars="JUNK", globals=Csnippet("JUNK"),
+  partrans=NULL,skeleton=NULL)
+  
+try(spatPomp(data=model_unit_covar,covar=b_covar_error))
+
+spatPomp(model_shared_covar)
+
+
 
 ## -----------------------------------------------------------------
 ## using bm to test behavior of inference methods when logLik = -Inf

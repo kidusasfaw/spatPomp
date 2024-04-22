@@ -236,17 +236,20 @@ setMethod(
           'time column of the observation data.frame')
       }
     }
+
     ## make covariates into a dataframe that pomp would expect
-    unit_covarnames <- NULL ## could get overwritten soon
-    if(missing(shared_covarnames)) shared_covarnames <- NULL
     if(!missing(covar)){
       upos_cov <- match(unitname, names(covar))
       tpos_cov <- match(tcovar, names(covar))
-      cov_col_order <- c()
-      if(missing(shared_covarnames)) unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]
-      else {
+      cov_col_order <- c()      
+      if(missing(shared_covarnames)) {
+        if(is.na(upos_cov)) pStop_(ep, "for unit-specific covariates, there should be a column with the unit name matching the data")
+        shared_covarnames <- NULL
+        unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]	
+      } else {
+        if(!is.na(upos_cov)) pStop_(ep, sQuote("shared_covarnames"), " currently supported only when there are no unit-specific covariates")	
         pos_shared_cov <- match(shared_covarnames, names(covar))
-        unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov, pos_shared_cov)]
+        unit_covarnames <- NULL
         cov_col_order <- c(cov_col_order, shared_covarnames)
       }
       if(length(unit_covarnames) > 0){
@@ -267,17 +270,19 @@ setMethod(
         pomp_covar <- pomp::covariate_table(covar, times=tcovar)
       }
     } else {
+      # return an empty covariate table
+      unit_covarnames <- NULL
+      shared_covarnames <- NULL
       pomp_covar <- pomp::covariate_table()
     }
 
     ## Get all names before call to pomp().
-    if(!missing(unit_statenames)) pomp_statenames <- paste0(rep(unit_statenames,each=U),seq_len(U))
+    if(length(unit_statenames)>0) pomp_statenames <- paste0(rep(unit_statenames,each=U),seq_len(U))
     else pomp_statenames <- NULL
     if (!missing(covar)){
-      if(missing(shared_covarnames)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
+      if(is.null(shared_covarnames)) pomp_covarnames <- paste0(rep(unit_covarnames,each=U),seq_len(U))
       else {
         if(length(unit_covarnames) == 0) pomp_covarnames <- shared_covarnames
-        else pomp_covarnames <- c(shared_covarnames, paste0(rep(unit_covarnames,each=U),seq_len(U)))
       }
     }
     else pomp_covarnames <- NULL
@@ -379,10 +384,11 @@ setMethod(
       upos_cov <- match(unitname, names(covar))
       tpos_cov <- match(tcovar, names(covar))
       cov_col_order <- c()
-      if(missing(shared_covarnames)) unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]
+      if(length(shared_covarnames)==0) unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov)]
       else {
+        if(!is.na(upos_cov)) pStop_(ep, sQuote("shared_covarnames"), " currently supported only when there are no unit-specific covariates")	
         pos_shared_cov <- match(shared_covarnames, names(covar))
-        unit_covarnames <- names(covar)[-c(upos_cov, tpos_cov, pos_shared_cov)]
+        unit_covarnames <- NULL
         cov_col_order <- c(cov_col_order, shared_covarnames)
       }
       if(length(unit_covarnames) > 0){
@@ -405,7 +411,7 @@ setMethod(
     if (missing(t0)) t0 <- data@t0
     if (missing(rinit)) rinit <- data@rinit
     if (missing(rprocess)) rprocess <- data@rprocess
-    else if (is.null(rprocess)) rprocess <- new("rprocPlugin")
+      else if (is.null(rprocess)) rprocess <- new("rprocPlugin")
     if (missing(dprocess)) dprocess <- data@dprocess
     if (missing(rmeasure)) rmeasure <- data@rmeasure
     if (missing(dmeasure)) dmeasure <- data@dmeasure
@@ -415,7 +421,7 @@ setMethod(
     if (missing(eunit_measure)) eunit_measure <- data@eunit_measure
     if (missing(runit_measure)) runit_measure <- data@runit_measure
     if (missing(skeleton)) skeleton <- data@skeleton
-    else if (is.null(skeleton)) skeleton <- new("skelPlugin")
+      else if (is.null(skeleton)) skeleton <- new("skelPlugin")
     if (missing(rprior)) rprior <- data@rprior
     if (missing(dprior)) dprior <- data@dprior
     if (missing(partrans)) partrans <- data@partrans
