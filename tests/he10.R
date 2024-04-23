@@ -37,8 +37,13 @@ if(model_type == "mostly fixed"){
   estParNames <- c(sharedParNames,unitParNames)
 }
 
-# Note: here we assume that there are no unestimated unit-specific
-# parameters. That could readily be accommodated if needed.
+## test error messages
+try(he10(U=5,towns_selected="JUNK"))
+try(he10(U=1000,towns_selected=1:1000))
+try(he10(U=5,Tmax=2024))
+
+## Note: here we assume that there are no unestimated unit-specific
+## parameters. That could readily be accommodated if needed.
 
 h_model <- he10(U=2,dt=4/365,Tmax=1950.1,
   expandedParNames=estParNames)
@@ -125,35 +130,70 @@ try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1)))
 try(ibpf(h_model,Nbpf=NA,Np=10))
 try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1))
 try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1,sharedParNames=NULL))
-try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames))
-try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames,block_list=block_list,block_size=1))
-try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames,block_list=block_list))
-try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=5,sharedParNames=sharedParNames,unitParNames=unitParNames,spat_regression=0.5,block_size=10))
+try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
+  unitParNames=unitParNames))
+try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
+  unitParNames=unitParNames,block_list=block_list,block_size=1))
+try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
+  unitParNames=unitParNames,block_list=block_list))
+try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=5,sharedParNames=sharedParNames,
+  unitParNames=unitParNames,spat_regression=0.5,block_size=10))
 
 try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1)))
-try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL))
-try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL,unitParNames=NULL))
-try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
-try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,spat_regression=0.5))
-try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
+  sharedParNames=NULL))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
+  sharedParNames=NULL,unitParNames=NULL))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
+try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
+  spat_regression=0.5))
+try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,
+  spat_regression=0.5))
+try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
+  spat_regression=0.5))
 
 # test errors on Np specification
-try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-try(ibpf(h_model,Nbpf=2,block_list=block_list,Np="a character vector",rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=c(10,10),rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
+  spat_regression=0.5))
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),
+  sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
+  spat_regression=0.5))
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np="a character vector",
+  rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,
+  unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=c(10,10),
+  rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,
+  unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
 
 # test ibpf errors on class ibpfd_spatPomp
-ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames)
-try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,block_size=1,Nbpf <- 0.1))
-try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,block_size=3))
 
-# test ibpf errors on class bpfilterd_spatPomp
+capture.output(ibpf(h_ibpf,sharedParNames=sharedParNames,
+  unitParNames=unitParNames,
+  .paramMatrix=h_ibpf@paramMatrix,verbose=TRUE)) -> out
+try(ibpf(h_ibpf,block_size="JUNK",block_list="JUNK"))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  block_size=1,Nbpf <- 0.1))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  block_size=3))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  Np=function(n) "JUNK"))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  Np=function(n) -1))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  .paramMatrix=h_ibpf@paramMatrix,Np=7))
+try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
+  .paramMatrix=h_ibpf@paramMatrix[,1,drop=FALSE],Np=1))
+
+# test ibpf on class bpfilterd_spatPomp
 try(ibpf(h_bpfilter,block_list=block_list,block_size=1))
 try(ibpf(h_bpfilter,block_size=23))
 try(ibpf(h_bpfilter))
+
 
 # test ibpf with missing basic model component
 h_model2 <- spatPomp(h_model,rprocess=NULL)

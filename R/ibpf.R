@@ -258,7 +258,9 @@ ibpf_internal <- function (object,Nbpf,spat_regression,
    sharedParNames,
    unitParNames,
    block_list, ...,
-   .ndone = 0L, .indices = integer(0),.paramMatrix = NULL,
+   .ndone = 0L,
+##   .indices = integer(0), ## For an extension to ancestor tracking
+   .paramMatrix = NULL,
    .gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)
@@ -326,16 +328,9 @@ ibpf_internal <- function (object,Nbpf,spat_regression,
   Np <- as.integer(Np)
   Np <- c(Np,Np[1L])
 
-  if (missing(rw.sd))
-    pStop_(sQuote("rw.sd")," must be specified!")
   rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   
-  if (missing(cooling.fraction.50))
-    pStop_(sQuote("cooling.fraction.50")," is a required argument.")
-  if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
-      !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
-      cooling.fraction.50 > 1)
-    pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
+  if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) || !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 || cooling.fraction.50 > 1) pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
   cooling.fn <- mif2.cooling(
@@ -377,12 +372,14 @@ ibpf_internal <- function (object,Nbpf,spat_regression,
       estParNames=estParNames,
       Np=Np,nbpf=.ndone+m,cooling.fn=cooling.fn,
       rw.sd=rw.sd,
-      verbose=verbose,.indices=.indices, .gnsi=gnsi)
+      verbose=verbose,
+##      .indices=.indices, ## For an extension to ancestor tracking
+      .gnsi=gnsi)
     gnsi <- FALSE
     paramMatrix <- b@paramMatrix
     traces[m+1,-1] <- coef(b)
     traces[m+1,1] <- b@loglik
-    .indices <- .indices
+    ## .indices <- .indices ## For an extension to ancestor tracking
 
     if (verbose) cat("ibpf iteration",m,"of",Nbpf,"completed\n")
 
@@ -411,48 +408,26 @@ ibpf_bpfilter <- function (object,block_list,params,
     sharedParNamesExpanded,
     estParNames,
     Np,nbpf,cooling.fn,rw.sd, 
-    verbose,.indices = integer(0), .gnsi = TRUE) {
+    verbose,
+    ## .indices = integer(0), ## For an extension to ancestor tracking
+    .gnsi = TRUE) {
 
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   nbpf <- as.integer(nbpf)
   Np <- as.integer(Np)
 
-  do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np[1L])
-    pStop_(sQuote(".indices")," has improper length.")
+  ## For an extension to ancestor tracking
+  ## do_ta <- length(.indices)>0L 
+  ## if (do_ta && length(.indices)!=Np[1L])
+  ##  pStop_(sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
   U <- length(unit_names(object))
   nblocks <- length(block_list)
   loglik <- rep(NA,ntimes)
-
-  if (length(Np)==1) {
-    Np <- rep(Np,times=ntimes+1)
-  } else if (length(Np)!=(ntimes+1)) {
-    pStop_(sQuote("Np")," must have length 1 or length ",ntimes+1)
-  } else if (!all(Np==Np[1]))
-    pStop_("time-varying ", sQuote("Np")," is currently unsupported")
-  if (any(Np<=0))
-    pStop_("number of particles, ",sQuote("Np"),", must always be positive")
-  if (!is.numeric(Np))
-    pStop_(sQuote("Np"),
-      " must be a number, a vector of numbers, or a function")
-  Np <- as.integer(Np)
-  if (is.matrix(params)) {
-    if (!all(Np==ncol(params)))
-      pStop_("when ",sQuote("params"),
-        " is provided as a matrix, do not specify ", sQuote("Np"),"!")
-  }
-  if (NCOL(params)==1) {
-    coef(object) <- params
-    params <- as.matrix(params)
-  }
-  paramnames <- rownames(params)
-  if (is.null(paramnames))
-    pStop_(sQuote("params")," must have rownames")
-
+  
   # create array to store weights per particle per block_list
   weights <- array(data = numeric(0), dim=c(nblocks,Np[1L]))
   loglik <- rep(NA,ntimes)
@@ -491,9 +466,7 @@ ibpf_bpfilter <- function (object,block_list,params,
         params=tparams,
         .gnsi=gnsi
       ),
-      error = function (e) {
-        pStop_("process simulation error: ", conditionMessage(e))
-      }
+      error = function (e) pStop_("ibpf_bpfilter process simulation error: ", conditionMessage(e))
     )
 
 
@@ -513,17 +486,12 @@ ibpf_bpfilter <- function (object,block_list,params,
           log=TRUE,
           .gnsi=gnsi
         ),
-        error = function (e) {
-          pStop_("error in calculation of weights: ",
-               conditionMessage(e))
-        }
+        error = function (e) pStop_("ibpf_bpfilter error in calculation of weights: ", conditionMessage(e))
       )
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
       max_log_d[i] <- max(log_d)
       log_d <- log_d - max_log_d[i]
       weights[i,] <- exp(log_d)
-
-
     }
     gnsi <- FALSE
 
@@ -550,9 +518,7 @@ ibpf_bpfilter <- function (object,block_list,params,
           doparRS=TRUE,
           weights=weights[i,]
         ),
-        error = function (e) {
-          pStop_(conditionMessage(e)) 
-        }
+        error = function (e) pStop_(conditionMessage(e)) 
       )
 
       Xfilt[statenames_block,] <- xx$states

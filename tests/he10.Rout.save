@@ -57,8 +57,17 @@ Loading required package: pomp
 +   estParNames <- c(sharedParNames,unitParNames)
 + }
 > 
-> # Note: here we assume that there are no unestimated unit-specific
-> # parameters. That could readily be accommodated if needed.
+> ## test error messages
+> try(he10(U=5,towns_selected="JUNK"))
+Error in he10(U = 5, towns_selected = "JUNK") : 
+  Require U==length(towns_selected) when towns_selected is specified
+> try(he10(U=1000,towns_selected=1:1000))
+Error in he10(U = 1000, towns_selected = 1:1000) : U <= 20
+> try(he10(U=5,Tmax=2024))
+Error in he10(U = 5, Tmax = 2024) : Tmax <= 1964
+> 
+> ## Note: here we assume that there are no unestimated unit-specific
+> ## parameters. That could readily be accommodated if needed.
 > 
 > h_model <- he10(U=2,dt=4/365,Tmax=1950.1,
 +   expandedParNames=estParNames)
@@ -173,58 +182,97 @@ Error : in ‘ibpf’: rw.sd is required
 Error : in ‘ibpf’: rw.sd is required
 > try(ibpf(h_model,Nbpf=NA,Np=10,block_size=1,sharedParNames=NULL))
 Error : in ‘ibpf’: rw.sd is required
-> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames))
+> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
++   unitParNames=unitParNames))
 Error : in ‘ibpf’: ‘block_list’ or ‘block_size’ must be specified to the call
-> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames,block_list=block_list,block_size=1))
+> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
++   unitParNames=unitParNames,block_list=block_list,block_size=1))
 Error : in ‘ibpf’: Exactly one of ‘block_size’ and ‘block_list’ should be provided, but not both.
-> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,unitParNames=unitParNames,block_list=block_list))
+> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=10,sharedParNames=sharedParNames,
++   unitParNames=unitParNames,block_list=block_list))
 Error : in ‘ibpf’: ‘spat_regression’ should be provided when there are shared parameters
-> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=5,sharedParNames=sharedParNames,unitParNames=unitParNames,spat_regression=0.5,block_size=10))
+> try(ibpf(h_model,Nbpf=2,rw.sd=rw_sd(mu1=0.1),Np=5,sharedParNames=sharedParNames,
++   unitParNames=unitParNames,spat_regression=0.5,block_size=10))
 Error : in ‘ibpf’: ‘block_size’ cannot be greater than the number of spatial units
 > 
 > try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1)))
 Error : in ‘ibpf’: sharedParNames is required
-> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL))
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
++   sharedParNames=NULL))
 Error : in ‘ibpf’: unitParNames is required
-> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=NULL,unitParNames=NULL))
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
++   sharedParNames=NULL,unitParNames=NULL))
 Error : in ‘ibpf’: cooling.fraction.50 is required
-> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.1),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5))
 Error : in ‘ibpf’: ‘spat_regression’ should be provided when there are shared parameters
-> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=NULL,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
++   spat_regression=0.5))
 Error : in ‘ibpf’: ‘Nbpf’ must be a positive integer.
-> try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=12,
++   spat_regression=0.5))
 Error : in ‘ibpf’: ‘cooling.fraction.50’ must be in (0,1].
-> try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=-1,block_list=block_list,Np=10,rw.sd=rw_sd(mu1=0.00001),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
++   spat_regression=0.5))
 Error : in ‘ibpf’: ‘Nbpf’ must be a positive integer.
 > 
 > # test errors on Np specification
-> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=NULL,rw.sd=rw_sd(mu1=0.00001),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
++   spat_regression=0.5))
 Error : in ‘ibpf’: ‘Np’ must be specified.
-> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
-Error : in ‘ibpf’: time-varying ‘Np’ is currently unsupported
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=1:100,rw.sd=rw_sd(mu1=0.00001),
++   sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,
++   spat_regression=0.5))
+Error : in ‘ibpf’: number of items to replace is not a multiple of replacement length
 In addition: Warning message:
 in ‘ibpf’: Np[k] ignored for k > ‘length(time(object))’. 
-> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np="a character vector",rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np="a character vector",
++   rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,
++   unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
 Error : in ‘ibpf’: ‘Np’ must be a number, a vector of numbers, or a function.
-> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=c(10,10),rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
+> try(ibpf(h_model,Nbpf=2,block_list=block_list,Np=c(10,10),
++   rw.sd=rw_sd(mu1=0.00001),sharedParNames=sharedParNames,
++   unitParNames=unitParNames,cooling.fraction.50=0.5,spat_regression=0.5))
 Error : in ‘ibpf’: ‘Np’ must have length 1 or ‘length(time(object))’.
 > 
-> 
 > # test ibpf errors on class ibpfd_spatPomp
-> ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames)
-<object of class ‘ibpfd_spatPomp’>
-> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,block_size=1,Nbpf <- 0.1))
-Error : in ‘ibpf’: ‘Nbpf’ should be a positive integer
-> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,block_size=3))
-Error : in ‘ibpf’: ‘block_size’ cannot be greater than the number of spatial units
 > 
-> # test ibpf errors on class bpfilterd_spatPomp
+> capture.output(ibpf(h_ibpf,sharedParNames=sharedParNames,
++   unitParNames=unitParNames,
++   .paramMatrix=h_ibpf@paramMatrix,verbose=TRUE)) -> out
+> try(ibpf(h_ibpf,block_size="JUNK",block_list="JUNK"))
+Error : in ‘ibpf’: Exactly one of ‘block_size’ and ‘block_list’ can be provided, but not both.
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   block_size=1,Nbpf <- 0.1))
+Error : in ‘ibpf’: ‘Nbpf’ should be a positive integer
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   block_size=3))
+Error : in ‘ibpf’: ‘block_size’ cannot be greater than the number of spatial units
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   Np=function(n) "JUNK"))
+Error : in ‘ibpf’: if ‘Np’ is a function, it must return a single positive integer.
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   Np=function(n) -1))
+Error : in ‘ibpf’: ‘Np’ must be a positive integer.
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   .paramMatrix=h_ibpf@paramMatrix,Np=7))
+Error : in ‘ibpf’: number of items to replace is not a multiple of replacement length
+> try(ibpf(h_ibpf,sharedParNames=sharedParNames,unitParNames=unitParNames,
++   .paramMatrix=h_ibpf@paramMatrix[,1,drop=FALSE],Np=1))
+<object of class ‘ibpfd_spatPomp’>
+> 
+> # test ibpf on class bpfilterd_spatPomp
 > try(ibpf(h_bpfilter,block_list=block_list,block_size=1))
 Error : in ‘in ‘ibpf’: ’: Exactly one of ‘block_size’ and ‘block_list’ can be provided, but not both.
 > try(ibpf(h_bpfilter,block_size=23))
 Error : in ‘ibpf’: ‘block_size’ cannot be greater than the number of spatial units
 > try(ibpf(h_bpfilter))
 Error : in ‘argument "Nbpf" is missing, with no default’: ibpf
+> 
 > 
 > # test ibpf with missing basic model component
 > h_model2 <- spatPomp(h_model,rprocess=NULL)

@@ -64,6 +64,10 @@ m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
 )
 logLik(m3_igirf_out)
 
+## test error message
+try(measles(U=1000))
+
+
 ## --------------------------------------------------------------------
 ## using measles to test spatPomp() covariate replacement functionality
 ## ____________________________________________________________________

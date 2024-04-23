@@ -285,6 +285,7 @@ igirf iteration 2 of 2 completed with likelihood  -10.59957
 + )
 ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
+> 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
 [1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.4969604389"
 > 
@@ -589,11 +590,16 @@ Error : in ‘spatPomp’: ‘shared_covarnames’ currently supported only when
 <object of class ‘spatPomp’>
 >   
 > try(spatPomp(data=model_unit_covar,covar=b_covar_error))
-Error : ‘covariate’ data.frame should have a time column with the same name as the observation data
+Error : in ‘spatPomp’: ‘covariate’ data.frame should have a time column with the same name as the time column of the observation data.frame
 > 
 > spatPomp(model_shared_covar)
 <object of class ‘spatPomp’>
 > 
+> spatPomp(data=model_shared_covar,covar=b_shared_covar, shared_covarnames="Z")
+<object of class ‘spatPomp’>
+> 
+> spatPomp(data=model_unit_covar,covar=b_unit_covar)
+<object of class ‘spatPomp’>
 > 
 > 
 > ## -----------------------------------------------------------------

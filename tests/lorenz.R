@@ -4,6 +4,8 @@ set.seed(3)
 
 l <- lorenz(U=5,N=3)
 
+try(lorenz(U=2,N=3))
+
 l_pf <- pfilter(l,Np=10)
 paste("lorenz pfilter loglik: ", round(logLik(l_pf),10))
 

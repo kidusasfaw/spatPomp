@@ -217,6 +217,7 @@ b_ienkf_hyp <- ienkf(b_model,
   cooling.fraction.50 = 0.5,
   verbose=TRUE
 )
+
 paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
 
 ##
@@ -397,6 +398,9 @@ try(spatPomp(data=model_unit_covar,covar=b_covar_error))
 
 spatPomp(model_shared_covar)
 
+spatPomp(data=model_shared_covar,covar=b_shared_covar, shared_covarnames="Z")
+
+spatPomp(data=model_unit_covar,covar=b_unit_covar)
 
 
 ## -----------------------------------------------------------------

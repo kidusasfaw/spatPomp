@@ -1,7 +1,7 @@
 
-R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin20 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -90,6 +90,12 @@ Warning messages:
 2: in 'table_lookup': extrapolating at 1.965002e+03. 
 > logLik(m3_igirf_out)
 [1] -86380.55
+> 
+> ## test error message
+> try(measles(U=1000))
+Error in measles(U = 1000) : 
+  Require U<=40 since data are only available for 40 cities
+> 
 > 
 > ## --------------------------------------------------------------------
 > ## using measles to test spatPomp() covariate replacement functionality
