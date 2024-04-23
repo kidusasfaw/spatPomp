@@ -11,6 +11,8 @@ sp3 <- bm2(U = 3, N = 10, shared_names = "rho")
 
 (t_spatPompList <- is(c(sp1, sp2), "spatPompList"))
 
+class( c(c(sp1,sp2),sp3))
+
 (t_bpfilterList <- is(
   c(
     bpfilter(sp1, Np = 10, block_size = 1),
@@ -22,3 +24,4 @@ sp3 <- bm2(U = 3, N = 10, shared_names = "rho")
 ## ibpfilterList is tested in He10
 
 stopifnot(all(t_spatPompList, t_bpfilterList))
+

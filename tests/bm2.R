@@ -1,8 +1,17 @@
 library(spatPomp)
-set.seed(0)
+
+## test error message
+try(bm2(U=3,N=2,unit_specific_names="rho",shared_names="sigma"))
+try(bm2_kalman_logLik(bm2(U=1,N=2)))
 
 b2_U <- 4
+
+set.seed(0)
 b2 <- bm2(U=b2_U,N=2,unit_specific_names="rho")
+
+set.seed(0)
+b2alt <- bm2(U=b2_U,N=2,shared_names=c("tau","sigma","X_0"))
+if(any(obs(b2)!=obs(b2alt))) stop("two different ways to specify the same bm2 model should match")
 
 b2_bpfilter <- bpfilter(b2,Np=5,block_size=1)
 paste("bpfilter logLik for bm2 model:",logLik(b2_bpfilter))

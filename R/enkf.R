@@ -60,7 +60,7 @@ setMethod(
   "enkf",
   signature=signature(data="missing"),
   definition=function (...) {
-    stop("enkf: ","data"," is a required argument.")
+    pStop_("in ", sQuote("enkf"), " : ", sQuote("data"), " is a required argument.")
   }
 )
 
@@ -68,7 +68,7 @@ setMethod(
   "enkf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    stop("enkf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
+    pStop_(sQuote("enkf"), " is undefined for ", sQuote("data"), " of class ", sQuote(class(data)), ".")
   }
 )
 
@@ -103,7 +103,7 @@ setMethod(
         ...,      
   verbose=verbose
       ),
-      error = function (e) stop("enkf",conditionMessage(e))
+      error = function (e) pStop_(conditionMessage(e))
     )
   }
 )
@@ -112,6 +112,7 @@ enkf.internal <- function (object,
   Np,
   ...,.gnsi=TRUE,verbose) {
 
+  ep <- paste0("in ", sQuote("enkf"), " : ")
   gnsi <- .gnsi
   verbose <- as.logical(verbose)
   p_object <- pomp(object,...,verbose=verbose)
@@ -130,11 +131,11 @@ enkf.internal <- function (object,
     unit_accumvars = object@unit_accumvars)
 
   if (undefined(object@rprocess))
-    pStop_(paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
+    pStop_(ep, paste(sQuote(c("rprocess")),collapse=", ")," is a needed basic component.")
   if (undefined(object@eunit_measure))
-    pStop_(paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
+    pStop_(ep, paste(sQuote(c("eunit_measure")),collapse=", ")," is a needed basic component.")
   if (undefined(object@vunit_measure))
-    pStop_(paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
+    pStop_(ep, paste(sQuote(c("vunit_measure")),collapse=", ")," is a needed basic component.")
 
   Np <- as.integer(Np)
   params <- coef(object)
@@ -173,7 +174,7 @@ enkf.internal <- function (object,
         params=params,
         gnsi=gnsi),
       error = function (e) {
-        stop("ep",conditionMessage(e),call.=FALSE) # nocov
+        pStop_(ep,conditionMessage(e)) # nocov
       }
     )
                                         # variance of artificial noise (i.e. R) computed using vmeasure
@@ -186,16 +187,14 @@ enkf.internal <- function (object,
         params=params,
         gnsi=gnsi),
       error = function (e) {
-        stop("ep",conditionMessage(e),call.=FALSE) # nocov
+        pStop(ep,conditionMessage(e)) # nocov
       }
     )
     dim(meas_var) <- c(length(unit_names(object)),  Np[1])
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
-      error = function (e) {
-        pStop_("degenerate ",sQuote("R"), "at time ", sQuote(k), ": ",conditionMessage(e))
-      }
+      error = function (e) pStop_("degenerate ",sQuote("R"), "at time ", sQuote(k), ": ",conditionMessage(e))
     )
     X <- X[,,1]
     predMeans[,k] <- pm <- rowMeans(X) # prediction mean

@@ -116,7 +116,7 @@ setMethod(
   "bpfilter",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    stop("bpfilter is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
+    pStop_(sQuote("bpfilter"), " is undefined for ", sQuote("data"), " of class ", sQuote(class(object)), ".")
   }
 )
 
@@ -228,7 +228,6 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
                 unit_statenames=object@unit_statenames,
                 unit_obsnames = object@unit_obsnames,
                 unit_accumvars = object@unit_accumvars)
-  params <- coef(object)
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
   gnsi <- as.logical(.gnsi)
@@ -239,24 +238,14 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
   if (length(Np)==1)
     Np <- rep(Np,times=ntimes+1)
   else if (length(Np)!=(ntimes+1))
-    stop(ep,sQuote("Np")," must have length 1 or length ",ntimes+1,call.=FALSE)
+    pStop_(ep,sQuote("Np")," must have length 1 or length ",ntimes+1)
   if (any(Np<=0))
-    stop(ep,"number of particles, ",sQuote("Np"),", must always be positive",call.=FALSE)
+    pStop_(ep,"number of particles, ",sQuote("Np"),", must always be positive")
   if (!is.numeric(Np))
-    stop(ep,sQuote("Np")," must be a number, a vector of numbers, or a function",call.=FALSE)
+    pStop_(ep,sQuote("Np")," must be a number, a vector of numbers, or a function")
   Np <- as.integer(Np)
-  if (is.matrix(params)) {
-    if (!all(Np==ncol(params)))
-      stop(ep,"when ",sQuote("params")," is provided as a matrix, do not specify ",
-           sQuote("Np"),"!",call.=FALSE)
-  }
-  if (NCOL(params)==1) {
-    coef(object) <- params
-    params <- as.matrix(params)
-  }
+  params <- as.matrix(coef(object))
   paramnames <- rownames(params)
-  if (is.null(paramnames))
-    stop(ep,sQuote("params")," must have rownames",call.=FALSE)
 
   ## returns an nvars by nsim matrix
   init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)
@@ -313,10 +302,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
         params=params,
         .gnsi=gnsi
       ),
-      error = function (e) {
-        stop(ep,"process simulation error: ",
-             conditionMessage(e),call.=FALSE)
-      }
+      error = function (e) pStop_(ep,"process simulation error: ", conditionMessage(e))
     )
 
     # For each  block, get each particle's weight
@@ -333,10 +319,7 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
           log=TRUE,
           .gnsi=gnsi
         ),
-        error = function (e) {
-          stop(ep,"error in calculation of weights: ",
-               conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_(ep,"error in calculation of weights: ", conditionMessage(e))
       )
       log_d <- apply(log_vd[,,1,drop=FALSE], 2, function(x) sum(x))
       max_log_d[i] <- max(log_d)

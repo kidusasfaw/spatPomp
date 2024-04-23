@@ -95,7 +95,7 @@ setMethod(
   "girf",
   signature=signature(object="missing"),
   definition=function (...) {
-    stop("girf: ","data"," is a required argument.")
+    pStop_("girf: ","data"," is a required argument.")
   }
 )
 
@@ -107,7 +107,7 @@ setMethod(
   "girf",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    stop("girf is undefined for ", sQuote(object), "of class ", sQuote(class(object)), ".")
+    pStop_("girf is undefined for ", sQuote("object"), " of class ", sQuote(class(object)), ".")
   }
 )
 
@@ -134,9 +134,9 @@ setMethod(
     kind = match.arg(kind)
 
     if(kind == 'moment'){
-      if(length(object@munit_measure@PACKAGE)==0) stop("girf with kind = 'moment' requires munit_measure")
-      if(length(object@eunit_measure@PACKAGE)==0) stop("girf with kind = 'moment' requires eunit_measure")
-      if(length(object@vunit_measure@PACKAGE)==0) stop("girf with kind = 'moment' requires vunit_measure")
+      if(length(object@munit_measure@PACKAGE)==0) pStop_("girf with kind = 'moment' requires munit_measure")
+      if(length(object@eunit_measure@PACKAGE)==0) pStop_("girf with kind = 'moment' requires eunit_measure")
+      if(length(object@vunit_measure@PACKAGE)==0) pStop_("girf with kind = 'moment' requires vunit_measure")
 
       tryCatch(
         g <- momgirf.internal(
@@ -287,7 +287,7 @@ momgirf.internal <- function (object,
         params=params,
         gnsi=TRUE),
       error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE)
+        pStop_(conditionMessage(e))
       }
     )
     fcst_samp_var <- xx
@@ -309,14 +309,7 @@ momgirf.internal <- function (object,
             params=params.matrix,
             times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
             ...),
-          error = function (e) {
-            pomp::flow(object,
-              x0=X.start,
-              t0=tt[s+1],
-              params=params.matrix,
-              times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-              method = 'adams')
-          }
+          error = function (e) pStop_(sQuote("girf"), " error in ",sQuote("pomp::flow"), conditionMessage(e))
         )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
@@ -336,9 +329,7 @@ momgirf.internal <- function (object,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=params,
           gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
+        error = function (e)  pStop_(conditionMessage(e))
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np)
 
@@ -355,9 +346,7 @@ momgirf.internal <- function (object,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.params,
           gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
+        error = function (e) pStop_(sQuote("girf"), conditionMessage(e)) # nocov
       )
       mom_match_param <- mmp
       dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np)
@@ -378,10 +367,7 @@ momgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) {
-          stop(ep,"error in calculation of log_dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_("error in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
@@ -404,10 +390,7 @@ momgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) {
-          stop(ep,"error in calculation of dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_("girf error in calculation of dmeas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -428,9 +411,7 @@ momgirf.internal <- function (object,
             fsv=fcst_samp_var,
             tol=tol
           ),
-          error = function (e) {
-            stop(ep,conditionMessage(e),call.=FALSE) # nocov
-          }
+          error = function (e) pStop_("girf : ",conditionMessage(e))
         )
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
@@ -624,7 +605,7 @@ bootgirf.internal <- function (object,
         dim(x_3d) <- c(dim(x),1)
         rownames(x_3d)<-rownames(x)
         log_meas_weights <- tryCatch(
-        (dmeasure(
+          dmeasure(
           object,
           y=object@data[,nt,drop=FALSE],
           x=x_3d,
@@ -632,11 +613,8 @@ bootgirf.internal <- function (object,
           params=params,
           log=TRUE,
           .gnsi=gnsi
-        )),
-        error = function (e) {
-          stop(ep,"error in calculation of dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+          ),
+          error = function (e) pStop_("girf error in calculation of dmeas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -658,9 +636,7 @@ bootgirf.internal <- function (object,
             fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), # bootgirf2 doesn't use fsv, set to an arbitrary val.
             tol=tol
           ),
-          error = function (e) {
-            stop(ep,conditionMessage(e),call.=FALSE) # nocov
-          }
+          error = function (e) pStop_("in girf : ",conditionMessage(e))
         )
         guidesim_index <- guidesim_index[xx$ancestry] # update guidesim index
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights

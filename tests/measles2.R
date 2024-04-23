@@ -1,6 +1,10 @@
 
 library(spatPomp)
 
+## test error messages
+try(measles2(U=1000,N=5))
+try(measles2(U=2,N=1000))
+
 i <- 1
 DEBUG=FALSE
 U <- switch(i,4,10,40)

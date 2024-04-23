@@ -139,8 +139,7 @@ ienkf.internal <- function (object, Nenkf, rw.sd,
   if (is.null(Np)) {
     pStop_(sQuote("Np")," must be specified.")
   }  else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np"),
-      " must be a number, a vector of numbers, or a function.")
+    pStop_(sQuote("Np")," must be a number or a vector of numbers")
   }
 
   Np <- as.integer(Np)
@@ -233,8 +232,7 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
   Np <- as.integer(Np)
 
   do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np)
-    pStop_(sQuote(".indices")," has improper length.")
+  if (do_ta) pStop_(sQuote(".indices")," for ancestor tracking is not supported.")
 
   times <- time(object,t0=TRUE)
   t <- time(object)

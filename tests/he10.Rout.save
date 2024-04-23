@@ -292,8 +292,7 @@ Error : in ‘ibpf’: ‘rprocess’, ‘dunit_measure’ are needed basic comp
 > ## test error message when munit_measure is undefined
 > try(girf(h_model,kind="moment",
 +   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
-Error in .local(object, ...) : 
-  girf with kind = 'moment' requires munit_measure
+Error : girf with kind = 'moment' requires munit_measure
 > 
 > # Create second ibpfd_spatPomp object with different chain length, to test error
 > h_ibpf3 <- ibpf(h_model,

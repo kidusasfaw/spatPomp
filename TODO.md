@@ -1,5 +1,7 @@
 # spatPomp to-do list
 
+16. 24-04-23. ienkf should have methods for enkfd_spatPomp and ienkfd_spatPomp.
+
 15. 23-06-08. Extend pomp-style list classes to spatPomp.
 
 14. 23-06-08. Some development of diagnostic plots at https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf should be incorporated into the package. Related to [15].

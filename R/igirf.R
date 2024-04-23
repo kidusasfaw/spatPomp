@@ -72,7 +72,7 @@ setMethod(
   "igirf",
   signature=signature(data="missing"),
   definition=function (...) {
-    stop("igirf: ","data"," is a required argument.")
+    pStop_("igirf: ","data"," is a required argument.")
   }
 )
 
@@ -84,7 +84,7 @@ setMethod(
   "igirf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    stop("igirf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
+    pStop_("igirf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
   }
 )
 
@@ -99,13 +99,21 @@ setMethod(
     Ninter,lookahead=1,Nguide,kind=c('bootstrap', 'moment'),
     tol = 1e-300,
     ..., verbose = getOption("verbose", FALSE)) {
+    ep <- paste0("in ", sQuote("igirf") , " : ")
     if(missing(Ninter)) Ninter <- length(unit_names(data))
+    if(missing(Ngirf)) pStop_(ep, sQuote("Ngirf"), " is a required argument")
+    if (missing(rw.sd)) pStop_(ep, sQuote("rw.sd")," must be specified.")
+    if (missing(cooling.fraction.50))
+      pStop_(ep, sQuote("cooling.fraction.50")," is a required argument.")
+    if (missing(Np)) pStop_(ep, sQuote("Np")," must be specified.")
+    if (missing(Ninter)) pStop_(ep, sQuote("Ninter")," must be specified.")
+    if (missing(Nguide))  pStop_(ep, sQuote("Nguide")," must be specified.")
     kind = match.arg(kind)
     tryCatch(
       igirf.internal(data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
         Ninter,lookahead,Nguide,kind,tol = tol,
         ...,verbose=verbose),
-      error = function (e) stop("igirf: ", e)
+      error = function (e) pStop_("in ", sQuote("igirf") , " : ", e)
     )
   }
 )
@@ -155,13 +163,14 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     unitname=object@unitname,
     unit_statenames=object@unit_statenames,
     unit_obsnames = object@unit_obsnames)
-  if (undefined(object@rprocess) || undefined(object@dmeasure))
-    stop(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+
+if (undefined(object@rprocess) || undefined(object@dmeasure))
+    pStop_(sQuote(c("rprocess","dmeasure"))," are needed basic components.")
 
   gnsi <- as.logical(.gnsi)
 
   if (length(Ngirf) != 1 || !is.numeric(Ngirf) || !is.finite(Ngirf) || Ngirf < 1)
-    stop(sQuote("Ngirf")," must be a positive integer.")
+    pStop_(sQuote("Ngirf")," must be a positive integer.")
   Ngirf <- as.integer(Ngirf)
 
   if (is.null(.paramMatrix)) {
@@ -173,18 +182,17 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
   ntimes <- length(time(object))
 
   if (is.null(Np)) {
-    stop(sQuote("Np")," must be specified.")
+    pStop_(sQuote("Np")," must be specified.")
   } else if (is.function(Np)) {
     Np <- tryCatch(
       vapply(seq_len(ntimes),Np,numeric(1)),
       error = function (e) {
-        stop("if ",sQuote("Np"),
+        pStop_("if ",sQuote("Np"),
           " is a function, it must return a single positive integer.")
       }
     )
   } else if (!is.numeric(Np)) {
-    stop(sQuote("Np"),
-      " must be a number, a vector of numbers, or a function.")
+    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
   }
 
   if (length(Np) == 1) {
@@ -195,28 +203,24 @@ igirf.internal <- function (object,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.
     }
     Np <- head(Np,ntimes)
   } else if (length(Np) < ntimes) {
-    stop(sQuote("Np")," must have length 1 or ",
+    pStop_(sQuote("Np")," must have length 1 or ",
       sQuote("length(time(object))"),".")
   }
 
   if (!all(is.finite(Np)) || any(Np <= 0))
-    stop(sQuote("Np")," must be a positive integer.")
+    pStop_(sQuote("Np")," must be a positive integer.")
 
   Np <- as.integer(Np)
   Np <- c(Np,Np[1L])
 
-  if (missing(rw.sd))
-    stop(sQuote("rw.sd")," must be specified!")
   ##rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   rw.sd <- perturbn.kernel.sd(rw.sd,
     time=igirf_rw_sd_times(times=time(object),Ninter=Ninter),
     paramnames=names(start))
-  if (missing(cooling.fraction.50))
-    stop(sQuote("cooling.fraction.50")," is a required argument.")
   if (length(cooling.fraction.50) != 1 || !is.numeric(cooling.fraction.50) ||
         !is.finite(cooling.fraction.50) || cooling.fraction.50 <= 0 ||
           cooling.fraction.50 > 1)
-    stop(sQuote("cooling.fraction.50")," must be in (0,1].")
+    pStop_(sQuote("cooling.fraction.50")," must be in (0,1].")
   cooling.fraction.50 <- as.numeric(cooling.fraction.50)
 
   cooling.fn <- mif2.cooling(
@@ -295,24 +299,24 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   verbose <- as.logical(verbose)
   girfiter <- as.integer(girfiter)
   Np <- as.integer(Np)
-  ep <- paste0("in ",sQuote("igirf"),": ")
+  ep <- paste0("in ",sQuote("igirf")," : ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    stop(sQuote("tol")," should be a small positive number.")
+    pStop_(ep, sQuote("tol")," should be a small positive number.")
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
-    stop(sQuote(".indices")," has improper length.")
+    pStop_(ep, sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
-  nunits <- length(unit_names(object))
+  ## nunits <- length(unit_names(object))
 
   cond.loglik <- array(0, dim = c(ntimes, Ninter))
 
   znames <- object@accumvars
 
-                                        # Initialize filter guide function
+  # Initialize filter guide function
   log_filter_guide_fun <- array(0, dim = Np[1])
   for (nt in 0:(ntimes-1)) {
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
@@ -335,7 +339,8 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         nreps = NULL
       )
     )
-                                        # For each particle get K guide particles, and fill in sample variance over K for each (lookahead value - unit - particle) combination
+    # For each particle get K guide particles, and fill in sample variance
+    # over K for each (lookahead value - unit - particle) combination
     fcst_samp_var <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
     x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
     tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
@@ -350,7 +355,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         params=tp_with_guides,
         gnsi=TRUE),
       error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
+        pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e)) 
       }
     )
     fcst_samp_var <- xx
@@ -358,7 +363,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
 
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
-                                        # Get prediction simulations: nvars by nreps by 1 array
+      # Get prediction simulations: nvars by nreps by 1 array
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
         params=tparams,.gnsi=gnsi)
       if(s>1 && length(znames)>0){
@@ -390,7 +395,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           params=tparams,
           gnsi=TRUE),
         error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
+          pStop_("in ", sQuote("igirf"), " : ",conditionMessage(e)) 
         }
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
@@ -408,9 +413,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.tparams,
           gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
+        error = function (e) pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e))
       )
       mom_match_param <- mmp
       dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np[1])
@@ -431,23 +434,22 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) {
-          stop(ep,"error in calculation of log_dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_("in igirf : error in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
-        if(any(is.na(log_dmeas_weights))){
-                                        # find particle with the NA
-          na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
-          na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
-          illegal_dunit_measure_error(
-            time=times[nt+1+l],
-            lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
-            datvals=object@data[,nt+l],
-            states=skel[,na_ix_col,l],
-            params=mom_match_param[,,l,na_ix_col]
-          )
-        }
+
+        ## uncomment for debugging: tracking down particles with NA weight
+        ## if(any(is.na(log_dmeas_weights))){
+        ##   na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
+        ##   na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
+        ##   illegal_dunit_measure_error(
+        ##     time=times[nt+1+l],
+        ##     lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
+        ##     datvals=object@data[,nt+l],
+        ##     states=skel[,na_ix_col,l],
+        ##     params=mom_match_param[,,l,na_ix_col]
+        ##   )
+        ##  }
+	
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, function(x) sum(x))*discount_factor
         log_guide_fun <- log_guide_fun + log_resamp_weights
       }
@@ -469,10 +471,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
             log=TRUE,
             .gnsi=gnsi
           ),
-          error = function (e) {
-            stop(ep,"error in calculation of log_meas_weights: ",
-              conditionMessage(e),call.=FALSE)
-          }
+          error = function (e) pStop_("in igirf : error in calculation of log_meas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -502,9 +501,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
             fsv=fcst_samp_var,
             tol=tol
           ),
-          error = function (e) {
-            stop(ep,conditionMessage(e),call.=FALSE) # nocov
-          }
+          error = function (e) pStop_("in igirf : ", conditionMessage(e))
         )
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
@@ -648,18 +645,20 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             conditionMessage(e),call.=FALSE)
         }
         )
-        if(any(is.na(log_dmeas_weights))){
-                                        # find particle with the NA
-          na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
-          na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
-          illegal_dunit_measure_error(
-            time=times[nt+1+l],
-            lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
-            datvals=object@data[,nt+l],
-            states=pseudosims[,na_ix_col,1L],
-            params=tp_with_guides[,na_ix_col]
-          )
-        }
+
+        ## uncomment for debugging: tracking down particles with NA weight
+        ## if(any(is.na(log_dmeas_weights))){
+        ##   na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
+        ##   na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
+        ##   illegal_dunit_measure_error(
+        ##     time=times[nt+1+l],
+        ##     lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
+        ##     datvals=object@data[,nt+l],
+        ##     states=pseudosims[,na_ix_col,1L],
+        ##     params=tp_with_guides[,na_ix_col]
+        ##   )
+        ## }
+	
         ldw <- array(log_dmeas_weights, c(nunits,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
         log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
         log_resamp_weights <- log_fcst_lik*discount_factor
@@ -746,16 +745,17 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
   )
 }
 
-illegal_dunit_measure_error <- function(time, lik, datvals, states, params){
-  showvals <- c(time=time,lik=lik,datvals,states,params)
-  m1 <- formatC(names(showvals),preserve.width="common")
-  m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
-  stop(
-    sQuote("dunit_measure")," returns illegal value.\n",
-    "Likelihood, data, states, and parameters are:\n",
-    paste0(m1,": ",m2,collapse="\n")
-  )
-}
+## uncomment for debugging: tracking down particles with NA weight
+## illegal_dunit_measure_error <- function(time, lik, datvals, states, params){
+##   showvals <- c(time=time,lik=lik,datvals,states,params)
+##   m1 <- formatC(names(showvals),preserve.width="common")
+##   m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
+##   stop(
+##     sQuote("dunit_measure")," returns illegal value.\n",
+##     "Likelihood, data, states, and parameters are:\n",
+##     paste0(m1,": ",m2,collapse="\n")
+##   )
+## }
 
 igirf_rw_sd_times <- function(times, Ninter){
   rw_sd_times <- c()

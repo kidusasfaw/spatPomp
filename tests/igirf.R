@@ -4,3 +4,6 @@
 ## used to test the rprocess, dunit_measure, rinit, skeleton, obs, coef and
 ## partrans methods for these models
 
+## error messages tested in bm.R
+
+

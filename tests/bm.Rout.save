@@ -58,6 +58,11 @@ Loading required package: pomp
 > ## foreach confused about whether it is running in parallel or not.
 > 
 > b_model <- bm(U=U,N=N) 
+> b_model_no_rproc <- spatPomp(b_model,rprocess=NULL)
+> b_model_no_eunit_measure <- spatPomp(b_model,eunit_measure=NULL)
+> b_model_no_vunit_measure <- spatPomp(b_model,vunit_measure=NULL)
+> b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
+> 
 > 
 > ## ------------------------------------------------------------
 > ## The bm model provides a simple example to test other methods.
@@ -124,6 +129,9 @@ executing %dopar% sequentially: no parallel backend registered
 +   logLik(b_bpfilter)==logLik(b_bpfilter_repeat))
 [1] "check bpfilter on bpfilterd_spatPomp:  TRUE"
 > 
+> bpfilter(b_model_t0_equal_t1,Np = Np, block_size = 1)
+<object of class ‘bpfilterd_spatPomp’>
+> 
 > set.seed(5)
 > b_bpfilter_filter_traj <- bpfilter(b_bpfilter,filter_traj=TRUE)
 > paste("bpfilter filter trajectory final particle: ")
@@ -133,7 +141,6 @@ executing %dopar% sequentially: no parallel backend registered
 name [,1]  [,2]  [,3]
   X1    0 1.373 2.349
   X2    0 2.035 0.796
-> 
 > 
 > set.seed(5)
 > b_bpfilter_save_states <- bpfilter(b_bpfilter,save_states=TRUE)
@@ -145,9 +152,49 @@ name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
   X1 2.611 2.236 2.186 2.186 2.349 1.077 1.077 1.155 1.442 1.063
   X2 0.796 0.442 0.442 0.231 0.231 0.231 0.648 0.648 1.337 1.019
 > 
+> ## test bpfilter error messages
+> try(bpfilter())
+Error in bpfilter() : bpfilter: data is a required argument.
+> try(bpfilter("JUNK"))
+Error : ‘bpfilter’ is undefined for ‘data’ of class ‘character’.
+> try(bpfilter(b_model))
+Error : in ‘bpfilter’: ‘block_list’ or ‘block_size’ must be specified to the call
+> try(bpfilter(b_model,block_list=block_list,block_size=23))
+Error : in ‘bpfilter’: Exactly one of ‘block_size’ and ‘block_list’ should be provided, but not both.
+> try(bpfilter(b_model,block_list=block_list))
+Error : in ‘bpfilter’: ‘Np’ must be specified
+> try(bpfilter(b_model,Np=10,block_size=1000))
+Error : in ‘bpfilter’: ‘block_size’ cannot be greater than the number of spatial units
+> try(bpfilter(b_bpfilter,block_list=block_list,block_size=23))
+Error : in ‘bpfilter’: Exactly one of ‘block_size’ and ‘block_list’ can be provided, but not both.
+> try(bpfilter(b_bpfilter,Np=10,block_size=1000))
+Error : in ‘bpfilter’: ‘block_size’ cannot be greater than the number of spatial units
+> try(bpfilter(b_bpfilter,Np=-1))
+Error : in ‘bpfilter’: number of particles, ‘Np’, must always be positive
+> try(bpfilter(b_bpfilter,Np=1:1000))
+Error : in ‘bpfilter’: ‘Np’ must have length 1 or length 3
+> try(bpfilter(b_bpfilter,Np="JUNK"))
+Error : in ‘bpfilter’: ‘Np’ must be a number, a vector of numbers, or a function
+> test_params_matrix <- cbind(coef(b_model),coef(b_model),coef(b_model))
+> try(bpfilter(b_bpfilter,params=test_params_matrix))
+Error : ‘params’ must be a named numeric vector.
+> 
+> 
 > ##
 > ## enkf tested on bm
 > ##
+> 
+> ## test error messages
+> try(enkf())
+Error : in ‘enkf’ : ‘data’ is a required argument.
+> try(enkf("JUNK"))
+Error : ‘enkf’ is undefined for ‘data’ of class ‘character’.
+> try(enkf(b_model_no_rproc))
+Error : in ‘enkf’ : ‘rprocess’ is a needed basic component.
+> try(enkf(b_model_no_eunit_measure))
+Error : in ‘enkf’ : ‘eunit_measure’ is a needed basic component.
+> try(enkf(b_model_no_vunit_measure))
+Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 > 
 > set.seed(5)
 > b_enkf <- enkf(b_model, Np = Np)
@@ -179,17 +226,36 @@ name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
 +   logLik(b_girf_boot)==logLik(b_girf_boot_repeat))
 [1] "check girf on girfd_spatPomp:  TRUE"
 > 
-> print("The following delivers an error message, to test it")
-[1] "The following delivers an error message, to test it"
+> print("The following deliver an error message, to test it")
+[1] "The following deliver an error message, to test it"
 > try(girf())
-Error in girf() : girf: data is a required argument.
-> try(girf(object="nonsense"))
-Error in girf(object = "nonsense") : 
-  girf is undefined for ‘nonsense’of class ‘character’.
+Error : girf: data is a required argument.
+> try(girf("JUNK"))
+Error : girf is undefined for ‘object’ of class ‘character’.
 > try(girf(b_girf_boot,Np=c(Inf)))
 Error : in ‘girf’: ‘Np’ must be a single positive integer
 > try(girf(b_girf_boot,Np=seq(from=10,length=N+1,by=2)))
 Error : in ‘girf’: ‘Np’ must be a single positive integer
+> try(girf(b_model_no_eunit_measure,kind='moment'))
+Error : girf with kind = 'moment' requires eunit_measure
+> try(girf(b_model_no_vunit_measure,kind='moment'))
+Error : girf with kind = 'moment' requires vunit_measure
+> try(girf(b_model_no_rproc,kind='moment'))
+Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
+> try(girf(b_model,kind='moment'))
+Error : in ‘girf’: ‘Np’ must be specified.
+> try(girf(b_model,kind='moment',Np=5))
+Error : in ‘girf’: argument "Nguide" is missing, with no default
+> try(girf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
+Error : in ‘girf’: ‘tol’ should be a small positive number.
+> try(girf(b_model_no_rproc,kind='boot'))
+Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
+> try(girf(b_model,kind='boot'))
+Error : in ‘girf’: ‘Np’ must be specified.
+> try(girf(b_model,kind='boot',Np=5))
+Error : in ‘girf’: argument "Nguide" is missing, with no default
+> try(girf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
+Error : in ‘girf’: ‘tol’ should be a small positive number.
 > 
 > ## ------------------------------------------------------------
 > ## Now, we test the inference methods
@@ -197,6 +263,7 @@ Error : in ‘girf’: ‘Np’ must be a single positive integer
 > 
 > b_rw.sd <- rw_sd(rho=0.02,X1_0=ivp(0.02))
 > 
+> ##############################################################
 > ##
 > ## igirf on bm
 > ##
@@ -227,7 +294,6 @@ Error : in ‘girf’: ‘Np’ must be a single positive integer
 > paste("check igirf on igirfd_spatPomp: ",
 +   logLik(b_igirf_geom)==logLik(b_igirf_geom_repeat))
 [1] "check igirf on igirfd_spatPomp:  FALSE"
-> 
 > 
 > b_igirf_hyp <- igirf(b_model,
 +   Ngirf = 2,
@@ -260,6 +326,75 @@ igirf iteration 2 of 2 completed with likelihood  -10.59957
 6         3    rho   0.3984085
 7         1  sigma   1.0000000
 > 
+> set.seed(1)
+> b_igirf_boot_geom <- igirf(b_model,
++   Ngirf = 2,
++   rw.sd = b_rw.sd,
++   cooling.type = "geometric",
++   cooling.fraction.50 = 0.5,
++   Np=Np,
++   Ninter = 2,
++   lookahead = 1,
++   Nguide = 5,
++   kind = 'bootstrap',
++   verbose = FALSE
++ )
+> paste("bm igirf boot loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_boot_geom),10))
+[1] "bm igirf boot loglik, geometric cooling, verbose=F:  -9.9090272439"
+> 
+> b_igirf_boot_hyp <- igirf(b_model,
++   Ngirf = 2,
++   rw.sd = b_rw.sd,
++   cooling.type = "hyperbolic",
++   cooling.fraction.50 = 0.5,
++   Np=floor(Np/2),
++   Ninter = 2,
++   lookahead = 1,
++   Nguide = floor(Np/2),
++   kind = 'bootstrap',
++   verbose = TRUE
++ )
+igirf iteration 1 of 2 completed with likelihood  -12.63759 
+       rho      sigma        tau       X1_0       X2_0 
+0.39913869 1.00000000 1.00000000 0.01175154 0.00000000 
+igirf iteration 2 of 2 completed with likelihood  -11.11327 
+       rho      sigma        tau       X1_0       X2_0 
+0.40066011 1.00000000 1.00000000 0.04626405 0.00000000 
+> paste("bm igirf boot loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
+[1] "bm igirf boot loglik, hyperbolic cooling, verbose=T:  -10.599572921"
+> 
+> 
+> print("The following deliver an error message, to test it")
+[1] "The following deliver an error message, to test it"
+> try(igirf())
+Error : igirf: data is a required argument.
+> try(igirf(data="JUNK"))
+Error : igirf is undefined for ‘JUNK’of class ‘character’.
+> try(igirf(b_igirf_boot_geom,Np=c(Inf)))
+Error : in ‘igirf’ : Error: ‘Np’ must be a positive integer.
+
+> try(igirf(b_igirf_boot_geom,Np=3))
+<object of class ‘igirfd_spatPomp’>
+> try(igirf(b_model_no_eunit_measure,kind='moment', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=floor(Np/2), Ninter = 2))
+Error : in ‘igirf’ : Error in if (max_log_weights > -Inf) {: missing value where TRUE/FALSE needed
+
+In addition: Warning message:
+'eunit_measure' unspecified. 
+>   
+> 
+> # try(igirf(b_model_no_vunit_measure,kind='moment'))
+> # try(igirf(b_model_no_rproc,kind='moment'))
+> # try(igirf(b_model,kind='moment'))
+> # try(igirf(b_model,kind='moment',Np=5))
+> # try(igirf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
+> # try(igirf(b_model_no_rproc,kind='boot'))
+> # try(igirf(b_model,kind='boot'))
+> # try(igirf(b_model,kind='boot',Np=5))
+> # try(igirf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
+> 
+> ######################################################
 > ##
 > ## ienkf on bm, with geometric and hyperbolic cooling
 > ##
@@ -273,7 +408,7 @@ igirf iteration 2 of 2 completed with likelihood  -10.59957
 +   verbose=FALSE
 + )
 > paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geom),10))
-[1] "bm ienkf loglik, geometric cooling, verbose=F:  -11.2659371179"
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -11.6995986214"
 > 
 > b_ienkf_hyp <- ienkf(b_model,
 +   Nenkf=2,
@@ -287,11 +422,38 @@ ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
 > 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.4969604389"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -9.7365825263"
 > 
+> ## test error messages for ienkf
+> try(ienkf(b_model_no_rproc))
+Error : in ‘ienkf’: ‘rprocess’, ‘eunit_measure’, ‘vunit_measure’ are needed basic components.
+> try(ienkf(b_model, Nenkf="JUNK"))
+Error : in ‘ienkf’: ‘Nenkf’ must be a positive integer.
+> ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.type="geometric",
++   cooling.fraction.50 = 0.5,
++   .paramMatrix=cbind(coef(b_model),coef(b_model),coef(b_model)))
+<object of class ‘ienkfd_spatPomp’>
+> try(ienkf(b_model,Nenkf=2))
+Error : in ‘ienkf’: argument "Np" is missing, with no default
+> try(ienkf(b_model,Nenkf=2,Np=NULL))
+Error : in ‘ienkf’: ‘Np’ must be specified.
+> try(ienkf(b_model,Nenkf=2,Np="JUNK"))
+Error : in ‘ienkf’: ‘Np’ must be a number or a vector of numbers
+> try(ienkf(b_model,Nenkf=2,Np = 3))
+Error : in ‘ienkf’: ‘rw.sd’ must be specified!
+> try(ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd))
+Error : in ‘ienkf’: ‘cooling.fraction.50’ is a required argument.
+> try(ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.fraction.50 = 1000))
+Error : in ‘ienkf’: ‘cooling.fraction.50’ must be in (0,1].
+> try(ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.fraction.50 = 0.5,.indices=1:1000))
+Error : in ‘ienkf’: ‘.indices’ for ancestor tracking is not supported.
+> 
+> ####################################################
 > ##
 > ## iubf on bm, with geometric and hyperbolic cooling
 > ##
+> 
+> set.seed(8)
 > 
 > b_iubf_geom <- iubf(b_model,
 +   Nubf = 2,
@@ -305,7 +467,7 @@ ienkf iteration 2 of 2 completed
 +   verbose=FALSE
 + )
 > paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom),10))
-[1] "bm iubf loglik, geometric cooling, verbose=F:  -11.4595005548"
+[1] "bm iubf loglik, geometric cooling, verbose=F:  -11.130525238"
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
@@ -321,49 +483,53 @@ ienkf iteration 2 of 2 completed
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -12.04241 
-        rho       sigma         tau        X1_0        X2_0 
- 0.40312565  1.00000000  1.00000000 -0.01326395  0.00000000 
+iubf iteration 1 of 2 completed with log-likelihood -11.39115 
+         rho        sigma          tau         X1_0         X2_0 
+0.4020068358 1.0000000000 1.0000000000 0.0008175748 0.0000000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -12.83948 
+iubf iteration 2 of 2 completed with log-likelihood -10.16506 
         rho       sigma         tau        X1_0        X2_0 
- 0.40523197  1.00000000  1.00000000 -0.00474667  0.00000000 
+0.399236177 1.000000000 1.000000000 0.004066272 0.000000000 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_iubf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.8394821627"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.16506276"
+> 
+> 
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot
 > ## ____________________________________________
 > 
+> set.seed(9)
+> 
 > b_sim1 <- simulate(b_model,nsim=2,format='data.frame')
 > head(b_sim1,10)
 # A tibble: 8 × 5
-   time .id   unitname      X       Y
-  <dbl> <ord> <chr>     <dbl>   <dbl>
-1     1 1     U1       -1.12  -0.918 
-2     1 2     U1       -0.670 -0.945 
-3     1 1     U2       -1.07  -0.409 
-4     1 2     U2       -0.648 -1.24  
-5     2 1     U1       -2.81  -4.87  
-6     2 2     U1        0.850  0.589 
-7     2 1     U2       -1.26  -1.96  
-8     2 2     U2       -0.491 -0.0759
+   time .id   unitname      X      Y
+  <dbl> <ord> <chr>     <dbl>  <dbl>
+1     1 1     U1        0.399  0.513
+2     1 2     U1        1.00   1.16 
+3     1 1     U2       -0.549 -1.60 
+4     1 2     U2       -0.483  0.817
+5     2 1     U1        0.147 -1.01 
+6     2 2     U1        1.37   2.17 
+7     2 1     U2       -1.31  -1.09 
+8     2 2     U2       -0.806 -1.54 
 > b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
 > head(b_sim2,10)
 # A tibble: 10 × 5
-    time .id   unitname      X      Y
-   <dbl> <ord> <chr>     <dbl>  <dbl>
- 1     1 data  U1        2.98   3.61 
- 2     1 1     U1       -0.827 -1.76 
- 3     1 2     U1        0.417  3.17 
- 4     1 data  U2        0.824  2.81 
- 5     1 1     U2       -0.228 -0.282
- 6     1 2     U2       -0.158 -1.84 
- 7     2 data  U1        2.03   1.73 
- 8     2 1     U1        0.164 -0.282
- 9     2 2     U1       -0.270  0.730
-10     2 data  U2       -0.759 -0.849
+    time .id   unitname       X      Y
+   <dbl> <ord> <chr>      <dbl>  <dbl>
+ 1     1 data  U1        2.98    3.61 
+ 2     1 1     U1       -0.713   1.09 
+ 3     1 2     U1        0.0866 -1.34 
+ 4     1 data  U2        0.824   2.81 
+ 5     1 1     U2       -0.263  -0.680
+ 6     1 2     U2       -0.616  -0.946
+ 7     2 data  U1        2.03    1.73 
+ 8     2 1     U1        0.352  -0.702
+ 9     2 2     U1       -2.31   -3.44 
+10     2 data  U2       -0.759  -0.849
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
 > plot(b_model,type="l",log=FALSE)
@@ -435,15 +601,25 @@ rep         [,1]
 
         rep
 variable     [,1]
-      Y1 1.181054
+      Y1 1.505094
 
 > 
 > vec_rmeasure(b_model,x=b_s,time=1, params=b_p)
 , , 1
 
            [,1]
-[1,]  0.8543340
-[2,] -0.5666138
+[1,]  0.4213165
+[2,] -1.7230998
+
+> b_p_3d <- b_p
+> dim(b_p_3d) <- c(5,1,1)
+> dimnames(b_p_3d) <- c(dimnames(b_p),NULL)
+> vec_rmeasure(b_model,x=b_s,time=1, params=b_p_3d)
+, , 1
+
+            [,1]
+[1,] -0.05396116
+[2,] -0.03157348
 
 > 
 > ## --------------------------------------------
@@ -480,7 +656,8 @@ unit   [,1]
 unit   [,1]
   [1,]    1
 
-> munit_measure(b_u, x=b_s, vc=b_vc, Np=1, unit = 2, time=1,params=b_array.params)
+> munit_measure(b_u, x=b_s, vc=b_vc, Np=1, unit = 2, time=1,
++   params=b_array.params)
 , , 1, 1
 
        
@@ -508,7 +685,8 @@ null device
           1 
 > 
 > ## test spatPomp_Csnippet variable construction
-> spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"), unit_covarnames="D",
+> spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),
++   unit_covarnames="D",
 +   unit_ivpnames="E",unit_paramnames="F",unit_vfnames="G")
 An object of class "Csnippet"
 Slot "text":
@@ -520,7 +698,8 @@ Slot "text":
 > ## ____________________________________________
 > 
 > b_rep1 <- spatPomp(b_model,params=coef(b_model))
-> for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),slot(b_rep1,slt))) print(slt)
+> for(slt in slotNames(b_model)) if(!identical(slot(b_model,slt),
++   slot(b_rep1,slt))) print(slt)
 [1] "states"
 > 
 > # test parameter replacement
@@ -550,7 +729,8 @@ Error : in ‘spatPomp’: ‘t0’ is a required argument
 Error : in ‘spatPomp’: ‘times’ does not identify a single column of ‘data’ by name.
 > try(spatPomp(data=b_data,times="time",units="NONSENSE",t0=0))
 Error : in ‘spatPomp’: ‘units’ does not identify a single column of ‘data’ by name.
-> spatPomp(data=b_data,times="time",units="unit",t0=0,params=list(coef(b_model)))
+> spatPomp(data=b_data,times="time",units="unit",t0=0,
++   params=list(coef(b_model)))
 <object of class ‘spatPomp’>
 > b_data2 <- b_data
 > names(b_data2) <- c("time","unit","X","X")
@@ -561,10 +741,12 @@ Error : in ‘spatPomp’: names of data variables must be unique.
 > 
 > # test error messages for covariates with data.frame class for spatPomp()
 > b_covar_error <- data.frame(time_name_error=0:2,Z=3:5)
-> try(spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_covar_error))
+> try(spatPomp(data=b_data,times="time",units="unit",t0=0,
++   covar=b_covar_error))
 Error : in ‘spatPomp’: ‘covariate’ data.frame should have a time column with the same name as the time column of the observation data.frame
 > 
-> b_unit_covar_names_error <- data.frame(time=c(0:2,0:2),JUNK=rep(c("U1","U2"),each=3), Z=rep(3:5,times=2))
+> b_unit_covar_names_error <- data.frame(time=c(0:2,0:2),
++   JUNK=rep(c("U1","U2"),each=3), Z=rep(3:5,times=2))
 > try(spatPomp(data=b_data,times="time",units="unit",t0=0,
 +   covar=b_unit_covar_names_error))
 Error : in ‘spatPomp’: for unit-specific covariates, there should be a column with the unit name matching the data
@@ -575,10 +757,12 @@ Error : in ‘spatPomp’: for unit-specific covariates, there should be a colum
 > 
 > b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
 +   Z=rep(3:5,times=2))
-> model_unit_covar <- spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_unit_covar,skeleton=NULL,partrans=NULL,unit_accumvars <- "JUNK")
-NOTE: The provided object  is available for use by POMP basic components.
+> model_unit_covar <- spatPomp(data=b_data,times="time",units="unit",
++   t0=0,covar=b_unit_covar,skeleton=NULL,partrans=NULL,
++   unit_accumvars = "JUNK")
 > 
-> try(spatPomp(data=b_data,times="time",units="unit",t0=0,covar=b_unit_covar,shared_covarnames ="JUNK"))
+> try(spatPomp(data=b_data,times="time",units="unit",t0=0,
++   covar=b_unit_covar,shared_covarnames ="JUNK"))
 Error : in ‘spatPomp’: ‘shared_covarnames’ currently supported only when there are no unit-specific covariates
 > 
 > # test spatPomp warnings with argument of class spatPomp
@@ -595,11 +779,19 @@ Error : in ‘spatPomp’: ‘covariate’ data.frame should have a time column 
 > spatPomp(model_shared_covar)
 <object of class ‘spatPomp’>
 > 
-> spatPomp(data=model_shared_covar,covar=b_shared_covar, shared_covarnames="Z")
+> spatPomp(data=model_shared_covar,covar=b_shared_covar,
++   shared_covarnames="Z")
 <object of class ‘spatPomp’>
 > 
 > spatPomp(data=model_unit_covar,covar=b_unit_covar)
 <object of class ‘spatPomp’>
+> 
+> try(spatPomp(data=model_unit_covar,covar=b_shared_covar))
+Error : in ‘spatPomp’: for unit-specific covariates, there should be a column with the unit name matching the data
+> 
+> try(spatPomp(data=model_unit_covar,covar=b_unit_covar,
++   shared_covarnames="Z"))
+Error : in ‘spatPomp’: ‘shared_covarnames’ currently supported only when there are no unit-specific covariates
 > 
 > 
 > ## -----------------------------------------------------------------
@@ -633,7 +825,8 @@ Error : in ‘spatPomp’: ‘covariate’ data.frame should have a time column 
 .id    [,1] [,2]
   [1,] -Inf -Inf
 > 
-> vec_dmeasure(b_inf,y=obs(b_inf),x=states(b_model),units=1:U,times=1:2,params=coef(b_inf),log=T)[,,1]
+> vec_dmeasure(b_inf,y=obs(b_inf),x=states(b_model),units=1:U,
++   times=1:2,params=coef(b_inf),log=T)[,,1]
      [,1] [,2]
 [1,] -Inf -Inf
 [2,] -Inf -Inf
@@ -641,19 +834,22 @@ Error : in ‘spatPomp’: ‘covariate’ data.frame should have a time column 
 > b_girf_mom_inf <- girf(b_inf,Np = floor(Np/2),lookahead = 1,
 +   Nguide = floor(Np/2),
 +   kind = 'moment',Ninter=2)
-> paste("bm moment girf loglik, zero measurement: ",round(logLik(b_girf_mom_inf),10))
+> paste("bm moment girf loglik, zero measurement: ",
++   round(logLik(b_girf_mom_inf),10))
 [1] "bm moment girf loglik, zero measurement:  -Inf"
 > 
 > set.seed(0)
 > b_girf_boot_inf <- girf(b_inf,Np = floor(Np/2),lookahead = 1,
 +   Nguide = floor(Np/2),
 +   kind = 'bootstrap',Ninter=2)
-> paste("bm bootstrap girf loglik, zero measurement: ",round(logLik(b_girf_boot_inf),10))
+> paste("bm bootstrap girf loglik, zero measurement: ",
++   round(logLik(b_girf_boot_inf),10))
 [1] "bm bootstrap girf loglik, zero measurement:  -Inf"
 > 
 > set.seed(5)
 > b_bpfilter_inf <- bpfilter(b_inf, Np = Np, block_size = 1)
-> paste("bm bpfilter loglik, zero measurement: ",round(logLik(b_bpfilter_inf),10))
+> paste("bm bpfilter loglik, zero measurement: ",
++   round(logLik(b_bpfilter_inf),10))
 [1] "bm bpfilter loglik, zero measurement:  NaN"
 > 
 > 
