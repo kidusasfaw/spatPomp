@@ -17,7 +17,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> png(filename="bm-%02d.png",res=100)
 > library(spatPomp)
 Loading required package: pomp
 > i <- 1
@@ -58,7 +57,7 @@ Loading required package: pomp
 > ## foreach confused about whether it is running in parallel or not.
 > 
 > b_model <- bm(U=U,N=N) 
-> b_model_no_rproc <- spatPomp(b_model,rprocess=NULL)
+> b_model_no_rprocess <- spatPomp(b_model,rprocess=NULL)
 > b_model_no_eunit_measure <- spatPomp(b_model,eunit_measure=NULL)
 > b_model_no_vunit_measure <- spatPomp(b_model,vunit_measure=NULL)
 > b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
@@ -189,7 +188,7 @@ Error : ‘params’ must be a named numeric vector.
 Error : in ‘enkf’ : ‘data’ is a required argument.
 > try(enkf("JUNK"))
 Error : ‘enkf’ is undefined for ‘data’ of class ‘character’.
-> try(enkf(b_model_no_rproc))
+> try(enkf(b_model_no_rprocess))
 Error : in ‘enkf’ : ‘rprocess’ is a needed basic component.
 > try(enkf(b_model_no_eunit_measure))
 Error : in ‘enkf’ : ‘eunit_measure’ is a needed basic component.
@@ -240,7 +239,7 @@ Error : in ‘girf’: ‘Np’ must be a single positive integer
 Error : girf with kind = 'moment' requires eunit_measure
 > try(girf(b_model_no_vunit_measure,kind='moment'))
 Error : girf with kind = 'moment' requires vunit_measure
-> try(girf(b_model_no_rproc,kind='moment'))
+> try(girf(b_model_no_rprocess,kind='moment'))
 Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
 > try(girf(b_model,kind='moment'))
 Error : in ‘girf’: ‘Np’ must be specified.
@@ -248,7 +247,7 @@ Error : in ‘girf’: ‘Np’ must be specified.
 Error : in ‘girf’: argument "Nguide" is missing, with no default
 > try(girf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
 Error : in ‘girf’: ‘tol’ should be a small positive number.
-> try(girf(b_model_no_rproc,kind='boot'))
+> try(girf(b_model_no_rprocess,kind='boot'))
 Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
 > try(girf(b_model,kind='boot'))
 Error : in ‘girf’: ‘Np’ must be specified.
@@ -369,12 +368,15 @@ igirf iteration 2 of 2 completed with likelihood  -11.11327
 > try(igirf())
 Error : igirf: data is a required argument.
 > try(igirf(data="JUNK"))
-Error : igirf is undefined for ‘JUNK’of class ‘character’.
+Error : igirf is undefined for ‘data’of class ‘character’.
 > try(igirf(b_igirf_boot_geom,Np=c(Inf)))
-Error : in ‘igirf’ : Error: ‘Np’ must be a positive integer.
+Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 
-> try(igirf(b_igirf_boot_geom,Np=3))
+> igirf(b_igirf_boot_geom,Np=3)
 <object of class ‘igirfd_spatPomp’>
+> try(igirf(b_igirf_boot_geom,Np=NULL))
+Error : in ‘igirf’ : Error: ‘Np’ must be specified.
+
 > try(igirf(b_model_no_eunit_measure,kind='moment', Ngirf = 2, Nguide=2,
 +   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
 +   Np=floor(Np/2), Ninter = 2))
@@ -382,14 +384,64 @@ Error : in ‘igirf’ : Error in if (max_log_weights > -Inf) {: missing value w
 
 In addition: Warning message:
 'eunit_measure' unspecified. 
+> try(igirf(b_model_no_vunit_measure,kind='moment', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=floor(Np/2), Ninter = 2))
+Error : in ‘igirf’ : Error in if (max_log_weights > -Inf) {: missing value where TRUE/FALSE needed
+
+In addition: Warning message:
+'vunit_measure' unspecified. 
+> try(igirf(b_model_no_rprocess,kind='moment', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=floor(Np/2), Ninter = 2))
+Error : in ‘igirf’ : Error: ‘rprocess’‘dmeasure’ are needed basic components.
+
+> 
+> try(igirf(b_model))
+Error : in ‘igirf’ : ‘Ngirf’ is a required argument
+> try(igirf(b_model,Ngirf=2))
+Error : in ‘igirf’ : ‘rw.sd’ must be specified.
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd))
+Error : in ‘igirf’ : ‘cooling.fraction.50’ is a required argument.
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5))
+Error : in ‘igirf’ : ‘cooling.type’ is a required argument.
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
++   cooling.type="geometric"))
+Error : in ‘igirf’ : ‘Np’ must be specified.
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
++   cooling.type="geometric",Np=4))
+Error : in ‘igirf’ : ‘Nguide’ must be specified.
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
++   cooling.type="geometric",Np="JUNK",Nguide=4))
+Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
+
+> 
+> igirf(b_igirf_boot_geom,Np=3,
++   .paramMatrix=cbind(coef(b_model),coef(b_model),coef(b_model)))
+<object of class ‘igirfd_spatPomp’>
+> try(igirf(b_igirf_boot_geom,Np=function(x) 4))
+Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
+
+> try(igirf(b_igirf_boot_geom,Np=function(x) "JUNK"))
+Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
+
+> try(igirf(b_igirf_boot_geom,Np=5:15))
+Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
+
+> 
+> 
+> try(igirf(b_model,kind='moment', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=floor(Np/2), Ninter = 2))
+<object of class ‘igirfd_spatPomp’>
 >   
 > 
 > # try(igirf(b_model_no_vunit_measure,kind='moment'))
-> # try(igirf(b_model_no_rproc,kind='moment'))
+> # try(igirf(b_model_no_rprocess,kind='moment'))
 > # try(igirf(b_model,kind='moment'))
 > # try(igirf(b_model,kind='moment',Np=5))
 > # try(igirf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-> # try(igirf(b_model_no_rproc,kind='boot'))
+> # try(igirf(b_model_no_rprocess,kind='boot'))
 > # try(igirf(b_model,kind='boot'))
 > # try(igirf(b_model,kind='boot',Np=5))
 > # try(igirf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
@@ -398,6 +450,8 @@ In addition: Warning message:
 > ##
 > ## ienkf on bm, with geometric and hyperbolic cooling
 > ##
+> 
+> set.seed(55)
 > 
 > b_ienkf_geom <- ienkf(b_model,
 +   Nenkf=2,
@@ -408,7 +462,7 @@ In addition: Warning message:
 +   verbose=FALSE
 + )
 > paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geom),10))
-[1] "bm ienkf loglik, geometric cooling, verbose=F:  -11.6995986214"
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -12.7660513791"
 > 
 > b_ienkf_hyp <- ienkf(b_model,
 +   Nenkf=2,
@@ -422,11 +476,12 @@ ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
 > 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -9.7365825263"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.2194988409"
 > 
 > ## test error messages for ienkf
 > try(ienkf(b_model_no_rproc))
-Error : in ‘ienkf’: ‘rprocess’, ‘eunit_measure’, ‘vunit_measure’ are needed basic components.
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'data' in selecting a method for function 'ienkf': object 'b_model_no_rproc' not found
 > try(ienkf(b_model, Nenkf="JUNK"))
 Error : in ‘ienkf’: ‘Nenkf’ must be a positive integer.
 > ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.type="geometric",
@@ -532,11 +587,15 @@ iubf iteration 2 of 2 completed with log-likelihood -10.16506
 10     2 data  U2       -0.759  -0.849
 > b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 > 
+> png(filename="bm-%02d.png",res=100)
 > plot(b_model,type="l",log=FALSE)
 > b_sim3v2 <- b_sim3[[1]]
 > b_sim3v2@data <- exp(b_sim3v2@data)
 > plot(b_sim3v2,type="l",log=TRUE)
 > plot(b_sim3[[2]],type="h")
+> dev.off()
+null device 
+          1 
 > 
 > ## --------------------------------------------
 > ## using bm to test spatPomp workhorse functions, extending pomp:
@@ -679,10 +738,6 @@ rep    [,1]
 variable [,1]
       Y1    1
 
-> 
-> dev.off()
-null device 
-          1 
 > 
 > ## test spatPomp_Csnippet variable construction
 > spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),

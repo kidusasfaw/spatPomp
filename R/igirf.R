@@ -84,7 +84,7 @@ setMethod(
   "igirf",
   signature=signature(data="ANY"),
   definition=function (data, ...) {
-    pStop_("igirf is undefined for ", sQuote(data), "of class ", sQuote(class(data)), ".")
+    pStop_("igirf is undefined for ", sQuote("data"), "of class ", sQuote(class(data)), ".")
   }
 )
 
@@ -99,14 +99,16 @@ setMethod(
     Ninter,lookahead=1,Nguide,kind=c('bootstrap', 'moment'),
     tol = 1e-300,
     ..., verbose = getOption("verbose", FALSE)) {
+
     ep <- paste0("in ", sQuote("igirf") , " : ")
     if(missing(Ninter)) Ninter <- length(unit_names(data))
     if(missing(Ngirf)) pStop_(ep, sQuote("Ngirf"), " is a required argument")
     if (missing(rw.sd)) pStop_(ep, sQuote("rw.sd")," must be specified.")
     if (missing(cooling.fraction.50))
       pStop_(ep, sQuote("cooling.fraction.50")," is a required argument.")
+    if (missing(cooling.type))
+      pStop_(ep, sQuote("cooling.type")," is a required argument.")
     if (missing(Np)) pStop_(ep, sQuote("Np")," must be specified.")
-    if (missing(Ninter)) pStop_(ep, sQuote("Ninter")," must be specified.")
     if (missing(Nguide))  pStop_(ep, sQuote("Nguide")," must be specified.")
     kind = match.arg(kind)
     tryCatch(
@@ -179,39 +181,15 @@ if (undefined(object@rprocess) || undefined(object@dmeasure))
     start <- apply(.paramMatrix,1L,mean)
   }
 
-  ntimes <- length(time(object))
-
-  if (is.null(Np)) {
+  if (missing(Np) || is.null(Np)) {
     pStop_(sQuote("Np")," must be specified.")
-  } else if (is.function(Np)) {
-    Np <- tryCatch(
-      vapply(seq_len(ntimes),Np,numeric(1)),
-      error = function (e) {
-        pStop_("if ",sQuote("Np"),
-          " is a function, it must return a single positive integer.")
-      }
-    )
-  } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np")," must be a number, a vector of numbers, or a function.")
+  } else if (length(Np)>1) {
+    pStop_(sQuote("Np")," must be a single positive integer")
+  } else if (!is.numeric(Np)|| !is.finite(Np) || (Np < 0)) {
+    pStop_(sQuote("Np")," must be a single positive integer")
   }
-
-  if (length(Np) == 1) {
-    Np <- rep(Np,times=ntimes)
-  } else if (length(Np) > ntimes) {
-    if (Np[1L] != Np[ntimes+1] || length(Np) > ntimes+1) {
-      warning("in igirf ","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
-    }
-    Np <- head(Np,ntimes)
-  } else if (length(Np) < ntimes) {
-    pStop_(sQuote("Np")," must have length 1 or ",
-      sQuote("length(time(object))"),".")
-  }
-
-  if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_(sQuote("Np")," must be a positive integer.")
 
   Np <- as.integer(Np)
-  Np <- c(Np,Np[1L])
 
   ##rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
   rw.sd <- perturbn.kernel.sd(rw.sd,
@@ -230,7 +208,7 @@ if (undefined(object@rprocess) || undefined(object@dmeasure))
   )
 
   if (is.null(.paramMatrix)) {
-    paramMatrix <- array(data=start,dim=c(length(start),Np[1L]),
+    paramMatrix <- array(data=start,dim=c(length(start),Np),
       dimnames=list(variable=names(start),rep=NULL))
   } else {
     paramMatrix <- .paramMatrix
@@ -298,14 +276,13 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   girfiter <- as.integer(girfiter)
-  Np <- as.integer(Np)
   ep <- paste0("in ",sQuote("igirf")," : ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
     pStop_(ep, sQuote("tol")," should be a small positive number.")
 
   do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np[1L])
+  if (do_ta && length(.indices)!=Np)
     pStop_(ep, sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
@@ -317,7 +294,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   znames <- object@accumvars
 
   # Initialize filter guide function
-  log_filter_guide_fun <- array(0, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np)
   for (nt in 0:(ntimes-1)) {
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
     params <- .Call(randwalk_perturbation_spatPomp,params,pmag)
@@ -331,7 +308,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
     lookahead_steps <- min(lookahead, ntimes-nt)
     ## Four-dimensional array: nvars by nguide by ntimes by nreps
     Xg <- array(0,
-      dim=c(length(statenames), Nguide, lookahead_steps, Np[1]),
+      dim=c(length(statenames), Nguide, lookahead_steps, Np),
       dimnames = list(
         nvars = statenames,
         ng = NULL,
@@ -341,16 +318,17 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
     )
     # For each particle get K guide particles, and fill in sample variance
     # over K for each (lookahead value - unit - particle) combination
-    fcst_samp_var <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
-    x_with_guides <- x[,rep(1:Np[1], rep(Nguide, Np[1]))]
-    tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
-    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+    fcst_samp_var <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np))
+    x_with_guides <- x[,rep(1:Np, rep(Nguide, Np))]
+    tp_with_guides <- tparams[,rep(1:Np, rep(Nguide, Np))]
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1],
+      times=times[(nt+2):(nt+1+lookahead_steps)],
       params=tp_with_guides,.gnsi=gnsi)
     xx <- tryCatch(
       .Call(do_fcst_samp_var,
         object=object,
         X=Xg,
-        Np = as.integer(Np[1]),
+        Np = as.integer(Np),
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=tp_with_guides,
         gnsi=TRUE),
@@ -359,7 +337,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
     )
     fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np[1])
+    dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
 
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
@@ -390,7 +368,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         .Call(do_vunit_measure,
           object=object,
           X=skel,
-          Np = as.integer(Np[1]),
+          Np = as.integer(Np),
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=tparams,
           gnsi=TRUE),
@@ -398,27 +376,27 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           pStop_("in ", sQuote("igirf"), " : ",conditionMessage(e)) 
         }
       )
-      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np[1])
-      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np[1]))
+      dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np)
+      fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np))
       for(l in 1:lookahead_steps) fcst_var_upd[,l,] <- fcst_samp_var[,l,]*(times[nt+1+l] - tt[s+1])/(times[nt+1+l] - times[nt+1])
       inflated_var <- meas_var_skel + fcst_var_upd
-      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np[1], lookahead_steps), dimnames = list(tparams = rownames(tparams)))
+      array.tparams <- array(NA, dim = c(dim(tparams)[1], length(unit_names(object)), Np, lookahead_steps), dimnames = list(tparams = rownames(tparams)))
       for(i in 1:length(unit_names(object))) array.tparams[,i,,1:lookahead_steps] <- tparams
       mmp <- tryCatch(
         .Call(do_munit_measure,
           object=object,
           X=skel,
           vc=inflated_var,
-          Np = as.integer(Np[1]),
+          Np = as.integer(Np),
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.tparams,
           gnsi=TRUE),
         error = function (e) pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e))
       )
       mom_match_param <- mmp
-      dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np[1])
+      dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np)
       dimnames(mom_match_param) <- list(tparam = rownames(tparams))
-      log_guide_fun <- vector(mode = "numeric", length = Np[1]) + 1
+      log_guide_fun <- vector(mode = "numeric", length = Np) + 1
 
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init <- object@t0
@@ -493,7 +471,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           .Call(girf_computations,
             x=X,
             params=params,
-            Np=Np[nt+1],
+            Np=Np,
             trackancestry=FALSE,
             doparRS=TRUE,
             weights=weights,
@@ -524,7 +502,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
     Nguide=Nguide,
     lookahead=lookahead,
     paramMatrix=params,
-    Np=Np[1],
+    Np=Np,
     tol=tol,
     loglik=sum(cond.loglik)
   )
@@ -545,7 +523,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     stop(ep,sQuote("tol")," should be a small positive number.",call.=FALSE)
 
   do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np[1L])
+  if (do_ta && length(.indices)!=Np)
     stop(ep,sQuote(".indices")," has improper length.",call.=FALSE)
 
   times <- time(object,t0=TRUE)
@@ -556,7 +534,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
 
   znames <- object@accumvars
 
-  log_filter_guide_fun <- array(0, dim = Np[1])
+  log_filter_guide_fun <- array(0, dim = Np)
   for (nt in 0:(ntimes-1)) {
     pmag <- cooling.fn(nt,girfiter)$alpha*rw.sd[,nt]
     params <- .Call(randwalk_perturbation_spatPomp,params,pmag)
@@ -569,7 +547,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     lookahead_steps <- min(lookahead, ntimes-nt)
     ## Four-dimensional array: nvars by nguide by ntimes by nreps
     Xg <- array(0,
-      dim=c(length(statenames), Nguide, lookahead_steps, Np[1]),
+      dim=c(length(statenames), Nguide, lookahead_steps, Np),
       dimnames = list(
         nvars = statenames,
         ng = NULL,
@@ -577,7 +555,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         nreps = NULL
       )
     )
-    guidesim_index <- seq_len(Np[1]) ## the index for guide simulations (to be updated each time resampling occurs)
+    guidesim_index <- seq_len(Np) ## the index for guide simulations (to be updated each time resampling occurs)
     x_with_guides <- x[,rep(guidesim_index, each = Nguide)]
     tp_with_guides <- tparams[,rep(guidesim_index, each = Nguide)]
     Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
@@ -588,11 +566,11 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       params=tparams,
       times = times[(nt+2):(nt+1+lookahead_steps)],
       method = 'adams')
-    resids <- Xg - Xskel[,rep(1:Np[1], each=Nguide),,drop=FALSE] # residuals
+    resids <- Xg - Xskel[,rep(1:Np, each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
     for (s in 1:Ninter){
       tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
-      tp_with_guides <- tparams[,rep(1:Np[1], rep(Nguide, Np[1]))]
+      tp_with_guides <- tparams[,rep(1:Np, rep(Nguide, Np))]
       X <- rprocess(object,x0=x, t0 = tt[s], times= tt[s+1],
         params=tparams,.gnsi=gnsi)
       if(s>1 && length(znames)>0){
@@ -617,18 +595,26 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       } else {
         skel <- X
       }
-      log_guide_fun <- vector(mode = "numeric", length = Np[1]) + 1
+      log_guide_fun <- vector(mode = "numeric", length = Np) + 1
 
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init <- object@t0
         else discount_denom_init <- times[nt+1+l - lookahead]
-        discount_factor <- 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
+        discount_factor <- 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1)
+	## to ensure that the discount factor does not become too small for L=1
+	## and small s (which can lead to very uninformative guide function), increase
+	## the discount factor to at least 1/2 when L=1.
 
-                                        # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
-        pseudosims <- skel[,rep(1:Np[1], each=Nguide),l,drop=FALSE] +
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),l,drop=FALSE] -
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] +
-          resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np[1]),1,drop=FALSE] * sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
+        ## construct pseudo-simulations by adding simulated noise terms (residuals)
+	## to the skeletons
+        pseudosims <- skel[,rep(1:Np, each=Nguide),l,drop=FALSE] +
+          resids[,rep(guidesim_index-1, each=Nguide)*
+	    Nguide+rep(1:Nguide, Np),l,drop=FALSE] -
+          resids[,rep(guidesim_index-1, each=Nguide)*
+	    Nguide+rep(1:Nguide, Np),1,drop=FALSE] +
+          resids[,rep(guidesim_index-1, each=Nguide)*
+	    Nguide+rep(1:Nguide, Np),1,drop=FALSE] *
+	      sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
         rm(skel)
         log_dmeas_weights <- tryCatch(
         (vec_dmeasure(
@@ -658,9 +644,14 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         ##     params=tp_with_guides[,na_ix_col]
         ##   )
         ## }
-	
-        ldw <- array(log_dmeas_weights, c(nunits,Nguide,Np[1])) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
-        log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
+
+        ## log_dmeas_weights is an array with dim U*(Np*Nguide)*1.
+	## Reorder it as U*Nguide*Np
+        ldw <- array(log_dmeas_weights, c(nunits,Nguide,Np))
+
+        ## average dmeas (natural scale) over Nguide sims, then take log,
+	## and then sum over 1:U (for each particle)
+        log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) 
         log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
@@ -707,19 +698,20 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
           .Call(girf_computations,
             x=X,
             params=params,
-            Np=Np[nt+1],
+            Np=Np,
             trackancestry=TRUE,
             doparRS=TRUE,
             weights=weights,
             lgps=log_guide_fun,
-            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np[1])), # bootgirf2 doesn't use fsv, set to an arbitrary val.
+	    ## bootgirf2 doesn't use fsv, set to an arbitrary value
+            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), 
             tol=tol
           ),
           error = function (e) {
-            stop(ep,conditionMessage(e),call.=FALSE) # nocov
+            stop(ep,conditionMessage(e),call.=FALSE) 
           }
         )
-        guidesim_index = guidesim_index[xx$ancestry] # update guidesim index
+        guidesim_index = guidesim_index[xx$ancestry] 
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
         log_filter_guide_fun <- xx$logfilterguides
@@ -739,7 +731,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
     Nguide=Nguide,
     lookahead=lookahead,
     paramMatrix=params,
-    Np=Np[1],
+    Np=Np,
     tol=tol,
     loglik=sum(cond.loglik)
   )
@@ -760,7 +752,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
 igirf_rw_sd_times <- function(times, Ninter){
   rw_sd_times <- c()
   for(i in seq(length(times)-1)) rw_sd_times <- c(
-                                   rw_sd_times, seq(from=times[i],to=times[i+1],length.out=Ninter+1))
+    rw_sd_times, seq(from=times[i],to=times[i+1],length.out=Ninter+1))
   return(rw_sd_times)
 }
 

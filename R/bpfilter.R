@@ -120,7 +120,6 @@ setMethod(
   }
 )
 
-
 ##' @name bpfilter-spatPomp
 ##' @aliases bpfilter,spatPomp-method
 ##' @rdname bpfilter
@@ -245,7 +244,6 @@ bpfilter.internal <- function (object, Np, block_list, save_states, filter_traj,
     pStop_(ep,sQuote("Np")," must be a number, a vector of numbers, or a function")
   Np <- as.integer(Np)
   params <- as.matrix(coef(object))
-  paramnames <- rownames(params)
 
   ## returns an nvars by nsim matrix
   init.x <- rinit(object,params=params,nsim=Np[1L],.gnsi=gnsi)

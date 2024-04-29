@@ -1,4 +1,3 @@
-png(filename="bm-%02d.png",res=100)
 library(spatPomp)
 i <- 1
 U <- switch(i,2,10)
@@ -38,7 +37,7 @@ set.seed(2)
 ## foreach confused about whether it is running in parallel or not.
 
 b_model <- bm(U=U,N=N) 
-b_model_no_rproc <- spatPomp(b_model,rprocess=NULL)
+b_model_no_rprocess <- spatPomp(b_model,rprocess=NULL)
 b_model_no_eunit_measure <- spatPomp(b_model,eunit_measure=NULL)
 b_model_no_vunit_measure <- spatPomp(b_model,vunit_measure=NULL)
 b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
@@ -135,7 +134,7 @@ try(bpfilter(b_bpfilter,params=test_params_matrix))
 ## test error messages
 try(enkf())
 try(enkf("JUNK"))
-try(enkf(b_model_no_rproc))
+try(enkf(b_model_no_rprocess))
 try(enkf(b_model_no_eunit_measure))
 try(enkf(b_model_no_vunit_measure))
 
@@ -172,11 +171,11 @@ try(girf(b_girf_boot,Np=c(Inf)))
 try(girf(b_girf_boot,Np=seq(from=10,length=N+1,by=2)))
 try(girf(b_model_no_eunit_measure,kind='moment'))
 try(girf(b_model_no_vunit_measure,kind='moment'))
-try(girf(b_model_no_rproc,kind='moment'))
+try(girf(b_model_no_rprocess,kind='moment'))
 try(girf(b_model,kind='moment'))
 try(girf(b_model,kind='moment',Np=5))
 try(girf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-try(girf(b_model_no_rproc,kind='boot'))
+try(girf(b_model_no_rprocess,kind='boot'))
 try(girf(b_model,kind='boot'))
 try(girf(b_model,kind='boot',Np=5))
 try(girf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
@@ -268,18 +267,47 @@ print("The following deliver an error message, to test it")
 try(igirf())
 try(igirf(data="JUNK"))
 try(igirf(b_igirf_boot_geom,Np=c(Inf)))
-try(igirf(b_igirf_boot_geom,Np=3))
+igirf(b_igirf_boot_geom,Np=3)
+try(igirf(b_igirf_boot_geom,Np=NULL))
 try(igirf(b_model_no_eunit_measure,kind='moment', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=floor(Np/2), Ninter = 2))
+try(igirf(b_model_no_vunit_measure,kind='moment', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=floor(Np/2), Ninter = 2))
+try(igirf(b_model_no_rprocess,kind='moment', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=floor(Np/2), Ninter = 2))
+
+try(igirf(b_model))
+try(igirf(b_model,Ngirf=2))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
+  cooling.type="geometric"))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
+  cooling.type="geometric",Np=4))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
+  cooling.type="geometric",Np="JUNK",Nguide=4))
+
+igirf(b_igirf_boot_geom,Np=3,
+  .paramMatrix=cbind(coef(b_model),coef(b_model),coef(b_model)))
+try(igirf(b_igirf_boot_geom,Np=function(x) 4))
+try(igirf(b_igirf_boot_geom,Np=function(x) "JUNK"))
+try(igirf(b_igirf_boot_geom,Np=5:15))
+
+
+try(igirf(b_model,kind='moment', Ngirf = 2, Nguide=2,
   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
   Np=floor(Np/2), Ninter = 2))
   
 
 # try(igirf(b_model_no_vunit_measure,kind='moment'))
-# try(igirf(b_model_no_rproc,kind='moment'))
+# try(igirf(b_model_no_rprocess,kind='moment'))
 # try(igirf(b_model,kind='moment'))
 # try(igirf(b_model,kind='moment',Np=5))
 # try(igirf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-# try(igirf(b_model_no_rproc,kind='boot'))
+# try(igirf(b_model_no_rprocess,kind='boot'))
 # try(igirf(b_model,kind='boot'))
 # try(igirf(b_model,kind='boot',Np=5))
 # try(igirf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
@@ -288,6 +316,8 @@ try(igirf(b_model_no_eunit_measure,kind='moment', Ngirf = 2, Nguide=2,
 ##
 ## ienkf on bm, with geometric and hyperbolic cooling
 ##
+
+set.seed(55)
 
 b_ienkf_geom <- ienkf(b_model,
   Nenkf=2,
@@ -372,11 +402,13 @@ b_sim2 <- simulate(b_model,nsim=2,format='data.frame',include.data=TRUE)
 head(b_sim2,10)
 b_sim3 <- simulate(b_model,nsim=2,format='spatPomps')
 
+png(filename="bm-%02d.png",res=100)
 plot(b_model,type="l",log=FALSE)
 b_sim3v2 <- b_sim3[[1]]
 b_sim3v2@data <- exp(b_sim3v2@data)
 plot(b_sim3v2,type="l",log=TRUE)
 plot(b_sim3[[2]],type="h")
+dev.off()
 
 ## --------------------------------------------
 ## using bm to test spatPomp workhorse functions, extending pomp:
@@ -444,8 +476,6 @@ munit_measure(b_u, x=b_s, vc=b_vc, Np=1, unit = 2, time=1,
   params=b_array.params)
 dunit_measure(b_u, y=b_y,x=b_s, unit=2, time=1, params=b_p)
 runit_measure(b_u, x=b_s, unit=2, time=1, params=b_p)
-
-dev.off()
 
 ## test spatPomp_Csnippet variable construction
 spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),
