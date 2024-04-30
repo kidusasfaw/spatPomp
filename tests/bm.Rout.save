@@ -22,7 +22,7 @@ Loading required package: pomp
 > i <- 1
 > U <- switch(i,2,10)
 > N <- switch(i,2,10)
-> Np <- switch(i,10,100)
+> Np <- switch(i,5,100)
 > 
 > # For CRAN tests, need to limit to two cores
 > # https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
@@ -65,6 +65,8 @@ Loading required package: pomp
 > b_model_no_dunit_measure <- spatPomp(b_model,dunit_measure=NULL)
 > b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
 > b_model5 <- bm(U=U,N=5) 
+> b_model_with_accumvars <- b_model
+> b_model_with_accumvars@accumvars <- rownames(states(b_model))
 > 
 > b_model_zero_dmeasure <- spatPomp(b_model,
 +   dmeasure = spatPomp_Csnippet(
@@ -98,7 +100,7 @@ Loading required package: pomp
 > 
 > b_pf <- pfilter(b_model,Np=Np)
 > paste("bm pfilter loglik: ",round(logLik(b_pf),10))
-[1] "bm pfilter loglik:  -9.1501758491"
+[1] "bm pfilter loglik:  -13.7472688507"
 > 
 > ## ---------------------------------------------------------------
 > ## abf tested on bm. abf uses parallelization, so we also test that
@@ -115,7 +117,7 @@ Loading required package: pomp
 Warning message:
 executing %dopar% sequentially: no parallel backend registered 
 > paste("bm abf loglik: ",round(logLik(b_abf),10))
-[1] "bm abf loglik:  -9.6241814039"
+[1] "bm abf loglik:  -10.4535588344"
 > 
 > set.seed(7)
 > b_abf_repeat <- abf(b_abf)
@@ -161,7 +163,7 @@ abf timestep 2 of 2 finished
 > 
 > b_abfir <- abfir(b_model, Nrep = 2, Np = Np, nbhd = b_bag_nbhd)
 > paste("bm abfir loglik: ",round(logLik(b_abfir),10))
-[1] "bm abfir loglik:  -10.0040577245"
+[1] "bm abfir loglik:  -11.4654403221"
 > 
 > abfir(b_abfir,verbose=TRUE,accumvars="X1")
 <object of class ‘abfird_spatPomp’>
@@ -190,7 +192,7 @@ Error in spatPomp:::abfir_internal(object = object, Np = Np, nbhd = nbhd,  :
 > set.seed(5)
 > b_bpfilter <- bpfilter(b_model, Np = Np, block_size = 1)
 > paste("bm bpfilter loglik: ",round(logLik(b_bpfilter),10))
-[1] "bm bpfilter loglik:  -11.2089477605"
+[1] "bm bpfilter loglik:  -10.4726151819"
 > set.seed(5)
 > b_bpfilter_repeat <- bpfilter(b_bpfilter)
 > paste("check bpfilter on bpfilterd_spatPomp: ",
@@ -207,8 +209,8 @@ Error in spatPomp:::abfir_internal(object = object, Np = Np, nbhd = nbhd,  :
 > round(b_bpfilter_filter_traj@filter.traj[,1,],3)
     time
 name [,1]  [,2]  [,3]
-  X1    0 1.373 2.349
-  X2    0 2.035 0.796
+  X1    0 1.006 0.488
+  X2    0 1.892 0.933
 > 
 > set.seed(5)
 > b_bpfilter_save_states <- bpfilter(b_bpfilter,save_states=TRUE)
@@ -216,9 +218,9 @@ name [,1]  [,2]  [,3]
 [1] "bpfilter final particles: "
 > round(b_bpfilter_save_states@saved.states[[N]],3)
     .id
-name  [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]
-  X1 2.611 2.236 2.186 2.186 2.349 1.077 1.077 1.155 1.442 1.063
-  X2 0.796 0.442 0.442 0.231 0.231 0.231 0.648 0.648 1.337 1.019
+name  [,1]   [,2]   [,3]   [,4]   [,5]
+  X1 3.063  1.919  2.978  0.836  0.488
+  X2 0.933 -0.038 -0.038 -0.038 -0.038
 > 
 > set.seed(5)
 > b_bpfilter_inf <- bpfilter(b_model_zero_dmeasure, Np = Np, block_size = 1)
@@ -273,7 +275,7 @@ Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 > set.seed(5)
 > b_enkf <- enkf(b_model, Np = Np)
 > paste("bm enkf loglik: ",round(logLik(b_enkf),10))
-[1] "bm enkf loglik:  -10.8897941231"
+[1] "bm enkf loglik:  -9.9066543616"
 > 
 > 
 > ## -----------------------------------------------------------------
@@ -285,7 +287,7 @@ Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 +   Nguide = floor(Np/2),
 +   kind = 'moment',Ninter=2)
 > paste("bm girf loglik, moment guide: ",round(logLik(b_girf_mom),10))
-[1] "bm girf loglik, moment guide:  -14.9828908185"
+[1] "bm girf loglik, moment guide:  -12.2974601246"
 > 
 > ## for boostrap girf, we do not set Ninter, to test the default which is Ninter=U
 > set.seed(0)
@@ -293,7 +295,7 @@ Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 +   Nguide = floor(Np/2),
 +   kind = 'bootstrap')
 > paste("bm girf loglik, bootstrap guide: ",round(logLik(b_girf_boot),10))
-[1] "bm girf loglik, bootstrap guide:  -14.3228315101"
+[1] "bm girf loglik, bootstrap guide:  -14.1036642632"
 > 
 > set.seed(0)
 > b_girf_boot_repeat <- girf(b_girf_boot)
@@ -303,7 +305,7 @@ Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 > 
 > ## check girf for zero measurement density situations
 > b_girf_mom_inf <- girf(b_model_zero_dmeasure,Np = floor(Np/2),lookahead = 1,
-+   Nguide = floor(Np/2),
++   Nguide = 3,
 +   kind = 'moment',Ninter=2)
 > paste("bm moment girf loglik, zero measurement: ",
 +   round(logLik(b_girf_mom_inf),10))
@@ -311,7 +313,7 @@ Error : in ‘enkf’ : ‘vunit_measure’ is a needed basic component.
 > 
 > set.seed(0)
 > b_girf_boot_inf <- girf(b_model_zero_dmeasure,Np = floor(Np/2),lookahead = 1,
-+   Nguide = floor(Np/2),
++   Nguide = 3,
 +   kind = 'bootstrap',Ninter=2)
 > paste("bm bootstrap girf loglik, zero measurement: ",
 +   round(logLik(b_girf_boot_inf),10))
@@ -348,6 +350,28 @@ Error : in ‘girf’: argument "Nguide" is missing, with no default
 > try(girf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
 Error : in ‘girf’: ‘tol’ should be a small positive number.
 > 
+> try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
++   kind = 'moment',Ninter=2))
+Error : in ‘girf’: in ‘girf’: ‘params’ must be specified if not provided in the spatPomp model object
+> try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
++   kind = 'boot',Ninter=2))
+Error : in ‘girf’: in ‘girf’: ‘params’ must be specified
+>   
+> try(girf(b_model,Np = 1:10,lookahead = 1, Nguide = 3,
++   kind = 'moment',Ninter=2))
+Error : in ‘girf’: ‘Np’ must be a single positive integer
+> try(girf(b_model,Np = "JUNK",lookahead = 1, Nguide = 3,
++   kind = 'moment',Ninter=2))
+Error : in ‘girf’: ‘Np’ must be a single positive integer
+> 
+> girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
++   kind = 'moment',Ninter=2)
+<object of class ‘girfd_spatPomp’>
+> girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
++   kind = 'boot',Ninter=2)
+<object of class ‘girfd_spatPomp’>
+> 
+> 
 > ## ------------------------------------------------------------
 > ## Now, we test the inference methods
 > ## ____________________________________________________________
@@ -372,13 +396,13 @@ Error : in ‘girf’: ‘tol’ should be a small positive number.
 +   cooling.fraction.50 = 0.5,
 +   Np=Np,
 +   Ninter = 2,
-+   lookahead = 1,
-+   Nguide = 5,
++   lookahead = 2,
++   Nguide = 3,
 +   kind = 'moment',
 +   verbose = FALSE
 + )
-> paste("bm igirf loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_geom),10))
-[1] "bm igirf loglik, geometric cooling, verbose=F:  -9.9887892835"
+> paste("bm igirf loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_geom),5))
+[1] "bm igirf loglik, geometric cooling, verbose=F:  -12.80467"
 > 
 > set.seed(1)
 > b_igirf_geom_repeat <- igirf(b_igirf_geom,params=coef(b_model))
@@ -391,30 +415,30 @@ Error : in ‘girf’: ‘tol’ should be a small positive number.
 +   rw.sd = b_rw.sd,
 +   cooling.type = "hyperbolic",
 +   cooling.fraction.50 = 0.5,
-+   Np=floor(Np/2),
++   Np=3,
 +   Ninter = 2,
-+   lookahead = 1,
++   lookahead = 2,
 +   Nguide = floor(Np/2),
 +   kind = 'moment',
 +   verbose = TRUE
 + )
-igirf iteration 1 of 2 completed with likelihood  -11.56221 
-       rho      sigma        tau       X1_0       X2_0 
-0.39957108 1.00000000 1.00000000 0.01379269 0.00000000 
-igirf iteration 2 of 2 completed with likelihood  -10.59957 
-       rho      sigma        tau       X1_0       X2_0 
-0.40074887 1.00000000 1.00000000 0.04083778 0.00000000 
+igirf iteration 1 of 2 completed with likelihood  -10.98847 
+         rho        sigma          tau         X1_0         X2_0 
+ 0.405072584  1.000000000  1.000000000 -0.004536302  0.000000000 
+igirf iteration 2 of 2 completed with likelihood  -10.24179 
+        rho       sigma         tau        X1_0        X2_0 
+ 0.41413023  1.00000000  1.00000000 -0.01933633  0.00000000 
 > paste("bm igirf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
-[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.599572921"
+[1] "bm igirf loglik, hyperbolic cooling, verbose=T:  -10.2417899687"
 > 
 > plot(b_igirf_geom) -> b_igirf_plot
 > head(b_igirf_plot$data)
   iteration  param       value
-2         2 loglik -10.8072342
-3         3 loglik  -9.9887893
+2         2 loglik -13.0919779
+3         3 loglik -12.8046689
 4         1    rho   0.4000000
-5         2    rho   0.4014437
-6         3    rho   0.3984085
+5         2    rho   0.4006886
+6         3    rho   0.3985569
 7         1  sigma   1.0000000
 > 
 > set.seed(1)
@@ -431,28 +455,28 @@ igirf iteration 2 of 2 completed with likelihood  -10.59957
 +   verbose = FALSE
 + )
 > paste("bm igirf boot loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_boot_geom),10))
-[1] "bm igirf boot loglik, geometric cooling, verbose=F:  -9.9090272439"
+[1] "bm igirf boot loglik, geometric cooling, verbose=F:  -13.0494777314"
 > 
 > b_igirf_boot_hyp <- igirf(b_model,
 +   Ngirf = 2,
 +   rw.sd = b_rw.sd,
 +   cooling.type = "hyperbolic",
 +   cooling.fraction.50 = 0.5,
-+   Np=floor(Np/2),
++   Np=3,
 +   Ninter = 2,
-+   lookahead = 1,
-+   Nguide = floor(Np/2),
++   lookahead = 2,
++   Nguide = 3,
 +   kind = 'bootstrap',
 +   verbose = TRUE
 + )
-igirf iteration 1 of 2 completed with likelihood  -12.63759 
+igirf iteration 1 of 2 completed with likelihood  -8.397624 
+        rho       sigma         tau        X1_0        X2_0 
+0.400592554 1.000000000 1.000000000 0.001354013 0.000000000 
+igirf iteration 2 of 2 completed with likelihood  -8.736799 
        rho      sigma        tau       X1_0       X2_0 
-0.39913869 1.00000000 1.00000000 0.01175154 0.00000000 
-igirf iteration 2 of 2 completed with likelihood  -11.11327 
-       rho      sigma        tau       X1_0       X2_0 
-0.40066011 1.00000000 1.00000000 0.04626405 0.00000000 
+0.40039279 1.00000000 1.00000000 0.01068524 0.00000000 
 > paste("bm igirf boot loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_igirf_hyp),10))
-[1] "bm igirf boot loglik, hyperbolic cooling, verbose=T:  -10.599572921"
+[1] "bm igirf boot loglik, hyperbolic cooling, verbose=T:  -10.2417899687"
 > 
 > 
 > print("The following deliver an error message, to test it")
@@ -507,6 +531,19 @@ Error : in ‘igirf’ : ‘Nguide’ must be specified.
 +   cooling.type="geometric",Np="JUNK",Nguide=4))
 Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 
+> try(igirf(b_model,Ngirf="JUNK",rw.sd=b_rw.sd,cooling.fraction.50=0.5,
++   cooling.type="geometric",Np=3,Nguide=4))
+Error : in ‘igirf’ : Error: ‘Ngirf’ must be a positive integer.
+
+> try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=1000,
++   cooling.type="geometric",Np=3,Nguide=4))
+Error : in ‘igirf’ : Error: ‘cooling.fraction.50’ must be in (0,1].
+
+> 
+> try(igirf(b_model,kind="moment",Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,cooling.type="geometric",Np=3,Nguide=4,tol=-1))
+Error : in ‘igirf’ : Error: in ‘igirf’ : ‘tol’ should be a small positive number.
+
+> 
 > 
 > igirf(b_igirf_boot_geom,Np=3,
 +   .paramMatrix=cbind(coef(b_model),coef(b_model),coef(b_model)))
@@ -522,21 +559,31 @@ Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 
 > 
 > 
-> try(igirf(b_model,kind='moment', Ngirf = 2, Nguide=2,
+> igirf(b_model_with_accumvars,kind='moment', Ngirf = 2, Nguide=2,
 +   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
-+   Np=floor(Np/2), Ninter = 2))
++   Np=3, Ninter = 1)
 <object of class ‘igirfd_spatPomp’>
->   
+> igirf(b_model_with_accumvars,kind='boot', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=3, Ninter = 1)
+<object of class ‘igirfd_spatPomp’>
 > 
-> # try(igirf(b_model_no_vunit_measure,kind='moment'))
-> # try(igirf(b_model_no_rprocess,kind='moment'))
-> # try(igirf(b_model,kind='moment'))
-> # try(igirf(b_model,kind='moment',Np=5))
-> # try(igirf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-> # try(igirf(b_model_no_rprocess,kind='boot'))
-> # try(igirf(b_model,kind='boot'))
-> # try(igirf(b_model,kind='boot',Np=5))
-> # try(igirf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
+> igirf(b_model_zero_dmeasure,kind='moment', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=3, Ninter = 1)
+<object of class ‘igirfd_spatPomp’>
+Warning messages:
+1: In igirf.momgirf(object = object, Ninter = Ninter, Nguide = Nguide,  :
+  igirf: filtering failure at last filter iteration; using unweighted mean for point estimate.
+2: In igirf.momgirf(object = object, Ninter = Ninter, Nguide = Nguide,  :
+  igirf: filtering failure at last filter iteration; using unweighted mean for point estimate.
+> igirf(b_model_zero_dmeasure,kind='boot', Ngirf = 2, Nguide=2,
++   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
++   Np=3, Ninter = 1)
+<object of class ‘igirfd_spatPomp’>
+Warning messages:
+1: in ‘ibootgirf’: filtering failure at last filter iteration; using unweighted mean for point estimate. 
+2: in ‘ibootgirf’: filtering failure at last filter iteration; using unweighted mean for point estimate. 
 > 
 > 
 > ## ----------------------------------------------------------
@@ -554,7 +601,7 @@ Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 +   verbose=FALSE
 + )
 > paste("bm ienkf loglik, geometric cooling, verbose=F: ",round(logLik(b_ienkf_geom),10))
-[1] "bm ienkf loglik, geometric cooling, verbose=F:  -12.7660513791"
+[1] "bm ienkf loglik, geometric cooling, verbose=F:  -15.6258716527"
 > 
 > b_ienkf_hyp <- ienkf(b_model,
 +   Nenkf=2,
@@ -568,7 +615,7 @@ ienkf iteration 1 of 2 completed
 ienkf iteration 2 of 2 completed
 > 
 > paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
-[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -10.2194988409"
+[1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.8788856955"
 > 
 > ## test error messages for ienkf
 > try(ienkf(b_model_no_rproc))
@@ -618,8 +665,8 @@ Error : in ‘ienkf’: ‘.indices’ for ancestor tracking is not supported.
 > 
 > b_iubf_hyp <- iubf(b_model,
 +   Nubf = 2,
-+   Nrep_per_param = floor(Np/2),
-+   Nparam = floor(Np/2),
++   Nrep_per_param = 3,
++   Nparam = 3,
 +   nbhd = b_bag_nbhd,
 +   prop = 0.8,
 +   rw.sd =b_rw.sd,
@@ -630,16 +677,16 @@ Error : in ‘ienkf’: ‘.indices’ for ancestor tracking is not supported.
 + )
 working on observation times  1  in iteration  1 
 working on observation times  2  in iteration  1 
-iubf iteration 1 of 2 completed with log-likelihood -10.42288 
-        rho       sigma         tau        X1_0        X2_0 
-0.399899789 1.000000000 1.000000000 0.009335362 0.000000000 
+iubf iteration 1 of 2 completed with log-likelihood -10.44755 
+       rho      sigma        tau       X1_0       X2_0 
+0.39857134 1.00000000 1.00000000 0.00917446 0.00000000 
 working on observation times  1  in iteration  2 
 working on observation times  2  in iteration  2 
-iubf iteration 2 of 2 completed with log-likelihood -10.37946 
-         rho        sigma          tau         X1_0         X2_0 
-0.4037402200 1.0000000000 1.0000000000 0.0002421797 0.0000000000 
+iubf iteration 2 of 2 completed with log-likelihood -9.477666 
+       rho      sigma        tau       X1_0       X2_0 
+0.38932595 1.00000000 1.00000000 0.02563298 0.00000000 
 > paste("bm iubf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_iubf_hyp),10))
-[1] "bm iubf loglik, hyperbolic cooling, verbose=T:  -10.3794597032"
+[1] "bm iubf loglik, hyperbolic cooling, verbose=T:  -9.477665891"
 > 
 > try(iubf(b_model))
 Error : in ‘iubf’: ‘Nubf’ must be specified
@@ -653,17 +700,19 @@ Error : in ‘iubf’: ‘cooling.fraction.50’ must be specified
 Error : in ‘iubf’: ‘nbhd’ must be specified
 > try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5))
 Error : in ‘iubf’: ‘nbhd’ must be specified
-> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2))
+> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3))
 Error : in ‘iubf’: ‘nbhd’ must be specified
-> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2,nbhd=b_bag_nbhd))
+> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
 Error : in ‘iubf’: ‘prop’ must be specified
-> try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2,nbhd=b_bag_nbhd))
+> try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
 Error : in ‘iubf’: ‘prop’ must be specified
 > 
 > ## max_lookback is not triggered for b_model with N=2
 > iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8) 
 <object of class ‘iubfd_spatPomp’>
 > 
+> try(iubf(b_model5,Nubf=2, Nparam = 2,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8))
+Error : in ‘iubf’: ‘Nparam’ must be at least 3
 > 
 > ## --------------------------------------------
 > ## using bm to test simulate and plot

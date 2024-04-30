@@ -281,9 +281,10 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
     pStop_(ep, sQuote("tol")," should be a small positive number.")
 
-  do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np)
-    pStop_(ep, sQuote(".indices")," has improper length.")
+  ## ancestor tracking is not supported
+  ## do_ta <- length(.indices)>0L
+  ## if (do_ta && length(.indices)!=Np)
+  ##   pStop_(ep, sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
@@ -332,9 +333,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=tp_with_guides,
         gnsi=TRUE),
-      error = function (e) {
-        pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e)) 
-      }
+      error = function (e) pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e)) 
     )
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
@@ -372,9 +371,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=tparams,
           gnsi=TRUE),
-        error = function (e) {
-          pStop_("in ", sQuote("igirf"), " : ",conditionMessage(e)) 
-        }
+        error = function (e) pStop_("in ", sQuote("igirf"), " : ",conditionMessage(e)) 
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np)
       fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np))
@@ -522,9 +519,10 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
     stop(ep,sQuote("tol")," should be a small positive number.",call.=FALSE)
 
-  do_ta <- length(.indices)>0L
-  if (do_ta && length(.indices)!=Np)
-    stop(ep,sQuote(".indices")," has improper length.",call.=FALSE)
+  ## ancestor tracking is not supported
+  ## do_ta <- length(.indices)>0L
+  ## if (do_ta && length(.indices)!=Np)
+  ##   pStop_(ep,sQuote(".indices")," has improper length.")
 
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
@@ -597,39 +595,35 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
       }
       log_guide_fun <- vector(mode = "numeric", length = Np) + 1
 
-      for(l in 1:lookahead_steps){
-        if(nt+1+l-lookahead <= 0) discount_denom_init <- object@t0
-        else discount_denom_init <- times[nt+1+l - lookahead]
-        discount_factor <- 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1)
+      for(lag in 1:lookahead_steps){
+        if(nt+1+lag-lookahead <= 0) discount_denom_init <- object@t0
+        else discount_denom_init <- times[nt+1+lag - lookahead]
+        discount_factor <- 1 - (times[nt+1+lag] - tt[s+1])/(times[nt+1+lag] - discount_denom_init)/ifelse(lookahead==1,2,1)
 	## to ensure that the discount factor does not become too small for L=1
 	## and small s (which can lead to very uninformative guide function), increase
 	## the discount factor to at least 1/2 when L=1.
 
         ## construct pseudo-simulations by adding simulated noise terms (residuals)
 	## to the skeletons
-        pseudosims <- skel[,rep(1:Np, each=Nguide),l,drop=FALSE] +
+        pseudosims <- skel[,rep(1:Np, each=Nguide),lag,drop=FALSE] +
           resids[,rep(guidesim_index-1, each=Nguide)*
-	    Nguide+rep(1:Nguide, Np),l,drop=FALSE] -
+	    Nguide+rep(1:Nguide, Np),lag,drop=FALSE] -
           resids[,rep(guidesim_index-1, each=Nguide)*
 	    Nguide+rep(1:Nguide, Np),1,drop=FALSE] +
           resids[,rep(guidesim_index-1, each=Nguide)*
 	    Nguide+rep(1:Nguide, Np),1,drop=FALSE] *
 	      sqrt((times[nt+2]-tt[s+1])/(times[nt+2]-times[nt+1]))
-        rm(skel)
         log_dmeas_weights <- tryCatch(
         (vec_dmeasure(
           object,
-          y=object@data[,nt+l,drop=FALSE],
+          y=object@data[,nt+lag,drop=FALSE],
           x=pseudosims,
-          times=times[nt+1+l],
+          times=times[nt+1+lag],
           params=tp_with_guides,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) {
-          stop(ep,"error in calculation of log_dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_("error in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
 
         ## uncomment for debugging: tracking down particles with NA weight
@@ -637,9 +631,9 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         ##   na_ix <- which(is.na(log_dmeas_weights[,,1]))[1]
         ##   na_ix_col <- (na_ix %/% nunits) + (na_ix %% nunits > 0)
         ##   illegal_dunit_measure_error(
-        ##     time=times[nt+1+l],
+        ##     time=times[nt+1+lag],
         ##     lik=log_dmeas_weights[,na_ix_col,1,drop=FALSE],
-        ##     datvals=object@data[,nt+l],
+        ##     datvals=object@data[,nt+lag],
         ##     states=pseudosims[,na_ix_col,1L],
         ##     params=tp_with_guides[,na_ix_col]
         ##   )
@@ -655,6 +649,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
         log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
+      rm(skel)
       log_s_not_1_weights <- log_guide_fun - log_filter_guide_fun
       if (!(s==1 & nt!=0)){
         log_weights <- log_s_not_1_weights
@@ -673,10 +668,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             log=TRUE,
             .gnsi=gnsi
           ),
-          error = function (e) {
-            stop(ep,"error in calculation of log_meas_weights: ",
-              conditionMessage(e),call.=FALSE)
-          }
+          error = function (e) pStop_("error in calculation of log_meas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -707,9 +699,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), 
             tol=tol
           ),
-          error = function (e) {
-            stop(ep,conditionMessage(e),call.=FALSE) 
-          }
+          error = function (e) pStop_("error in igirf computations : ", conditionMessage(e)) 
         )
         guidesim_index = guidesim_index[xx$ancestry] 
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights

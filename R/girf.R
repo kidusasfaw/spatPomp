@@ -240,7 +240,8 @@ momgirf.internal <- function (object,
     pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   if (length(params)==0)
-    stop(ep,sQuote("params")," must be specified",call.=FALSE)
+    pStop_(ep,sQuote("params"),
+      " must be specified if not provided in the spatPomp model object")
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
@@ -286,9 +287,7 @@ momgirf.internal <- function (object,
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=params,
         gnsi=TRUE),
-      error = function (e) {
-        pStop_(conditionMessage(e))
-      }
+      error = function (e) pStop_("rprocess error in girf : ", conditionMessage(e))
     )
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
@@ -515,14 +514,7 @@ bootgirf.internal <- function (object,
         params=params.matrix,
         times = times[(nt+2):(nt+1+lookahead_steps)],
         ...),
-      error = function (e) {
-        pomp::flow(object,
-          x0=x,
-          t0=times[nt+1],
-          params=params.matrix,
-          times = times[(nt+2):(nt+1+lookahead_steps)],
-          method = 'adams')
-      }
+      error = function (e) pStop_("girf error in flow : ", conditionMessage(e))
     )
     resids <- Xg - Xskel[,rep(1:Np, each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
@@ -543,14 +535,7 @@ bootgirf.internal <- function (object,
             params=params.matrix,
             times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
             ...),
-          error = function (e) {
-            pomp::flow(object,
-              x0=X.start,
-              t0=tt[s+1],
-              params=params.matrix,
-              times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-              method = 'adams')
-          }
+          error = function (e) pStop_("girf error in flow : ", conditionMessage(e))
         )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
@@ -586,10 +571,7 @@ bootgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) {
-          stop(ep,"error in calculation of log_dmeas_weights: ",
-            conditionMessage(e),call.=FALSE)
-        }
+        error = function (e) pStop_("girf error in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
         ldw <- array(log_dmeas_weights, c(U,Nguide,Np)) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
         log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)

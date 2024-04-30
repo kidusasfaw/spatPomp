@@ -104,6 +104,8 @@ setMethod(
       pStop_(ep,sQuote("nbhd")," must be specified")
     if (missing(Nparam))
       pStop_(ep,sQuote("Nparam")," must be specified")
+    if (Nparam<2.5)
+      pStop_(ep,sQuote("Nparam")," must be at least 3")
     if (missing(prop))
       pStop_(ep,sQuote("prop")," must be specified")
     cooling.type <- match.arg(cooling.type)

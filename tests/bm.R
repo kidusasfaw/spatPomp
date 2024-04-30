@@ -2,7 +2,7 @@ library(spatPomp)
 i <- 1
 U <- switch(i,2,10)
 N <- switch(i,2,10)
-Np <- switch(i,10,100)
+Np <- switch(i,5,100)
 
 # For CRAN tests, need to limit to two cores
 # https://stackoverflow.com/questions/50571325/r-cran-check-fail-when-using-parallel-functions
@@ -45,6 +45,8 @@ b_model_no_runit_measure <- spatPomp(b_model,runit_measure=NULL)
 b_model_no_dunit_measure <- spatPomp(b_model,dunit_measure=NULL)
 b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
 b_model5 <- bm(U=U,N=5) 
+b_model_with_accumvars <- b_model
+b_model_with_accumvars@accumvars <- rownames(states(b_model))
 
 b_model_zero_dmeasure <- spatPomp(b_model,
   dmeasure = spatPomp_Csnippet(
@@ -212,14 +214,14 @@ paste("check girf on girfd_spatPomp: ",
 
 ## check girf for zero measurement density situations
 b_girf_mom_inf <- girf(b_model_zero_dmeasure,Np = floor(Np/2),lookahead = 1,
-  Nguide = floor(Np/2),
+  Nguide = 3,
   kind = 'moment',Ninter=2)
 paste("bm moment girf loglik, zero measurement: ",
   round(logLik(b_girf_mom_inf),10))
 
 set.seed(0)
 b_girf_boot_inf <- girf(b_model_zero_dmeasure,Np = floor(Np/2),lookahead = 1,
-  Nguide = floor(Np/2),
+  Nguide = 3,
   kind = 'bootstrap',Ninter=2)
 paste("bm bootstrap girf loglik, zero measurement: ",
   round(logLik(b_girf_boot_inf),10))
@@ -239,6 +241,22 @@ try(girf(b_model_no_rprocess,kind='boot'))
 try(girf(b_model,kind='boot'))
 try(girf(b_model,kind='boot',Np=5))
 try(girf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
+
+try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
+  kind = 'moment',Ninter=2))
+try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
+  kind = 'boot',Ninter=2))
+  
+try(girf(b_model,Np = 1:10,lookahead = 1, Nguide = 3,
+  kind = 'moment',Ninter=2))
+try(girf(b_model,Np = "JUNK",lookahead = 1, Nguide = 3,
+  kind = 'moment',Ninter=2))
+
+girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
+  kind = 'moment',Ninter=2)
+girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
+  kind = 'boot',Ninter=2)
+
 
 ## ------------------------------------------------------------
 ## Now, we test the inference methods
@@ -264,12 +282,12 @@ b_igirf_geom <- igirf(b_model,
   cooling.fraction.50 = 0.5,
   Np=Np,
   Ninter = 2,
-  lookahead = 1,
-  Nguide = 5,
+  lookahead = 2,
+  Nguide = 3,
   kind = 'moment',
   verbose = FALSE
 )
-paste("bm igirf loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_geom),10))
+paste("bm igirf loglik, geometric cooling, verbose=F: ",round(logLik(b_igirf_geom),5))
 
 set.seed(1)
 b_igirf_geom_repeat <- igirf(b_igirf_geom,params=coef(b_model))
@@ -281,9 +299,9 @@ b_igirf_hyp <- igirf(b_model,
   rw.sd = b_rw.sd,
   cooling.type = "hyperbolic",
   cooling.fraction.50 = 0.5,
-  Np=floor(Np/2),
+  Np=3,
   Ninter = 2,
-  lookahead = 1,
+  lookahead = 2,
   Nguide = floor(Np/2),
   kind = 'moment',
   verbose = TRUE
@@ -313,10 +331,10 @@ b_igirf_boot_hyp <- igirf(b_model,
   rw.sd = b_rw.sd,
   cooling.type = "hyperbolic",
   cooling.fraction.50 = 0.5,
-  Np=floor(Np/2),
+  Np=3,
   Ninter = 2,
-  lookahead = 1,
-  Nguide = floor(Np/2),
+  lookahead = 2,
+  Nguide = 3,
   kind = 'bootstrap',
   verbose = TRUE
 )
@@ -349,6 +367,13 @@ try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
   cooling.type="geometric",Np=4))
 try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,
   cooling.type="geometric",Np="JUNK",Nguide=4))
+try(igirf(b_model,Ngirf="JUNK",rw.sd=b_rw.sd,cooling.fraction.50=0.5,
+  cooling.type="geometric",Np=3,Nguide=4))
+try(igirf(b_model,Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=1000,
+  cooling.type="geometric",Np=3,Nguide=4))
+
+try(igirf(b_model,kind="moment",Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,cooling.type="geometric",Np=3,Nguide=4,tol=-1))
+
 
 igirf(b_igirf_boot_geom,Np=3,
   .paramMatrix=cbind(coef(b_model),coef(b_model),coef(b_model)))
@@ -357,20 +382,19 @@ try(igirf(b_igirf_boot_geom,Np=function(x) "JUNK"))
 try(igirf(b_igirf_boot_geom,Np=5:15))
 
 
-try(igirf(b_model,kind='moment', Ngirf = 2, Nguide=2,
+igirf(b_model_with_accumvars,kind='moment', Ngirf = 2, Nguide=2,
   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
-  Np=floor(Np/2), Ninter = 2))
-  
+  Np=3, Ninter = 1)
+igirf(b_model_with_accumvars,kind='boot', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=3, Ninter = 1)
 
-# try(igirf(b_model_no_vunit_measure,kind='moment'))
-# try(igirf(b_model_no_rprocess,kind='moment'))
-# try(igirf(b_model,kind='moment'))
-# try(igirf(b_model,kind='moment',Np=5))
-# try(igirf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-# try(igirf(b_model_no_rprocess,kind='boot'))
-# try(igirf(b_model,kind='boot'))
-# try(igirf(b_model,kind='boot',Np=5))
-# try(igirf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
+igirf(b_model_zero_dmeasure,kind='moment', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=3, Ninter = 1)
+igirf(b_model_zero_dmeasure,kind='boot', Ngirf = 2, Nguide=2,
+  rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
+  Np=3, Ninter = 1)
 
 
 ## ----------------------------------------------------------
@@ -436,8 +460,8 @@ paste("bm iubf loglik, geometric cooling, verbose=F: ",round(logLik(b_iubf_geom)
 
 b_iubf_hyp <- iubf(b_model,
   Nubf = 2,
-  Nrep_per_param = floor(Np/2),
-  Nparam = floor(Np/2),
+  Nrep_per_param = 3,
+  Nparam = 3,
   nbhd = b_bag_nbhd,
   prop = 0.8,
   rw.sd =b_rw.sd,
@@ -454,13 +478,14 @@ try(iubf(b_model,Nubf=2,Nrep_per_param=3))
 try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd))
 try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=1000))
 try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5))
-try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2))
-try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2,nbhd=b_bag_nbhd))
-try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=2,nbhd=b_bag_nbhd))
+try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3))
+try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
+try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
 
 ## max_lookback is not triggered for b_model with N=2
 iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8) 
 
+try(iubf(b_model5,Nubf=2, Nparam = 2,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8))
 
 ## --------------------------------------------
 ## using bm to test simulate and plot
