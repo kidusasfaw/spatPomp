@@ -82,6 +82,27 @@ Loading required package: pomp
 +   ")
 + )
 > 
+> b_bag_nbhd <- function(object, time, unit) {
++   nbhd_list <- list()
++   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
++   return(nbhd_list)
++ }
+> 
+> b_bag_nbhd_lookback1 <- function(object, time, unit) {
++   nbhd_list <- list()
++   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
++   if(time>1)  nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
++   return(nbhd_list)
++ }
+> 
+> b_bag_nbhd_lookback2 <- function(object, time, unit) {
++   nbhd_list <- list()
++   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
++   if(time>1) nbhd_list <- c(nbhd_list, list(c(unit, time-1)))
++   if(time>2)  nbhd_list <- c(nbhd_list, list(c(unit, time-2)))
++   return(nbhd_list)
++ }
+> 
 > ## ------------------------------------------------------------
 > ## The bm model provides a simple example to test other methods.
 > ## First, we test the filtering methods
@@ -106,11 +127,6 @@ Loading required package: pomp
 > ## abf tested on bm. abf uses parallelization, so we also test that
 > ## _______________________________________________________________
 > 
-> b_bag_nbhd <- function(object, time, unit) {
-+   nbhd_list <- list()
-+   if(unit>1) nbhd_list <- c(nbhd_list, list(c(unit-1, time)))
-+   return(nbhd_list)
-+ }
 > 
 > set.seed(7)
 > b_abf <- abf(b_model,Nrep=2,Np=Np, nbhd = b_bag_nbhd)
@@ -690,6 +706,8 @@ iubf iteration 2 of 2 completed with log-likelihood -9.477666
 > 
 > try(iubf(b_model))
 Error : in ‘iubf’: ‘Nubf’ must be specified
+> try(iubf(b_model,Nubf=-1))
+Error : in ‘iubf’: ‘Nubf’ must be a positive integer
 > try(iubf(b_model,Nubf=2))
 Error : in ‘iubf’: number of replicates, ‘Nrep_per_param’, must be specified
 > try(iubf(b_model,Nubf=2,Nrep_per_param=3))
@@ -700,15 +718,23 @@ Error : in ‘iubf’: ‘cooling.fraction.50’ must be specified
 Error : in ‘iubf’: ‘nbhd’ must be specified
 > try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5))
 Error : in ‘iubf’: ‘nbhd’ must be specified
-> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3))
-Error : in ‘iubf’: ‘nbhd’ must be specified
-> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
+> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,nbhd=b_bag_nbhd))
+Error : in ‘iubf’: ‘Nparam’ must be specified
+> try(iubf(b_model,Nubf=2,Nrep_per_param=3,rw.sd=b_rw.sd,cooling.fraction.50=0.5,nbhd=b_bag_nbhd,Nparam=3))
 Error : in ‘iubf’: ‘prop’ must be specified
 > try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,Nparam=3,nbhd=b_bag_nbhd))
 Error : in ‘iubf’: ‘prop’ must be specified
+> try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=1000,Nparam=3,nbhd=b_bag_nbhd,prop=0.8))
+Error : in ‘iubf’: ‘cooling.fraction.50’ must be in (0,1]
 > 
 > ## max_lookback is not triggered for b_model with N=2
-> iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8) 
+> iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
+<object of class ‘iubfd_spatPomp’>
+> 
+> ## trigger situations where neighborhood is not contemporaneous
+> iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd_lookback1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
+<object of class ‘iubfd_spatPomp’>
+> iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd_lookback2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
 <object of class ‘iubfd_spatPomp’>
 > 
 > try(iubf(b_model5,Nubf=2, Nparam = 2,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8))

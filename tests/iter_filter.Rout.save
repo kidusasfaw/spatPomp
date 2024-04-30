@@ -24,11 +24,28 @@ Type 'q()' to quit R.
 > 
 > library(spatPomp)
 Loading required package: pomp
-> try(
-+   spatPomp:::perturbn.kernel.sd(rw.sd=rw_sd(rho=0.02,X1_0=ivp(0.02)),1:2,
-+     paramnames="testing_error")
-+ )
+> try(spatPomp:::perturbn.kernel.sd(rw.sd=rw_sd(rho=0.02,X1_0=ivp(0.02)),1:2,
++   paramnames="JUNK"))
 Error : the following parameter(s), given random walks in ‘rw.sd’, are not present in ‘params’: ‘rho’,‘X1_0’.
+> 
+> try(spatPomp:::perturbn.kernel.sd("JUNK"))
+Error : ‘rw.sd’ should be specified using the ‘rw.sd’ function. See ‘?mif2’.
+> 
+> try(spatPomp:::perturbn.kernel.sd(rw.sd=rw_sd(0.02)))
+Error : in ‘rw.sd’: parameters must be referenced by name.
+> 
+> try(spatPomp:::perturbn.kernel.sd(rw.sd=rw_sd(rho=1:10,X1_0=ivp(0.02)),1:2,
++   paramnames=c("rho","X1_0")))
+Error : ‘rw.sd’ spec for parameter ‘rho’ does not evaluate to a vector of the correct length (‘length(time(object))’=2).
+> 
+> spatPomp:::safecall()
+An object of class "safecall"
+Slot "call":
+spatPomp:::safecall()
+
+Slot "envir":
+<environment: R_GlobalEnv>
+
 > 
 > spatPomp:::perturbn.kernel.sd(
 +   rw.sd=matrix(c(0.01,0.02),nrow=2,ncol=2,
@@ -39,6 +56,13 @@ X1_0 0.02 0.02
 > 
 > # test fraction > 1
 > frac_test <- spatPomp:::mif2.cooling("hyperbolic",fraction=1.5,ntimes=5)
+> frac_test(5,1)
+$alpha
+[1] 1
+
+$gamma
+[1] 1
+
 > 
 > 
 > 

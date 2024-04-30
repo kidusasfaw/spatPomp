@@ -141,7 +141,6 @@ iubf_ubf <- function (object,
   tol = (1e-18)^17,
   .indices = integer(0), verbose,
   .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("iubf_ubf"),": ")
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   abfiter <- as.integer(abfiter)
@@ -199,10 +198,8 @@ iubf_ubf <- function (object,
             log=TRUE,
             .gnsi=gnsi
           ),
-          error = function (e) {
-            stop(ep,"error in calculation of weights: ",
-              conditionMessage(e),call.=FALSE)
-          }
+          error = function (e) pStop_("error in calculation of weights: ",
+              conditionMessage(e))
         )[,,1]
         log_cond_densities[is.infinite(log_cond_densities)] <- log(tol)
         gnsi <- FALSE
