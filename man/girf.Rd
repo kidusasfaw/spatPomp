@@ -42,7 +42,7 @@
 \arguments{
 \item{object}{A \code{spatPomp} object.}
 
-\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+\item{...}{Additional arguments can be used to replace model components.}
 
 \item{Np}{The number of particles used within each replicate for the adapted simulations.}
 

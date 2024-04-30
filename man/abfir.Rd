@@ -15,11 +15,12 @@
   nbhd,
   Ninter,
   tol = (1e-300),
+  params,
   ...,
   verbose = getOption("verbose", FALSE)
 )
 
-\S4method{abfir}{abfird_spatPomp}(object, Np, Nrep, nbhd, Ninter, tol, ...)
+\S4method{abfir}{abfird_spatPomp}(object, Np, Nrep, nbhd, Ninter, tol, params, ...)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}
@@ -29,14 +30,17 @@
 \item{Nrep}{The number of bootstrap replicates for the adapted simulations.}
 
 \item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}.
-The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
-which is represented by \code{c(unit,time)}. See example below for more details.}
+The function should return a \code{list} of two-element vectors that represent space-time
+neighbors of \eqn{(u,n)}, which is represented by \code{c(unit,time)}.
+See example below for more details.}
 
 \item{Ninter}{the number of intermediate resampling time points. By default, this is set equal to the number of units.}
 
 \item{tol}{If the resampling weight for a particle is zero due to floating-point precision issues, it is set to the value of \code{tol} since resampling has to be done.}
 
-\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+\item{params}{Parameter vector, required if not available from the spatPomp model object.}
+
+\item{...}{Additional arguments can be used to replace model components.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }

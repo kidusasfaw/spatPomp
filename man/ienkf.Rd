@@ -40,7 +40,7 @@ See below (under \dQuote{Specifying the perturbations}) for more detail.}
 
 \item{Np}{The number of particles used within each replicate for the adapted simulations.}
 
-\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+\item{...}{Additional arguments can be used to replace model components.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }

@@ -51,7 +51,7 @@
 \arguments{
 \item{data}{an object of class \code{spatPomp} or \code{igirfd_spatPomp}}
 
-\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+\item{...}{Additional arguments can be used to replace model components.}
 
 \item{Ngirf}{the number of iterations of parameter-perturbed GIRF.}
 

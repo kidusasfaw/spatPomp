@@ -15,7 +15,7 @@
 
 \item{Np}{The number of Monte Carlo particles used to approximate the filter distribution.}
 
-\item{...}{If a \code{params} argument is specified, \code{abf} will estimate the likelihood at that parameter set instead of at \code{coef(object)}.}
+\item{...}{Additional arguments can be used to replace model components.}
 
 \item{verbose}{logical; if \code{TRUE}, messages updating the user on progress will be printed to the console.}
 }

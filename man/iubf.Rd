@@ -31,8 +31,9 @@
 \item{Nparam}{The number of parameters that will undergo the iterated perturbation}
 
 \item{nbhd}{A neighborhood function with three arguments: \code{object}, \code{time} and \code{unit}.
-The function should return a \code{list} of two-element vectors that represent space-time neighbors of \eqn{(u,n)},
-which is represented by \code{c(unit,time)}. See example below for more details.}
+The function should return a \code{list} of two-element vectors that represent space-time
+neighbors of \eqn{(u,n)}, which is represented by \code{c(unit,time)}.
+See example below for more details.}
 
 \item{prop}{A numeric between 0 and 1. The top \code{prop}*100\% of the parameters are resampled at each observation}
 

@@ -81,251 +81,6 @@ setClass(
   )
 )
 
-abfir_internal <- function (object, Np, nbhd,
-  Ninter, tol, ..., verbose, .gnsi = TRUE) {
-  ep <- paste0("in ",sQuote("abfir"),": ")
-  p_object <- pomp(object,...,verbose=verbose)
-  object <- new("spatPomp",p_object,
-    unit_covarnames = object@unit_covarnames,
-    shared_covarnames = object@shared_covarnames,
-    runit_measure = object@runit_measure,
-    dunit_measure = object@dunit_measure,
-    eunit_measure = object@eunit_measure,
-    munit_measure = object@munit_measure,
-    vunit_measure = object@vunit_measure,
-    unit_names=object@unit_names,
-    unitname=object@unitname,
-    unit_statenames=object@unit_statenames,
-    unit_obsnames = object@unit_obsnames,
-    unit_accumvars = object@unit_accumvars)
-  params <- coef(object)
-  verbose = FALSE
-  pompLoad(object,verbose=verbose)
-  on.exit(pompUnload(object,verbose=verbose))
-  gnsi <- as.logical(.gnsi)
-
-  if (length(params)==0) stop(ep,sQuote("params")," must be specified",call.=FALSE)
-  if (missing(tol)) stop(ep,sQuote("tol")," must be specified",call.=FALSE)
-
-  times <- time(object,t0=TRUE)
-  N <- length(times)-1
-  U <- length(unit_names(object))
-
-  if (missing(Np)) stop(ep,sQuote("Np")," must be specified",call.=FALSE)
-  if (is.function(Np)) stop(ep,"Functions for Np not supported by abfir",call.=FALSE)
-  if (length(Np)!=1) stop(ep,"Np should be a length 1 vector",call.=FALSE)
-  Np <- as.integer(Np)
-
-  if (NCOL(params)>1) stop(ep,"does not accept matrix parameter input",call.=FALSE)
-
-  paramnames <- names(params)
-  if (is.null(paramnames))
-    stop(ep,sQuote("params")," must have names",call.=FALSE)
-
-  param_matrix <- matrix(params,nrow=length(params),ncol=Np,
-    dimnames=list(names(params),NULL))
-
-  x_init <- rinit(object,params=params,nsim=1,.gnsi=gnsi) # Nx x 1 matrix
-  statenames <- rownames(x_init)
-  Nx <- nrow(x_init)
-  xas <- as.numeric(x_init) # adapted simulation state vector
-  znames <- object@accumvars
-
-  log_cond_densities <- array(data = numeric(0), dim=c(U,Np,N))
-  dimnames(log_cond_densities) <- list(unit = 1:U, rep = 1:Np, time = 1:N)
-
-  for (n in seq_len(N)) {
-    ## assimilate observation n given filter at n-1
-    ## note that times[n+1] is the time for observation n
-
-    ## xg: Nx x Np x 1 matrix of guide simulations
-    ## also used to calculate local prediction weights
-    xf <- matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL))
-    xg <- tryCatch(
-      rprocess(
-        object,
-        x0=xf,
-        t0=times[n],
-        times=times[n+1],
-        params=params,
-        .gnsi=gnsi
-      ),
-      error = function (e) stop(ep,"process simulation error: ",
-        conditionMessage(e),call.=FALSE)
-    )
-    xg_2dim <- xg[,,1]
-    xg_with_rep <- do.call(cbind,replicate(Np, xg_2dim, simplify=FALSE))
-    dim(xg_with_rep) <- c(dim(xg_with_rep)[1],dim(xg_with_rep)[2],1)
-    dimnames(xg_with_rep) <- list(states = rownames(xg_2dim))
-    xx <- tryCatch(
-      .Call(do_fcst_samp_var,
-        object=object,
-        X=xg_with_rep,
-        Np = as.integer(Np),
-        times=times[n+1],
-        params=params,
-        gnsi=TRUE),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE) # nocov
-      }
-    )
-    fcst_samp_var <- xx
-    dim(fcst_samp_var) <- c(length(unit_names(object)), Np)
-
-    log_weights <- tryCatch(
-      vec_dmeasure(
-        object,
-        y=object@data[,n,drop=FALSE],
-        x=xg,
-        times=times[n+1],
-        params=param_matrix,
-        log=TRUE,
-        .gnsi=gnsi
-      ),
-      error = function (e) {
-        stop(ep,"error in calculation of weights: ",
-          conditionMessage(e),call.=FALSE)
-      }
-    )
-
-    log_cond_densities[,,n] <- log_weights[,,1]
-    tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
-    log_gf <- rep(0,Np) # filtered guide function
-    for (s in 1:Ninter){
-      xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
-        params=params,.gnsi=gnsi) # an Nx by nreps by 1 array
-      if(s>1 && length(znames)>0){
-        xf.znames <- xf[znames,,drop=FALSE]
-        xp[znames,,1] <- xp[znames,,1,drop=FALSE][,,1] + xf.znames
-      }
-      if(s < Ninter){
-        skel <- tryCatch(
-          pomp::flow(object,
-            x0=xp[,,1],
-            t0=tt[s+1],
-            params=param_matrix,
-            times = times[n + 1],
-            ...),
-          error = function (e) {
-            pomp::flow(object,
-              x0=xp[,,1],
-              t0=tt[s+1],params=param_matrix,
-              times = times[n + 1],
-              method='adams')
-          }
-        )
-        if(length(znames) > 0){
-          skel.lookahead1.znames <- skel[znames,,1,drop=FALSE]
-          xp.znames <- xp[znames,,1,drop=FALSE]
-          skel[znames,,] <- skel.lookahead1.znames + xp.znames
-        }
-      } else {
-        skel <- xp
-      }
-      meas_var_skel <- tryCatch(
-        .Call(do_vunit_measure,
-          object=object,
-          X=skel,
-          Np = as.integer(Np[1]),
-          times=times[n+1],
-          params=params,
-          gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
-      )
-      meas_var_skel <- meas_var_skel[,,1]
-      fcst_var_upd <- fcst_samp_var*(times[n+1] - tt[s+1])/(times[n+1] - times[n])
-      inflated_var <- meas_var_skel + fcst_var_upd
-      dim(inflated_var) <- c(U, Np, 1)
-      array.params <- array(params, dim = c(length(params), length(unit_names(object)), Np, 1), dimnames = list(params = names(params)))
-
-      mmp <- tryCatch(
-        .Call(do_munit_measure,
-          object=object,
-          X=skel,
-          vc=inflated_var,
-          Np = as.integer(Np[1]),
-          times=times[n+1],
-          params=array.params,
-          gnsi=TRUE),
-        error = function (e) {
-          stop(ep,conditionMessage(e),call.=FALSE) # nocov
-        }
-      )
-      mom_match_param <- mmp[,,,1]
-
-      log_wp <- tryCatch(
-        vec_dmeasure(
-          object,
-          y=object@data[,n,drop=FALSE],
-          x=skel,
-          times=times[n+1],
-          params=mom_match_param,
-          log=TRUE,
-          .gnsi=gnsi
-        ),
-        error = function (e) stop(ep,"error in calculation of wp: ",
-          conditionMessage(e),call.=FALSE)
-      )
-      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
-      max_log_gp <- max(log_gp)
-      if(max_log_gp > -Inf){
-        log_gp <- log_gp - max_log_gp
-        weights <- exp(log_gp - log_gf)
-        gnsi <- FALSE
-        xx <- tryCatch(
-          .Call(abfir_resample, xp, Np, weights, log_gp, tol),
-          error = function (e) stop(ep,conditionMessage(e),call.=FALSE)
-        )
-        xf <- xx$states
-        log_gf <- xx$filterguides
-      }
-      else{
-        xf <- xp
-        log_gf <- log(tol)
-      }
-
-    }
-                                        # resample down to one particle, making Np copies of, say, particle #1.
-    xas <- xf[,1]
-
-    if (verbose && (n%%5==0)) cat("abfir timestep",n,"of",N,"finished\n")
-
-  }
-  log_loc_comb_pred_weights = array(data = numeric(0), dim=c(U,Np, N))
-  log_wm_times_wp_avg = array(data = numeric(0), dim = c(U, N))
-  log_wp_avg = array(data = numeric(0), dim = c(U, N))
-  for (n in seq_len(N)){
-    for (u in seq_len(U)){
-      full_nbhd <- nbhd(object, time = n, unit = u)
-      log_prod_cond_dens_nt  <- rep(0, Np)
-      if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0, Np[1], max(1,n-min(sapply(full_nbhd,'[[',2))))
-      else log_prod_cond_dens_not_nt <- matrix(0,Np[1],0)
-      for (neighbor in full_nbhd){
-        neighbor_u <- neighbor[1]
-        neighbor_n <- neighbor[2]
-        if (neighbor_n == n)
-          log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ,neighbor_n]
-        else
-          log_prod_cond_dens_not_nt[, n-neighbor_n] <- log_prod_cond_dens_not_nt[, n-neighbor_n] + log_cond_densities[neighbor_u, ,neighbor_n]
-      }
-      log_loc_comb_pred_weights[u,,n]  <- sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) + log_prod_cond_dens_nt
-    }
-  }
-  log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities, c(1,3), FUN = logmeanexp)
-  log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
-
-  pompUnload(object,verbose=verbose)
-  new(
-    "adapted_replicate",
-    log_wm_times_wp_avg = log_wm_times_wp_avg,
-    log_wp_avg = log_wp_avg,
-    Np=as.integer(Np),
-    tol=tol
-  )
-}
-
 setGeneric("abfir",function(object,...)standardGeneric("abfir"))
 
 ##' @name abfir-spatPomp
@@ -336,11 +91,18 @@ setMethod(
   "abfir",
   signature=signature(object="spatPomp"),
   function (object, Np, Nrep, nbhd,
-    Ninter, tol = (1e-300), ...,
-    verbose=getOption("verbose",FALSE)) {
-                                        # declare global variable since foreach's u uses non-standard evaluation
+    Ninter, tol = (1e-300), params, ...,
+    verbose=getOption("verbose",FALSE) ) {
+
+    ep <- paste0("in ",sQuote("abfir"),": ")
+    ## declare global variable since foreach's u uses non-standard evaluation
     i <- 1
     if (missing(Ninter)) Ninter <- length(unit_names(object))
+    if (missing(Np)) pStop_(ep,sQuote("Np")," must be specified")
+    if (!missing(params)) {
+      if(is.null(names(params))) pStop_(ep, sQuote('params'), " must be a named vector")
+      coef(object) <- params
+    }
     if(missing(nbhd)){
       nbhd <- function(object, unit, time){
         nbhd_list = list()
@@ -349,31 +111,19 @@ setMethod(
         return(nbhd_list)
       }
     }
-    ## set.seed(396658101,kind="L'Ecuyer")
-    ## begin single-core
-    ## single_rep_output <- spatPomp:::abfir_internal(
-    ##   object=object,
-    ##   Np=Np,
-    ##   nbhd=nbhd,
-    ##   Ninter=Ninter,
-    ##   tol=tol,
-    ##   ...
-    ## )
-    ## return(single_rep_output)
-    ## end single-core
     mcopts <- list(set.seed=TRUE)
     mult_rep_output <- foreach::foreach(i=1:Nrep,
       .packages=c("pomp","spatPomp"),
-      .options.multicore=list(set.seed=TRUE)) %dopar%
+      .options.multicore=list(set.seed=TRUE)) %dopar% 
       spatPomp:::abfir_internal(
-                   object=object,
-                   Np=Np,
-                   nbhd=nbhd,
-                   Ninter=Ninter,
-                   tol=tol,
-                   ...,
-                   verbose=verbose
-                 )
+        object=object,
+        Np=Np,
+        nbhd=nbhd,
+        Ninter=Ninter,
+        tol=tol,
+        ...,
+        verbose=verbose
+      )
     ## compute sum (over all Nrep) of w_{d,n,i}^{P} for each (d,n)
     N <- length(object@times)
     U <- length(unit_names(object))
@@ -415,19 +165,257 @@ setMethod(
   "abfir",
   signature=signature(object="abfird_spatPomp"),
   function (object, Np, Nrep, nbhd,
-    Ninter, tol, ...) {
+    Ninter, tol, params, ...) {
     if (missing(Np)) Np <- object@Np
     if (missing(tol)) tol <- object@tol
     if (missing(Ninter)) Ninter <- object@Ninter
     if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd
+    if (missing(params)) params <- object@params
 
-    abfir(as(object,"spatPomp"),
-      Np=Np,
-      Ninter=Ninter,
-      Nrep=Nrep,
-      nbhd=nbhd,
-      tol=tol,
-      ...)
+    tryCatch(
+      abfir(as(object,"spatPomp"),
+        Np=Np,
+        Ninter=Ninter,
+        Nrep=Nrep,
+        nbhd=nbhd,
+	tol=tol,
+        params=params,
+        ...),
+	error = function (e) pStop_(" in abfir : ", conditionMessage(e))
+     )
   }
 )
+
+abfir_internal <- function (object, Np, nbhd,
+  Ninter, tol, ..., verbose, .gnsi = TRUE) {
+  ep <- paste0("in ",sQuote("abfir")," : ")
+  p_object <- pomp(object,...,verbose=verbose)
+  object <- new("spatPomp",p_object,
+    unit_covarnames = object@unit_covarnames,
+    shared_covarnames = object@shared_covarnames,
+    runit_measure = object@runit_measure,
+    dunit_measure = object@dunit_measure,
+    eunit_measure = object@eunit_measure,
+    munit_measure = object@munit_measure,
+    vunit_measure = object@vunit_measure,
+    unit_names=object@unit_names,
+    unitname=object@unitname,
+    unit_statenames=object@unit_statenames,
+    unit_obsnames = object@unit_obsnames,
+    unit_accumvars = object@unit_accumvars)
+  params <- coef(object)
+  verbose = FALSE
+  pompLoad(object,verbose=verbose)
+  on.exit(pompUnload(object,verbose=verbose))
+  gnsi <- as.logical(.gnsi)
+
+  if (length(params)==0) pStop_(ep,sQuote("params")," must be specified")
+  if (missing(tol)) pStop_(ep,sQuote("tol")," must be specified")
+
+  times <- time(object,t0=TRUE)
+  N <- length(times)-1
+  U <- length(unit_names(object))
+
+  if (is.function(Np)) pStop_(ep,"Functions for Np not supported by abfir")
+  if (length(Np)!=1) pStop_(ep,"Np should be a length 1 vector")
+  Np <- as.integer(Np)
+
+  param_matrix <- matrix(params,nrow=length(params),ncol=Np,
+    dimnames=list(names(params),NULL))
+
+  x_init <- rinit(object,params=params,nsim=1,.gnsi=gnsi) # Nx x 1 matrix
+  statenames <- rownames(x_init)
+  Nx <- nrow(x_init)
+  xas <- as.numeric(x_init) # adapted simulation state vector
+  znames <- object@accumvars
+
+  log_cond_densities <- array(data = numeric(0), dim=c(U,Np,N))
+  dimnames(log_cond_densities) <- list(unit = 1:U, rep = 1:Np, time = 1:N)
+
+  for (n in seq_len(N)) {
+    ## assimilate observation n given filter at n-1
+    ## note that times[n+1] is the time for observation n
+
+    ## xg: Nx x Np x 1 matrix of guide simulations
+    ## also used to calculate local prediction weights
+    xf <- matrix(xas,nrow=Nx,ncol=Np,dimnames=list(statenames,NULL))
+    xg <- tryCatch(
+      rprocess(
+        object,
+        x0=xf,
+        t0=times[n],
+        times=times[n+1],
+        params=params,
+        .gnsi=gnsi
+      ),
+      error = function (e) pStop_(" in abfir process simulation: ",conditionMessage(e))
+    )
+    xg_2dim <- xg[,,1]
+    xg_with_rep <- do.call(cbind,replicate(Np, xg_2dim, simplify=FALSE))
+    dim(xg_with_rep) <- c(dim(xg_with_rep)[1],dim(xg_with_rep)[2],1)
+    dimnames(xg_with_rep) <- list(states = rownames(xg_2dim))
+    xx <- tryCatch(
+      .Call(do_fcst_samp_var,
+        object=object,
+        X=xg_with_rep,
+        Np = as.integer(Np),
+        times=times[n+1],
+        params=params,
+        gnsi=TRUE),
+      error = function (e) pStop_(" in abfir variance: ", conditionMessage(e)) 
+    )
+    fcst_samp_var <- xx
+    dim(fcst_samp_var) <- c(length(unit_names(object)), Np)
+
+    log_weights <- tryCatch(
+      vec_dmeasure(
+        object,
+        y=object@data[,n,drop=FALSE],
+        x=xg,
+        times=times[n+1],
+        params=param_matrix,
+        log=TRUE,
+        .gnsi=gnsi
+      ),
+      error = function (e) {
+        pStop_("abfir error in calculation of weights: ",
+          conditionMessage(e))
+      }
+    )
+
+    log_cond_densities[,,n] <- log_weights[,,1]
+    tt <- seq(from=times[n],to=times[n+1],length.out=Ninter+1)
+    log_gf <- rep(0,Np) # filtered guide function
+    for (s in 1:Ninter){
+      xp <- rprocess(object,x0=xf, t0 = tt[s], times= tt[s+1],
+        params=params,.gnsi=gnsi) # an Nx by nreps by 1 array
+      if(s>1 && length(znames)>0){
+        xf.znames <- xf[znames,,drop=FALSE]
+        xp[znames,,1] <- xp[znames,,1,drop=FALSE][,,1] + xf.znames
+      }
+      if(s < Ninter){
+        skel <- tryCatch(
+          pomp::flow(object,
+            x0=xp[,,1],
+            t0=tt[s+1],
+            params=param_matrix,
+            times = times[n + 1],
+            ...),
+          error = function (e) pStop_(" in abfir skeleton: ", conditionMessage(e))
+        )
+        if(length(znames) > 0){
+          skel.lookahead1.znames <- skel[znames,,1,drop=FALSE]
+          xp.znames <- xp[znames,,1,drop=FALSE]
+          skel[znames,,] <- skel.lookahead1.znames + xp.znames
+        }
+      } else {
+        skel <- xp
+      }
+      meas_var_skel <- tryCatch(
+        .Call(do_vunit_measure,
+          object=object,
+          X=skel,
+          Np = as.integer(Np[1]),
+          times=times[n+1],
+          params=params,
+          gnsi=TRUE),
+        error = function (e) pStop_(" in abfir vunit_measure: ", conditionMessage(e))
+      )
+      meas_var_skel <- meas_var_skel[,,1]
+      fcst_var_upd <- fcst_samp_var*(times[n+1] - tt[s+1])/(times[n+1] - times[n])
+      inflated_var <- meas_var_skel + fcst_var_upd
+      dim(inflated_var) <- c(U, Np, 1)
+      array.params <- array(params, dim = c(length(params), length(unit_names(object)),
+        Np, 1), dimnames = list(params = names(params)))
+
+      mmp <- tryCatch(
+        .Call(do_munit_measure,
+          object=object,
+          X=skel,
+          vc=inflated_var,
+          Np = as.integer(Np[1]),
+          times=times[n+1],
+          params=array.params,
+          gnsi=TRUE),
+        error = function (e) pStop_(" in abfir munit_measure: ", conditionMessage(e)) 
+      )
+      mom_match_param <- mmp[,,,1]
+
+      log_wp <- tryCatch(
+        vec_dmeasure(
+          object,
+          y=object@data[,n,drop=FALSE],
+          x=skel,
+          times=times[n+1],
+          params=mom_match_param,
+          log=TRUE,
+          .gnsi=gnsi
+        ),
+        error = function (e) pStop_(" in abfir vec_dmeasure: ",conditionMessage(e))
+      )
+      log_gp <- apply(log_wp[,,1,drop=FALSE],2,sum)
+      max_log_gp <- max(log_gp)
+      if(max_log_gp > -Inf){
+        log_gp <- log_gp - max_log_gp
+        weights <- exp(log_gp - log_gf)
+        gnsi <- FALSE
+        xx <- tryCatch(
+          .Call(abfir_resample, xp, Np, weights, log_gp, tol),
+          error = function (e) pStop_(" in abfir resampling: ",conditionMessage(e))
+        )
+        xf <- xx$states
+        log_gf <- xx$filterguides
+      }
+      else{
+        xf <- xp
+        log_gf <- log(tol)
+      }
+
+    }
+    ## resample down to one particle, making Np copies of, say, particle #1.
+    xas <- xf[,1]
+
+    if (verbose) cat("abfir timestep",n,"of",N,"finished\n")
+
+  }
+  log_loc_comb_pred_weights = array(data = numeric(0), dim=c(U,Np, N))
+  log_wm_times_wp_avg = array(data = numeric(0), dim = c(U, N))
+  log_wp_avg = array(data = numeric(0), dim = c(U, N))
+  for (n in seq_len(N)){
+    for (u in seq_len(U)){
+      full_nbhd <- nbhd(object, time = n, unit = u)
+      log_prod_cond_dens_nt  <- rep(0, Np)
+      if(length(full_nbhd) > 0) log_prod_cond_dens_not_nt <- matrix(0,
+        Np[1], max(1,n-min(sapply(full_nbhd,'[[',2))))
+      else log_prod_cond_dens_not_nt <- matrix(0,Np[1],0)
+      for (neighbor in full_nbhd){
+        neighbor_u <- neighbor[1]
+        neighbor_n <- neighbor[2]
+        if (neighbor_n == n)
+          log_prod_cond_dens_nt  <- log_prod_cond_dens_nt +
+	    log_cond_densities[neighbor_u, ,neighbor_n]
+        else
+          log_prod_cond_dens_not_nt[, n-neighbor_n] <-
+	    log_prod_cond_dens_not_nt[, n-neighbor_n] +
+	    log_cond_densities[neighbor_u, ,neighbor_n]
+      }
+      log_loc_comb_pred_weights[u,,n]  <-
+        sum(apply(log_prod_cond_dens_not_nt, 2, logmeanexp)) +
+	log_prod_cond_dens_nt
+    }
+  }
+  log_wm_times_wp_avg = apply(log_loc_comb_pred_weights + log_cond_densities,
+    c(1,3), FUN = logmeanexp)
+  log_wp_avg = apply(log_loc_comb_pred_weights, c(1,3), FUN = logmeanexp)
+
+  pompUnload(object,verbose=verbose)
+  new(
+    "adapted_replicate",
+    log_wm_times_wp_avg = log_wm_times_wp_avg,
+    log_wp_avg = log_wp_avg,
+    Np=as.integer(Np),
+    tol=tol
+  )
+}
+
