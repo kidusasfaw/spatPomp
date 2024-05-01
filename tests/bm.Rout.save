@@ -63,6 +63,7 @@ Loading required package: pomp
 > b_model_no_vunit_measure <- spatPomp(b_model,vunit_measure=NULL)
 > b_model_no_runit_measure <- spatPomp(b_model,runit_measure=NULL)
 > b_model_no_dunit_measure <- spatPomp(b_model,dunit_measure=NULL)
+> b_model_no_munit_measure <- spatPomp(b_model,munit_measure=NULL)
 > b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
 > b_model5 <- bm(U=U,N=5) 
 > b_model_with_accumvars <- b_model
@@ -980,6 +981,58 @@ Error : length('times') = 0, no work to do.
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
 > try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1:10, params=b_p2))
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> 
+> ## trigger error messages in vunit_measure.c
+> vunit_measure(b_model_no_vunit_measure, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit   [,1]
+  [1,]   NA
+
+Warning message:
+'vunit_measure' unspecified. 
+> try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+Error : larger number of replicates is not a multiple of smaller.
+> 
+> ## trigger error messages in eunit_measure.c
+> eunit_measure(b_model_no_eunit_measure, x=b_s, unit=2, time=1, params=b_p)
+, , 1
+
+      rep
+unit   [,1]
+  [1,]   NA
+
+Warning message:
+'eunit_measure' unspecified. 
+> try(eunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> try(eunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+Error : larger number of replicates is not a multiple of smaller.
+> 
+> ## trigger error messages in munit_measure.c
+> munit_measure(b_model_no_munit_measure, x=b_s, vc=b_vc, Np=1, unit = 2, time=1, params=b_array.params)
+, , 1, 1
+
+       
+params  [,1]
+  rho    0.4
+  sigma  1.0
+  tau    1.0
+  X1_0   0.0
+  X2_0   0.0
+
+Warning message:
+'munit_measure' unspecified. 
+> try(munit_measure(b_model, x=b_s, vc=b_vc, Np=1, unit = 2, time=1:10,params=b_array.params))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> b_array.params2 <- array(c(b_p,b_p),
++   dim = c(length(b_p),length(unit_names(b_model)), 2, 1),
++   dimnames = list(params = rownames(b_p)))
+> try(munit_measure(b_model, x=b_s2, vc=b_vc, Np=3, unit = 2, time=1,params=b_array.params2))
+Error : larger number of replicates is not a multiple of smaller.
 > 
 > ## test spatPomp_Csnippet variable construction
 > spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),

@@ -2,8 +2,12 @@
 library(spatPomp)
 
 p_expanded <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=4)
+p_expanded_unequal <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=5)
 
 p_contracted <- contract_params(p_expanded,expandedParNames="c",U=3)
+
+try(contract_params(p_expanded_unequal,
+  expandedParNames="c",U=3,average=FALSE))
   
 p_contracted
 

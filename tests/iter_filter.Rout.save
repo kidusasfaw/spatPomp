@@ -38,15 +38,6 @@ Error : in ‘rw.sd’: parameters must be referenced by name.
 +   paramnames=c("rho","X1_0")))
 Error : ‘rw.sd’ spec for parameter ‘rho’ does not evaluate to a vector of the correct length (‘length(time(object))’=2).
 > 
-> spatPomp:::safecall()
-An object of class "safecall"
-Slot "call":
-spatPomp:::safecall()
-
-Slot "envir":
-<environment: R_GlobalEnv>
-
-> 
 > spatPomp:::perturbn.kernel.sd(
 +   rw.sd=matrix(c(0.01,0.02),nrow=2,ncol=2,
 +     dimnames=list(c("rho","X1_0"),NULL)), 1:2, paramnames=c("rho","X1_0"))
@@ -63,6 +54,28 @@ $alpha
 $gamma
 [1] 1
 
+> 
+> ## also use this test file for some other miscelaneous edge cases
+> 
+> spatPomp:::safecall()
+An object of class "safecall"
+Slot "call":
+spatPomp:::safecall()
+
+Slot "envir":
+<environment: R_GlobalEnv>
+
+> 
+> 
+> ## some unused error message mechanics, which may be used in future
+> spatPomp:::pWarn_("testing")
+Warning message:
+testing 
+> try(spatPomp:::reqd_arg(NULL,"JUNK"))
+Error : ‘JUNK’ is a required argument.
+> spatPomp:::invalid_names(NULL)
+[1] TRUE
+> 
 > 
 > 
 > 

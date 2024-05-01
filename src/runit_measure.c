@@ -80,11 +80,6 @@ SEXP do_runit_measure (SEXP object, SEXP x, SEXP times, SEXP units, SEXP params,
   // first do setup
   switch (mode) {
 
-  case Rfun: {
-  }
-
-    break;
-
   case native: case regNative: {
     double *yt = 0, *xp, *pp;
     int *unit = INTEGER(units);

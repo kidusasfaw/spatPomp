@@ -22,8 +22,13 @@ Type 'q()' to quit R.
 Loading required package: pomp
 > 
 > p_expanded <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=4)
+> p_expanded_unequal <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=5)
 > 
 > p_contracted <- contract_params(p_expanded,expandedParNames="c",U=3)
+> 
+> try(contract_params(p_expanded_unequal,
++   expandedParNames="c",U=3,average=FALSE))
+Error in sQutote(contract_params) : could not find function "sQutote"
 >   
 > p_contracted
 a1 b1 b2 b3 c1 

@@ -13,7 +13,7 @@ SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP pa
   SEXP Snames, Pnames, Cnames, Onames;
   SEXP cvec, pompfun;
   SEXP fn, args;
-  SEXP F = NULL, mparams;
+  SEXP mparams;
   SEXP x;
   SEXP unitnames;
   int *dim;
@@ -69,47 +69,6 @@ SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP pa
   // PROTECT(F = ret_array(npars, nunits, nreps, ntimes)); nprotect++;
   switch (mode) {
 
-  case Rfun: {
-    //double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
-    //double *ft = REAL(F);
-    //int j, k;
-
-    // build argument list
-    //PROTECT(args = dmeas_args(args,Onames,Snames,Pnames,Cnames,log)); nprotect++;
-
-    //for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
-
-    //R_CheckUserInterrupt();	// check for user interrupt
-
-    //table_lookup(&covariate_table,*time,cov); // interpolate the covariates
-
-    //for (j = 0; j < nreps; j++, ft++) { // loop over replicates
-
-    // evaluate the call
-    //PROTECT(
-    //ans = eval_call(
-    //fn,args,
-    //time,
-    //ys,nobs,
-    //xs+nvars*((j%nrepsx)+nrepsx*k),nvars,
-    //ps+npars*(j%nrepsp),npars,
-    //cov,ncovars
-    //)
-    //);
-
-    //if (k == 0 && j == 0 && LENGTH(ans) != 1)
-    //errorcall(R_NilValue,"user 'dmeasure' returns a vector of length %d when it should return a scalar.",LENGTH(ans));
-
-    //*ft = *(REAL(AS_NUMERIC(ans)));
-
-    //UNPROTECT(1);
-
-    //}
-    //}
-  }
-
-    break;
-
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
     spatPomp_unit_mmeasure *ff = NULL;
@@ -146,7 +105,7 @@ SEXP do_munit_measure(SEXP object, SEXP X, SEXP vc, SEXP Np, SEXP times, SEXP pa
     break;
 
   default: {
-    double *ft = REAL(F);
+    double *ft = REAL(mparams);
     int j, k;
 
     for (k = 0; k < ntimes; k++) { // loop over times

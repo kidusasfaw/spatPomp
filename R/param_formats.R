@@ -39,18 +39,13 @@ expand_params <- function(params, expandedParNames,U){
 #' @rdname param_formats
 #' @export
 contract_params <- function(params, expandedParNames,U,average=FALSE){
-if(0){
-p_expanded <- c(a1=0,b1=0,b2=1,b3=2,c1=4,c2=4,c3=4)
-params <- p_expanded
-expandedParNames="c"
-U=3
-average=F
-}
-  expanded <- unlist(lapply(expandedParNames,function(par) params[paste0(par,1:U)]))
+
+  expanded <- unlist(lapply(expandedParNames,
+    function(par) params[paste0(par,1:U)]))
   unexpanded <- params[setdiff(names(params),names(expanded))]
   contracted <- unlist(lapply(expandedParNames,function(par){
     x <- params[paste0(par,1:U)]
-    if(sd(x)>0 & !average) stop ("cannot contract unequal parameters unless average=TRUE")
+    if(sd(x)>0 & !average) pStop_("in ", sQuote(contract_params), " : cannot contract unequal parameters unless average=TRUE")
     x <- mean(x)
     names(x) <- paste0(par,'1')
     x

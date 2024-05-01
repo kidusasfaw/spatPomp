@@ -72,11 +72,7 @@ SEXP do_vunit_measure (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
   // create array to store results
   PROTECT(F = ret_array(nunits, nreps, ntimes)); nprotect++;
   switch (mode) {
-  case Rfun: {
-  }
-
-    break;
-
+ 
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
     spatPomp_unit_measure_var *ffthetatov = NULL;

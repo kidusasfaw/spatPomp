@@ -80,11 +80,6 @@ SEXP do_dunit_measure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP units, SEXP
 
   switch (mode) {
 
-  case Rfun: {
-  }
-
-    break;
-
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
     int give_log;

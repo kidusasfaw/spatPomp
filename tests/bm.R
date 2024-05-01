@@ -43,6 +43,7 @@ b_model_no_eunit_measure <- spatPomp(b_model,eunit_measure=NULL)
 b_model_no_vunit_measure <- spatPomp(b_model,vunit_measure=NULL)
 b_model_no_runit_measure <- spatPomp(b_model,runit_measure=NULL)
 b_model_no_dunit_measure <- spatPomp(b_model,dunit_measure=NULL)
+b_model_no_munit_measure <- spatPomp(b_model,munit_measure=NULL)
 b_model_t0_equal_t1 <- spatPomp(b_model,t0=1)
 b_model5 <- bm(U=U,N=5) 
 b_model_with_accumvars <- b_model
@@ -621,6 +622,24 @@ runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1, params=b_p)
 try(runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=numeric(0), params=b_p))
 try(runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1:10, params=b_p))
 try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1:10, params=b_p2))
+
+## trigger error messages in vunit_measure.c
+vunit_measure(b_model_no_vunit_measure, x=b_s, unit=2, time=1, params=b_p)
+try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
+try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+
+## trigger error messages in eunit_measure.c
+eunit_measure(b_model_no_eunit_measure, x=b_s, unit=2, time=1, params=b_p)
+try(eunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
+try(eunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+
+## trigger error messages in munit_measure.c
+munit_measure(b_model_no_munit_measure, x=b_s, vc=b_vc, Np=1, unit = 2, time=1, params=b_array.params)
+try(munit_measure(b_model, x=b_s, vc=b_vc, Np=1, unit = 2, time=1:10,params=b_array.params))
+b_array.params2 <- array(c(b_p,b_p),
+  dim = c(length(b_p),length(unit_names(b_model)), 2, 1),
+  dimnames = list(params = rownames(b_p)))
+try(munit_measure(b_model, x=b_s2, vc=b_vc, Np=3, unit = 2, time=1,params=b_array.params2))
 
 ## test spatPomp_Csnippet variable construction
 spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),
