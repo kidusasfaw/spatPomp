@@ -158,7 +158,7 @@ b_bpfilter_repeat <- bpfilter(b_bpfilter)
 paste("check bpfilter on bpfilterd_spatPomp: ",
   logLik(b_bpfilter)==logLik(b_bpfilter_repeat))
 
-bpfilter(b_model_t0_equal_t1,Np = Np, block_size = 1)
+bpfilter(b_model_t0_equal_t1,Np = Np, block_size = 1,filter_traj=TRUE)
 
 set.seed(5)
 b_bpfilter_filter_traj <- bpfilter(b_bpfilter,filter_traj=TRUE)
@@ -442,7 +442,7 @@ b_ienkf_hyp <- ienkf(b_model,
 paste("bm ienkf loglik, hyperbolic cooling, verbose=T: ",round(logLik(b_ienkf_hyp),10))
 
 ## test error messages for ienkf
-try(ienkf(b_model_no_rproc))
+try(ienkf(b_model_no_rprocess))
 try(ienkf(b_model, Nenkf="JUNK"))
 ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.type="geometric",
   cooling.fraction.50 = 0.5,
@@ -611,22 +611,25 @@ try(dunit_measure(b_model, y=b_y,
   x=b_s, unit=1, time=1:10, params=b_p))  
 b_s2 <- 1:6
 dim(b_s2) <- c(2,3,1)
+b_s3 <- 1:6
+dim(b_s3) <- c(1,3,2)
 dimnames(b_s2) <- list(variable=dimnames(states(b_model))[[1]], rep=NULL)
 b_p2 <- c(coef(b_model),coef(b_model))
 dim(b_p2) <- c(length(coef(b_model)),2)
 dimnames(b_p2) <- list(param=names(coef(b_model)))
 try(dunit_measure(b_model, y=b_y, x=b_s2, unit=1, time=1, params=b_p2))
+try(dunit_measure(b_model, y=b_y, x=b_s3, unit=1, time=1, params=b_p2))
 
 ## trigger error messages in runit_measure.c
 runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1, params=b_p)
 try(runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=numeric(0), params=b_p))
 try(runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1:10, params=b_p))
-try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1:10, params=b_p2))
+try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1,params=b_p2))
 
 ## trigger error messages in vunit_measure.c
 vunit_measure(b_model_no_vunit_measure, x=b_s, unit=2, time=1, params=b_p)
 try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
-try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+try(vunit_measure(b_model, x=b_s3, unit=2, time=1, params=b_p2))
 
 ## trigger error messages in eunit_measure.c
 eunit_measure(b_model_no_eunit_measure, x=b_s, unit=2, time=1, params=b_p)
@@ -725,5 +728,16 @@ try(spatPomp(data=model_unit_covar,covar=b_shared_covar))
 
 try(spatPomp(data=model_unit_covar,covar=b_unit_covar,
   shared_covarnames="Z"))
+
+
+## --------------------------------------------
+## test utility functions
+## ____________________________________________
+
+spatPomp:::undefined()
+spatPomp:::undefined(NULL)
+spatPomp:::undefined("JUNK")
+
+try(.Call("spatPomp_systematic_resampling",c(-0.1,-0.2),2))
 
 

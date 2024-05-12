@@ -6,10 +6,7 @@
 \alias{undefined,ANY-method}
 \alias{undefined,missing-method}
 \alias{undefined,pomp_fun-method}
-\alias{undefined,partransPlugin-method}
 \alias{undefined,rprocPlugin-method}
-\alias{undefined,covartable-method}
-\alias{undefined,skelPlugin-method}
 \title{Undefined}
 \usage{
 undefined(object, ...)
@@ -22,13 +19,7 @@ undefined(object, ...)
 
 \S4method{undefined}{pomp_fun}(object, ...)
 
-\S4method{undefined}{partransPlugin}(object, ...)
-
 \S4method{undefined}{rprocPlugin}(object, ...)
-
-\S4method{undefined}{covartable}(object)
-
-\S4method{undefined}{skelPlugin}(object, ...)
 }
 \arguments{
 \item{object}{object to test.}

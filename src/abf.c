@@ -8,16 +8,17 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
 			   SEXP resamp_weights)
 {
   int nprotect = 0;
-  SEXP anc = R_NilValue;
   SEXP newstates = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
   double *xx = 0;
-  int *xanc = 0;
   SEXP dimX, dimP, Xnames, Pnames;
   int *dim, np;
   int nvars, nreps;
-  int do_ta;
+  // ancestor tracking currently not implemented
+  // int do_ta;
+  // SEXP anc = R_NilValue;
+  // int *xanc = 0;
   int j, k, l;
 
   PROTECT(dimX = GET_DIM(x)); nprotect++;
@@ -34,12 +35,12 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
 
   np = 1;       // number of particles to resample for abf is just one
 
-  do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-
-  if (do_ta) {
-    PROTECT(anc = NEW_INTEGER(np)); nprotect++;
-    xanc = INTEGER(anc);
-  }
+  // ancestry tracking not implemented
+  // do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
+  // if (do_ta) {
+  //   PROTECT(anc = NEW_INTEGER(np)); nprotect++;
+  //   xanc = INTEGER(anc);
+  // }
   GetRNGstate();
 
   int xdim[2];
@@ -64,7 +65,7 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
 
   for (k = 0; k < copies; k++) { // copy the particles
     for (j = 0, xx = ss+nvars*sample[k]; j < nvars; j++, st++, xx++) *st = *xx;
-    if (do_ta) xanc[k] = sample[k]+1;
+  //  if (do_ta) xanc[k] = sample[k]+1;
   }
 
   PutRNGstate();
@@ -78,9 +79,9 @@ SEXP abf_computations (SEXP x, SEXP params, SEXP Np,
   SET_ELEMENT(retval,0,newstates);
   SET_ELEMENT(retval,1,params);
 
-  if (do_ta) {
-    SET_ELEMENT(retval,2,anc);
-  }
+  // if (do_ta) {
+  //   SET_ELEMENT(retval,2,anc);
+  // }
 
   UNPROTECT(nprotect);
   return(retval);

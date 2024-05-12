@@ -216,7 +216,7 @@ Error in spatPomp:::abfir_internal(object = object, Np = Np, nbhd = nbhd,  :
 +   logLik(b_bpfilter)==logLik(b_bpfilter_repeat))
 [1] "check bpfilter on bpfilterd_spatPomp:  TRUE"
 > 
-> bpfilter(b_model_t0_equal_t1,Np = Np, block_size = 1)
+> bpfilter(b_model_t0_equal_t1,Np = Np, block_size = 1,filter_traj=TRUE)
 <object of class ‘bpfilterd_spatPomp’>
 > 
 > set.seed(5)
@@ -635,9 +635,8 @@ ienkf iteration 2 of 2 completed
 [1] "bm ienkf loglik, hyperbolic cooling, verbose=T:  -12.8788856955"
 > 
 > ## test error messages for ienkf
-> try(ienkf(b_model_no_rproc))
-Error in h(simpleError(msg, call)) : 
-  error in evaluating the argument 'data' in selecting a method for function 'ienkf': object 'b_model_no_rproc' not found
+> try(ienkf(b_model_no_rprocess))
+Error : in ‘ienkf’: ‘rprocess’, ‘eunit_measure’, ‘vunit_measure’ are needed basic components.
 > try(ienkf(b_model, Nenkf="JUNK"))
 Error : in ‘ienkf’: ‘Nenkf’ must be a positive integer.
 > ienkf(b_model,Nenkf=2,Np = 3,rw.sd=b_rw.sd,cooling.type="geometric",
@@ -958,12 +957,16 @@ Warning message:
 Error : length of 'times' and 2nd dimension of 'y' do not agree.
 > b_s2 <- 1:6
 > dim(b_s2) <- c(2,3,1)
+> b_s3 <- 1:6
+> dim(b_s3) <- c(1,3,2)
 > dimnames(b_s2) <- list(variable=dimnames(states(b_model))[[1]], rep=NULL)
 > b_p2 <- c(coef(b_model),coef(b_model))
 > dim(b_p2) <- c(length(coef(b_model)),2)
 > dimnames(b_p2) <- list(param=names(coef(b_model)))
 > try(dunit_measure(b_model, y=b_y, x=b_s2, unit=1, time=1, params=b_p2))
 Error : larger number of replicates is not a multiple of smaller.
+> try(dunit_measure(b_model, y=b_y, x=b_s3, unit=1, time=1, params=b_p2))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
 > 
 > ## trigger error messages in runit_measure.c
 > runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1, params=b_p)
@@ -979,8 +982,8 @@ Warning message:
 Error : length('times') = 0, no work to do.
 > try(runit_measure(b_model_no_runit_measure, x=b_s, unit=2, time=1:10, params=b_p))
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
-> try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1:10, params=b_p2))
-Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1,params=b_p2))
+Error : larger number of replicates is not a multiple of smaller.
 > 
 > ## trigger error messages in vunit_measure.c
 > vunit_measure(b_model_no_vunit_measure, x=b_s, unit=2, time=1, params=b_p)
@@ -994,8 +997,8 @@ Warning message:
 'vunit_measure' unspecified. 
 > try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
-> try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
-Error : larger number of replicates is not a multiple of smaller.
+> try(vunit_measure(b_model, x=b_s3, unit=2, time=1, params=b_p2))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
 > 
 > ## trigger error messages in eunit_measure.c
 > eunit_measure(b_model_no_eunit_measure, x=b_s, unit=2, time=1, params=b_p)
@@ -1142,6 +1145,21 @@ Error : in ‘spatPomp’: for unit-specific covariates, there should be a colum
 > try(spatPomp(data=model_unit_covar,covar=b_unit_covar,
 +   shared_covarnames="Z"))
 Error : in ‘spatPomp’: ‘shared_covarnames’ currently supported only when there are no unit-specific covariates
+> 
+> 
+> ## --------------------------------------------
+> ## test utility functions
+> ## ____________________________________________
+> 
+> spatPomp:::undefined()
+[1] NA
+> spatPomp:::undefined(NULL)
+[1] TRUE
+> spatPomp:::undefined("JUNK")
+[1] NA
+> 
+> try(.Call("spatPomp_systematic_resampling",c(-0.1,-0.2),2))
+Error : in 'systematic_resampling': non-positive sum of weights
 > 
 > 
 > 

@@ -191,9 +191,8 @@ bm2 <- function(U=5,N=100,delta_t=0.1,
 
 log_unit_names <- c("sigma", "tau")
 logit_unit_names <- c("rho")
-log_names <- unlist(lapply(log_unit_names,
-  function(x,y,U){if(x%in%y)paste0(x,"1") else paste0(x,1:U)},
-  y=shared_names,U=U))
+log_name_func <- function(x,y,U) if(x%in%y)paste0(x,"1") else paste0(x,1:U)
+log_names <- unlist(lapply(log_unit_names,log_name_func,y=shared_names,U=U))
 logit_names <- unlist(lapply(logit_unit_names,
   function(x,y,U){if(x%in%y)paste0(x,"1") else paste0(x,1:U)},
   y=shared_names,U=U))

@@ -54,34 +54,8 @@ setMethod(
 ##' @rdname undefined
 setMethod(
   "undefined",
-  signature=signature(object="partransPlugin"),
-  definition=function (object, ...) {
-    undefined(object@to) || undefined(object@from)
-  }
-)
-
-##' @rdname undefined
-setMethod(
-  "undefined",
   signature=signature(object="rprocPlugin"),
   definition=function (object, ...) {
     undefined(object@step.fn) && undefined(object@rate.fn)
-  }
-)
-##' @rdname undefined
-setMethod(
-  "undefined",
-  signature=signature(object="covartable"),
-  definition=function (object) {
-    nrow(object@table) == 0L
-  }
-)
-
-##' @rdname undefined
-setMethod(
-  "undefined",
-  signature=signature(object="skelPlugin"),
-  definition=function (object, ...) {
-    object@type==skeletontype$undef || undefined(object@skel.fn)
   }
 )

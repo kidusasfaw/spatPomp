@@ -28,7 +28,8 @@ Loading required package: pomp
 > 
 > try(contract_params(p_expanded_unequal,
 +   expandedParNames="c",U=3,average=FALSE))
-Error in sQutote(contract_params) : could not find function "sQutote"
+Error in paste0(before, x, after) : 
+  cannot coerce type 'closure' to vector of type 'character'
 >   
 > p_contracted
 a1 b1 b2 b3 c1 

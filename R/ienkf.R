@@ -293,19 +293,17 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     R <- diag(rowMeans(meas_var))
     sqrtR <- tryCatch(
       t(chol(R)),                     # t(sqrtR)%*%sqrtR == R
-      error = function (e) {
-        pStop_("degenerate ",sQuote("R"), "at time ", sQuote(nt), ": ",conditionMessage(e))
-      }
+      error = function (e) pStop_("degenerate ",sQuote("R"), "at time ", sQuote(nt), ": ",conditionMessage(e))
     )
 
-                                        # expand the state space
+    # expand the state space
     XT <- rbind(X[,,1],params)
     pm <- rowMeans(XT) # prediction mean
 
-                                        # forecast mean
+    # forecast mean
     ym <- rowMeans(Y)
 
-                                        # center prediction and forecast ensembles
+    # center prediction and forecast ensembles
     XT <- XT-pm
     Y <- Y-ym
 
@@ -320,8 +318,8 @@ ienkf.filter <- function (object, params, Np, enkfiter, rw.sd, cooling.fn,
     XT <- XT+pm+crossprod(Kt,resid-Y+Ek)
     params <- XT[pnames,,drop = FALSE]
     X <- XT[xnames,,drop = FALSE]
-    loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),mean=0,sd=sqrt(svdS$d),log=TRUE))
-                                        # print(rowMeans(partrans(object,params,dir="fromEst",.gnsi=gnsi)))
+    loglik[nt] <- sum(dnorm(x=crossprod(svdS$u,resid),
+      mean=0,sd=sqrt(svdS$d),log=TRUE))
 
     ## compute mean at last timestep
     if (nt == ntimes) {

@@ -3,6 +3,25 @@
 #include "spatPomp_defines.h"
 #include <Rdefines.h>
 
+SEXP spatPomp_systematic_resampling (SEXP weights, SEXP np);
+void nosort_resamp (int nw, double *w, int np, int *p, int offset);
+
+SEXP spatPomp_systematic_resampling (SEXP weights, SEXP np)  
+{
+  int m, n;
+  SEXP perm;
+
+  m = *(INTEGER(AS_INTEGER(np)));
+  n = LENGTH(weights);
+  PROTECT(perm = NEW_INTEGER(m));
+  PROTECT(weights = AS_NUMERIC(weights));
+  GetRNGstate();
+  nosort_resamp(n,REAL(weights),m,INTEGER(perm),1);
+  PutRNGstate();
+  UNPROTECT(2);
+  return(perm);
+}
+
 void nosort_resamp (int nw, double *w, int np, int *p, int offset)
 {
   int i, j;
@@ -23,7 +42,7 @@ void nosort_resamp (int nw, double *w, int np, int *p, int offset)
     while ((u > w[i]) && (i < nw-1)) i++;
     p[j] = i;
   }
-  if (offset)			// add offset if needed
+  if (offset)     // add offset if needed
     for (j = 0; j < np; j++) p[j] += offset;
 
 }

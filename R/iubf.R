@@ -307,10 +307,12 @@ iubf_internal <- function (object, Nrep_per_param, Nparam, nbhd, Nubf, prop, rw.
   if (is.null(.paramMatrix)) {
     rep_param_init <- coef(object)
     start <- coef(object)
-  } else {
-    rep_param_init <- .paramMatrix
-    start <- apply(.paramMatrix,1L,mean)
   }
+  ## continuation using .paramMatrix not yet implemented
+  ## else {
+  ##   rep_param_init <- .paramMatrix
+  ##   start <- apply(.paramMatrix,1L,mean)
+  ## }
 
   rw.sd <- perturbn.kernel.sd(rw.sd,time=time(object),paramnames=names(start))
 
