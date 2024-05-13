@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin20
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -290,11 +290,17 @@ Error : in ‘argument "Nbpf" is missing, with no default’: ibpf
 Error : in ‘ibpf’: ‘rprocess’, ‘dunit_measure’ are needed basic components.
 > 
 > ## test error message when munit_measure is undefined
+> ## this also tests setup of covariates for girf_moment
 > try(girf(h_model,kind="moment",
 +   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
 Error : girf with kind = 'moment' requires munit_measure
 > 
-> # Create second ibpfd_spatPomp object with different chain length, to test error
+> ## test girf_bootstrap with covariates
+> h_girf <- girf(h_model,kind="bootstrap",
++   Np=5,Ninter=2,Nguide=5,lookahead=2,tol=1e-5)
+> 
+> # Create second ibpfd_spatPomp object with different chain length,
+> # to test error
 > h_ibpf3 <- ibpf(h_model,
 +                 params=coef(h_model),
 +                 sharedParNames=sharedParNames,

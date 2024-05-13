@@ -80,11 +80,6 @@ SEXP do_fcst_samp_var (SEXP object, SEXP X, SEXP Np, SEXP times, SEXP params, SE
   PROTECT(F = ret_array(nunits, nreps, ntimes)); nprotect++;
   switch (mode) {
 
-  case Rfun: {
-  }
-
-    break;
-
   case native: case regNative: {
     int *oidx, *sidx, *pidx, *cidx;
     spatPomp_unit_measure_mean *ff = NULL;

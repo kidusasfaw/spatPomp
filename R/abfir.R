@@ -91,9 +91,8 @@ setMethod(
   "abfir",
   signature=signature(object="spatPomp"),
   function (object, Np, Nrep, nbhd,
-    Ninter, tol = (1e-300), params, ...,
+    Ninter, tol = (1e-100), params, ...,
     verbose=getOption("verbose",FALSE) ) {
-
     ep <- paste0("in ",sQuote("abfir"),": ")
     ## declare global variable since foreach's u uses non-standard evaluation
     i <- 1
@@ -205,15 +204,11 @@ abfir_internal <- function (object, Np, nbhd,
     unit_obsnames = object@unit_obsnames,
     unit_accumvars = object@unit_accumvars)
   params <- coef(object)
-  verbose = FALSE
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
   gnsi <- as.logical(.gnsi)
 
-  if (length(params)==0) pStop_(ep,sQuote("params")," must be specified")
-  if (missing(tol)) pStop_(ep,sQuote("tol")," must be specified")
-
-  times <- time(object,t0=TRUE)
+    times <- time(object,t0=TRUE)
   N <- length(times)-1
   U <- length(unit_names(object))
 
@@ -278,10 +273,7 @@ abfir_internal <- function (object, Np, nbhd,
         log=TRUE,
         .gnsi=gnsi
       ),
-      error = function (e) {
-        pStop_("abfir error in calculation of weights: ",
-          conditionMessage(e))
-      }
+      error = function (e) pStop_("abfir error in calculation of weights: ", conditionMessage(e))
     )
 
     log_cond_densities[,,n] <- log_weights[,,1]
@@ -375,7 +367,6 @@ abfir_internal <- function (object, Np, nbhd,
     }
     ## resample down to one particle, making Np copies of, say, particle #1.
     xas <- xf[,1]
-
     if (verbose) cat("abfir timestep",n,"of",N,"finished\n")
 
   }

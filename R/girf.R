@@ -129,7 +129,7 @@ setMethod(
     ...,
     verbose = getOption("verbose", FALSE)) {
 
-    if (missing(tol)) tol <- 1e-300
+    if (missing(tol)) tol <- 1e-100
     if (missing(Ninter)) Ninter <- length(unit_names(object))
     kind = match.arg(kind)
 

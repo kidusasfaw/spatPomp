@@ -137,7 +137,9 @@ abf(b_model_zero_dmeasure,Nrep=2,Np=Np,verbose=TRUE)
 b_abfir <- abfir(b_model, Nrep = 2, Np = Np, nbhd = b_bag_nbhd)
 paste("bm abfir loglik: ",round(logLik(b_abfir),10))
 
-abfir(b_abfir,verbose=TRUE,accumvars="X1")
+capture.output(
+  abfir(b_abfir,verbose=TRUE,accumvars="X1")
+) -> b_abfir_out
 abfir(b_model, Nrep = 2, Np = Np)
 try(abfir(b_model))
 try(abfir(b_model,Nrep=2))
@@ -145,6 +147,10 @@ try(abfir(b_model,Nrep=2,Np=function(n)"JUNK"))
 try(abfir(b_model,Nrep=2,Np=1:10))
 try(abfir(b_model,Nrep=2,Np=Np,params=unname(coef(b_model))))
 try(abfir(b_model_zero_dmeasure,Nrep = 3, Np = Np))
+
+# test abfir when all particles fail...
+# make this happen by setting a high tol
+abfir(b_abfir,tol=1000)
 
 ## --------------------------------------------------------------
 ## bpfilter tested on bm
@@ -274,6 +280,11 @@ girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
 girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
   kind = 'boot',Ninter=2)
 
+# test girf when all particles fail...
+# make this happen by setting a high tol
+girf(b_girf_mom,tol=1000)
+
+
 
 ## ------------------------------------------------------------
 ## Now, we test the inference methods
@@ -397,6 +408,7 @@ igirf(b_igirf_boot_geom,Np=3,
 try(igirf(b_igirf_boot_geom,Np=function(x) 4))
 try(igirf(b_igirf_boot_geom,Np=function(x) "JUNK"))
 try(igirf(b_igirf_boot_geom,Np=5:15))
+try(igirf(b_igirf_boot_geom,tol=-1))
 
 
 igirf(b_model_with_accumvars,kind='moment', Ngirf = 2, Nguide=2,
@@ -529,6 +541,7 @@ b_sim3v2@data <- exp(b_sim3v2@data)
 plot(b_sim3v2,type="l",log=TRUE)
 plot(b_sim3[[2]],type="h",plot_unit_names=FALSE)
 dev.off()
+plot(b_sim3[[2]],type="h",plot_unit_names=TRUE) -> b_sim3_plot
 
 print(b_model)
 
@@ -645,6 +658,11 @@ b_array.params2 <- array(c(b_p,b_p),
   dimnames = list(params = rownames(b_p)))
 try(munit_measure(b_model, x=b_s2, vc=b_vc, Np=3, unit = 2, time=1,params=b_array.params2))
 
+## trigger error messages in fcstsampvar.c
+try(.Call("do_fcst_samp_var",b_model,b_s,3,1:10,b_array.params,FALSE))
+try(.Call("do_fcst_samp_var",b_model,b_s2,3,1,b_array.params2,FALSE))
+
+
 ## test spatPomp_Csnippet variable construction
 spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),
   unit_covarnames="D",
@@ -699,6 +717,7 @@ try(spatPomp(data=b_data,times="time",units="unit",t0=0,
 b_shared_covar <- data.frame(time=0:2,Z=3:5)
 model_shared_covar <- spatPomp(data=b_data,times="time",units="unit",
   t0=0,covar=b_shared_covar, shared_covarnames="Z")
+as.data.frame(b_shared_covar)
 
 b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
   Z=rep(3:5,times=2))

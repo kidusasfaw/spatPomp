@@ -210,10 +210,16 @@ try(h_ibpf2 <- ibpf(h_model2,
 ))
 
 ## test error message when munit_measure is undefined
+## this also tests setup of covariates for girf_moment
 try(girf(h_model,kind="moment",
   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
 
-# Create second ibpfd_spatPomp object with different chain length, to test error
+## test girf_bootstrap with covariates
+h_girf <- girf(h_model,kind="bootstrap",
+  Np=5,Ninter=2,Nguide=5,lookahead=2,tol=1e-5)
+
+# Create second ibpfd_spatPomp object with different chain length,
+# to test error
 h_ibpf3 <- ibpf(h_model,
                 params=coef(h_model),
                 sharedParNames=sharedParNames,

@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin20
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -182,8 +182,9 @@ abf timestep 2 of 2 finished
 > paste("bm abfir loglik: ",round(logLik(b_abfir),10))
 [1] "bm abfir loglik:  -11.4654403221"
 > 
-> abfir(b_abfir,verbose=TRUE,accumvars="X1")
-<object of class ‘abfird_spatPomp’>
+> capture.output(
++   abfir(b_abfir,verbose=TRUE,accumvars="X1")
++ ) -> b_abfir_out
 > abfir(b_model, Nrep = 2, Np = Np)
 <object of class ‘abfird_spatPomp’>
 > try(abfir(b_model))
@@ -201,6 +202,11 @@ Error : in ‘abfir’: ‘params’ must be a named vector
 > try(abfir(b_model_zero_dmeasure,Nrep = 3, Np = Np))
 Error in spatPomp:::abfir_internal(object = object, Np = Np, nbhd = nbhd,  : 
   task 1 failed - "incorrect number of dimensions"
+> 
+> # test abfir when all particles fail...
+> # make this happen by setting a high tol
+> abfir(b_abfir,tol=1000)
+<object of class ‘abfird_spatPomp’>
 > 
 > ## --------------------------------------------------------------
 > ## bpfilter tested on bm
@@ -388,6 +394,12 @@ Error : in ‘girf’: ‘Np’ must be a single positive integer
 +   kind = 'boot',Ninter=2)
 <object of class ‘girfd_spatPomp’>
 > 
+> # test girf when all particles fail...
+> # make this happen by setting a high tol
+> girf(b_girf_mom,tol=1000)
+<object of class ‘girfd_spatPomp’>
+> 
+> 
 > 
 > ## ------------------------------------------------------------
 > ## Now, we test the inference methods
@@ -558,7 +570,7 @@ Error : in ‘igirf’ : Error: ‘cooling.fraction.50’ must be in (0,1].
 
 > 
 > try(igirf(b_model,kind="moment",Ngirf=2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,cooling.type="geometric",Np=3,Nguide=4,tol=-1))
-Error : in ‘igirf’ : Error: in ‘igirf’ : ‘tol’ should be a small positive number.
+Error : in ‘igirf’ : Error: in ‘igirf’ (method=moment) : ‘tol’ should be a small positive number.
 
 > 
 > 
@@ -573,6 +585,9 @@ Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 
 > try(igirf(b_igirf_boot_geom,Np=5:15))
 Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
+
+> try(igirf(b_igirf_boot_geom,tol=-1))
+Error : in ‘igirf’ : Error: in ‘igirf’ (method=bootstrap) : ‘tol’ should be a small positive number.
 
 > 
 > 
@@ -591,9 +606,9 @@ Error : in ‘igirf’ : Error: ‘Np’ must be a single positive integer
 <object of class ‘igirfd_spatPomp’>
 Warning messages:
 1: In igirf.momgirf(object = object, Ninter = Ninter, Nguide = Nguide,  :
-  igirf: filtering failure at last filter iteration; using unweighted mean for point estimate.
+  igirf_moment: filtering failure at last filter iteration; using unweighted mean for point estimate.
 2: In igirf.momgirf(object = object, Ninter = Ninter, Nguide = Nguide,  :
-  igirf: filtering failure at last filter iteration; using unweighted mean for point estimate.
+  igirf_moment: filtering failure at last filter iteration; using unweighted mean for point estimate.
 > igirf(b_model_zero_dmeasure,kind='boot', Ngirf = 2, Nguide=2,
 +   rw.sd = b_rw.sd, cooling.type = "hyperbolic", cooling.fraction.50 = 0.5,
 +   Np=3, Ninter = 1)
@@ -785,6 +800,7 @@ Error : in ‘iubf’: ‘Nparam’ must be at least 3
 > dev.off()
 null device 
           1 
+> plot(b_sim3[[2]],type="h",plot_unit_names=TRUE) -> b_sim3_plot
 > 
 > print(b_model)
 <object of class ‘spatPomp’>
@@ -1039,6 +1055,13 @@ Error : length of 'times' and 3rd dimension of 'x' do not agree.
 > try(munit_measure(b_model, x=b_s2, vc=b_vc, Np=3, unit = 2, time=1,params=b_array.params2))
 Error : larger number of replicates is not a multiple of smaller.
 > 
+> ## trigger error messages in fcstsampvar.c
+> try(.Call("do_fcst_samp_var",b_model,b_s,3,1:10,b_array.params,FALSE))
+Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> try(.Call("do_fcst_samp_var",b_model,b_s2,3,1,b_array.params2,FALSE))
+Error : larger number of replicates is not a multiple of smaller.
+> 
+> 
 > ## test spatPomp_Csnippet variable construction
 > spatPomp_Csnippet("lik=u;",unit_statenames="A",unit_obsnames=c("B","C"),
 +   unit_covarnames="D",
@@ -1109,6 +1132,11 @@ Error : in ‘spatPomp’: for unit-specific covariates, there should be a colum
 > b_shared_covar <- data.frame(time=0:2,Z=3:5)
 > model_shared_covar <- spatPomp(data=b_data,times="time",units="unit",
 +   t0=0,covar=b_shared_covar, shared_covarnames="Z")
+> as.data.frame(b_shared_covar)
+  time Z
+1    0 3
+2    1 4
+3    2 5
 > 
 > b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
 +   Z=rep(3:5,times=2))

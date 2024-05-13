@@ -97,7 +97,7 @@ setMethod(
   signature=signature(data="spatPomp"),
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
     Ninter,lookahead=1,Nguide,kind=c('bootstrap', 'moment'),
-    tol = 1e-300,
+    tol = 1e-100,
     ..., verbose = getOption("verbose", FALSE)) {
 
     ep <- paste0("in ", sQuote("igirf") , " : ")
@@ -276,7 +276,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   girfiter <- as.integer(girfiter)
-  ep <- paste0("in ",sQuote("igirf")," : ")
+  ep <- paste0("in ",sQuote("igirf"), " (method=moment) : ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
     pStop_(ep, sQuote("tol")," should be a small positive number.")
@@ -333,7 +333,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=tp_with_guides,
         gnsi=TRUE),
-      error = function (e) pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e)) 
+      error = function (e) pStop_("in ", sQuote("igirf_moment"), " : ", conditionMessage(e)) 
     )
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
@@ -371,7 +371,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=tparams,
           gnsi=TRUE),
-        error = function (e) pStop_("in ", sQuote("igirf"), " : ",conditionMessage(e)) 
+        error = function (e) pStop_("in ", sQuote("igirf_moment"), " : ",conditionMessage(e)) 
       )
       dim(meas_var_skel) <- c(length(unit_names(object)), lookahead_steps, Np)
       fcst_var_upd <- array(0, dim = c(length(unit_names(object)), lookahead_steps, Np))
@@ -388,7 +388,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.tparams,
           gnsi=TRUE),
-        error = function (e) pStop_("in ", sQuote("igirf"), " : ", conditionMessage(e))
+        error = function (e) pStop_("in ", sQuote("igirf_moment"), " : ", conditionMessage(e))
       )
       mom_match_param <- mmp
       dim(mom_match_param) <- c(dim(tparams)[1], length(unit_names(object)), lookahead_steps, Np)
@@ -409,7 +409,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) pStop_("in igirf : error in calculation of log_dmeas_weights: ", conditionMessage(e))
+        error = function (e) pStop_("in igirf_moment : error in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
 
         ## uncomment for debugging: tracking down particles with NA weight
@@ -446,7 +446,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
             log=TRUE,
             .gnsi=gnsi
           ),
-          error = function (e) pStop_("in igirf : error in calculation of log_meas_weights: ", conditionMessage(e))
+          error = function (e) pStop_("in igirf_moment : error in calculation of log_meas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -455,7 +455,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
         if (any(log_weights>-Inf)) {
           coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=exp(log_weights))
         } else {
-          warning("igirf: ","filtering failure at last filter iteration; using ",
+          warning("igirf_moment: ","filtering failure at last filter iteration; using ",
             "unweighted mean for point estimate.")
           coef(object,transform=TRUE) <- apply(params,1L,mean)
         }
@@ -476,7 +476,7 @@ igirf.momgirf <- function (object, params, Ninter, lookahead, Nguide,
             fsv=fcst_samp_var,
             tol=tol
           ),
-          error = function (e) pStop_("in igirf : ", conditionMessage(e))
+          error = function (e) pStop_("in igirf_moment : ", conditionMessage(e))
         )
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
@@ -514,7 +514,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
   verbose <- as.logical(verbose)
   girfiter <- as.integer(girfiter)
   Np <- as.integer(Np)
-  ep <- paste0("in ",sQuote("ibootgirf"),": ")
+  ep <- paste0("in ",sQuote("igirf")," (method=bootstrap) : ")
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
     stop(ep,sQuote("tol")," should be a small positive number.",call.=FALSE)
@@ -623,7 +623,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) pStop_("error in calculation of log_dmeas_weights: ", conditionMessage(e))
+        error = function (e) pStop_("error in igirf_bootstrap calculation of log_dmeas_weights: ", conditionMessage(e))
         )
 
         ## uncomment for debugging: tracking down particles with NA weight
@@ -668,7 +668,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             log=TRUE,
             .gnsi=gnsi
           ),
-          error = function (e) pStop_("error in calculation of log_meas_weights: ", conditionMessage(e))
+          error = function (e) pStop_("error in igirf_bootstrap calculation of log_meas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -699,7 +699,7 @@ igirf.bootgirf <- function (object, params, Ninter, lookahead, Nguide,
             fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), 
             tol=tol
           ),
-          error = function (e) pStop_("error in igirf computations : ", conditionMessage(e)) 
+          error = function (e) pStop_("error in igirf_bootsrap computations : ", conditionMessage(e)) 
         )
         guidesim_index = guidesim_index[xx$ancestry] 
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights

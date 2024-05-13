@@ -27,7 +27,7 @@
   lookahead = 1,
   Nguide,
   kind = c("bootstrap", "moment"),
-  tol = 1e-300,
+  tol = 1e-100,
   ...,
   verbose = getOption("verbose", FALSE)
 )

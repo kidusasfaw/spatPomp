@@ -108,7 +108,7 @@ setMethod(
   "abf",
   signature=signature(object="spatPomp"),
   function (object, Nrep, Np, nbhd, params,
-    tol = 1e-300,
+    tol = 1.0e-100,
     ..., verbose=getOption("verbose",FALSE)) {
 
     ep <- paste0("in ",sQuote("abf"),": ")
@@ -222,9 +222,6 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
   params <- coef(object)
   pompLoad(object,verbose=FALSE)
   gnsi <- as.logical(.gnsi)
-  if (length(params)==0) pStop_(ep,sQuote("params")," must be specified")
-  if (missing(tol)) pStop(ep,sQuote("tol")," must be specified")
-
   times <- time(object,t0=TRUE)
   ntimes <- length(times)-1
   nunits <- length(unit_names(object))
@@ -246,10 +243,12 @@ abf_internal <- function (object, Np, nbhd, tol, ..., verbose, .gnsi = TRUE) {
   if (!is.numeric(Np))
     pStop(ep,sQuote("Np")," must be a number, a vector of numbers, or a function")
   Np <- as.integer(Np)
-  if (is.matrix(params)) {
-    if (!all(Np==ncol(params)))
-      pStop_(ep,"when ",sQuote("params")," is provided as a matrix, do not specify ",sQuote("Np"))
-  }
+  ## matrix parameters not currently supported
+  ## if (is.matrix(params)) {
+  ##   if (!all(Np==ncol(params)))
+  ##     pStop_(ep,"when ",sQuote("params"),
+  ##       " is provided as a matrix, do not specify ",sQuote("Np"))
+  ## }
 
   params <- as.matrix(params)
 

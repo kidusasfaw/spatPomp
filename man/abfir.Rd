@@ -14,7 +14,7 @@
   Nrep,
   nbhd,
   Ninter,
-  tol = (1e-300),
+  tol = (1e-100),
   params,
   ...,
   verbose = getOption("verbose", FALSE)

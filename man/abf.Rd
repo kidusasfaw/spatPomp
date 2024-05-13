@@ -14,7 +14,7 @@
   Np,
   nbhd,
   params,
-  tol = 1e-300,
+  tol = 1e-100,
   ...,
   verbose = getOption("verbose", FALSE)
 )
