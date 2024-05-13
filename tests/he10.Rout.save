@@ -1,7 +1,7 @@
 
-R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin20 (64-bit)
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -315,5 +315,24 @@ Error : girf with kind = 'moment' requires munit_measure
 > try(c(h_ibpf, h_ibpf3))
 Error in validObject(.Object) : 
   invalid class “ibpfList” object: error in ‘c’: to be combined, ‘ibpfd_spatPomp’ objects must have chains of equal length
+> 
+> # Test as.data.frame on a spatPomp with covariates
+> as.data.frame(h_model)
+       time       town cases     pop lag_birthrate
+1  1950.014     London    43 3389187      66086.82
+2  1950.014 Birmingham   100 1117804      22925.88
+3  1950.033     London    54 3388581      66176.17
+4  1950.033 Birmingham   100 1117670      22949.51
+5  1950.052     London    36 3387975      66265.51
+6  1950.052 Birmingham    90 1117536      22973.14
+7  1950.071     London    24 3387369      66354.86
+8  1950.071 Birmingham    70 1117402      22996.77
+9  1950.090     London    42 3386763      66444.21
+10 1950.090 Birmingham    65 1117268      23020.40
+> 
+> # Test covariate lookup on a spatPomp with covariates
+> .Call("lookup_in_table_spatPomp",h_model@covar,1950.02)
+          pop1           pop2 lag_birthrate1 lag_birthrate2 
+    3388987.60     1117760.00       66116.24       22933.66 
 > 
 > 

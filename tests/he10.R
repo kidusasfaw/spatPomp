@@ -232,3 +232,9 @@ is(c(h_ibpf, h_ibpf), "ibpfList")
 # Throws error because they have different chain lengths
 try(c(h_ibpf, h_ibpf3))
 
+# Test as.data.frame on a spatPomp with covariates
+as.data.frame(h_model)
+
+# Test covariate lookup on a spatPomp with covariates
+.Call("lookup_in_table_spatPomp",h_model@covar,1950.02)
+

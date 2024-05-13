@@ -527,7 +527,7 @@ plot(b_model,type="l",log=FALSE)
 b_sim3v2 <- b_sim3[[1]]
 b_sim3v2@data <- exp(b_sim3v2@data)
 plot(b_sim3v2,type="l",log=TRUE)
-plot(b_sim3[[2]],type="h")
+plot(b_sim3[[2]],type="h",plot_unit_names=FALSE)
 dev.off()
 
 print(b_model)
@@ -629,6 +629,7 @@ try(runit_measure(b_model_no_runit_measure, x=b_s2, unit=2, time=1,params=b_p2))
 ## trigger error messages in vunit_measure.c
 vunit_measure(b_model_no_vunit_measure, x=b_s, unit=2, time=1, params=b_p)
 try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
+try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
 try(vunit_measure(b_model, x=b_s3, unit=2, time=1, params=b_p2))
 
 ## trigger error messages in eunit_measure.c
@@ -738,6 +739,8 @@ spatPomp:::undefined()
 spatPomp:::undefined(NULL)
 spatPomp:::undefined("JUNK")
 
+.Call("spatPomp_systematic_resampling",c(0.1,0.2),2)
 try(.Call("spatPomp_systematic_resampling",c(-0.1,-0.2),2))
+
 
 

@@ -1,7 +1,7 @@
 
-R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin20 (64-bit)
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -781,7 +781,7 @@ Error : in ‘iubf’: ‘Nparam’ must be at least 3
 > b_sim3v2 <- b_sim3[[1]]
 > b_sim3v2@data <- exp(b_sim3v2@data)
 > plot(b_sim3v2,type="l",log=TRUE)
-> plot(b_sim3[[2]],type="h")
+> plot(b_sim3[[2]],type="h",plot_unit_names=FALSE)
 > dev.off()
 null device 
           1 
@@ -997,6 +997,8 @@ Warning message:
 'vunit_measure' unspecified. 
 > try(vunit_measure(b_model, x=b_s, unit=2, time=1:10, params=b_p))
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
+> try(vunit_measure(b_model, x=b_s2, unit=2, time=1, params=b_p2))
+Error : larger number of replicates is not a multiple of smaller.
 > try(vunit_measure(b_model, x=b_s3, unit=2, time=1, params=b_p2))
 Error : length of 'times' and 3rd dimension of 'x' do not agree.
 > 
@@ -1158,8 +1160,11 @@ Error : in ‘spatPomp’: ‘shared_covarnames’ currently supported only when
 > spatPomp:::undefined("JUNK")
 [1] NA
 > 
+> .Call("spatPomp_systematic_resampling",c(0.1,0.2),2)
+[1] 2 2
 > try(.Call("spatPomp_systematic_resampling",c(-0.1,-0.2),2))
 Error : in 'systematic_resampling': non-positive sum of weights
+> 
 > 
 > 
 > 
