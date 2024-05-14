@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -63,7 +63,10 @@ Loading required package: pomp
 > ## i.e., cohort=0.
 > ##
 > 
-> ## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+> ## A call to igirf using the moment-based guide function can test
+> ## compiled code for eunit_measure, munit_measure, vunit_measure,
+> ## dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+> ## It also tests igirf (method=moment) with covariates
 > 
 > m3_params <- m_params
 > m3_params["cohort"] <- 0
@@ -90,6 +93,16 @@ Warning messages:
 2: in 'table_lookup': extrapolating at 1.965002e+03. 
 > logLik(m3_igirf_out)
 [1] -86380.55
+> 
+> ## another call to igirf tests igirf (method=bootstrap) with covariates
+> m3_igirf_bootstrap_out <- igirf(m3_igirf_out,kind='bootstrap')
+Warning messages:
+1: in 'table_lookup': extrapolating at 1.965003e+03. 
+2: in 'table_lookup': extrapolating at 1.965002e+03. 
+3: in 'table_lookup': extrapolating at 1.965002e+03. 
+4: in 'table_lookup': extrapolating at 1.965002e+03. 
+> logLik(m3_igirf_bootstrap_out)
+[1] -86123.26
 > 
 > ## test error message
 > try(measles(U=1000))

@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -1132,11 +1132,9 @@ Error : in ‘spatPomp’: for unit-specific covariates, there should be a colum
 > b_shared_covar <- data.frame(time=0:2,Z=3:5)
 > model_shared_covar <- spatPomp(data=b_data,times="time",units="unit",
 +   t0=0,covar=b_shared_covar, shared_covarnames="Z")
-> as.data.frame(b_shared_covar)
-  time Z
-1    0 3
-2    1 4
-3    2 5
+> try(as.data.frame(model_shared_covar))
+Error in asMethod(object) : 
+  in ‘as.data.frame’ : shared covariates are not yet fully implemented in spatPomp
 > 
 > b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
 +   Z=rep(3:5,times=2))

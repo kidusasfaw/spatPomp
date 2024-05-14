@@ -717,7 +717,7 @@ try(spatPomp(data=b_data,times="time",units="unit",t0=0,
 b_shared_covar <- data.frame(time=0:2,Z=3:5)
 model_shared_covar <- spatPomp(data=b_data,times="time",units="unit",
   t0=0,covar=b_shared_covar, shared_covarnames="Z")
-as.data.frame(b_shared_covar)
+try(as.data.frame(model_shared_covar))
 
 b_unit_covar <- data.frame(time=c(0:2,0:2),unit=rep(c("U1","U2"),each=3),
   Z=rep(3:5,times=2))

@@ -58,10 +58,11 @@ setAs(
     # convert to long format with column for stateobscovars
     no_time_colnames <- colnames(dat)[-1]
     shared_covnames_ix <- which(no_time_colnames %in% from@shared_covarnames)
-    if(length(shared_covnames_ix) > 0)
+    if(length(shared_covnames_ix) > 0) {
       to_gather <- no_time_colnames[-shared_covnames_ix]
-    else
-      to_gather <- no_time_colnames
+      stop(paste('in', sQuote('as.data.frame'),
+        ": shared covariates are not yet fully implemented in spatPomp"))
+    } else to_gather <- no_time_colnames
     to_arrange <- rlang::syms(c(timename, unitname, "stateobscovars"))
     to_final_select <- c(timename, unitname, unit_stateobscovars)
     gathered <- dat %>%

@@ -40,7 +40,10 @@ logLik(m2_pf)
 ## i.e., cohort=0.
 ##
 
-## A call to igirf using the moment-based guide function can test compiled code for eunit_measure, munit_measure, vunit_measure, dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+## A call to igirf using the moment-based guide function can test
+## compiled code for eunit_measure, munit_measure, vunit_measure,
+## dunit_measure, runit_measure, rprocess, skeleton, rinit and partrans. 
+## It also tests igirf (method=moment) with covariates
 
 m3_params <- m_params
 m3_params["cohort"] <- 0
@@ -63,6 +66,10 @@ m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
   verbose = FALSE
 )
 logLik(m3_igirf_out)
+
+## another call to igirf tests igirf (method=bootstrap) with covariates
+m3_igirf_bootstrap_out <- igirf(m3_igirf_out,kind='bootstrap')
+logLik(m3_igirf_bootstrap_out)
 
 ## test error message
 try(measles(U=1000))
