@@ -53,22 +53,24 @@ m3_igirf_np <- 5
 m3_igirf_nguide <- 5
 m3_igirf_ngirf <- 2
 
-m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
-  params=m3_params,
-  rw.sd=rw_sd(g=0.02),
-  cooling.type = "geometric",
-  cooling.fraction.50 = 0.5,
-  Np=m3_igirf_np,
-  Ninter = m3_igirf_ninter,
-  lookahead = m3_igirf_lookahead,
-  Nguide = m3_igirf_nguide,
-  kind = 'moment',
-  verbose = FALSE
+suppressWarnings(
+  m3_igirf_out <- igirf(m_model, Ngirf = m3_igirf_ngirf,
+    params=m3_params,
+    rw.sd=rw_sd(g=0.02),
+    cooling.type = "geometric",
+    cooling.fraction.50 = 0.5,
+    Np=m3_igirf_np,
+    Ninter = m3_igirf_ninter,
+    lookahead = m3_igirf_lookahead,
+    Nguide = m3_igirf_nguide,
+    kind = 'moment',
+    verbose = FALSE
+  )
 )
 logLik(m3_igirf_out)
 
 ## another call to igirf tests igirf (method=bootstrap) with covariates
-m3_igirf_bootstrap_out <- igirf(m3_igirf_out,kind='bootstrap')
+suppressWarnings(m3_igirf_bootstrap_out <- igirf(m3_igirf_out,kind='bootstrap'))
 logLik(m3_igirf_bootstrap_out)
 
 ## test error message

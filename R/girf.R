@@ -149,7 +149,7 @@ setMethod(
           ...,
           verbose=verbose
         ),
-        error = function (e) pStop("girf",conditionMessage(e))
+        error = function (e) pStop("girf (method=moment)",conditionMessage(e))
       )
       return(g)
     }
@@ -166,7 +166,7 @@ setMethod(
           ...,
           verbose=verbose
         ),
-        error = function (e) pStop("girf",conditionMessage(e))
+        error = function (e) pStop("girf (method=bootstrap)",conditionMessage(e))
       )
       return(g)
     }
@@ -233,14 +233,13 @@ momgirf.internal <- function (object,
     unit_obsnames = object@unit_obsnames,
     unit_accumvars = object@unit_accumvars)
 
-  ep <- paste0("in ",sQuote("girf"),": ")
   params <- coef(object)
 
   if (undefined(object@rprocess) || undefined(object@dmeasure))
     pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
 
   if (length(params)==0)
-    pStop_(ep,sQuote("params"),
+    pStop_(sQuote("params"),
       " must be specified if not provided in the spatPomp model object")
 
   tol <- as.numeric(tol)
@@ -275,9 +274,10 @@ momgirf.internal <- function (object,
   for (nt in 0:(ntimes-1)) { ## main loop
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps <- min(lookahead, ntimes-nt)
-                                        # Get a matrix with nguides times nreps columns to propagate using rprocess
+    ## Get a matrix with nguides times nreps columns to propagate using rprocess
     x_with_guides <- x[,rep(1:Np, rep(Nguide, Np))]
-    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)],
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1],
+      times=times[(nt+2):(nt+1+lookahead_steps)],
       params=params,.gnsi=gnsi)
     xx <- tryCatch(
       .Call(do_fcst_samp_var,
@@ -287,7 +287,7 @@ momgirf.internal <- function (object,
         times=times[(nt+2):(nt+1+lookahead_steps)],
         params=params,
         gnsi=TRUE),
-      error = function (e) pStop_("rprocess error in girf : ", conditionMessage(e))
+      error = function (e) pStop_("in rprocess : ", conditionMessage(e))
     )
     fcst_samp_var <- xx
     dim(fcst_samp_var) <- c(length(unit_names(object)), lookahead_steps, Np)
@@ -306,9 +306,8 @@ momgirf.internal <- function (object,
             x0=X.start,
             t0=tt[s+1],
             params=params.matrix,
-            times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-            ...),
-          error = function (e) pStop_(sQuote("girf"), " error in ",sQuote("pomp::flow"), conditionMessage(e))
+            times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]),
+          error = function (e) pStop_(" in ",sQuote("pomp::flow"), conditionMessage(e))
         )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
@@ -345,7 +344,7 @@ momgirf.internal <- function (object,
           times=times[(nt+2):(nt+1+lookahead_steps)],
           params=array.params,
           gnsi=TRUE),
-        error = function (e) pStop_(sQuote("girf"), conditionMessage(e)) # nocov
+        error = function (e) pStop_(" in munit_measure : ", conditionMessage(e)) 
       )
       mom_match_param <- mmp
       dim(mom_match_param) <- c(length(params), length(unit_names(object)), lookahead_steps, Np)
@@ -355,7 +354,10 @@ momgirf.internal <- function (object,
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1)
+	## to ensure that the discount factor does not become too small for L=1 and small s
+	## (which can lead to very uninformative guide function), increase the discount
+	## factor to at least 1/2 when L=1.
         log_dmeas_weights <- tryCatch(
         (vec_dmeasure(
           object,
@@ -366,7 +368,7 @@ momgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) pStop_("error in calculation of log_dmeas_weights: ", conditionMessage(e))
+        error = function (e) pStop_("in calculation of log_dmeas_weights : ", conditionMessage(e))
         )
         log_resamp_weights <- apply(log_dmeas_weights[,,1,drop=FALSE], 2, sum)*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
@@ -389,7 +391,7 @@ momgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) pStop_("girf error in calculation of dmeas_weights: ", conditionMessage(e))
+        error = function (e) pStop_("in calculation of dmeas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -410,7 +412,7 @@ momgirf.internal <- function (object,
             fsv=fcst_samp_var,
             tol=tol
           ),
-          error = function (e) pStop_("girf : ",conditionMessage(e))
+          error = function (e) pStop_("in girf_computations : ",conditionMessage(e))
         )
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights
         x <- xx$states
@@ -447,8 +449,6 @@ bootgirf.internal <- function (object,
   verbose,
   .gnsi = TRUE) {
 
-  ep <- paste0("in ",sQuote("girf"),": ")
-
   p_object <- pomp(object,...,verbose=verbose)
   object <- new("spatPomp",p_object,
     unit_covarnames = object@unit_covarnames,
@@ -466,10 +466,11 @@ bootgirf.internal <- function (object,
   params <- coef(object)
 
   if (undefined(object@rprocess) || undefined(object@dmeasure))
-    pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", ")," are needed basic components.")
+    pStop_(paste(sQuote(c("rprocess","dmeasure")),collapse=", "),
+      " are needed basic components.")
 
   if (length(params)==0)
-    stop(ep,sQuote("params")," must be specified",call.=FALSE)
+    pStop_(sQuote("params")," must be specified")
 
   tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
@@ -503,18 +504,19 @@ bootgirf.internal <- function (object,
   for (nt in 0:(ntimes-1)) { ## main loop
     tt <- seq(from=times[nt+1],to=times[nt+2],length.out=Ninter+1)
     lookahead_steps = min(lookahead, ntimes-nt)
-                                        # Get a matrix with nguides times nreps columns to propagate using rprocess
+    ## Get a matrix with nguides times nreps columns to propagate using rprocess
     x_with_guides <- x[,rep(1:Np, each=Nguide)]
-    guidesim_index <- 1:Np # the index for guide simulations (to be updated each time resampling occurs)
-    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1], times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
-    Xskel <- tryCatch( # skeleton
+    guidesim_index <- 1:Np
+    ## the index for guide simulations (to be updated each time resampling occurs)
+    Xg <- rprocess(object, x0=x_with_guides, t0=times[nt+1],
+      times=times[(nt+2):(nt+1+lookahead_steps)], params=params,.gnsi=gnsi)
+    Xskel <- tryCatch( 
       pomp::flow(object,
         x0=x,
         t0=times[nt+1],
         params=params.matrix,
-        times = times[(nt+2):(nt+1+lookahead_steps)],
-        ...),
-      error = function (e) pStop_("girf error in flow : ", conditionMessage(e))
+        times = times[(nt+2):(nt+1+lookahead_steps)]),
+      error = function (e) pStop_("in flow : ", conditionMessage(e))
     )
     resids <- Xg - Xskel[,rep(1:Np, each=Nguide),,drop=FALSE] # residuals
     rm(Xg, Xskel, x_with_guides)
@@ -533,9 +535,8 @@ bootgirf.internal <- function (object,
             x0=X.start,
             t0=tt[s+1],
             params=params.matrix,
-            times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)],
-            ...),
-          error = function (e) pStop_("girf error in flow : ", conditionMessage(e))
+            times = times[(nt + 1 + 1):(nt + 1 + lookahead_steps)]),
+          error = function (e) pStop_("in flow : ", conditionMessage(e))
         )
         if(length(znames) > 0){
           skel.start <- skel[,,1]
@@ -553,9 +554,14 @@ bootgirf.internal <- function (object,
       for(l in 1:lookahead_steps){
         if(nt+1+l-lookahead <= 0) discount_denom_init = object@t0
         else discount_denom_init = times[nt+1+l - lookahead]
-        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] - discount_denom_init)/ifelse(lookahead==1,2,1) ## to ensure that the discount factor does not become too small for L=1 and small s (which can lead to very uninformative guide function), increase the discount factor to at least 1/2 when L=1.
+        discount_factor = 1 - (times[nt+1+l] - tt[s+1])/(times[nt+1+l] -
+	  discount_denom_init)/ifelse(lookahead==1,2,1)
+	## to ensure that the discount factor does not become too small for L=1 and
+	## small s (which can lead to very uninformative guide function), increase the
+	## discount factor to at least 1/2 when L=1.
 
-                                        # construct pseudo-simulations by adding simulated noise terms (residuals) to the skeletons
+        ## construct pseudo-simulations by adding simulated noise terms (residuals)
+	## to the skeletons
         pseudosims <- skel[,rep(1:Np, each=Nguide),l,drop=FALSE] +
           resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np),l,drop=FALSE] -
           resids[,rep(guidesim_index-1, each=Nguide)*Nguide+rep(1:Nguide, Np),1,drop=FALSE] +
@@ -571,10 +577,14 @@ bootgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
         )),
-        error = function (e) pStop_("girf error in calculation of log_dmeas_weights: ", conditionMessage(e))
+        error = function (e) pStop_("in calculation of log_dmeas_weights: ", conditionMessage(e))
         )
-        ldw <- array(log_dmeas_weights, c(U,Nguide,Np)) # log_dmeas_weights is an array with dim U*(Np*Nguide)*1. Reorder it as U*Nguide*Np
-        log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide)) # average dmeas (natural scale) over Nguide sims, then take log, and then sum over 1:U (for each particle)
+        ldw <- array(log_dmeas_weights, c(U,Nguide,Np))
+	## log_dmeas_weights is an array with dim U*(Np*Nguide)*1.
+	## Reorder it as U*Nguide*Np
+        log_fcst_lik <- colSums(log(apply(exp(ldw),c(1,3),sum)/Nguide))
+	## average dmeas (natural scale) over Nguide sims, then take log,
+	## and then sum over 1:U (for each particle)
         log_resamp_weights <- log_fcst_lik*discount_factor
         log_guide_fun = log_guide_fun + log_resamp_weights
       }
@@ -596,7 +606,7 @@ bootgirf.internal <- function (object,
           log=TRUE,
           .gnsi=gnsi
           ),
-          error = function (e) pStop_("girf error in calculation of dmeas_weights: ", conditionMessage(e))
+          error = function (e) pStop_("in calculation of dmeas_weights: ", conditionMessage(e))
         )
         gnsi <- FALSE
         log_weights <- as.numeric(log_meas_weights) + log_s_not_1_weights
@@ -615,10 +625,11 @@ bootgirf.internal <- function (object,
             doparRS=FALSE,
             weights=weights,
             lgps=log_guide_fun,
-            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)), # bootgirf2 doesn't use fsv, set to an arbitrary val.
+            fsv=array(0,dim=c(length(unit_names(object)), lookahead_steps, Np)),
+	    ## bootgirf2 doesn't use fsv, set to an arbitrary val.
             tol=tol
           ),
-          error = function (e) pStop_("in girf : ",conditionMessage(e))
+          error = function (e) pStop_("in girf_computations : ",conditionMessage(e))
         )
         guidesim_index <- guidesim_index[xx$ancestry] # update guidesim index
         cond.loglik[nt+1, s] <- xx$loglik + max_log_weights

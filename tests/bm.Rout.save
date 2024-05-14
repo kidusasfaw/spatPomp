@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin20
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -349,43 +349,43 @@ Error : girf: data is a required argument.
 > try(girf("JUNK"))
 Error : girf is undefined for ‘object’ of class ‘character’.
 > try(girf(b_girf_boot,Np=c(Inf)))
-Error : in ‘girf’: ‘Np’ must be a single positive integer
+Error : in ‘girf (method=bootstrap)’: ‘Np’ must be a single positive integer
 > try(girf(b_girf_boot,Np=seq(from=10,length=N+1,by=2)))
-Error : in ‘girf’: ‘Np’ must be a single positive integer
+Error : in ‘girf (method=bootstrap)’: ‘Np’ must be a single positive integer
 > try(girf(b_model_no_eunit_measure,kind='moment'))
 Error : girf with kind = 'moment' requires eunit_measure
 > try(girf(b_model_no_vunit_measure,kind='moment'))
 Error : girf with kind = 'moment' requires vunit_measure
 > try(girf(b_model_no_rprocess,kind='moment'))
-Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
+Error : in ‘girf (method=moment)’: ‘rprocess’, ‘dmeasure’ are needed basic components.
 > try(girf(b_model,kind='moment'))
-Error : in ‘girf’: ‘Np’ must be specified.
+Error : in ‘girf (method=moment)’: ‘Np’ must be specified.
 > try(girf(b_model,kind='moment',Np=5))
-Error : in ‘girf’: argument "Nguide" is missing, with no default
+Error : in ‘girf (method=moment)’: argument "Nguide" is missing, with no default
 > try(girf(b_model,kind='moment',Np=5,Nguide=3,tol=1:1000))
-Error : in ‘girf’: ‘tol’ should be a small positive number.
+Error : in ‘girf (method=moment)’: ‘tol’ should be a small positive number.
 > try(girf(b_model_no_rprocess,kind='boot'))
-Error : in ‘girf’: ‘rprocess’, ‘dmeasure’ are needed basic components.
+Error : in ‘girf (method=bootstrap)’: ‘rprocess’, ‘dmeasure’ are needed basic components.
 > try(girf(b_model,kind='boot'))
-Error : in ‘girf’: ‘Np’ must be specified.
+Error : in ‘girf (method=bootstrap)’: ‘Np’ must be specified.
 > try(girf(b_model,kind='boot',Np=5))
-Error : in ‘girf’: argument "Nguide" is missing, with no default
+Error : in ‘girf (method=bootstrap)’: argument "Nguide" is missing, with no default
 > try(girf(b_model,kind='boot',Np=5,Nguide=3,tol=1:1000))
-Error : in ‘girf’: ‘tol’ should be a small positive number.
+Error : in ‘girf (method=bootstrap)’: ‘tol’ should be a small positive number.
 > 
 > try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
 +   kind = 'moment',Ninter=2))
-Error : in ‘girf’: in ‘girf’: ‘params’ must be specified if not provided in the spatPomp model object
+Error : in ‘girf (method=moment)’: ‘params’ must be specified if not provided in the spatPomp model object
 > try(girf(b_model_no_params,Np = 3,lookahead = 1, Nguide = 3,
 +   kind = 'boot',Ninter=2))
-Error : in ‘girf’: in ‘girf’: ‘params’ must be specified
+Error : in ‘girf (method=bootstrap)’: ‘params’ must be specified
 >   
 > try(girf(b_model,Np = 1:10,lookahead = 1, Nguide = 3,
 +   kind = 'moment',Ninter=2))
-Error : in ‘girf’: ‘Np’ must be a single positive integer
+Error : in ‘girf (method=moment)’: ‘Np’ must be a single positive integer
 > try(girf(b_model,Np = "JUNK",lookahead = 1, Nguide = 3,
 +   kind = 'moment',Ninter=2))
-Error : in ‘girf’: ‘Np’ must be a single positive integer
+Error : in ‘girf (method=moment)’: ‘Np’ must be a single positive integer
 > 
 > girf(b_model_with_accumvars,Np = 3,lookahead = 2, Nguide = 3,
 +   kind = 'moment',Ninter=2)
