@@ -6,7 +6,7 @@
 #include <R.h>
 #include <Rmath.h>
 #include <Rdefines.h>
-#include <Rinternals.h>
+
 #include "pomp_defines.h"
 
 typedef void spatPomp_unit_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
