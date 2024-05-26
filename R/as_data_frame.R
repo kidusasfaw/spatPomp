@@ -65,12 +65,12 @@ setAs(
     } else to_gather <- no_time_colnames
     to_arrange <- rlang::syms(c(timename, unitname, "stateobscovars"))
     to_final_select <- c(timename, unitname, unit_stateobscovars)
-    gathered <- dat %>%
+    gathered <- dat |>
       tidyr::gather(key="stateobscovars", val="val",
-        tidyr::all_of(to_gather)) %>%
-      dplyr::mutate(ui = get_unit_index_from_name_v(.data$stateobscovars))%>%
-      dplyr::mutate(!!unitname := unit_names(from)[as.integer(.data$ui)]) %>%
-      dplyr::select(-.data$ui) %>%
+        tidyr::all_of(to_gather)) |>
+      dplyr::mutate(ui = get_unit_index_from_name_v(.data$stateobscovars))|>
+      dplyr::mutate(!!unitname := unit_names(from)[as.integer(.data$ui)]) |>
+      dplyr::select(-.data$ui) |>
       dplyr::arrange(!!!to_arrange)
 
     # get the type of stateobscovars from the stateobscovars column
@@ -80,10 +80,10 @@ setAs(
     gathered$stateobscovarstype <- stateobscovarstype
 
     # spread stateobscovartype column to get columns for all unitnames
-    gathered <- gathered %>%
-      dplyr::select(-.data$stateobscovars) %>%
-      tidyr::spread(key = .data$stateobscovarstype, value = .data$val)%>%
-      dplyr::select(dplyr::all_of(to_final_select)) %>%
+    gathered <- gathered |>
+      dplyr::select(-.data$stateobscovars) |>
+      tidyr::spread(key = .data$stateobscovarstype, value = .data$val)|>
+      dplyr::select(dplyr::all_of(to_final_select)) |>
       dplyr::arrange(!!rlang::sym(timename),
                      match(!!rlang::sym(unitname), unit_names(from)))
     gathered

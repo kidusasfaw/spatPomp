@@ -200,7 +200,7 @@ logit_names <- unlist(lapply(logit_unit_names,
 bm2_partrans <- parameter_trans(log=log_names,logit=logit_names)
 
 
-  bm2_spatPomp <- spatPomp(bm2_data %>% dplyr::arrange(time, factor(.data$unit, levels = bm2_unitnames_level)),
+  bm2_spatPomp <- spatPomp(bm2_data |> dplyr::arrange(time, factor(.data$unit, levels = bm2_unitnames_level)),
                  times="time",
                  t0=0,
                  units="unit",

@@ -23,7 +23,7 @@ BugReports: https://github.com/kidusasfaw/spatPomp/issues/
 Depends: pomp (>= 5.4), R(>= 4.1), methods
 LinkingTo: pomp
 Suggests: doParallel (>= 1.0.11), parallel, doRNG
-Imports: foreach, dplyr, tidyr, stringr, abind, rlang, magrittr, ggplot2
+Imports: foreach, dplyr, tidyr, stringr, abind, rlang, ggplot2
 Collate:
     'spatPomp_class.R'
     'abf.R'
@@ -67,7 +67,6 @@ Collate:
     'munit_measure.R'
     'package.R'
     'param_formats.R'
-    'pipe.R'
     'plot.R'
     'print.R'
     'runit_measure.R'
