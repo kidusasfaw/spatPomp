@@ -143,7 +143,7 @@ bm <- function(U=5,N=100,delta_t=0.1){
     Y = rnorm(X,tau);
   ")
 
-  bm_spatPomp <- spatPomp(bm_data %>% dplyr::arrange(time, factor(.data$unit, levels = bm_unitnames_level)),
+  bm_spatPomp <- spatPomp(bm_data |> dplyr::arrange(time, factor(.data$unit, levels = bm_unitnames_level)),
                  times="time",
                  t0=0,
                  units="unit",

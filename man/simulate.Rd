@@ -21,8 +21,8 @@ if present, it should be a data frame or a \sQuote{pomp} object.}
 
 \item{nsim}{number of simulations.}
 
-\item{seed}{optional;
-if set, the pseudorandom number generator (RNG) will be initialized with \code{seed}.  the random seed to use.
+\item{seed}{optional integer;
+if set, the pseudorandom number generator (RNG) will be initialized with \code{seed}.
 The RNG will be restored to its original state afterward.}
 
 \item{format}{the format of the simulated results. If the argument is
@@ -33,12 +33,7 @@ and \code{'data.frame'}.}
 \item{include.data}{if \code{TRUE}, the original data and covariates (if any) are included (with \code{.id = "data"}).
 This option is ignored unless \code{format = "data.frame"}.}
 
-\item{...}{additional arguments supply new or modify existing model characteristics or components.
-See \code{\link[pomp]{pomp}} for a full list of recognized arguments.
-
-When named arguments not recognized by \code{\link[pomp]{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
-This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[pomp:userdata]{userdata} for information on how to use this facility.}
+\item{...}{additional arguments are passed to \code{\link[pomp]{pomp}}.}
 }
 \value{
 if \code{format='spatPomps'} and \code{nsim=1} an object of class \sQuote{spatPomp} representing a simulation from the model in \code{object} is returned.
