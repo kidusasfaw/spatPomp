@@ -1,7 +1,14 @@
 # The `spatPomp` package
 
+[![Development Release](https://img.shields.io/github/release/kidusasfaw/spatPomp.svg)](https://github.com/kidusasfaw/spatPomp/releases/latest)
+[![CRAN Status](https://www.r-pkg.org/badges/version/spatPomp?color=blue)](https://cran.r-project.org/package=spatPomp)
+[![Last CRAN release date](https://www.r-pkg.org/badges/last-release/spatPomp?color=blue)](https://cran.r-project.org/package=spatPomp)
+
 [![R-CMD-check](https://github.com/kidusasfaw/spatPomp/actions/workflows/r-cmd-check.yml/badge.svg)](https://github.com/kidusasfaw/spatPomp/actions/workflows/r-cmd-check.yml)
 [![test-coverage](https://github.com/kidusasfaw/spatPomp/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/kidusasfaw/spatPomp/actions/workflows/test-coverage.yml)
+
+![CRAN mirror monthly downloads](https://cranlogs.r-pkg.org/badges/last-month/spatPomp?color=yellow)
+![CRAN mirror total downloads](https://cranlogs.r-pkg.org/badges/grand-total/spatPomp?color=yellow)
 
 ## What is this package?
 The [`spatPomp` package](https://kidusasfaw.github.io/spatPomp/) provides facilities for inference on panel data using spatiotemporal partially-observed Markov process (SpatPOMP) models.
