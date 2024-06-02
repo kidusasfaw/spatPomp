@@ -7,9 +7,9 @@ try(measles2(U=2,N=1000))
 
 i <- 1
 DEBUG=FALSE
-U <- switch(i,4,10,40)
+U <- switch(i,2,10,40)
 N <- switch(i,2,50,391)
-Np <- switch(i,10,100,1000)
+Np <- switch(i,5,100,1000)
 
 m1 <- measles2(U=U,N=N)
 if(DEBUG){

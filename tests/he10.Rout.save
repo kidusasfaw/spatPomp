@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -82,10 +82,10 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
       S_02       E_01       E_02       I_01       I_02 
    3.2e-02    5.0e-05    5.0e-05    4.0e-05    4.0e-05 
 > 
-> h_bpfilter <- bpfilter(h_model,Np=10,block_size=1)
+> h_bpfilter <- bpfilter(h_model,Np=5,block_size=1)
 > 
 > paste("bpfilter logLik for he10 model:",logLik(h_bpfilter))
-[1] "bpfilter logLik for he10 model: -2110.11342383345"
+[1] "bpfilter logLik for he10 model: -3473.00909847443"
 > 
 > 
 > h_U <- length(unit_names(h_model))
@@ -120,16 +120,16 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
 +   unitParNames=unitParNames,
 +   Nbpf=2,
 +   spat_regression=0.1,
-+   Np=10,
++   Np=5,
 +   rw.sd=h_rw.sd,
 +   cooling.fraction.50=0.5,
 +   block_list=block_list
 + )
 > 
-> h_bpfilter <- bpfilter(h_ibpf,Np=10,block_size=1)
+> h_bpfilter <- bpfilter(h_ibpf,Np=5,block_size=1)
 > 
 > paste("ibpf logLik for he10 model:",logLik(h_bpfilter))
-[1] "ibpf logLik for he10 model: -2814.71744861074"
+[1] "ibpf logLik for he10 model: -2124.73768966054"
 > 
 > # test whether specifying Np as a function gives the same result
 > set.seed(3)
@@ -140,28 +140,28 @@ amplitude1 amplitude2   sigmaSE1   sigmaSE2       rho1       rho2       S_01
 +   unitParNames=unitParNames,
 +   Nbpf=2,
 +   spat_regression=0.1,
-+   Np=function(k) 10,
++   Np=function(k) 5,
 +   rw.sd=h_rw.sd,
 +   cooling.fraction.50=0.5,
 +   block_list=block_list
 + )
 > 
-> h_bpfilter2 <- bpfilter(h_ibpf2,Np=10,block_size=1)
+> h_bpfilter2 <- bpfilter(h_ibpf2,Np=5,block_size=1)
 > 
 > if (logLik(h_bpfilter2)!=logLik(h_bpfilter))
 +   stop("in ibpf: Np specified as a function gives a different result from Np as a scalar")
 >   
 > coef(h_ibpf)
       alpha1        iota1      cohort1          mu1          R01          R02 
-1.000000e+00 0.000000e+00 0.000000e+00 2.000000e-02 2.998682e+01 2.998682e+01 
+1.000000e+00 0.000000e+00 0.000000e+00 2.000000e-02 3.205576e+01 3.205576e+01 
         psi1         psi2           g1           g2       sigma1       sigma2 
-1.478142e-01 1.478142e-01 3.890605e+02 3.890605e+02 5.146403e+01 5.146403e+01 
+1.525741e-01 1.525741e-01 4.201358e+02 4.201358e+02 4.903717e+01 4.903717e+01 
       gamma1       gamma2   amplitude1   amplitude2     sigmaSE1     sigmaSE2 
-5.263311e+01 5.263311e+01 5.011599e-01 5.011599e-01 1.417224e-01 1.417224e-01 
+5.383299e+01 5.383299e+01 4.768450e-01 4.768450e-01 1.565076e-01 1.565076e-01 
         rho1         rho2         S_01         S_02         E_01         E_02 
-4.847137e-01 5.354589e-01 3.025523e-02 3.154374e-02 4.923364e-05 5.325866e-05 
+5.110425e-01 4.952817e-01 3.259427e-02 3.338056e-02 5.503672e-05 5.213017e-05 
         I_01         I_02 
-4.123391e-05 4.097914e-05 
+3.981390e-05 3.743017e-05 
 > 
 > # test errors for ibpf on class 'missing' or character
 > try(ibpf())
@@ -282,7 +282,7 @@ Error : in ‘argument "Nbpf" is missing, with no default’: ibpf
 +   unitParNames=unitParNames,
 +   Nbpf=2,
 +   spat_regression=0.1,
-+   Np=10,
++   Np=5,
 +   rw.sd=h_rw.sd,
 +   cooling.fraction.50=0.5,
 +   block_list=block_list
@@ -292,7 +292,7 @@ Error : in ‘ibpf’: ‘rprocess’, ‘dunit_measure’ are needed basic comp
 > ## test error message when munit_measure is undefined
 > ## this also tests setup of covariates for girf_moment
 > try(girf(h_model,kind="moment",
-+   Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
++   Np=5,Ninter=2,Nguide=5,lookahead=1,tol=1e-5))
 Error : girf with kind = 'moment' requires munit_measure
 > 
 > ## test girf_bootstrap with covariates
@@ -307,7 +307,7 @@ Error : girf with kind = 'moment' requires munit_measure
 +                 unitParNames=unitParNames,
 +                 Nbpf=3,
 +                 spat_regression=0.1,
-+                 Np=10,
++                 Np=5,
 +                 rw.sd=h_rw.sd,
 +                 cooling.fraction.50=0.5,
 +                 block_list=block_list

@@ -761,5 +761,21 @@ spatPomp:::undefined("JUNK")
 .Call("spatPomp_systematic_resampling",c(0.1,0.2),2)
 try(.Call("spatPomp_systematic_resampling",c(-0.1,-0.2),2))
 
+try(spatPomp:::conc())
+try(spatPomp:::conc("a","b"))
+
+(t_spatPompList <- is(c(b_model, b_model), "spatPompList"))
+
+class( c(c(b_model,b_model),b_model))
+
+(t_bpfilterList <- is(
+  c(b_bpfilter,b_bpfilter),
+  "bpfilterList"
+))
+
+## ibpfilterList is tested in he10
+
+stopifnot(all(t_spatPompList, t_bpfilterList))
+
 
 

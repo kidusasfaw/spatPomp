@@ -50,7 +50,7 @@ h_model <- he10(U=2,dt=4/365,Tmax=1950.1,
 
 coef(h_model)
 
-h_bpfilter <- bpfilter(h_model,Np=10,block_size=1)
+h_bpfilter <- bpfilter(h_model,Np=5,block_size=1)
 
 paste("bpfilter logLik for he10 model:",logLik(h_bpfilter))
 
@@ -87,13 +87,13 @@ h_ibpf <- ibpf(h_model,
   unitParNames=unitParNames,
   Nbpf=2,
   spat_regression=0.1,
-  Np=10,
+  Np=5,
   rw.sd=h_rw.sd,
   cooling.fraction.50=0.5,
   block_list=block_list
 )
 
-h_bpfilter <- bpfilter(h_ibpf,Np=10,block_size=1)
+h_bpfilter <- bpfilter(h_ibpf,Np=5,block_size=1)
 
 paste("ibpf logLik for he10 model:",logLik(h_bpfilter))
 
@@ -106,13 +106,13 @@ h_model,
   unitParNames=unitParNames,
   Nbpf=2,
   spat_regression=0.1,
-  Np=function(k) 10,
+  Np=function(k) 5,
   rw.sd=h_rw.sd,
   cooling.fraction.50=0.5,
   block_list=block_list
 )
 
-h_bpfilter2 <- bpfilter(h_ibpf2,Np=10,block_size=1)
+h_bpfilter2 <- bpfilter(h_ibpf2,Np=5,block_size=1)
 
 if (logLik(h_bpfilter2)!=logLik(h_bpfilter))
   stop("in ibpf: Np specified as a function gives a different result from Np as a scalar")
@@ -203,7 +203,7 @@ try(h_ibpf2 <- ibpf(h_model2,
   unitParNames=unitParNames,
   Nbpf=2,
   spat_regression=0.1,
-  Np=10,
+  Np=5,
   rw.sd=h_rw.sd,
   cooling.fraction.50=0.5,
   block_list=block_list
@@ -212,7 +212,7 @@ try(h_ibpf2 <- ibpf(h_model2,
 ## test error message when munit_measure is undefined
 ## this also tests setup of covariates for girf_moment
 try(girf(h_model,kind="moment",
-  Np=10,Ninter=2,Nguide=10,lookahead=1,tol=1e-5))
+  Np=5,Ninter=2,Nguide=5,lookahead=1,tol=1e-5))
 
 ## test girf_bootstrap with covariates
 h_girf <- girf(h_model,kind="bootstrap",
@@ -226,7 +226,7 @@ h_ibpf3 <- ibpf(h_model,
                 unitParNames=unitParNames,
                 Nbpf=3,
                 spat_regression=0.1,
-                Np=10,
+                Np=5,
                 rw.sd=h_rw.sd,
                 cooling.fraction.50=0.5,
                 block_list=block_list

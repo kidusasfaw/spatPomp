@@ -2,9 +2,9 @@
 library(spatPomp)
 set.seed(3)
 
-l <- lorenz(U=5,N=3)
+l <- lorenz(U=5,N=2)
 
-try(lorenz(U=2,N=3))
+try(lorenz(U=2,N=2))
 
 l_pf <- pfilter(l,Np=10)
 paste("lorenz pfilter loglik: ", round(logLik(l_pf),10))
@@ -16,10 +16,10 @@ l_igirf <- igirf(l,
   rw.sd = rw_sd(F=0.02, tau=0.02,X1_0=ivp(0),X2_0=ivp(0)),
   cooling.type = "hyperbolic",
   cooling.fraction.50 = 0.5,
-  Np=10,
+  Np=5,
   Ninter = 2,
   lookahead = 1,
-  Nguide = 10,
+  Nguide = 5,
   kind = 'bootstrap',
   verbose = FALSE
 )

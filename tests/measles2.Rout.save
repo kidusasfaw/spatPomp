@@ -1,7 +1,7 @@
 
 R version 4.4.0 (2024-04-24) -- "Puppy Cup"
 Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+Platform: x86_64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -29,9 +29,9 @@ Error in measles2(U = 2, N = 1000) : N <= 391
 > 
 > i <- 1
 > DEBUG=FALSE
-> U <- switch(i,4,10,40)
+> U <- switch(i,2,10,40)
 > N <- switch(i,2,50,391)
-> Np <- switch(i,10,100,1000)
+> Np <- switch(i,5,100,1000)
 > 
 > m1 <- measles2(U=U,N=N)
 > if(DEBUG){
@@ -44,10 +44,8 @@ Error in measles2(U = 2, N = 1000) : N <= 391
 > head(obs(s1))
         year
 name     [,1] [,2]
-  cases1   95   97
-  cases2   42   46
-  cases3   42   36
-  cases4   29   13
+  cases1   95  123
+  cases2   58   17
 > 
 > if(DEBUG){
 + par1 <- coef(m1)
@@ -85,22 +83,14 @@ name     [,1] [,2]
 > if(any(obs(s3)!=obs(s1)))stop("s1 and s3 should be identical")
 > 
 > partrans(m1,coef(m1),dir="toEst")
-        R01         R02         R03         R04          c1          c2 
-  3.4011974   3.4011974   3.4011974   3.4011974  -0.8472979  -0.8472979 
-         c3          c4          A1          A2          A3          A4 
- -0.8472979  -0.8472979   0.0000000   0.0000000   0.0000000   0.0000000 
-      muIR1       muIR2       muIR3       muIR4       muEI1       muEI2 
-  3.9512437   3.9512437   3.9512437   3.9512437   3.9512437   3.9512437 
-      muEI3       muEI4    sigmaSE1    sigmaSE2    sigmaSE3    sigmaSE4 
-  3.9512437   3.9512437  -1.8971200  -1.8971200  -1.8971200  -1.8971200 
-       rho1        rho2        rho3        rho4        psi1        psi2 
-  0.0000000   0.0000000   0.0000000   0.0000000  -1.8971200  -1.8971200 
-       psi3        psi4          g1          g2          g3          g4 
- -1.8971200  -1.8971200   5.9914645   5.9914645   5.9914645   5.9914645 
-       S_01        S_02        S_03        S_04        E_01        E_02 
- -3.4094962  -3.4094962  -3.4094962  -3.4094962  -9.9034376  -9.9034376 
-       E_03        E_04        I_01        I_02        I_03        I_04 
- -9.9034376  -9.9034376 -10.1265911 -10.1265911 -10.1265911 -10.1265911 
+        R01         R02          c1          c2          A1          A2 
+  3.4011974   3.4011974  -0.8472979  -0.8472979   0.0000000   0.0000000 
+      muIR1       muIR2       muEI1       muEI2    sigmaSE1    sigmaSE2 
+  3.9512437   3.9512437   3.9512437   3.9512437  -1.8971200  -1.8971200 
+       rho1        rho2        psi1        psi2          g1          g2 
+  0.0000000   0.0000000  -1.8971200  -1.8971200   5.9914645   5.9914645 
+       S_01        S_02        E_01        E_02        I_01        I_02 
+ -3.4094962  -3.4094962  -9.9034376  -9.9034376 -10.1265911 -10.1265911 
      alpha1       iota1        muD1 
   0.9800000   0.1000000   0.0200000 
 > partrans(m2,coef(m2),dir="toEst")
@@ -111,31 +101,29 @@ name     [,1] [,2]
      alpha1       iota1        muD1 
   0.9800000   0.1000000   0.0200000 
 > partrans(m3,coef(m3),dir="toEst")
-         A1          A2          A3          A4       muIR1       muIR2 
-  0.0000000   0.0000000   0.0000000   0.0000000   3.9512437   3.9512437 
-      muIR3       muIR4         R01          c1        S_01      alpha1 
-  3.9512437   3.9512437   3.4011974  -0.8472979  -3.4094962   0.9800000 
-      iota1        psi1       muEI1    sigmaSE1        muD1        rho1 
-  0.1000000   0.1500000  52.0000000   0.1500000   0.0200000   0.5000000 
-         g1        E_01        I_01 
-400.0000000   0.0000500   0.0000400 
+         A1          A2       muIR1       muIR2         R01          c1 
+  0.0000000   0.0000000   3.9512437   3.9512437   3.4011974  -0.8472979 
+       S_01      alpha1       iota1        psi1       muEI1    sigmaSE1 
+ -3.4094962   0.9800000   0.1000000   0.1500000  52.0000000   0.1500000 
+       muD1        rho1          g1        E_01        I_01 
+  0.0200000   0.5000000 400.0000000   0.0000500   0.0000400 
 > 
 > set.seed(2)
 > pf1 <- pfilter(m1,Np=Np)
 > logLik(pf1)
-[1] -1415.717
+[1] -38.565
 > set.seed(2)
 > pf2 <- pfilter(m2,Np=Np)
 > logLik(pf2)
-[1] -1415.717
+[1] -38.565
 > set.seed(2)
 > pf3 <- pfilter(m3,Np=Np)
 > logLik(pf3)
-[1] -1415.717
+[1] -38.565
 > 
 > e1 <- enkf(m1,Np=Np)
 > logLik(e1)
-[1] -1472.011
+[1] -98.95214
 > 
 > if(DEBUG){
 +   # compare to measles()
