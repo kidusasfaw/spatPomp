@@ -29,7 +29,7 @@ affiliations:
    index: 3
  - name: Santa Fe Institute, Santa Fe, New Mexico.
    index: 4
-date: 2024-04-14
+date: 3 June 2024
 bibliography: paper.bib
 
 ---
