@@ -8,10 +8,10 @@ tags:
   - particle filter
 authors:
   - name: Kidus Asfaw
-    affiliation: [1]
+    affiliation: "1"
     orcid: 0000-0001-8625-3743
   - name: Joonha Park
-    affiliation: [2]
+    affiliation: "2"
     orcid: 0000-0002-4493-7730
   - name: Aaron A. King
     affiliation: "3, 4"
@@ -19,7 +19,7 @@ authors:
   - name: Edward L. Ionides
     corresponding: true 
     orcid: 0000-0002-4190-0174
-    affiliation: [1]
+    affiliation: "1"
 affiliations:
  - name: University of Michigan, Department of Statistics.
    index: 1
