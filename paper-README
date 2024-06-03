@@ -1,0 +1,23 @@
+
+This is a temporary branch used to prepare and submit a paper
+on spatPomp to Journal of Open Source Software.
+
+After publication, this can be put in a sub-directory of the master branch.
+
+To use docker to put the manuscript into JOSS format
+
+docker run --rm -it \
+        -v $PWD:/data \
+        -u $(id -u):$(id -g) \
+        openjournals/inara \
+        -o pdf,crossref \
+        paper.md
+
+or, compressed into one line,
+
+docker run --rm -it  -v $PWD:/data  -u $(id -u):$(id -g)  openjournals/inara  -o pdf,crossref paper.md
+
+which can be set up as an alias, joss. On Mac, the Docker app has to be running to start the docker daemon required for docker run.
+
+
+
