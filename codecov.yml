@@ -1,0 +1,10 @@
+coverage:
+  precision: 2
+  round: nearest
+  range: "80...100"
+comment:
+  layout: "header, diff, changes, sunburst, uncovered"
+  branches: null
+  behavior: default
+codecov: 
+ token: af170d45-4f46-44bf-af6a-4ec2ae8e6803
