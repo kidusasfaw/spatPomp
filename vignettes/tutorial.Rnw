@@ -1,0 +1,6 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{tutorial}
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{tutorial-original.pdf}
+\end{document}

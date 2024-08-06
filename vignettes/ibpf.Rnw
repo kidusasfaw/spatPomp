@@ -1,0 +1,6 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{ibpf}
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{ibpf-original.pdf}
+\end{document}
