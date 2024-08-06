@@ -52,6 +52,8 @@ jobs:
       _R_CHECK_CODETOOLS_PROFILE_: "suppressLocalUnused=FALSE,suppressPartialMatchArgs=FALSE,suppressParamUnused=TRUE,suppressUndefined=FALSE"
 
     steps:
+      - uses: r-lib/actions/setup-tinytex@master
+      
       - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-r@v2
