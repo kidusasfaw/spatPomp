@@ -48,18 +48,21 @@ Papers using **spatPomp** include the following:
   [doi](https://doi.org/10.5705/ss.202022.0188).
   [arxiv](https://arxiv.org/abs/2206.03837).
   [code](https://github.com/ionides/ibpf_article).
-- Li, J., E. L. Ionides, A. A., King, M. Pascual and N. Ning (2024). Inference on spatiotemporal dynamics for networks of biological populations.
+- Li, J., E. L. Ionides, A. A., King, M. Pascual and N. Ning (2024). Inference on spatiotemporal dynamics for coupled biological populations. _Journal of the Royal Society Interface_ 21(216), 20240217.
+  [doi](https://doi.org/10.1098/rsif.2024.0217).
   [arxiv](https://arxiv.org/abs/2311.06702).
   [code](https://github.com/jifanli/metapop_article).
+  [software](https://github.com/jifanli/metapoppkg)
 - Ning, N. and Ionides, E. L. (2023). Iterated block particle filter for high-dimensional parameter learning: Beating the curse of dimensionality. _Journal of Machine Learning Research_ 24(82), 1-76.
 [pdf](https://jmlr.org/papers/v24/21-1253.pdf). 
 [arxiv](https://arxiv.org/abs/2110.10745v3"><i>arxiv</i></a>).
 - Wheeler, J., Rosengart, A. L., Jiang, Z., Tan, K., Treutle, N. and Ionides, E. L. (2024).
   Informing policy via dynamic models: Cholera in Haiti.
-  To appear in _PLOS Computational Biology_.
+  _PLOS Computational Biology_ 20(4), e1012032.
+  [doi](https://doi.org/10.1371/journal.pcbi.1012032).
   [arxiv](https://doi.org/10.48550/arXiv.2301.08979).
   [code](https://github.com/jeswheel/haiti_article).
   [software](https://github.com/jeswheel/haitipkg).
-- Zhang, B., Huang, W., Pei, S., Zeng, J., Shen, W., Wang, D., Wang, G., Chen, T., Yang, L., Cheng, P., Wang, D., Shu, Y., & Du, X. (2022). Mechanisms for the circulation of influenza A (H3N2) in China: A spatiotemporal modelling study. _PLoS Pathogens_, 18(12), e1011046.
+- Zhang, B., Huang, W., Pei, S., Zeng, J., Shen, W., Wang, D., Wang, G., Chen, T., Yang, L., Cheng, P., Wang, D., Shu, Y., & Du, X. (2022). Mechanisms for the circulation of influenza A (H3N2) in China: A spatiotemporal modelling study. _PLOS Pathogens_, 18(12), e1011046.
 [doi](https://doi.org/10.1371/journal.ppat.1011046).
 
