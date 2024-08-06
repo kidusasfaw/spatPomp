@@ -19,7 +19,6 @@
 *.so
 *.gcda
 *.gcno
-*.pdf
 /scripts
 lib
 library
