@@ -104,7 +104,7 @@ The `spatPomp` website ([https://kidusasfaw.github.io/spatPomp/](https://kidusas
 
 1. An extended tutorial [@asfaw24] introduces the mathematical framework behind `spatPomp`, describes the software implementation of this framework, provides pseudocode for various algorithms included in the package, and illustrates some basic usage.
 
-2. A supplementary tutorial focuses specifically on the iterated block particle filter algorithm [@ning23tutorial].
+2. A tutorial provided as a supplement to [@ning23] focuses specifically on the iterated block particle filter algorithm. This is available at [https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf](https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf).
 
 3. A numerical comparison of spatiotemporal filtering methods by @ionides23, carried out using `spatPomp`,  has source code available at [https://github.com/ionides/bagged_filters](https://github.com/ionides/bagged_filters).
 
