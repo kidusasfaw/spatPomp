@@ -132,6 +132,33 @@ The following methods are available for such an object:
 }
 }
 
+\examples{
+# Complete examples are provided in the package tests
+\dontrun{
+# Create a simulation of a Brownian motion, for an extended model with
+# unit-specific parameters for all estimated, even if the parameter
+# takes the same shared value for each unit.
+U <- 4
+b2 <- bm2(U=U,N=5,unit_specific_names="rho")
+
+# Run ibpf with two blocks of two units each. estimating rho as a
+# shared parameter with all other parameters being fixed.
+b2_ibpf <- ibpf(b2,
+  sharedParNames="rho",
+  unitParNames=NULL,
+  Nbpf=5,
+  spat_regression=0.1,
+  Np=50,
+  rw.sd=do.call(rw_sd,setNames(rep(list(0.01),times=U),paste0("rho",1:U))),
+  cooling.fraction.50=0.5,
+  block_size=2
+)
+
+# Get a likelihood estimate
+logLik(b2_ibpf)
+}
+
+}
 \references{
 \ionides2022
 }
