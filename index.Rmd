@@ -30,8 +30,16 @@ In addition, the particle filter provided by [**pomp**](https://kingaa.github.io
 
 The latest development version of **spatPomp** is available on [GitHub](https://github.com/kidusasfaw/spatPomp) and versions are occasionally uploaded to [CRAN](https://cran.rstudio.com/web/packages/spatPomp). Other relevant resources are:
 
-- [A tutorial on spatiotemporal partially observed Markov process models via the R package spatPomp](vignettes/spatPomp.pdf)
-- [A tutorial on the iterated block particle filter](vignettes/ibpf.pdf)
+- A tutorial on spatiotemporal partially observed Markov process models via the R package spatPomp.
+  [pdf](vignettes/spatPomp.pdf).
+  [R script](vignettes/spatPomp.R).
+  [arxiv](https://arxiv.org/abs/2101.01157).
+  [GitHub](https://github.com/ionides/spatPomp-article).
+
+- A tutorial on the iterated block particle filter.
+  [pdf](vignettes/ibpf.pdf).
+  [R script](vignettes/ibpf.R).
+  [GitHub](https://github.com/ionides/ibpf-tutorial).
 
 Papers using **spatPomp** include the following:
 
