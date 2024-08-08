@@ -36,19 +36,17 @@ bibliography: paper.bib
 
 # Summary
 
-SpatPOMP models are high-dimensional partially observed Markov process (POMP) models.
+The development of `spatPomp` was motivated by the goal of investigating dynamics arising from a collection of spatially distributed, interacting biological populations.
+The entire population, consisting of the union of these sub-populations over all the spatial locations, is called a metapopulation.
+Each sub-population may have its own structure, which could correspond to disease status in an epidemiological model or abundance of several species in an ecosystem model. 
+The `spatPomp` package embeds this goal in a more general problem: inference for spatiotemporal partially observed Markov process (SpatPOMP) models.
 A POMP model consists of a latent Markov process model, together with a measurement model describing how the data arise from noisy and/or incomplete observation of this latent state.
 The latent Markov process may be constructed in discrete or continuous time, taking scalar or vector values in a discrete or continuous space.
 POMP models are also known as state space models, or hidden Markov models.
-A SpatPOMP model adds a unit structure, where the latent state is comprised of a collection of values for each unit.
-In a spatiotemporal context, a unit typically corresponds to a spatial location.
+A SpatPOMP model extends the POMP model formulation by adding an index set corresponding to spatial location, so that the state of the SpatPOMP is comprised of a value for each location.
+We say "unit" rather than "spatial location" to build our framework in the general context of an arbitrary index set. 
 Measurements are made on each unit, and are assumed to depend only on the latent state value for that unit.
 The `spatPomp` R package provides a computational framework for modeling and statistical inference on SpatPOMP models.
-
-The development of `spatPomp` was motivated by the goal of investigating metapopulation dynamics arising from a collection of spatially distributed, interacting biological populations.
-In metapopulation models, the latent state for each unit can represent a structured population or the abundances of a collection of species at a specific geographical location.
-However, `spatPomp` embeds this goal in a more general problem: inference for a collection of interacting partially observed nonlinear non-Gaussian stochastic processes.
-
 
 # Statement of Need
 
@@ -75,9 +73,11 @@ A consequence of the plug-and-play property is that the data analyst is not requ
 This makes `spatPomp` a flexible tool to assist model development.
 
 The `spatPomp` package builds on `pomp` [@king16] which is a successful software package for low-dimensional POMP models.
-We are not aware of alternative packages providing statistically efficient, plug-and-play inference for the general class of SpatPOMP models.
-
-
+Other packages with similar capabilities to `pomp` include `nimble` [@michaud21], `LiBBi` [@murray15] and `mcstate` with `odin` and `dust` [@fitzjohn20].
+All these packages enable plug-and-play inference based on sequential Monte~Carlo.
+Markov chain Monte Carlo packages, such as `stan`, have been found to be effective for inference on some POMP models [@li18] but they lack the plug-and-play property.
+Perhaps for that reason, sequential Monte Carlo methods have found broader applicability for this model class.
+We are not aware of alternative packages to `spatPomp` that provide statistically efficient, plug-and-play inference for the general class of SpatPOMP models.
 
 
 # Package Design
@@ -117,5 +117,6 @@ The `spatPomp` website ([https://kidusasfaw.github.io/spatPomp/](https://kidusas
 
 This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108, and National Institutes of Health grants 1-U54-GM111274, 1-U01-GM110712 and 1-R01-AI143852.
 We recognize those who have participated in the development and testing of `spatPomp`, especially Allister Ho, Zhuoxun Jiang, Jifan Li, Patricia Ning, Eduardo Ochoa, Rahul Subramanian and Jesse Wheeler.
+We are grateful to the editors and referees at The Journal of Open Source Software for their constructive feedback.
 
 # References
