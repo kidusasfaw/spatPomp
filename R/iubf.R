@@ -214,7 +214,11 @@ iubf_ubf <- function (object,
             neighbor_u <- neighbor[1]
             neighbor_n <- neighbor[2]
             if (neighbor_n == nt)
-              log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ]
+              if(Nrep_per_param==1){
+                log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u]
+              } else {
+                log_prod_cond_dens_nt  <- log_prod_cond_dens_nt + log_cond_densities[neighbor_u, ]
+              }
             else{
               ## means prev_meas_weights was non-null, i.e. dim(prev_meas_weights)[3]>=1
               log_prod_cond_dens_not_nt <- log_prod_cond_dens_not_nt +
@@ -236,8 +240,14 @@ iubf_ubf <- function (object,
 ####### Quantile resampling
     def_resample <- which(param_resamp_log_weights > quantile(param_resamp_log_weights, 1-prop))
     length_also_resample <- Nparam - length(def_resample)
-    also_resample <- sample(def_resample, size = length_also_resample, replace = TRUE,
-      prob = rep(1, length(def_resample)))
+    if(length(def_resample) > 1){
+      also_resample <- sample(def_resample, size = length_also_resample, replace = TRUE,
+      prob = rep(1, length(def_resample))) 
+    } else if (length(def_resample) == 1){
+      also_resample <- rep(def_resample, length_also_resample)
+    } else {
+      also_resample <- seq_len(Nparam)
+    }
     resample_ixs_raw <- c(def_resample, also_resample)
     resample_ixs <- (resample_ixs_raw - 1)*Nrep_per_param
     resample_ixs <- rep(resample_ixs, each = Nrep_per_param)
