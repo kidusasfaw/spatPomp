@@ -516,6 +516,20 @@ try(iubf(b_model,Nubf=2,Nrep_per_param=1,rw.sd=b_rw.sd,cooling.fraction.50=1000,
 ## max_lookback is not triggered for b_model with N=2
 iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
 
+set.seed(98)
+
+## trigger special case when Nrep_per_param=1
+b_iubf_npp1 <- iubf(b_model,Nubf=2, Nparam = 3,Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
+paste("bm iubf loglik with Nrep_per_param = 1 : ",round(logLik(b_iubf_npp1),10))
+
+## trigger special cases when length(def_resample)==0
+b_iubf_np1 <- iubf(b_model,Nubf=2, Nparam = 3, Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0)
+paste("bm iubf loglik with length(def_resample)==0: ",round(logLik(b_iubf_np1),10))
+
+## trigger special cases when length(def_resample)==Nparam*prop=1
+b_iubf_dr1 <- iubf(b_model,Nubf=2, Nparam = 3,Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.25)
+paste("bm iubf loglik with length(def_resample)==Nparam*prop=1 : ",round(logLik(b_iubf_dr1),10))
+
 ## trigger situations where neighborhood is not contemporaneous
 iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd_lookback1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
 iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd_lookback2,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
