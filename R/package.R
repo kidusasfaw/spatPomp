@@ -16,7 +16,7 @@
 #' @section Data analysis using \pkg{spatPomp}:
 #' The first step in using \pkg{spatPomp} is to encode one's model(s) and data
 #'  in objects of class \code{spatPomp}.
-#' This can be done via a call to the \link[=spatPomp]{spatPomp} constructor
+#' This can be done via a call to the \code{\link[=spatPomp]{spatPomp}} constructor
 #' function.
 #'
 #' @section Extending the \pkg{pomp} platform for developing inference tools:
@@ -35,7 +35,7 @@
 #' @references \asfaw2020
 #' @author Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King
 #'
-#' @seealso \link[=pomp-package]{pomp package}
+#' @seealso \code{\link[=pomp::pomp]{pomp}}
 #'
 #' @keywords models datasets ts
 #'

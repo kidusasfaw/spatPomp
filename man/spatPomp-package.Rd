@@ -19,7 +19,7 @@ whether or not these units correspond to spatial locations.
 
 The first step in using \pkg{spatPomp} is to encode one's model(s) and data
  in objects of class \code{spatPomp}.
-This can be done via a call to the \link[=spatPomp]{spatPomp} constructor
+This can be done via a call to the \code{\link[=spatPomp]{spatPomp}} constructor
 function.
 }
 
@@ -46,7 +46,7 @@ and compared on a growing body of models and datasets.
 \asfaw2020
 }
 \seealso{
-\link[=pomp-package]{pomp package}
+\code{\link[=pomp::pomp]{pomp}}
 }
 \author{
 Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King
