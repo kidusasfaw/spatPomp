@@ -35,7 +35,7 @@
 #' @references \asfaw2020
 #' @author Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King
 #'
-#' @seealso \code{\link[=pomp::pomp]{pomp}}
+#' @seealso \code{\link[pomp]{pomp}}
 #'
 #' @keywords models datasets ts
 #'

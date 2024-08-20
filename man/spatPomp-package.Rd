@@ -46,7 +46,7 @@ and compared on a growing body of models and datasets.
 \asfaw2020
 }
 \seealso{
-\code{\link[=pomp::pomp]{pomp}}
+\code{\link[pomp]{pomp}}
 }
 \author{
 Kidus Asfaw, Joonha Park, Allister Ho, Edward Ionides, Aaron A. King

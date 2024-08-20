@@ -3,6 +3,8 @@
 
 spatPomp 0.36.0 updates 0.35.0 with some bug fixes and the inclusion of vignettes.
 
+Also, update documentation link needed by R-devel (see https://cran.r-project.org/doc/manuals/R-exts.html#Cross_002dreferences-1).
+
 #### Test environments
 
 Experimenting with test validation based on GitHub actions in
