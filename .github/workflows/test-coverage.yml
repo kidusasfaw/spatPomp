@@ -1,12 +1,27 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
+  workflow_dispatch:
   push:
     branches: [master]
+    paths:
+      - DESCRIPTION
+      - NAMESPACE
+      - R/**
+      - src/**
+      - tests/**
+      - man/**
+      - data/**
   pull_request:
     branches: [master]
-  workflow_dispatch:
-    branches: [master]
+    paths:
+      - DESCRIPTION
+      - NAMESPACE
+      - R/**
+      - src/**
+      - tests/**
+      - man/**
+      - data/**
     
 name: test-coverage
 
