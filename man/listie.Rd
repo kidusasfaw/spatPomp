@@ -2,8 +2,9 @@
 % Please edit documentation in R/listie.R
 \name{listie}
 \alias{listie}
-\title{listie}
+\title{listie: List-like objects}
 \description{
-List-like objects.
+A listie allows object-oriented behavior on lists of
+\sQuote{spatPomp} objects
 }
 \keyword{internal}

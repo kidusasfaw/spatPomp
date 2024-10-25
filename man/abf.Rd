@@ -16,10 +16,18 @@
   params,
   tol = 1e-100,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
-\S4method{abf}{abfd_spatPomp}(object, Nrep, Np, nbhd, tol, ..., verbose = getOption("verbose", FALSE))
+\S4method{abf}{abfd_spatPomp}(
+  object,
+  Nrep,
+  Np,
+  nbhd,
+  tol,
+  ...,
+  verbose = getOption("spatPomp_verbose", FALSE)
+)
 }
 \arguments{
 \item{object}{A \code{spatPomp} object.}

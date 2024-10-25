@@ -4,7 +4,7 @@
 \alias{vec_rmeasure}
 \alias{vec_rmeasure-spatPomp}
 \alias{vec_rmeasure,spatPomp-method}
-\title{Vector of simulated measurements}
+\title{Vector simulating measurements for each unit using \code{runit_measure}}
 \usage{
 \S4method{vec_rmeasure}{spatPomp}(object, x, times, params, ...)
 }

@@ -1,4 +1,4 @@
-#' eunit_measure
+#' Expectation of the measurement model for one unit
 #'
 #' \code{eunit_measure} evaluates the expectation of a unit's observation given the entire state
 #' @name eunit_measure

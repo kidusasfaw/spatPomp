@@ -109,7 +109,7 @@ setMethod(
   signature=signature(object="spatPomp"),
   function (object, Nrep, Np, nbhd, params,
     tol = 1.0e-100,
-    ..., verbose=getOption("verbose",FALSE)) {
+    ..., verbose=getOption("spatPomp_verbose",FALSE)) {
 
     ep <- paste0("in ",sQuote("abf"),": ")
 
@@ -188,7 +188,7 @@ setMethod(
   signature=signature(object="abfd_spatPomp"),
   function (object, Nrep, Np, nbhd, tol,
     ...,
-    verbose = getOption("verbose", FALSE)) {
+    verbose = getOption("spatPomp_verbose", FALSE)) {
     if (missing(Np)) Np <- object@Np
     if (missing(Nrep)) Nrep <- object@Nrep
     if (missing(nbhd)) nbhd <- object@nbhd

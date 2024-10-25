@@ -1,5 +1,5 @@
 
-R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
 Copyright (C) 2024 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin20
 
@@ -745,6 +745,23 @@ Error : in ‘iubf’: ‘cooling.fraction.50’ must be in (0,1]
 > ## max_lookback is not triggered for b_model with N=2
 > iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
 <object of class ‘iubfd_spatPomp’>
+> 
+> set.seed(98)
+> 
+> ## trigger special case when Nrep_per_param=1
+> b_iubf_npp1 <- iubf(b_model,Nubf=2, Nparam = 3,Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)
+> paste("bm iubf loglik with Nrep_per_param = 1 : ",round(logLik(b_iubf_npp1),10))
+[1] "bm iubf loglik with Nrep_per_param = 1 :  -25.8317474406"
+> 
+> ## trigger special cases when length(def_resample)==0
+> b_iubf_np1 <- iubf(b_model,Nubf=2, Nparam = 3, Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0)
+> paste("bm iubf loglik with length(def_resample)==0: ",round(logLik(b_iubf_np1),10))
+[1] "bm iubf loglik with length(def_resample)==0:  -16.4452178406"
+> 
+> ## trigger special cases when length(def_resample)==Nparam*prop=1
+> b_iubf_dr1 <- iubf(b_model,Nubf=2, Nparam = 3,Nrep_per_param=1,nbhd=b_bag_nbhd,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.25)
+> paste("bm iubf loglik with length(def_resample)==Nparam*prop=1 : ",round(logLik(b_iubf_dr1),10))
+[1] "bm iubf loglik with length(def_resample)==Nparam*prop=1 :  -12.1300071488"
 > 
 > ## trigger situations where neighborhood is not contemporaneous
 > iubf(b_model5,Nubf=2, Nparam = 3,Nrep_per_param=3,nbhd=b_bag_nbhd_lookback1,rw.sd=b_rw.sd,cooling.fraction.50=0.5,prop=0.8)

@@ -17,7 +17,7 @@
   tol = (1e-100),
   params,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{abfir}{abfird_spatPomp}(object, Np, Nrep, nbhd, Ninter, tol, params, ...)

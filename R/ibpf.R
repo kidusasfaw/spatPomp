@@ -27,6 +27,32 @@
 ##' each unit.
 ##' @param spat_regression fraction of each extended parameter regressed toward the unit mean. Not required when all parameters are unit-specific.
 ##'
+##' @examples
+##' # Complete examples are provided in the package tests
+##' \dontrun{
+##' # Create a simulation of a Brownian motion, for an extended model with
+##' # unit-specific parameters for all estimated, even if the parameter
+##' # takes the same shared value for each unit.
+##' U <- 4
+##' b2 <- bm2(U=U,N=5,unit_specific_names="rho")
+##'
+##' # Run ibpf with two blocks of two units each. estimating rho as a
+##' # shared parameter with all other parameters being fixed.
+##' b2_ibpf <- ibpf(b2,
+##'   sharedParNames="rho",
+##'   unitParNames=NULL,
+##'   Nbpf=5,
+##'   spat_regression=0.1,
+##'   Np=50,
+##'   rw.sd=do.call(rw_sd,setNames(rep(list(0.01),times=U),paste0("rho",1:U))),
+##'   cooling.fraction.50=0.5,
+##'   block_size=2
+##' )
+##'
+##' # Get a likelihood estimate
+##' logLik(b2_ibpf)
+##' }
+##'
 ##' @return
 ##' Upon successful completion, \code{ibpf} returns an object of class
 ##' \sQuote{ibpfd_spatPomp}.
@@ -100,7 +126,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (missing(Nbpf)) pStop_(ep, "Nbpf is required")
@@ -163,7 +189,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){
@@ -218,7 +244,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ) {
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){

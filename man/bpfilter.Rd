@@ -24,7 +24,7 @@
   save_states,
   filter_traj,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{bpfilter}{bpfilterd_spatPomp}(
@@ -35,7 +35,7 @@
   save_states,
   filter_traj,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 }
 \arguments{

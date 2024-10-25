@@ -29,7 +29,7 @@
   kind = c("bootstrap", "moment"),
   tol = 1e-100,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{igirf}{igirfd_spatPomp}(
@@ -45,7 +45,7 @@
   kind = c("bootstrap", "moment"),
   tol,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 }
 \arguments{

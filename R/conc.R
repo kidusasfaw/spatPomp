@@ -1,4 +1,4 @@
-##' Concatenate
+##' Concatenate spatPomp objects into a listie
 ##'
 ##' @description Internal methods to concatenate objects into useful listie.
 ##' @details Not exported.

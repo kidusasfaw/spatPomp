@@ -14,7 +14,7 @@
 \alias{logLik,abfird_spatPomp-method}
 \alias{logLik-igirfd_spatPomp}
 \alias{logLik,igirfd_spatPomp-method}
-\title{Log likelihood}
+\title{Log likelihood extractor}
 \usage{
 \S4method{logLik}{girfd_spatPomp}(object)
 
@@ -35,5 +35,5 @@
 a numeric which is the estimated log likelihood
 }
 \description{
-Extract the estimated log likelihood.
+Extracts the estimated log likelihood from a fitted model
 }

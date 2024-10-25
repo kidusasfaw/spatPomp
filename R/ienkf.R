@@ -82,7 +82,7 @@ setMethod(
     Nenkf = 1, rw.sd,
     cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
     Np,
-    ..., verbose = getOption("verbose", FALSE)) {
+    ..., verbose = getOption("spatPomp_verbose", FALSE)) {
     tryCatch(
       ienkf.internal(
         data,
