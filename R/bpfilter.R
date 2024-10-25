@@ -127,7 +127,7 @@ setMethod(
 setMethod(
   "bpfilter",
   signature=signature(object="spatPomp"),
-  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("verbose", FALSE)) {
+  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("spatPomp_verbose", FALSE)) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
 
     if(missing(save_states)) save_states <- FALSE
@@ -172,7 +172,7 @@ setMethod(
 setMethod(
   "bpfilter",
   signature=signature(object="bpfilterd_spatPomp"),
-  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("verbose", FALSE)) {
+  function (object, Np, block_size, block_list, save_states, filter_traj, ..., verbose=getOption("spatPomp_verbose", FALSE)) {
     ep = paste0("in ",sQuote("bpfilter"),": ")
 
     if(missing(save_states)) save_states <- FALSE

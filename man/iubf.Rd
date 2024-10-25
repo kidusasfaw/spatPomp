@@ -17,7 +17,7 @@
   cooling.type = c("geometric", "hyperbolic"),
   cooling.fraction.50,
   tol = (1e-18)^17,
-  verbose = getOption("verbose"),
+  verbose = getOption("spatPomp_verbose"),
   ...
 )
 }

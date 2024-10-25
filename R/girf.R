@@ -127,7 +127,7 @@ setMethod(
     kind=c('bootstrap','moment'),
     tol,
     ...,
-    verbose = getOption("verbose", FALSE)) {
+    verbose = getOption("spatPomp_verbose", FALSE)) {
 
     if (missing(tol)) tol <- 1e-100
     if (missing(Ninter)) Ninter <- length(unit_names(object))

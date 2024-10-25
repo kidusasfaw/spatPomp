@@ -2,28 +2,24 @@
 % Please edit documentation in R/plot.R
 \name{plot}
 \alias{plot}
-\alias{plot-igirfd_spatPomp}
-\alias{plot,igirfd_spatPomp-method}
 \alias{plot-spatPomp}
 \alias{plot,spatPomp-method}
-\title{Plotting \code{spatPomp} data}
+\alias{plot-igirfd_spatPomp}
+\alias{plot,igirfd_spatPomp-method}
+\title{Plot methods for \code{spatPomp} objects}
 \usage{
-\S4method{plot}{igirfd_spatPomp}(x, params = names(coef(x)), ncol = 3)
+\S4method{plot}{spatPomp}(x, type = c("l", "h"), log = FALSE, plot_unit_names = TRUE, ...)
 
-\S4method{plot}{spatPomp}(x, type = c("l", "h"), log = F, plot_unit_names = T, ...)
+\S4method{plot}{igirfd_spatPomp}(x, params = names(coef(x)), ncol = 3)
 }
 \arguments{
 \item{x}{a \code{spatPomp} object}
 
-\item{params}{the names of the parameters for which the user would like to see a trace plot}
-
-\item{ncol}{the number of columns in the grid plot}
-
 \item{type}{for visualizing an object of class \code{spatPomp}, the user
-can obtain a grid of line plots by default (\code{'l'}) or a heat map by
-supplying argument \code{'h'}.}
+can obtain a grid of line plots by default (\code{l}) or a heat map by
+supplying argument \code{h}.}
 
-\item{log}{should the data be log-transformed before plotting?
+\item{log}{should the data be transformed to \code{log10(x+1)} before plotting?
 This helps in contexts where there are spikes that could take away
 attention from the dynamics illustrated by the rest of the data.}
 
@@ -33,18 +29,17 @@ a heat map for a large number of units}
 \item{...}{for visualizing an object of class \code{spatPomp}, the user
 can add arguments like \code{nrow} to specify the number of rows in the
 grid.}
+
+\item{params}{allows selection of a subset of parameters when making
+a diagnostic plot for a model with many parameters}
+
+\item{ncol}{the number of columns in the grid plot}
 }
 \value{
-a \code{ggplot} facet plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
-the convergence record of running \code{igirf()} with respect to the likelihood and the parameters of the model.
-
-a \code{ggplot} plot of class \sQuote{gg} and \sQuote{ggplot} visualizing
-the time series data over multiple spatial units via a tile-plot.
+a \code{ggplot} plot of class \sQuote{gg} and \sQuote{ggplot}.
 }
 \description{
-Visualize \code{spatPomp} data
-
-Diagnostic plot for \code{igirf()}
-
-Visualize \code{spatPomp} data
+Visualize data in a \code{spatPomp} object or a derived class.
+This gives a quick view; the data can be extracted from 
+the object to make a customized plot.
 }

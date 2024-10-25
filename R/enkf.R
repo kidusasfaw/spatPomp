@@ -95,7 +95,7 @@ setMethod(
   signature=signature(data="spatPomp"),
   function (data,
     Np,
-    ..., verbose = getOption("verbose", FALSE)) {
+    ..., verbose = getOption("spatPomp_verbose", FALSE)) {
     tryCatch(
       enkf.internal(
         data,

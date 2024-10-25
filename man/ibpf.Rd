@@ -31,7 +31,7 @@
   block_list,
   spat_regression,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{ibpf}{ibpfd_spatPomp}(
@@ -47,7 +47,7 @@
   block_list,
   spat_regression,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{ibpf}{bpfilterd_spatPomp}(
@@ -63,7 +63,7 @@
   block_list,
   spat_regression,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 }
 \arguments{

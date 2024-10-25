@@ -86,7 +86,7 @@ setMethod(
     rw.sd,
     cooling.type = c("geometric","hyperbolic"),
     cooling.fraction.50, tol = (1e-18)^17,
-    verbose = getOption("verbose"),...) {
+    verbose = getOption("spatPomp_verbose"),...) {
 
     ep <- paste0("in ",sQuote("iubf"),": ")
     if(missing(Nubf))

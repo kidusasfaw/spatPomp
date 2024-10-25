@@ -4,7 +4,7 @@
 \alias{runit_measure}
 \alias{runit_measure-spatPomp}
 \alias{runit_measure,spatPomp-method}
-\title{runit_measure}
+\title{Random draw from the measurement model for one unit}
 \usage{
 \S4method{runit_measure}{spatPomp}(object, x, unit, time, params, log = FALSE)
 }

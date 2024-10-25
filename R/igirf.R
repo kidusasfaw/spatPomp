@@ -98,7 +98,7 @@ setMethod(
   definition=function (data,Ngirf,Np,rw.sd,cooling.type,cooling.fraction.50,
     Ninter,lookahead=1,Nguide,kind=c('bootstrap', 'moment'),
     tol = 1e-100,
-    ..., verbose = getOption("verbose", FALSE)) {
+    ..., verbose = getOption("spatPomp_verbose", FALSE)) {
 
     ep <- paste0("in ", sQuote("igirf") , " : ")
     if(missing(Ninter)) Ninter <- length(unit_names(data))
@@ -129,7 +129,7 @@ setMethod(
   signature=signature(data="igirfd_spatPomp"),
   function (data,Ngirf,Np,rw.sd,cooling.type, cooling.fraction.50, Ninter,
     lookahead,Nguide,kind=c('bootstrap','moment'),tol, ...,
-    verbose = getOption("verbose", FALSE)) {
+    verbose = getOption("spatPomp_verbose", FALSE)) {
     if (missing(Ngirf)) Ngirf <- data@Ngirf
     if (missing(rw.sd)) rw.sd <- data@rw.sd
     if (missing(cooling.type)) cooling.type <- data@cooling.type

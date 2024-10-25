@@ -1,4 +1,4 @@
-#' runit_measure
+#' Random draw from the measurement model for one unit
 #'
 #' \code{runit_measure} simulates a unit's observation given the entire state
 #' @name runit_measure

@@ -1,4 +1,4 @@
-#' munit_measure
+#' Matching moments for the unit measurement model
 #'
 #' \code{munit_measure} returns a moment-matched parameter set given an empirically calculated measurement variance and latent states.
 #' This is used in \code{girf()} and \code{igirf()} when they are run with \code{kind='moment'}.

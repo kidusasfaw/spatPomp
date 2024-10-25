@@ -4,7 +4,7 @@
 \alias{eunit_measure}
 \alias{eunit_measure-spatPomp}
 \alias{eunit_measure,spatPomp-method}
-\title{eunit_measure}
+\title{Expectation of the measurement model for one unit}
 \usage{
 \S4method{eunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1, log = FALSE)
 }

@@ -8,7 +8,7 @@
 \alias{enkf,spatPomp-method}
 \title{Generalized Ensemble Kalman filter (EnKF)}
 \usage{
-\S4method{enkf}{spatPomp}(data, Np, ..., verbose = getOption("verbose", FALSE))
+\S4method{enkf}{spatPomp}(data, Np, ..., verbose = getOption("spatPomp_verbose", FALSE))
 }
 \arguments{
 \item{data}{A \code{spatPomp} object.}

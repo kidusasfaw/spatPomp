@@ -4,7 +4,7 @@
 \alias{vec_dmeasure}
 \alias{vec_dmeasure-spatPomp}
 \alias{vec_dmeasure,spatPomp-method}
-\title{Vector of measurement densities}
+\title{Vector of unit measurement densities for each unit}
 \usage{
 \S4method{vec_dmeasure}{spatPomp}(object, y, x, units, times, params, log = FALSE, ...)
 }

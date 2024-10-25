@@ -4,7 +4,7 @@
 \alias{vunit_measure}
 \alias{vunit_measure-spatPomp}
 \alias{vunit_measure,spatPomp-method}
-\title{vunit_measure}
+\title{Conditional variance of the measurement on a single unit}
 \usage{
 \S4method{vunit_measure}{spatPomp}(object, x, unit, time, params, Np = 1)
 }

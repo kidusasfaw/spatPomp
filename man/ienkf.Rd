@@ -14,7 +14,7 @@
   cooling.fraction.50,
   Np,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 }
 \arguments{

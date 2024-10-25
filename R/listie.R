@@ -1,6 +1,7 @@
-##' listie
+##' listie: List-like objects
 ##'
-##' List-like objects.
+##' A listie allows object-oriented behavior on lists of
+##' \sQuote{spatPomp} objects
 ##'
 ##' @name listie
 ##' @rdname listie

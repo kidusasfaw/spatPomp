@@ -1,4 +1,4 @@
-##' Vector of simulated measurements
+##' Vector simulating measurements for each unit using \code{runit_measure}
 ##'
 ##' Simulate from the unit measurement model density function for each unit
 ##' @param object a \code{spatPomp} object

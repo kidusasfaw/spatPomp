@@ -25,7 +25,7 @@
   kind = c("bootstrap", "moment"),
   tol,
   ...,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 
 \S4method{girf}{girfd_spatPomp}(

@@ -1,4 +1,4 @@
-#' Lorenz '96 spatPomp simulator
+#' Lorenz '96 spatPomp constructor
 #'
 #' Generate a spatPomp object representing a \code{U}-dimensional stochastic Lorenz '96 process with
 #' \code{N} measurements made at times \eqn{t_n = n * delta_obs}, simulated using an Euler method

@@ -93,7 +93,7 @@ spatPomp <- function (data, units, times, covar, t0, ...,
   rprocess, rmeasure, dprocess, dmeasure, skeleton, rinit, rprior, dprior,
   unit_statenames, unit_accumvars, shared_covarnames, globals, paramnames, params,
   cdir,cfile, shlib.args, PACKAGE,
-  partrans, compile=TRUE, verbose = getOption("verbose",FALSE)) {
+  partrans, compile=TRUE, verbose = getOption("spatPomp_verbose",FALSE)) {
 
   ep <- paste0("in ",sQuote("spatPomp"),": ")
 

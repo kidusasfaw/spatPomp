@@ -3,7 +3,7 @@
 \name{lorenz}
 \alias{lorenz}
 \alias{lorenz96}
-\title{Lorenz '96 spatPomp simulator}
+\title{Lorenz '96 spatPomp constructor}
 \usage{
 lorenz(
   U = 5,

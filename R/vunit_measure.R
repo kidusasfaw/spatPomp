@@ -1,4 +1,4 @@
-#' vunit_measure
+#' Conditional variance of the measurement on a single unit
 #'
 #' \code{vunit_measure} evaluates the variance of a unit's observation given the entire state
 #' @name vunit_measure

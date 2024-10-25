@@ -4,7 +4,7 @@
 \alias{munit_measure}
 \alias{munit_measure-spatPomp}
 \alias{munit_measure,spatPomp-method}
-\title{munit_measure}
+\title{Matching moments for the unit measurement model}
 \usage{
 \S4method{munit_measure}{spatPomp}(object, x, vc, unit, time, params, Np = 1)
 }

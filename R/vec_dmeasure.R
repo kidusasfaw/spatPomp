@@ -1,4 +1,4 @@
-##' Vector of measurement densities
+##' Vector of unit measurement densities for each unit
 ##'
 ##' Evaluate the unit measurement model density function for each unit.
 ##' This method is used primarily as part of likelihood evaluation and parameter inference algorithms.

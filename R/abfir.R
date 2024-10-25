@@ -92,7 +92,7 @@ setMethod(
   signature=signature(object="spatPomp"),
   function (object, Np, Nrep, nbhd,
     Ninter, tol = (1e-100), params, ...,
-    verbose=getOption("verbose",FALSE) ) {
+    verbose=getOption("spatPomp_verbose",FALSE) ) {
     ep <- paste0("in ",sQuote("abfir"),": ")
     ## declare global variable since foreach's u uses non-standard evaluation
     i <- 1

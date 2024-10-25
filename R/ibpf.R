@@ -126,7 +126,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (missing(Nbpf)) pStop_(ep, "Nbpf is required")
@@ -189,7 +189,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ){
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){
@@ -244,7 +244,7 @@ setMethod(
     cooling.type="geometric",
     cooling.fraction.50,
     block_size, block_list,spat_regression,
-    ..., verbose = getOption("verbose", FALSE)
+    ..., verbose = getOption("spatPomp_verbose", FALSE)
   ) {
     ep <- paste0("in ",sQuote("ibpf"),": ")
     if (!missing(block_list) & !missing(block_size)){

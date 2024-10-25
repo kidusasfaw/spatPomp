@@ -1,6 +1,6 @@
-##' Log likelihood
+##' Log likelihood extractor 
 ##'
-##' Extract the estimated log likelihood.
+##' Extracts the estimated log likelihood from a fitted model
 ##'
 ##' @name logLik
 ##' @rdname loglik

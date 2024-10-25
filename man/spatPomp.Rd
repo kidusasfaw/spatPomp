@@ -36,7 +36,7 @@ spatPomp(
   PACKAGE,
   partrans,
   compile = TRUE,
-  verbose = getOption("verbose", FALSE)
+  verbose = getOption("spatPomp_verbose", FALSE)
 )
 }
 \arguments{

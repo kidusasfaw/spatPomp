@@ -5,7 +5,7 @@
 \alias{conc,SpatPomp-method}
 \alias{conc,Bpfilter-method}
 \alias{conc,Ibpf-method}
-\title{Concatenate}
+\title{Concatenate spatPomp objects into a listie}
 \usage{
 \S4method{conc}{SpatPomp}(...)
 
