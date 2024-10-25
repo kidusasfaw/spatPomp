@@ -103,6 +103,8 @@ The inter-operability of methods across models, provided by `spatPomp`, facilita
 The `spatPomp` website ([https://kidusasfaw.github.io/spatPomp/](https://kidusasfaw.github.io/spatPomp)) provides links to various resources for users and developers of the package. This includes the following.
 
 1. An extended tutorial [@asfaw24] introduces the mathematical framework behind `spatPomp`, describes the software implementation of this framework, provides pseudocode for various algorithms included in the package, and illustrates some basic usage.
+Section 2 explains the elementary methods used to access properties of the `spatPomp` model class.
+These elementary methods are the building blocks available to developers for implementing complex algorithms acting on spatPomp models.
 
 2. A tutorial provided as a supplement to [@ning23] focuses specifically on the iterated block particle filter algorithm. This is available at [https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf](https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf).
 
@@ -117,6 +119,6 @@ The `spatPomp` website ([https://kidusasfaw.github.io/spatPomp/](https://kidusas
 
 This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108, and National Institutes of Health grants 1-U54-GM111274, 1-U01-GM110712 and 1-R01-AI143852.
 We recognize those who have participated in the development and testing of `spatPomp`, especially Allister Ho, Zhuoxun Jiang, Jifan Li, Patricia Ning, Eduardo Ochoa, Rahul Subramanian and Jesse Wheeler.
-We are grateful to the editors and referees at The Journal of Open Source Software for their constructive feedback.
+We are grateful to John Lees, Ben Bolker, and the editors at The Journal of Open Source Software for their constructive feedback.
 
 # References
