@@ -1,0 +1,7 @@
+
+The tutorials provided with spatPomp are developed in separate public git repositories.
+
+tutorial.pdf is built as ms.pdf in https://github.com/ionides/spatPomp-article
+
+ibpf.pdf is built as ms.pdf in https://github.com/ionides/ibpf-tutorial
+
