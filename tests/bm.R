@@ -553,9 +553,10 @@ plot(b_model,type="l",log=FALSE)
 b_sim3v2 <- b_sim3[[1]]
 b_sim3v2@data <- exp(b_sim3v2@data)
 plot(b_sim3v2,type="l",log=TRUE)
+plot(b_sim3v2,type="h",log=TRUE)
 plot(b_sim3[[2]],type="h",plot_unit_names=FALSE)
 dev.off()
-plot(b_sim3[[2]],type="h",plot_unit_names=TRUE) -> b_sim3_plot
+plot(b_sim3[[2]],type="h",log=FALSE,plot_unit_names=TRUE) -> b_sim3_plot
 
 print(b_model)
 
