@@ -1,4 +1,4 @@
-# The `spatPomp` package
+# `spatPomp` has moved to [spatPomp-org/spatPomp](https://github.com/spatPomp-org/spatPomp/)
 
 [![Development Release](https://img.shields.io/github/release/kidusasfaw/spatPomp.svg)](https://github.com/kidusasfaw/spatPomp/releases/latest)
 [![CRAN Status](https://www.r-pkg.org/badges/version/spatPomp?color=blue)](https://cran.r-project.org/package=spatPomp)
