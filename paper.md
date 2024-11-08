@@ -100,13 +100,13 @@ The inter-operability of methods across models, provided by `spatPomp`, facilita
 
 # Resources
 
-The `spatPomp` website ([https://kidusasfaw.github.io/spatPomp/](https://kidusasfaw.github.io/spatPomp)) provides links to various resources for users and developers of the package. This includes the following.
+The `spatPomp` website ([https://spatPomp-org.github.io/spatPomp/](https://spatPomp-org.github.io/spatPomp)) provides links to various resources for users and developers of the package. This includes the following.
 
 1. An extended tutorial [@asfaw24] introduces the mathematical framework behind `spatPomp`, describes the software implementation of this framework, provides pseudocode for various algorithms included in the package, and illustrates some basic usage.
 Section 2 explains the elementary methods used to access properties of the `spatPomp` model class.
 These elementary methods are the building blocks available to developers for implementing complex algorithms acting on spatPomp models.
 
-2. A tutorial provided as a supplement to [@ning23] focuses specifically on the iterated block particle filter algorithm. This is available at [https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf](https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf).
+2. A tutorial provided as a supplement to [@ning23] focuses specifically on the iterated block particle filter algorithm. This is available at [https://spatPomp-org.github.io/spatPomp/vignettes/ibpf.pdf](https://spatPomp-org.github.io/spatPomp/vignettes/ibpf.pdf).
 
 3. A numerical comparison of spatiotemporal filtering methods by @ionides23, carried out using `spatPomp`,  has source code available at [https://github.com/ionides/bagged_filters](https://github.com/ionides/bagged_filters).
 
