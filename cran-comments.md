@@ -1,9 +1,7 @@
 
-#### spatPomp 0.36.0
+#### spatPomp 1.0.0
 
-spatPomp 0.36.0 updates 0.35.0 with some bug fixes and the inclusion of vignettes.
-
-Also, update documentation link needed by R-devel (see https://cran.r-project.org/doc/manuals/R-exts.html#Cross_002dreferences-1).
+spatPomp 1.0.0 updates 0.36.1 with various minor changes requested during peer review at Journal of Open Source Software.
 
 #### Test environments
 
