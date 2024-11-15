@@ -4,7 +4,7 @@
 
 15. 23-06-08. Extend pomp-style list classes to spatPomp.
 
-14. 23-06-08. Some development of diagnostic plots at https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf should be incorporated into the package. Related to [15].
+14. 23-06-08. Some development of diagnostic plots at https://spatPomp-org.github.io/spatPomp/vignettes/ibpf.pdf should be incorporated into the package. Related to [15].
 
 13. 23-05-26. munit_measure does not yet have a Csnippet argument for unit-specific variables of the form Mtheta.
 
